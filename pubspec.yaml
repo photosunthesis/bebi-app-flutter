@@ -1,0 +1,73 @@
+name: bebi_app
+description: "A new Flutter project."
+publish_to: "none"
+version: 1.0.0
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  cloud_firestore: ^5.6.11
+  cupertino_icons: ^1.0.8
+  firebase_analytics: ^11.5.2
+  firebase_auth: ^5.6.2
+  firebase_core: ^3.15.1
+  firebase_crashlytics: ^4.3.9
+  firebase_storage: ^12.4.9
+  flutter:
+    sdk: flutter
+  flutter_bloc: ^9.1.1
+  flutter_keyboard_visibility_temp_fork: ^0.1.5
+  flutter_localizations:
+    sdk: flutter
+  go_router: ^16.0.0
+  image_picker: ^1.1.2
+  intl: any
+
+dev_dependencies:
+  flutter_lints: ^5.0.0
+  flutter_native_splash: ^2.4.6
+  flutter_test:
+    sdk: flutter
+  icons_launcher: ^3.0.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/app_logo/app_logo_main.png
+    - assets/fonts/ibm_plex_sans/
+    - assets/fonts/vidaloka/
+  fonts:
+    - family: IBMPlexSans
+      fonts:
+        - asset: assets/fonts/ibm_plex_sans/IBMPlexSans-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/ibm_plex_sans/IBMPlexSans-Italic.ttf
+          weight: 400
+          style: italic
+        - asset: assets/fonts/ibm_plex_sans/IBMPlexSans-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/ibm_plex_sans/IBMPlexSans-Bold.ttf
+          weight: 700
+    - family: Vidaloka
+      fonts:
+        - asset: assets/fonts/vidaloka/Vidaloka-Regular.ttf
+          weight: 400
+
+flutter_native_splash:
+  color: "#F1F2F3"
+  image: "assets/app_logo/app_logo_main.png"
+  android_12:
+    color: "#F1F2F3"
+    image: "assets/app_logo/app_logo_android12.png"
+
+icons_launcher:
+  platforms:
+    android:
+      enable: true
+      image_path: "assets/app_logo/app_logo_android12.png"
+      adaptive_foreground_image: "assets/app_logo/app_logo_android12.png"
+      adaptive_background_color: "#F1F2F3"
+    ios:
+      enable: true
+      image_path: "assets/app_logo/app_logo_ios.png"

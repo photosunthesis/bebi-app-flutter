@@ -1,0 +1,23 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  errors:
+    invalid_annotation_target: ignore
+    use_build_context_synchronously: ignore
+  exclude:
+    - "**.freezed.dart"
+    - "**.g.dart"
+    - "**.gr.dart"
+    - "**/generated_plugin_registrant.dart"
+    - "**/firebase_options.dart"
+
+linter:
+  rules:
+    prefer_const_constructors: true
+    directives_ordering: true
+    prefer_final_fields: true
+    prefer_final_locals: true
+    prefer_final_in_for_each: true
+    prefer_single_quotes: true
+    sort_constructors_first: true
+    prefer_constructors_over_static_methods: true
