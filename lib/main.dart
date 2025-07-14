@@ -47,10 +47,12 @@ void _configureNavigationColors() {
 void _configureFontLicenses() {
   LicenseRegistry.addLicense(() async* {
     final licenses = await Future.wait([
+      rootBundle.loadString('assets/fonts/ibm_plex_mono/OFL.txt'),
       rootBundle.loadString('assets/fonts/ibm_plex_sans/OFL.txt'),
       rootBundle.loadString('assets/fonts/vidaloka/OFL.txt'),
     ]);
-    yield LicenseEntryWithLineBreaks(['IBMPlexSans'], licenses[0]);
-    yield LicenseEntryWithLineBreaks(['Vidaloka'], licenses[1]);
+    yield LicenseEntryWithLineBreaks(['IBMPlexMono'], licenses[0]);
+    yield LicenseEntryWithLineBreaks(['IBMPlexSans'], licenses[1]);
+    yield LicenseEntryWithLineBreaks(['Vidaloka'], licenses[2]);
   });
 }

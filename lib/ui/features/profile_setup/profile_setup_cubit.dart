@@ -21,10 +21,9 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
   final FirebaseAuth _firebaseAuth;
   final ImagePicker _imagePicker;
 
-  Future<void> setProfilePicture(ImageSource source) async {
+  Future<void> setProfilePicture() async {
     final pickedFile = await _imagePicker.pickImage(
-      source: source,
-      preferredCameraDevice: CameraDevice.front,
+      source: ImageSource.gallery,
       imageQuality: 80,
       maxWidth: 600,
       maxHeight: 600,
@@ -34,6 +33,10 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
     if (pickedFile != null) {
       emit(state.copyWith(profilePicture: File(pickedFile.path)));
     }
+  }
+
+  void removeProfilePicture() {
+    emit(state.copyWith(profilePicture: null, profilePictureChanged: true));
   }
 
   Future<void> updateUserProfile(String displayName, String birthDate) async {
@@ -66,6 +69,7 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
           state.copyWith(
             error:
                 'There was an issue with the server. Please try again later.',
+            errorChanged: true,
           ),
         );
       },

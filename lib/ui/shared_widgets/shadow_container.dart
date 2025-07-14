@@ -5,12 +5,14 @@ import 'package:flutter/material.dart';
 class ShadowContainer extends StatelessWidget {
   const ShadowContainer({
     required this.child,
+    this.color,
     this.shape = BoxShape.rectangle,
-    this.offset = const Offset(0, -2),
+    this.offset = const Offset(0, 0),
     super.key,
   });
 
   final Widget child;
+  final Color? color;
   final BoxShape shape;
   final Offset offset;
 
@@ -24,7 +26,7 @@ class ShadowContainer extends StatelessWidget {
             : BorderRadius.circular(UiConstants.defaultBorderRadius),
         boxShadow: [
           BoxShadow(
-            color: context.colorScheme.shadow.withAlpha(10),
+            color: color ?? context.colorScheme.shadow.withAlpha(10),
             blurRadius: 4,
             offset: offset,
             spreadRadius: -4,

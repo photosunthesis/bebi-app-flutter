@@ -38,6 +38,10 @@ flutter:
     - assets/fonts/ibm_plex_sans/
     - assets/fonts/vidaloka/
   fonts:
+    - family: IBMPlexMono
+      fonts:
+        - asset: assets/fonts/ibm_plex_mono/IBMPlexMono-Regular.ttf
+          weight: 400
     - family: IBMPlexSans
       fonts:
         - asset: assets/fonts/ibm_plex_sans/IBMPlexSans-Regular.ttf

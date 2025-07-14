@@ -18,6 +18,7 @@ class AppTextFormField extends StatefulWidget {
     this.enabled = true,
     this.autofillHints,
     this.inputFormatters,
+    this.inputStyle,
     super.key,
   });
 
@@ -33,6 +34,7 @@ class AppTextFormField extends StatefulWidget {
   final bool enabled;
   final Iterable<String>? autofillHints;
   final List<TextInputFormatter>? inputFormatters;
+  final TextStyle? inputStyle;
 
   @override
   State<AppTextFormField> createState() => _AppTextFormFieldState();
@@ -91,14 +93,15 @@ class _AppTextFormFieldState extends State<AppTextFormField> {
               obscureText: widget.obscureText,
               keyboardType: widget.keyboardType,
               onFieldSubmitted: widget.onSubmitted,
-              style: context.textTheme.bodyMedium,
+              style: widget.inputStyle ?? context.textTheme.bodyMedium,
               autofillHints: widget.autofillHints,
               inputFormatters: widget.inputFormatters,
               decoration: InputDecoration(
                 hintText: widget.hintText,
-                hintStyle: context.textTheme.bodyMedium?.copyWith(
-                  color: context.colorScheme.onSurface.withAlpha(120),
-                ),
+                hintStyle: (widget.inputStyle ?? context.textTheme.bodyMedium)
+                    ?.copyWith(
+                      color: context.colorScheme.onSurface.withAlpha(120),
+                    ),
                 errorText: '',
                 errorStyle: const TextStyle(fontSize: 0),
               ),

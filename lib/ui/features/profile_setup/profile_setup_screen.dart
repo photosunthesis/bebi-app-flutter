@@ -7,11 +7,12 @@ import 'package:bebi_app/ui/shared_widgets/forms/app_text_form_field.dart';
 import 'package:bebi_app/ui/shared_widgets/shadow_container.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
+import 'package:bebi_app/utils/extension/int_extensions.dart';
+import 'package:bebi_app/utils/extension/text_style_extensions.dart';
 import 'package:bebi_app/utils/formatter/birth_date_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 class ProfileSetupScreen extends StatefulWidget {
@@ -74,6 +75,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     return BlocSelector<ProfileSetupCubit, ProfileSetupState, File?>(
       selector: (state) => state.profilePicture,
       builder: (context, profilePicture) {
+        final hasProfilePicture = profilePicture != null;
         return Align(
           alignment: Alignment.center,
           child: Stack(
@@ -81,21 +83,22 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             children: [
               ShadowContainer(
                 shape: BoxShape.circle,
-                child: CircleAvatar(
-                  radius: 60,
-                  backgroundColor: context.colorScheme.onPrimary,
-                  backgroundImage: profilePicture != null
-                      ? FileImage(profilePicture)
-                      : null,
-                  child: Stack(
-                    children: [
-                      if (profilePicture == null)
-                        Icon(
-                          Icons.face,
-                          size: 69,
-                          color: context.colorScheme.onSurface.withAlpha(80),
-                        ),
-                    ],
+                child: AnimatedSwitcher(
+                  duration: 300.milliseconds,
+                  child: CircleAvatar(
+                    key: ValueKey(profilePicture?.path ?? 'no-image'),
+                    radius: 60,
+                    backgroundColor: context.colorScheme.onPrimary,
+                    backgroundImage: hasProfilePicture
+                        ? FileImage(profilePicture)
+                        : null,
+                    child: !hasProfilePicture
+                        ? Icon(
+                            Icons.face,
+                            size: 69,
+                            color: context.colorScheme.onSurface.withAlpha(80),
+                          )
+                        : null,
                   ),
                 ),
               ),
@@ -103,15 +106,24 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                 bottom: -5,
                 right: -18,
                 child: TextButton(
-                  onPressed: _showImageSourceBottomSheet,
+                  onPressed: hasProfilePicture
+                      ? _cubit.removeProfilePicture
+                      : _cubit.setProfilePicture,
                   style: IconButton.styleFrom(
-                    backgroundColor: context.colorScheme.primary,
-                    foregroundColor: context.colorScheme.onPrimary,
+                    backgroundColor: hasProfilePicture
+                        ? context.colorScheme.onPrimary
+                        : context.colorScheme.primary,
+                    foregroundColor: hasProfilePicture
+                        ? context.colorScheme.error
+                        : context.colorScheme.onPrimary,
                     padding: const EdgeInsets.all(8),
                     shape: const CircleBorder(),
                   ),
-                  child: const Icon(
-                    Icons.add_photo_alternate_outlined,
+                  child: Icon(
+                    profilePicture != null
+                        ? Icons.delete_outline
+                        : Icons.add_photo_alternate_outlined,
+
                     size: 20,
                   ),
                 ),
@@ -120,56 +132,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
           ),
         );
       },
-    );
-  }
-
-  void _showImageSourceBottomSheet() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return Container(
-          decoration: BoxDecoration(
-            color: context.colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(UiConstants.defaultBorderRadius),
-            ),
-          ),
-          padding: const EdgeInsets.all(UiConstants.defaultPadding),
-          child: SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(height: 8),
-                _buildBottomSheetButton(
-                  'Take a photo',
-                  () => _cubit.setProfilePicture(ImageSource.camera),
-                ),
-                const SizedBox(height: 12),
-                _buildBottomSheetButton(
-                  'Choose from gallery',
-                  () => _cubit.setProfilePicture(ImageSource.gallery),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildBottomSheetButton(String text, VoidCallback onPressed) {
-    return ElevatedButton(
-      onPressed: () {
-        onPressed.call();
-        Navigator.pop(context);
-      },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: context.colorScheme.onPrimary,
-        foregroundColor: context.colorScheme.onSecondary,
-        textStyle: context.textTheme.titleMedium,
-      ),
-      child: Text(text),
     );
   }
 
@@ -185,6 +147,15 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         if (value == null || value.isEmpty) {
           return 'Please enter your preferred name.';
         }
+
+        if (!RegExp(r'^[a-zA-Z0-9 ]+$').hasMatch(value)) {
+          return 'Only letters, numbers, and spaces are allowed.';
+        }
+
+        if (value.length > 32) {
+          return 'Name can\'t be longer than 32 characters.';
+        }
+
         return null;
       },
     );
@@ -199,6 +170,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       textInputAction: TextInputAction.done,
       autofillHints: const [AutofillHints.birthday],
       inputFormatters: [BirthDateFormatter()],
+      inputStyle: context.textTheme.bodyMedium?.monospace,
       validator: (value) {
         if (value == null || value.isEmpty) {
           return 'Please enter your birthdate.';

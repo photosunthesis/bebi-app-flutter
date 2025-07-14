@@ -17,13 +17,17 @@ class ProfileSetupState {
     bool? loading,
     bool? success,
     File? profilePicture,
+    bool profilePictureChanged = false,
     String? error,
+    bool errorChanged = false,
   }) {
     return ProfileSetupState(
       loading: loading ?? this.loading,
       success: success ?? this.success,
-      profilePicture: profilePicture ?? this.profilePicture,
-      error: error ?? this.error,
+      profilePicture: profilePictureChanged
+          ? profilePicture
+          : this.profilePicture,
+      error: errorChanged ? error : this.error,
     );
   }
 }
