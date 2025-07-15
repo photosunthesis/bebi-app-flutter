@@ -15,7 +15,6 @@ abstract class AppTheme {
     elevatedButtonTheme: _elevatedButtonTheme,
     textButtonTheme: _textButtonTheme,
     appBarTheme: _appBarTheme,
-    bottomNavigationBarTheme: _bottomNavigationBarTheme,
   );
 
   static const _colorScheme = ColorScheme.light(
@@ -99,17 +98,5 @@ abstract class AppTheme {
     foregroundColor: _colorScheme.onSecondary,
     titleTextStyle: _primaryTextTheme.titleLarge?.copyWith(fontSize: 24),
     systemOverlayStyle: SystemUiOverlayStyle.dark,
-  );
-
-  static final _bottomNavigationBarTheme = BottomNavigationBarThemeData(
-    backgroundColor: _colorScheme.onPrimary,
-    selectedItemColor: _colorScheme.primary,
-    unselectedItemColor: _colorScheme.onSurface.withAlpha(150),
-    selectedLabelStyle: _textTheme.labelMedium?.copyWith(
-      fontWeight: FontWeight.w600,
-    ),
-    unselectedLabelStyle: _textTheme.labelMedium?.copyWith(
-      fontWeight: FontWeight.w600,
-    ),
   );
 }

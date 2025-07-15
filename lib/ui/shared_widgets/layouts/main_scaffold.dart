@@ -1,3 +1,4 @@
+import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -34,37 +35,59 @@ class _MainScaffoldState extends State<MainScaffold> {
             : null,
         children: widget.children,
       ),
-      bottomNavigationBar: _buildBottomBar(),
+      bottomNavigationBar: _buildBottomBar(context),
     );
   }
 
-  Widget _buildBottomBar() {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      showUnselectedLabels: true,
-      selectedFontSize: 12,
-      currentIndex: _Tabs.values.indexOf(activeTab),
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Home'),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.calendar_view_day_rounded),
-          label: 'Stories',
+  Widget _buildBottomBar(BuildContext context) {
+    final height = context.screenHeight * 0.12;
+    return Container(
+      height: height > 100 ? 100 : height,
+      decoration: BoxDecoration(
+        color: context.colorScheme.surface,
+        boxShadow: [
+          BoxShadow(
+            color: context.colorScheme.shadow.withAlpha(20),
+            blurRadius: 8,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _buildTabIcon(_Tabs.home, Icons.space_dashboard_rounded),
+            _buildTabIcon(_Tabs.stories, Icons.calendar_view_day_rounded),
+            _buildTabIcon(_Tabs.calendar, Icons.calendar_month_rounded),
+            _buildTabIcon(_Tabs.location, Icons.location_on_rounded),
+            _buildTabIcon(_Tabs.account, Icons.person_rounded),
+          ],
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.calendar_month_rounded),
-          label: 'Calendar',
-        ),
+      ),
+    );
+  }
 
-        BottomNavigationBarItem(
-          icon: Icon(Icons.location_on_rounded),
-          label: 'Location',
+  Widget _buildTabIcon(_Tabs tab, IconData icon) {
+    final isActive = tab == activeTab;
+    final color = isActive
+        ? context.colorScheme.primary
+        : context.colorScheme.onSecondary.withAlpha(120);
+    return Expanded(
+      child: Center(
+        child: Material(
+          color: Colors.transparent,
+          shape: const CircleBorder(),
+          child: InkWell(
+            onTap: () => _onTap(_Tabs.values.indexOf(tab)),
+            customBorder: const CircleBorder(),
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Icon(icon, color: color, size: 28),
+            ),
+          ),
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person_rounded),
-          label: 'Account',
-        ),
-      ],
-      onTap: _onTap,
+      ),
     );
   }
 
