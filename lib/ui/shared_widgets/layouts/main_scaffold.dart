@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 
 // Items here must match the order in the BottomNavigationBar
 // and the order of the StatefulShellBranches in AppRouter.
-enum _Tabs { home, stories, calendar, location, account }
+enum _Tabs { home, calendar, stories, location, account }
 
 class MainScaffold extends StatefulWidget {
   const MainScaffold({
@@ -24,6 +24,7 @@ class MainScaffold extends StatefulWidget {
 class _MainScaffoldState extends State<MainScaffold> {
   _Tabs activeTab = _Tabs.home;
   _Tabs? previousTab;
+  DateTime? _lastTapTime;
 
   @override
   Widget build(BuildContext context) {
@@ -58,8 +59,8 @@ class _MainScaffoldState extends State<MainScaffold> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             _buildTabIcon(_Tabs.home, Icons.space_dashboard_rounded),
-            _buildTabIcon(_Tabs.stories, Icons.calendar_view_day_rounded),
             _buildTabIcon(_Tabs.calendar, Icons.calendar_month_rounded),
+            _buildTabIcon(_Tabs.stories, Icons.calendar_view_day_rounded),
             _buildTabIcon(_Tabs.location, Icons.location_on_rounded),
             _buildTabIcon(_Tabs.account, Icons.person_rounded),
           ],
@@ -92,12 +93,24 @@ class _MainScaffoldState extends State<MainScaffold> {
   }
 
   void _onTap(int index) {
+    final now = DateTime.now();
+
+    if (_lastTapTime != null &&
+        now.difference(_lastTapTime!) < 300.milliseconds) {
+      return; // Ignore taps within debounce window
+    }
+
+    _lastTapTime = now;
+
     final tab = _Tabs.values[index];
-    if (tab == activeTab) return;
+
+    if (tab == activeTab) return; // Ignore if the same tab is tapped
+
     setState(() {
       previousTab = activeTab;
       activeTab = tab;
     });
+
     widget.navigationShell.goBranch(
       index,
       initialLocation: index == widget.navigationShell.currentIndex,
@@ -123,107 +136,114 @@ class _AnimatedBranchContainer extends StatefulWidget {
 
 class _AnimatedBranchContainerState extends State<_AnimatedBranchContainer>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<Offset> _slideAnimation;
-
+  late AnimationController _animationController;
   int? _animatingFromIndex;
-  int? _animatingToIndex;
+  bool _isAnimating = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(duration: 200.milliseconds, vsync: this);
-    _slideAnimation = Tween<Offset>(begin: Offset.zero, end: Offset.zero)
-        .animate(
-          CurvedAnimation(parent: _controller, curve: Curves.easeInOutQuart),
-        );
+    _animationController = AnimationController(
+      duration: 250.milliseconds,
+      vsync: this,
+    );
   }
 
   @override
   void didUpdateWidget(_AnimatedBranchContainer oldWidget) {
     super.didUpdateWidget(oldWidget);
-
-    if (oldWidget.currentIndex != widget.currentIndex) {
-      _startAnimation(oldWidget.currentIndex, widget.currentIndex);
+    if (oldWidget.currentIndex != widget.currentIndex && !_isAnimating) {
+      _startAnimation(oldWidget.currentIndex);
     }
   }
 
-  void _startAnimation(int from, int to) {
+  void _startAnimation(int fromIndex) {
     setState(() {
-      _animatingFromIndex = from;
-      _animatingToIndex = to;
+      _animatingFromIndex = fromIndex;
+      _isAnimating = true;
     });
 
-    final isForward = to > from;
-    _slideAnimation =
-        Tween<Offset>(
-          begin: Offset.zero,
-          end: Offset(isForward ? -1.0 : 1.0, 0),
-        ).animate(
-          CurvedAnimation(parent: _controller, curve: Curves.easeInOutQuart),
-        );
-
-    _controller.forward().then((_) {
+    _animationController.forward().then((_) {
       setState(() {
         _animatingFromIndex = null;
-        _animatingToIndex = null;
+        _isAnimating = false;
       });
-      _controller.reset();
+      _animationController.reset();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final stackChildren = <Widget>[];
+    return Stack(
+      children: widget.children.asMap().entries.map((entry) {
+        final index = entry.key;
+        final child = entry.value;
+        var shouldShow = index == widget.currentIndex;
 
-    // Show the current tab (or animating target)
-    final currentTabIndex = _animatingToIndex ?? widget.currentIndex;
-    stackChildren.add(
-      SlideTransition(
-        position: _animatingToIndex != null
-            ? Tween<Offset>(
-                begin: Offset(
-                  widget.currentIndex > (_animatingFromIndex ?? 0) ? 1.0 : -1.0,
+        if (_isAnimating && index == _animatingFromIndex) {
+          shouldShow = true; // Keep previous tab visible during animation
+        }
+
+        return AnimatedBuilder(
+          animation: _animationController,
+          builder: (context, _) {
+            // Calculate slide offset for animation inside AnimatedBuilder
+            var slideOffset = Offset.zero;
+
+            if (_isAnimating) {
+              final isForward =
+                  widget.currentIndex > (_animatingFromIndex ?? 0);
+              final animationValue = Curves.easeInOutQuad.transform(
+                _animationController.value,
+              );
+
+              if (index == _animatingFromIndex) {
+                // Outgoing tab - slide out
+                slideOffset = Offset(
+                  (isForward ? -1.0 : 1.0) * animationValue,
                   0,
-                ),
-                end: Offset.zero,
-              ).animate(_controller)
-            : const AlwaysStoppedAnimation(Offset.zero),
-        child: _branchNavigatorWrapper(
-          currentTabIndex,
-          widget.children[currentTabIndex],
-        ),
-      ),
+                );
+              } else if (index == widget.currentIndex) {
+                // Incoming tab - slide in
+                slideOffset = Offset(
+                  (isForward ? 1.0 : -1.0) * (1.0 - animationValue),
+                  0,
+                );
+              }
+            }
+
+            return Transform.translate(
+              offset: Offset(
+                slideOffset.dx * context.screenWidth,
+                slideOffset.dy * context.screenHeight,
+              ),
+              child: Visibility(
+                visible: shouldShow,
+                maintainState: true, // Keep widget state alive
+                child: _branchNavigatorWrapper(index, child),
+              ),
+            );
+          },
+        );
+      }).toList(),
     );
-
-    // Show the previous tab during animation
-    if (_animatingFromIndex != null) {
-      stackChildren.insert(
-        0, // Put behind the incoming tab
-        SlideTransition(
-          position: _slideAnimation,
-          child: _branchNavigatorWrapper(
-            _animatingFromIndex!,
-            widget.children[_animatingFromIndex!],
-          ),
-        ),
-      );
-    }
-
-    return Stack(children: stackChildren);
   }
 
-  Widget _branchNavigatorWrapper(int index, Widget navigator) => IgnorePointer(
-    ignoring: index != widget.currentIndex && _animatingToIndex != index,
-    child: TickerMode(
-      enabled: index == widget.currentIndex || _animatingToIndex == index,
-      child: navigator,
-    ),
-  );
+  Widget _branchNavigatorWrapper(int index, Widget navigator) {
+    // Only the current tab (or animating target) should be interactive
+    final isInteractive =
+        index == widget.currentIndex ||
+        (_isAnimating && index == widget.currentIndex);
+
+    return IgnorePointer(
+      ignoring: !isInteractive,
+      child: TickerMode(enabled: isInteractive, child: navigator),
+    );
+  }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 }

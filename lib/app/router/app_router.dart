@@ -59,10 +59,11 @@ abstract class AppRouter {
             routes: [
               GoRoute(
                 // TODO
-                path: '/stories',
-                name: AppRoutes.stories,
-                builder: (context, state) =>
-                    const Scaffold(body: Center(child: Text('Stories Screen'))),
+                path: '/calendar',
+                name: AppRoutes.calendar,
+                builder: (context, state) => const Scaffold(
+                  body: Center(child: Text('Calendar Screen')),
+                ),
               ),
             ],
           ),
@@ -70,11 +71,10 @@ abstract class AppRouter {
             routes: [
               GoRoute(
                 // TODO
-                path: '/calendar',
-                name: AppRoutes.calendar,
-                builder: (context, state) => const Scaffold(
-                  body: Center(child: Text('Calendar Screen')),
-                ),
+                path: '/stories',
+                name: AppRoutes.stories,
+                builder: (context, state) =>
+                    const Scaffold(body: Center(child: Text('Stories Screen'))),
               ),
             ],
           ),
