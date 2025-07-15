@@ -8,4 +8,11 @@ abstract class AppRoutes {
   static const home = 'home';
   static const signIn = 'sign-in';
   static const profileSetup = 'profile-setup';
+  static const relationshipOnboarding = 'relationship-onboarding';
+  static const relationshipSetup = 'relationship-setup';
+
+  static const stories = 'stories';
+  static const calendar = 'calendar';
+  static const account = 'account';
+  static const location = 'location';
 }

@@ -38,7 +38,7 @@ extension DefaultSnackbar on BuildContext {
         behavior: SnackBarBehavior.floating,
         duration: duration ?? 4.seconds,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(UiConstants.defaultBorderRadius),
+          borderRadius: UiConstants.defaultBorderRadius,
         ),
       ),
     );

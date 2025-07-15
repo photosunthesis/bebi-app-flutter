@@ -23,7 +23,7 @@ class ShadowContainer extends StatelessWidget {
         shape: shape,
         borderRadius: shape == BoxShape.circle
             ? null
-            : BorderRadius.circular(UiConstants.defaultBorderRadius),
+            : UiConstants.defaultBorderRadius,
         boxShadow: [
           BoxShadow(
             color: color ?? context.colorScheme.shadow.withAlpha(10),

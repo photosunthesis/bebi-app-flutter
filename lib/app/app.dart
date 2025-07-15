@@ -1,6 +1,7 @@
 import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/app/theme/app_theme.dart';
 import 'package:bebi_app/config/firebase_services.dart';
+import 'package:bebi_app/data/repositories/partnerships_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,21 +15,22 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiRepositoryProvider(
       providers: [
-        // Firebase services
-        RepositoryProvider(create: (_) => FirebaseServices.auth),
-        RepositoryProvider(create: (_) => FirebaseServices.firestore),
-        RepositoryProvider(create: (_) => FirebaseServices.analytics),
-        RepositoryProvider(create: (_) => FirebaseServices.storage),
+        // Firebase
+        RepositoryProvider.value(value: FirebaseServices.auth),
+        RepositoryProvider.value(value: FirebaseServices.firestore),
+        RepositoryProvider.value(value: FirebaseServices.analytics),
+        RepositoryProvider.value(value: FirebaseServices.storage),
 
         // Other services
-        RepositoryProvider(create: (_) => ImagePicker()),
+        RepositoryProvider.value(value: ImagePicker()),
 
         // Repositories
         RepositoryProvider(
-          create: (context) => UserProfileRepository(
-            context.read<FirebaseFirestore>(),
-            context.read<FirebaseStorage>(),
-          ),
+          create: (context) =>
+              UserProfileRepository(context.read(), context.read()),
+        ),
+        RepositoryProvider(
+          create: (context) => PartnershipsRepository(context.read()),
         ),
       ],
       child: MaterialApp.router(

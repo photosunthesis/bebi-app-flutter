@@ -1,15 +1,15 @@
 import 'package:bebi_app/config/firebase_services.dart';
-import 'package:bebi_app/data/repositories/user_profile_repository.dart';
 import 'package:bebi_app/ui/features/home/home_cubit.dart';
 import 'package:bebi_app/ui/features/home/home_screen.dart';
 import 'package:bebi_app/ui/features/profile_setup/profile_setup_cubit.dart';
 import 'package:bebi_app/ui/features/profile_setup/profile_setup_screen.dart';
 import 'package:bebi_app/ui/features/sign_in/sign_in_cubit.dart';
 import 'package:bebi_app/ui/features/sign_in/sign_in_screen.dart';
+import 'package:bebi_app/ui/shared_widgets/layouts/main_scaffold.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
 
 part 'app_routes.dart';
 
@@ -20,10 +20,7 @@ abstract class AppRouter {
         path: '/sign-in',
         name: AppRoutes.signIn,
         builder: (context, state) => BlocProvider(
-          create: (context) => SignInCubit(
-            context.read<FirebaseAuth>(),
-            context.read<FirebaseAnalytics>(),
-          ),
+          create: (context) => SignInCubit(context.read(), context.read()),
           child: const SignInScreen(),
         ),
       ),
@@ -31,25 +28,80 @@ abstract class AppRouter {
         path: '/profile-setup',
         name: AppRoutes.profileSetup,
         builder: (context, state) => BlocProvider(
-          create: (context) => ProfileSetupCubit(
-            context.read<UserProfileRepository>(),
-            context.read<FirebaseAuth>(),
-            context.read<ImagePicker>(),
-          ),
+          create: (context) =>
+              ProfileSetupCubit(context.read(), context.read(), context.read()),
           child: const ProfileSetupScreen(),
         ),
       ),
-      GoRoute(
-        path: '/',
-        name: AppRoutes.home,
-        builder: (context, state) => BlocProvider(
-          create: (context) => HomeCubit(
-            context.read<UserProfileRepository>(),
-            context.read<FirebaseAnalytics>(),
-            context.read<FirebaseAuth>(),
+      StatefulShellRoute(
+        builder: (context, state, shell) => shell,
+        navigatorContainerBuilder: (context, navigationShell, children) =>
+            MainScaffold(navigationShell: navigationShell, children: children),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/',
+                name: AppRoutes.home,
+                builder: (context, state) => BlocProvider(
+                  create: (context) => HomeCubit(
+                    context.read(),
+                    context.read(),
+                    context.read(),
+                    context.read(),
+                  ),
+                  child: const HomeScreen(),
+                ),
+              ),
+            ],
           ),
-          child: const HomeScreen(),
-        ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                // TODO
+                path: '/stories',
+                name: AppRoutes.stories,
+                builder: (context, state) =>
+                    const Scaffold(body: Center(child: Text('Stories Screen'))),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                // TODO
+                path: '/calendar',
+                name: AppRoutes.calendar,
+                builder: (context, state) => const Scaffold(
+                  body: Center(child: Text('Calendar Screen')),
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                // TODO
+                path: '/account',
+                name: AppRoutes.account,
+                builder: (context, state) =>
+                    const Scaffold(body: Center(child: Text('Account Screen'))),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                // TODO
+                path: '/location',
+                name: AppRoutes.location,
+                builder: (context, state) => const Scaffold(
+                  body: Center(child: Text('Location Screen')),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     ],
     observers: [
