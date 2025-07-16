@@ -1,12 +1,21 @@
 import 'dart:ui';
 
 abstract class AppColors {
-  static const grayscale = Color(0xFFF1F2F3);
-  static const purple = Color(0xFF967CF8);
-  static const teal = Color(0xFF3EB7C2);
-  static const pink = Color(0xFFF78ABF);
-  static const red = Color(0xFFF44336);
-  static const yellow = Color(0xFFFDD658);
-  static const titleText = Color(0xFF231F20);
-  static const bodyText = Color(0xFF4B4B4D);
+  static const stone50 = Color(0xFFFAFAF9);
+  static const stone100 = Color(0xFFF5F5F4);
+  static const stone200 = Color(0xFFE7E5E4);
+  static const stone300 = Color(0xFFD6D3D1);
+  static const stone400 = Color(0xFFA8A29E);
+  static const stone500 = Color(0xFF78716C);
+  static const stone600 = Color(0xFF57534E);
+  static const stone700 = Color(0xFF44403C);
+  static const stone800 = Color(0xFF292524);
+  static const stone900 = Color(0xFF1C1917);
+
+  static const green = Color(0xFF4CAF7D);
+  static const blue = Color(0xFF4285D6);
+  static const yellow = Color(0xFFFFD740);
+  static const red = Color(0xFFE57373);
+  static const purple = Color(0xFF9C64A6);
+  static const orange = Color(0xFFFFA344);
 }

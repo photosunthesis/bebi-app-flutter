@@ -1,5 +1,4 @@
 import 'package:bebi_app/app/theme/app_colors.dart';
-import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -15,21 +14,22 @@ abstract class AppTheme {
     elevatedButtonTheme: _elevatedButtonTheme,
     textButtonTheme: _textButtonTheme,
     appBarTheme: _appBarTheme,
+    cardTheme: _cardTheme,
+    floatingActionButtonTheme: _floatingActionButtonTheme,
   );
 
   static const _colorScheme = ColorScheme.light(
-    primary: AppColors.purple,
-    onPrimary: Colors.white,
-    secondary: AppColors.teal,
-    tertiary: AppColors.pink,
-    secondaryContainer: AppColors.yellow,
-    surface: AppColors.grayscale,
-    shadow: Colors.black26,
+    primary: AppColors.stone900,
+    onPrimary: AppColors.stone50,
+    secondary: AppColors.stone500,
+    tertiary: AppColors.stone700,
+    surface: AppColors.stone50,
+    surfaceContainerHighest: AppColors.stone900,
     error: AppColors.red,
 
     // Text colors
-    onSecondary: AppColors.titleText,
-    onSurface: AppColors.bodyText,
+    onSecondary: AppColors.stone900,
+    onSurface: AppColors.stone700,
   );
 
   static final _textTheme = Typography.material2021().black.apply(
@@ -48,11 +48,32 @@ abstract class AppTheme {
 
   static final _inputDecorationTheme = InputDecorationTheme(
     filled: true,
-    fillColor: _colorScheme.onPrimary,
-    border: OutlineInputBorder(
-      borderRadius: UiConstants.defaultBorderRadius,
-      borderSide: BorderSide.none,
+    fillColor: _colorScheme.onSurface.withAlpha(20),
+    border: UnderlineInputBorder(
+      borderRadius: BorderRadius.zero,
+      borderSide: BorderSide(color: _colorScheme.onSecondary, width: 1),
     ),
+    errorBorder: UnderlineInputBorder(
+      borderRadius: BorderRadius.zero,
+      borderSide: BorderSide(color: _colorScheme.onSecondary, width: 1),
+    ),
+    focusedBorder: UnderlineInputBorder(
+      borderRadius: BorderRadius.zero,
+      borderSide: BorderSide(color: _colorScheme.onSecondary, width: 1),
+    ),
+    focusedErrorBorder: UnderlineInputBorder(
+      borderRadius: BorderRadius.zero,
+      borderSide: BorderSide(color: _colorScheme.onSecondary, width: 1),
+    ),
+    disabledBorder: UnderlineInputBorder(
+      borderRadius: BorderRadius.zero,
+      borderSide: BorderSide(color: _colorScheme.onSecondary, width: 1),
+    ),
+    enabledBorder: UnderlineInputBorder(
+      borderRadius: BorderRadius.zero,
+      borderSide: BorderSide(color: _colorScheme.onSecondary, width: 1),
+    ),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
   );
 
   static final _elevatedButtonTheme = ElevatedButtonThemeData(
@@ -60,13 +81,13 @@ abstract class AppTheme {
         ElevatedButton.styleFrom(
           backgroundColor: _colorScheme.primary,
           foregroundColor: _colorScheme.onPrimary,
-          shape: RoundedRectangleBorder(
-            borderRadius: UiConstants.defaultBorderRadius,
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+          minimumSize: const Size.fromHeight(44),
+          textStyle: _textTheme.labelLarge?.copyWith(
+            fontSize: 14,
+            letterSpacing: 0.9,
+            fontWeight: FontWeight.w600,
           ),
-          minimumSize: const Size.fromHeight(48),
-          textStyle: _textTheme.labelLarge
-              ?.copyWith(fontWeight: FontWeight.w600, fontSize: 16)
-              .copyWith(),
         ).copyWith(
           elevation: const WidgetStatePropertyAll(0),
           shadowColor: WidgetStatePropertyAll(_colorScheme.shadow),
@@ -84,9 +105,6 @@ abstract class AppTheme {
       backgroundColor: _colorScheme.onPrimary,
       foregroundColor: _colorScheme.primary,
       textStyle: _textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
-      shape: RoundedRectangleBorder(
-        borderRadius: UiConstants.defaultBorderRadius,
-      ),
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
     ),
   );
@@ -98,5 +116,18 @@ abstract class AppTheme {
     foregroundColor: _colorScheme.onSecondary,
     titleTextStyle: _primaryTextTheme.titleLarge?.copyWith(fontSize: 24),
     systemOverlayStyle: SystemUiOverlayStyle.dark,
+  );
+
+  static final _cardTheme = CardThemeData(
+    color: _colorScheme.onPrimary,
+    shadowColor: _colorScheme.shadow,
+    surfaceTintColor: _colorScheme.surface,
+    elevation: 0,
+  );
+
+  static final _floatingActionButtonTheme = FloatingActionButtonThemeData(
+    elevation: 2,
+    backgroundColor: _colorScheme.primary,
+    foregroundColor: _colorScheme.onPrimary,
   );
 }

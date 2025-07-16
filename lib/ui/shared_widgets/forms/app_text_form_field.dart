@@ -1,4 +1,3 @@
-import 'package:bebi_app/ui/shared_widgets/shadow/shadow_container.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:flutter/material.dart';
@@ -79,32 +78,37 @@ class _AppTextFormFieldState extends State<AppTextFormField> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (widget.labelText != null) ...[
-            Text(widget.labelText!, style: context.textTheme.labelLarge),
+            Text(
+              widget.labelText!.toUpperCase(),
+              style: context.textTheme.titleSmall?.copyWith(
+                fontSize: 12,
+                letterSpacing: 0.9,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             const SizedBox(height: 8),
           ],
-          ShadowContainer(
-            child: TextFormField(
-              enabled: widget.enabled,
-              controller: widget.controller,
-              focusNode: _focusNode,
-              validator: _validator,
-              obscuringCharacter: '*',
-              textInputAction: widget.textInputAction,
-              obscureText: widget.obscureText,
-              keyboardType: widget.keyboardType,
-              onFieldSubmitted: widget.onSubmitted,
-              style: widget.inputStyle ?? context.textTheme.bodyMedium,
-              autofillHints: widget.autofillHints,
-              inputFormatters: widget.inputFormatters,
-              decoration: InputDecoration(
-                hintText: widget.hintText,
-                hintStyle: (widget.inputStyle ?? context.textTheme.bodyMedium)
-                    ?.copyWith(
-                      color: context.colorScheme.onSurface.withAlpha(120),
-                    ),
-                errorText: '',
-                errorStyle: const TextStyle(fontSize: 0),
-              ),
+          TextFormField(
+            enabled: widget.enabled,
+            controller: widget.controller,
+            focusNode: _focusNode,
+            validator: _validator,
+            obscuringCharacter: '*',
+            textInputAction: widget.textInputAction,
+            obscureText: widget.obscureText,
+            keyboardType: widget.keyboardType,
+            onFieldSubmitted: widget.onSubmitted,
+            style: widget.inputStyle ?? context.textTheme.bodyMedium,
+            autofillHints: widget.autofillHints,
+            inputFormatters: widget.inputFormatters,
+            decoration: InputDecoration(
+              hintText: widget.hintText,
+              hintStyle: (widget.inputStyle ?? context.textTheme.bodyMedium)
+                  ?.copyWith(
+                    color: context.colorScheme.onSurface.withAlpha(200),
+                  ),
+              errorText: '',
+              errorStyle: const TextStyle(fontSize: 0),
             ),
           ),
           AnimatedOpacity(

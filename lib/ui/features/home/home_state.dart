@@ -18,11 +18,14 @@ class HomeError extends HomeState {
 }
 
 class HomeLoaded extends HomeState {
-  const HomeLoaded({required this.currentUser, this.partnership});
+  const HomeLoaded({required this.currentUser});
   final UserProfile currentUser;
-  final Partnership? partnership;
 }
 
 class HomeShouldSetUpProfile extends HomeState {
   const HomeShouldSetUpProfile();
+}
+
+class HomeShouldAddPartner extends HomeState {
+  const HomeShouldAddPartner();
 }

@@ -2,6 +2,7 @@ import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 // Items here must match the order in the BottomNavigationBar
 // and the order of the StatefulShellBranches in AppRouter.
@@ -41,16 +42,16 @@ class _MainScaffoldState extends State<MainScaffold> {
   }
 
   Widget _buildBottomBar(BuildContext context) {
-    final height = context.screenHeight * 0.12;
+    final height = context.screenHeight * 0.11;
     return Container(
-      height: height > 100 ? 100 : height,
+      height: height > 110 ? 110 : height,
       decoration: BoxDecoration(
         color: context.colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: context.colorScheme.shadow.withAlpha(20),
+            color: context.colorScheme.shadow.withAlpha(14),
             blurRadius: 8,
-            offset: const Offset(0, -2),
+            offset: const Offset(0, -1.5),
           ),
         ],
       ),
@@ -58,11 +59,11 @@ class _MainScaffoldState extends State<MainScaffold> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildTabIcon(_Tabs.home, Icons.space_dashboard_rounded),
-            _buildTabIcon(_Tabs.calendar, Icons.calendar_month_rounded),
-            _buildTabIcon(_Tabs.stories, Icons.calendar_view_day_rounded),
-            _buildTabIcon(_Tabs.location, Icons.location_on_rounded),
-            _buildTabIcon(_Tabs.account, Icons.person_rounded),
+            _buildTabIcon(_Tabs.home, Symbols.home),
+            _buildTabIcon(_Tabs.calendar, Symbols.calendar_month),
+            _buildTabIcon(_Tabs.stories, Symbols.calendar_view_day),
+            _buildTabIcon(_Tabs.location, Symbols.location_pin),
+            _buildTabIcon(_Tabs.account, Symbols.account_circle),
           ],
         ),
       ),
@@ -73,8 +74,8 @@ class _MainScaffoldState extends State<MainScaffold> {
     final isActive = tab == activeTab;
     final color = isActive
         ? context.colorScheme.primary
-        : context.colorScheme.onSecondary.withAlpha(120);
-    return Expanded(
+        : context.colorScheme.secondary.withAlpha(120);
+    return Flexible(
       child: Center(
         child: Material(
           color: Colors.transparent,
@@ -82,8 +83,10 @@ class _MainScaffoldState extends State<MainScaffold> {
           child: InkWell(
             onTap: () => _onTap(_Tabs.values.indexOf(tab)),
             customBorder: const CircleBorder(),
+            splashColor: context.colorScheme.primary.withAlpha(20),
+            highlightColor: context.colorScheme.primary.withAlpha(10),
             child: Padding(
-              padding: const EdgeInsets.all(12.0),
+              padding: const EdgeInsets.fromLTRB(12, 14, 12, 12),
               child: Icon(icon, color: color, size: 28),
             ),
           ),
@@ -96,7 +99,7 @@ class _MainScaffoldState extends State<MainScaffold> {
     final now = DateTime.now();
 
     if (_lastTapTime != null &&
-        now.difference(_lastTapTime!) < 300.milliseconds) {
+        now.difference(_lastTapTime!) < 160.milliseconds) {
       return; // Ignore taps within debounce window
     }
 
@@ -144,7 +147,7 @@ class _AnimatedBranchContainerState extends State<_AnimatedBranchContainer>
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: 250.milliseconds,
+      duration: 150.milliseconds,
       vsync: this,
     );
   }

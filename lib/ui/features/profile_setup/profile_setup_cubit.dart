@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
@@ -31,7 +32,12 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
     );
 
     if (pickedFile != null) {
-      emit(state.copyWith(profilePicture: File(pickedFile.path)));
+      emit(
+        state.copyWith(
+          profilePicture: File(pickedFile.path),
+          profilePictureChanged: true,
+        ),
+      );
     }
   }
 
@@ -54,11 +60,12 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
         await _userProfileRepository.createOrUpdate(
           UserProfile(
             userId: _firebaseAuth.currentUser!.uid,
+            code: await _generateUserCode(),
             birthDate: DateFormat('mm/dd/yyyy').parse(birthDate),
-            createdAt: DateTime.now(),
+            createdAt: DateTime.now().toUtc(),
+            updatedAt: DateTime.now().toUtc(),
             displayName: displayName,
             photoUrl: photoUrl,
-            updatedAt: DateTime.now(),
           ),
         );
 
@@ -77,5 +84,23 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
         emit(state.copyWith(loading: false));
       },
     );
+  }
+
+  Future<String> _generateUserCode() async {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    final rand = Random();
+
+    for (int attempts = 0; attempts < 100; attempts++) {
+      final code = List.generate(
+        6,
+        (_) => chars[rand.nextInt(chars.length)],
+      ).join();
+
+      if (await _userProfileRepository.getByUserCode(code) == null) {
+        return code;
+      }
+    }
+
+    throw Exception('Failed to generate unique user code after 100 attempts');
   }
 }

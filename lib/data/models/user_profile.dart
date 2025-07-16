@@ -1,10 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserProfile {
+  const UserProfile({
+    required this.userId,
+    required this.code,
+    required this.birthDate,
+    required this.createdAt,
+    required this.displayName,
+    required this.photoUrl,
+    required this.updatedAt,
+  });
+
   factory UserProfile.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return UserProfile(
       userId: doc.id,
+      code: data['code'] as String,
       birthDate: (data['birth_date'] as Timestamp).toDate(),
       createdAt: (data['created_at'] as Timestamp).toDate(),
       displayName: data['display_name'] as String,
@@ -13,16 +24,8 @@ class UserProfile {
     );
   }
 
-  const UserProfile({
-    required this.userId,
-    required this.birthDate,
-    required this.createdAt,
-    required this.displayName,
-    required this.photoUrl,
-    required this.updatedAt,
-  });
-
   final String userId;
+  final String code;
   final DateTime birthDate;
   final DateTime createdAt;
   final String displayName;
@@ -32,6 +35,7 @@ class UserProfile {
   Map<String, dynamic> toFirestore() {
     return {
       // ID is managed by Firestore
+      'code': code,
       'birth_date': Timestamp.fromDate(birthDate),
       'created_at': Timestamp.fromDate(createdAt),
       'display_name': displayName,
@@ -40,8 +44,13 @@ class UserProfile {
     };
   }
 
+  UserProfile updated() {
+    return copyWith(updatedAt: DateTime.now().toUtc());
+  }
+
   UserProfile copyWith({
     String? userId,
+    String? code,
     DateTime? birthDate,
     DateTime? createdAt,
     String? displayName,
@@ -50,6 +59,7 @@ class UserProfile {
   }) {
     return UserProfile(
       userId: userId ?? this.userId,
+      code: code ?? this.code,
       birthDate: birthDate ?? this.birthDate,
       createdAt: createdAt ?? this.createdAt,
       displayName: displayName ?? this.displayName,

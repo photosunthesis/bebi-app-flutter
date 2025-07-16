@@ -1,3 +1,3 @@
 abstract class AppAssets {
-  static const mainLogo = 'assets/app_logo/app_logo_main.png';
+  static const appLogo = 'assets/app_logo/app_logo.png';
 }

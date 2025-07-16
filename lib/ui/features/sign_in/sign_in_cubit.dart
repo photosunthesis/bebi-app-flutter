@@ -32,8 +32,8 @@ class SignInCubit extends Cubit<SignInState> {
       onError: (error, _) {
         final errorMessage = switch (error) {
           FirebaseAuthException(:final message) =>
-            message ?? 'There was an issue with the sign-in process. 😅',
-          _ => 'An unexpected error occurred. Please try again later. 😅',
+            message ?? 'There was an issue with the sign-in process.',
+          _ => 'An unexpected error occurred. Please try again later.',
         };
 
         emit(SignInFailure(errorMessage));

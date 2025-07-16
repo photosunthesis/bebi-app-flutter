@@ -1,4 +1,3 @@
-import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:flutter/material.dart';
 
@@ -21,9 +20,6 @@ class ShadowContainer extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         shape: shape,
-        borderRadius: shape == BoxShape.circle
-            ? null
-            : UiConstants.defaultBorderRadius,
         boxShadow: [
           BoxShadow(
             color: color ?? context.colorScheme.shadow.withAlpha(10),
