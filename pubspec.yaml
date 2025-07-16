@@ -18,11 +18,11 @@ dependencies:
     sdk: flutter
   flutter_bloc: ^9.1.1
   flutter_keyboard_visibility_temp_fork: ^0.1.5
-  flutter_localizations:
-    sdk: flutter
   go_router: ^16.0.0
   image_picker: ^1.1.2
   intl: any
+  material_symbols_icons: ^4.2815.1
+  table_calendar: ^3.2.0
 
 dev_dependencies:
   flutter_lints: ^5.0.0
@@ -34,7 +34,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/app_logo/app_logo_main.png
+    - assets/app_logo/app_logo.png
     - assets/fonts/ibm_plex_sans/
     - assets/fonts/vidaloka/
   fonts:
@@ -42,6 +42,12 @@ flutter:
       fonts:
         - asset: assets/fonts/ibm_plex_mono/IBMPlexMono-Regular.ttf
           weight: 400
+        - asset: assets/fonts/ibm_plex_mono/IBMPlexMono-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/ibm_plex_mono/IBMPlexMono-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/ibm_plex_mono/IBMPlexMono-Bold.ttf
+          weight: 700
     - family: IBMPlexSans
       fonts:
         - asset: assets/fonts/ibm_plex_sans/IBMPlexSans-Regular.ttf
@@ -49,6 +55,10 @@ flutter:
         - asset: assets/fonts/ibm_plex_sans/IBMPlexSans-Italic.ttf
           weight: 400
           style: italic
+        - asset: assets/fonts/ibm_plex_sans/IBMPlexSans-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/ibm_plex_sans/IBMPlexSans-MediumItalic.ttf
+          weight: 500
         - asset: assets/fonts/ibm_plex_sans/IBMPlexSans-SemiBold.ttf
           weight: 600
         - asset: assets/fonts/ibm_plex_sans/IBMPlexSans-Bold.ttf
@@ -59,10 +69,10 @@ flutter:
           weight: 400
 
 flutter_native_splash:
-  color: "#F1F2F3"
-  image: "assets/app_logo/app_logo_main.png"
+  color: "#F5F6F7"
+  image: "assets/app_logo/app_logo.png"
   android_12:
-    color: "#F1F2F3"
+    color: "#F5F6F7"
     image: "assets/app_logo/app_logo_android12.png"
 
 icons_launcher:
@@ -71,7 +81,7 @@ icons_launcher:
       enable: true
       image_path: "assets/app_logo/app_logo_android12.png"
       adaptive_foreground_image: "assets/app_logo/app_logo_android12.png"
-      adaptive_background_color: "#F1F2F3"
+      adaptive_background_color: "#F5F6F7"
     ios:
       enable: true
       image_path: "assets/app_logo/app_logo_ios.png"
