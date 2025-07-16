@@ -1,4 +1,6 @@
 extension IntExtensions on int {
+  Duration get years => Duration(days: this * 365);
+
   Duration get days => Duration(days: this);
 
   Duration get hours => Duration(hours: this);

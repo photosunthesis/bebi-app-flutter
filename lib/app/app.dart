@@ -1,7 +1,7 @@
 import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/app/theme/app_theme.dart';
 import 'package:bebi_app/config/firebase_services.dart';
-import 'package:bebi_app/data/repositories/partnerships_repository.dart';
+import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -30,7 +30,7 @@ class App extends StatelessWidget {
               UserProfileRepository(context.read(), context.read()),
         ),
         RepositoryProvider(
-          create: (context) => PartnershipsRepository(context.read()),
+          create: (context) => UserPartnershipsRepository(context.read()),
         ),
       ],
       child: MaterialApp.router(

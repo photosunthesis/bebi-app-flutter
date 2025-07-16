@@ -1,4 +1,6 @@
 import 'package:bebi_app/config/firebase_services.dart';
+import 'package:bebi_app/ui/features/calendar/calendar_cubit.dart';
+import 'package:bebi_app/ui/features/calendar/calendar_screen.dart';
 import 'package:bebi_app/ui/features/home/home_cubit.dart';
 import 'package:bebi_app/ui/features/home/home_screen.dart';
 import 'package:bebi_app/ui/features/profile_setup/profile_setup_cubit.dart';
@@ -58,11 +60,11 @@ abstract class AppRouter {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                // TODO
                 path: '/calendar',
                 name: AppRoutes.calendar,
-                builder: (context, state) => const Scaffold(
-                  body: Center(child: Text('Calendar Screen')),
+                builder: (context, state) => BlocProvider(
+                  create: (context) => CalendarCubit(),
+                  child: const CalendarScreen(),
                 ),
               ),
             ],
