@@ -47,17 +47,14 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             ),
             child: ListView(
               children: [
-                const SafeArea(child: SizedBox(height: 10)),
-                Text(
-                  'Set up your profile',
-                  style: context.primaryTextTheme.headlineSmall,
-                ),
-                const SizedBox(height: 30),
+                const SafeArea(child: SizedBox(height: UiConstants.padding)),
+                _buildHeader(),
+                const SizedBox(height: 32),
                 _buildProfilePicture(),
-                const SizedBox(height: 30),
+                const SizedBox(height: 44),
                 _buildDisplayNameField(),
                 const SizedBox(height: 16),
-                _buildBirthdayField(),
+                _buildBirthdateField(),
               ],
             ),
           ),
@@ -82,10 +79,10 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                 child: AnimatedSwitcher(
                   duration: 300.milliseconds,
                   child: CircleAvatar(
-                    key: ValueKey(profilePicture?.path ?? 'no-image'),
+                    key: ValueKey(profilePicture),
                     radius: 60,
                     backgroundColor: context.colorScheme.secondary.withAlpha(
-                      30,
+                      20,
                     ),
                     backgroundImage: hasProfilePicture
                         ? FileImage(profilePicture)
@@ -111,12 +108,10 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                         ? _cubit.removeProfilePicture
                         : _cubit.setProfilePicture,
                     style: IconButton.styleFrom(
-                      backgroundColor: hasProfilePicture
-                          ? context.colorScheme.onPrimary
-                          : context.colorScheme.primary,
+                      backgroundColor: context.colorScheme.onPrimary,
                       foregroundColor: hasProfilePicture
                           ? context.colorScheme.error
-                          : context.colorScheme.onPrimary,
+                          : context.colorScheme.primary,
                       padding: const EdgeInsets.all(8),
                       shape: const CircleBorder(),
                     ),
@@ -137,65 +132,96 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     );
   }
 
-  Widget _buildDisplayNameField() {
-    return AppTextFormField(
-      controller: _displayNameController,
-      labelText: 'Display name',
-      hintText: 'Your nickname',
-      keyboardType: TextInputType.text,
-      textInputAction: TextInputAction.next,
-      autofillHints: const [AutofillHints.nickname],
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter your preferred name.';
-        }
-
-        if (!RegExp(r'^[a-zA-Z0-9 ]+$').hasMatch(value)) {
-          return 'Only letters, numbers, and spaces are allowed.';
-        }
-
-        if (value.length > 32) {
-          return 'Name can\'t be longer than 32 characters.';
-        }
-
-        return null;
-      },
+  Widget _buildHeader() {
+    return Column(
+      children: [
+        Text(
+          'Set up your profile',
+          style: context.primaryTextTheme.headlineSmall,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          width: context.screenWidth * 0.85,
+          child: Text(
+            'Add a photo and name to personalize your profile. These details will be visible on your account.',
+            style: context.textTheme.bodyLarge?.copyWith(
+              height: 1.4,
+              fontWeight: FontWeight.normal,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildBirthdayField() {
-    return AppTextFormField(
-      controller: _birthdayController,
-      labelText: 'Birthdate',
-      hintText: 'DD/MM/YYYY',
-      keyboardType: TextInputType.number,
-      textInputAction: TextInputAction.done,
-      autofillHints: const [AutofillHints.birthday],
-      inputFormatters: [BirthDateFormatter()],
-      inputStyle: context.textTheme.bodyMedium?.monospace,
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter your birthdate.';
-        }
+  Widget _buildDisplayNameField() {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: context.screenWidth * 0.05),
+      child: AppTextFormField(
+        controller: _displayNameController,
+        labelText: 'Display name',
+        hintText: 'Your nickname',
+        keyboardType: TextInputType.text,
+        textInputAction: TextInputAction.next,
+        autofillHints: const [AutofillHints.nickname],
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Please enter your preferred name.';
+          }
 
-        final date = DateFormat('dd/MM/yyyy').tryParseStrict(value);
+          if (!RegExp(r'^[a-zA-Z0-9 ]+$').hasMatch(value)) {
+            return 'Only letters, numbers, and spaces are allowed.';
+          }
 
-        if (date == null) {
-          return 'Please enter a valid date in DD/MM/YYYY format.';
-        }
+          if (value.length > 32) {
+            return 'Name can\'t be longer than 32 characters.';
+          }
 
-        if (date.isAfter(DateTime.now())) {
-          return 'Birthdate cannot be in the future.';
-        }
+          return null;
+        },
+      ),
+    );
+  }
 
-        return null;
-      },
+  Widget _buildBirthdateField() {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: context.screenWidth * 0.05),
+      child: AppTextFormField(
+        controller: _birthdayController,
+        labelText: 'Birthdate',
+        hintText: 'DD/MM/YYYY',
+        keyboardType: TextInputType.number,
+        textInputAction: TextInputAction.done,
+        autofillHints: const [AutofillHints.birthday],
+        inputFormatters: const [BirthDateFormatter()],
+        inputStyle: context.textTheme.bodyMedium?.monospace,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Please enter your birthdate.';
+          }
+
+          final date = DateFormat('dd/MM/yyyy').tryParseStrict(value);
+
+          if (date == null) {
+            return 'Please enter a valid date in DD/MM/YYYY format.';
+          }
+
+          if (date.isAfter(DateTime.now())) {
+            return 'Birthdate cannot be in the future.';
+          }
+
+          return null;
+        },
+      ),
     );
   }
 
   Widget _buildBottomBar() {
     return SafeArea(
-      child: Padding(
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: context.screenWidth * 0.05),
         padding: const EdgeInsets.all(UiConstants.padding),
         child: BlocSelector<ProfileSetupCubit, ProfileSetupState, bool>(
           selector: (state) => state.loading,
