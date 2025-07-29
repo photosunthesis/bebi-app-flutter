@@ -17,26 +17,17 @@ class CalendarEventsRepository {
     return querySnapshot.docs.map(CalendarEvent.fromFirestore).toList();
   }
 
-  /// Creates a new calendar event.
-  ///
-  /// Dates will be converted to UTC if they are not already.
-  Future<CalendarEvent> create(CalendarEvent event) async {
-    final newEvent = event.copyWith(
-      startDate: event.startDate.toUtc(),
-      endDate: event.endDate?.toUtc(),
-      createdAt: event.createdAt.toUtc(),
-      updatedAt: DateTime.now().toUtc(),
-    );
-
-    final docRef = _firestore.collection(_collection).doc(newEvent.id);
-    await docRef.set(newEvent.toFirestore());
-    return newEvent;
+  Future<CalendarEvent?> getById(String id) async {
+    final docRef = _firestore.collection(_collection).doc(id);
+    final docSnapshot = await docRef.get();
+    if (!docSnapshot.exists) return null;
+    return CalendarEvent.fromFirestore(docSnapshot);
   }
 
-  /// Updates an existing calendar event.
+  /// Creates or updates a calendar event.
   ///
   /// Dates will be converted to UTC if they are not already.
-  Future<CalendarEvent> update(CalendarEvent event) async {
+  Future<CalendarEvent> createOrUpdate(CalendarEvent event) async {
     final updatedEvent = event.copyWith(
       startDate: event.startDate.toUtc(),
       endDate: event.endDate?.toUtc(),
@@ -44,8 +35,15 @@ class CalendarEventsRepository {
       updatedAt: DateTime.now().toUtc(),
     );
 
-    final docRef = _firestore.collection(_collection).doc(event.id);
-    await docRef.update(updatedEvent.toFirestore());
+    final docRef = event.id.isEmpty
+        ? _firestore.collection(_collection).doc()
+        : _firestore.collection(_collection).doc(event.id);
+
+    await docRef.set(
+      updatedEvent.toFirestore(),
+      SetOptions(merge: event.id.isNotEmpty),
+    );
+
     return updatedEvent;
   }
 }

@@ -1,6 +1,22 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-enum RepeatFrequency { daily, weekly, monthly, yearly, doNotRepeat, custom }
+enum RepeatFrequency {
+  daily,
+  weekly,
+  monthly,
+  yearly,
+  custom,
+  doNotRepeat;
+
+  String get label => switch (this) {
+    RepeatFrequency.daily => 'Daily',
+    RepeatFrequency.weekly => 'Weekly',
+    RepeatFrequency.monthly => 'Monthly',
+    RepeatFrequency.yearly => 'Yearly',
+    RepeatFrequency.custom => 'Custom',
+    RepeatFrequency.doNotRepeat => 'Do not repeat',
+  };
+}
 
 class RepeatRule {
   const RepeatRule({

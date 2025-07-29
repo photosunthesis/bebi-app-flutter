@@ -1,43 +1,24 @@
 import 'dart:ui';
 
-import 'package:bebi_app/app/theme/app_colors.dart';
+import 'package:bebi_app/data/models/cycle_event.dart';
+import 'package:bebi_app/data/models/event_color.dart';
 import 'package:bebi_app/data/models/repeat_rule.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-enum EventType { reminder, menstruation, ovulation }
-
-enum EventColor {
-  green,
-  blue,
-  yellow,
-  red,
-  purple,
-  orange;
-
-  Color get color => switch (this) {
-    EventColor.green => AppColors.green,
-    EventColor.blue => AppColors.blue,
-    EventColor.yellow => AppColors.yellow,
-    EventColor.red => AppColors.red,
-    EventColor.purple => AppColors.purple,
-    EventColor.orange => AppColors.orange,
-  };
-}
 
 class CalendarEvent {
   const CalendarEvent({
     required this.id,
     required this.title,
     this.notes,
-    required this.eventType,
+    this.isCycleEvent = false,
     required DateTime startDate,
     DateTime? endDate,
     this.allDay = false,
     required this.repeatRule,
     this.location,
     required this.eventColor,
-    required this.users,
     required this.createdBy,
+    this.partnershipId,
     required DateTime createdAt,
     required DateTime updatedAt,
   }) : _startDate = startDate,
@@ -55,9 +36,7 @@ class CalendarEvent {
       id: doc.id,
       title: data['title'] as String,
       notes: data['notes'] as String?,
-      eventType: EventType.values.firstWhere(
-        (e) => e.name == data['event_type'],
-      ),
+      isCycleEvent: data['is_cycle_event'] as bool? ?? false,
       startDate: (data['start_date'] as Timestamp).toDate(),
       endDate: data['end_date'] != null
           ? (data['end_date'] as Timestamp).toDate()
@@ -67,10 +46,9 @@ class CalendarEvent {
         data['repeat_rule'] as Map<String, dynamic>,
       ),
       location: data['location'] as String?,
-      eventColor: EventColor.values.firstWhere(
+      eventColor: EventColors.values.firstWhere(
         (e) => e.name == data['event_color'],
       ),
-      users: data['users'] as List<String>,
       createdBy: data['created_by'] as String,
       createdAt: (data['created_at'] as Timestamp).toDate(),
       updatedAt: (data['updated_at'] as Timestamp).toDate(),
@@ -80,15 +58,15 @@ class CalendarEvent {
   final String id;
   final String title;
   final String? notes;
-  final EventType eventType;
+  final bool isCycleEvent;
   final DateTime _startDate;
   final DateTime? _endDate;
   final bool allDay;
   final RepeatRule repeatRule;
   final String? location;
-  final EventColor eventColor;
-  final List<String> users;
+  final EventColors eventColor;
   final String createdBy;
+  final String? partnershipId;
   final DateTime _createdAt;
   final DateTime _updatedAt;
 
@@ -104,15 +82,15 @@ class CalendarEvent {
       // ID is handled by Firestore
       'title': title,
       'notes': notes,
-      'event_type': eventType.name,
+      'is_cycle_event': isCycleEvent,
       'start_date': Timestamp.fromDate(_startDate),
       'end_date': _endDate != null ? Timestamp.fromDate(_endDate) : null,
       'all_day': allDay,
       'repeat_rule': repeatRule.toMap(),
       'location': location,
       'event_color': eventColor.name,
-      'users': users,
       'created_by': createdBy,
+      'partnership_id': partnershipId,
       'created_at': Timestamp.fromDate(_createdAt),
       'updated_at': Timestamp.fromDate(_updatedAt),
     };
@@ -122,15 +100,15 @@ class CalendarEvent {
     String? id,
     String? title,
     String? notes,
-    EventType? eventType,
+    bool? isCycleEvent,
     DateTime? startDate,
     DateTime? endDate,
     bool? allDay,
     RepeatRule? repeatRule,
     String? location,
-    EventColor? eventColor,
-    List<String>? users,
+    EventColors? eventColor,
     String? createdBy,
+    String? partnershipId,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -138,17 +116,23 @@ class CalendarEvent {
       id: id ?? this.id,
       title: title ?? this.title,
       notes: notes ?? this.notes,
-      eventType: eventType ?? this.eventType,
+      isCycleEvent: isCycleEvent ?? this.isCycleEvent,
       startDate: startDate ?? _startDate,
       endDate: endDate ?? _endDate,
       allDay: allDay ?? this.allDay,
       repeatRule: repeatRule ?? this.repeatRule,
       location: location ?? this.location,
       eventColor: eventColor ?? this.eventColor,
-      users: users ?? this.users,
       createdBy: createdBy ?? this.createdBy,
+      partnershipId: partnershipId ?? this.partnershipId,
       createdAt: createdAt ?? _createdAt,
       updatedAt: updatedAt ?? _updatedAt,
     );
+  }
+
+  CycleEvent toCycleEvent() {
+    // TODO Add more robust checks
+    assert(isCycleEvent, 'Event is not a cycle event.');
+    return this as CycleEvent;
   }
 }

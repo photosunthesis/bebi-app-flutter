@@ -19,4 +19,7 @@
     <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
         <item name="android:windowBackground">?android:colorBackground</item>
     </style>
+    <style name="frameRatePowerSavingsBalancedDisabled">
+        <item name="android:windowIsFrameRatePowerSavingsBalanced">false</item>
+    </style>
 </resources>

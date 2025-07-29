@@ -4,6 +4,7 @@ class UserPartnership {
   const UserPartnership({
     required this.id,
     required this.users,
+    required this.createdBy,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -13,6 +14,7 @@ class UserPartnership {
     return UserPartnership(
       id: doc.id,
       users: data['users'] as List<String>,
+      createdBy: data['created_by'] as String,
       createdAt: (data['created_at'] as Timestamp).toDate(),
       updatedAt: (data['updated_at'] as Timestamp).toDate(),
     );
@@ -20,6 +22,7 @@ class UserPartnership {
 
   final String id;
   final List<String> users;
+  final String createdBy;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -27,6 +30,7 @@ class UserPartnership {
     return {
       // ID is managed by Firestore
       'users': users,
+      'created_by': createdBy,
       'created_at': Timestamp.fromDate(createdAt),
       'updated_at': Timestamp.fromDate(updatedAt),
     };
@@ -39,12 +43,14 @@ class UserPartnership {
   UserPartnership copyWith({
     String? id,
     List<String>? users,
+    String? createdBy,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
     return UserPartnership(
       id: id ?? this.id,
       users: users ?? this.users,
+      createdBy: createdBy ?? this.createdBy,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

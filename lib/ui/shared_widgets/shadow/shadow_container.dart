@@ -6,14 +6,16 @@ class ShadowContainer extends StatelessWidget {
     required this.child,
     this.color,
     this.shape = BoxShape.rectangle,
-    this.offset = const Offset(0, 0),
+    this.shadowOffset = const Offset(0, 0),
+    this.shadowBlurRadius = 4,
     super.key,
   });
 
   final Widget child;
   final Color? color;
   final BoxShape shape;
-  final Offset offset;
+  final double shadowBlurRadius;
+  final Offset shadowOffset;
 
   @override
   Widget build(BuildContext context) {
@@ -23,8 +25,8 @@ class ShadowContainer extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: color ?? context.colorScheme.shadow.withAlpha(10),
-            blurRadius: 4,
-            offset: offset,
+            blurRadius: shadowBlurRadius,
+            offset: shadowOffset,
             spreadRadius: -4,
           ),
         ],

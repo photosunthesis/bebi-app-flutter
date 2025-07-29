@@ -18,6 +18,9 @@ class AppTextFormField extends StatefulWidget {
     this.autofillHints,
     this.inputFormatters,
     this.inputStyle,
+    this.minLines,
+    this.maxLines,
+    this.readOnly = false,
     super.key,
   });
 
@@ -34,6 +37,9 @@ class AppTextFormField extends StatefulWidget {
   final Iterable<String>? autofillHints;
   final List<TextInputFormatter>? inputFormatters;
   final TextStyle? inputStyle;
+  final int? minLines;
+  final int? maxLines;
+  final bool readOnly;
 
   @override
   State<AppTextFormField> createState() => _AppTextFormFieldState();
@@ -82,7 +88,6 @@ class _AppTextFormFieldState extends State<AppTextFormField> {
               widget.labelText!.toUpperCase(),
               style: context.textTheme.titleSmall?.copyWith(
                 fontSize: 12,
-                letterSpacing: 0.9,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -91,6 +96,7 @@ class _AppTextFormFieldState extends State<AppTextFormField> {
           TextFormField(
             enabled: widget.enabled,
             controller: widget.controller,
+            readOnly: widget.readOnly,
             focusNode: _focusNode,
             validator: _validator,
             obscuringCharacter: '*',
@@ -101,11 +107,13 @@ class _AppTextFormFieldState extends State<AppTextFormField> {
             style: widget.inputStyle ?? context.textTheme.bodyMedium,
             autofillHints: widget.autofillHints,
             inputFormatters: widget.inputFormatters,
+            minLines: widget.minLines,
+            maxLines: widget.maxLines ?? 1,
             decoration: InputDecoration(
               hintText: widget.hintText,
               hintStyle: (widget.inputStyle ?? context.textTheme.bodyMedium)
                   ?.copyWith(
-                    color: context.colorScheme.onSurface.withAlpha(200),
+                    color: context.colorScheme.onSurface.withAlpha(120),
                   ),
               errorText: '',
               errorStyle: const TextStyle(fontSize: 0),
@@ -125,7 +133,6 @@ class _AppTextFormFieldState extends State<AppTextFormField> {
                         key: ValueKey(_errorText),
                         style: context.textTheme.bodySmall?.copyWith(
                           color: context.colorScheme.error,
-                          letterSpacing: 0,
                         ),
                       ),
                     )

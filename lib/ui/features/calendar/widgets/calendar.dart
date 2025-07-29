@@ -1,3 +1,4 @@
+import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/ui/features/calendar/calendar_cubit.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
@@ -53,10 +54,10 @@ class Calendar extends StatelessWidget {
     DateTime focusedDay,
   ) {
     return Container(
-      margin: const EdgeInsets.all(13),
+      margin: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         color: context.colorScheme.primary,
-        shape: BoxShape.circle,
+        borderRadius: UiConstants.borderRadius,
       ),
       child: Center(
         child: Text(
@@ -76,10 +77,10 @@ class Calendar extends StatelessWidget {
     DateTime focusedDay,
   ) {
     return Container(
-      margin: const EdgeInsets.all(13),
+      margin: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         color: day.isSameDay(focusedDay) ? context.colorScheme.primary : null,
-        shape: BoxShape.circle,
+        borderRadius: UiConstants.borderRadius,
         border: Border.all(color: context.colorScheme.primary, width: 0.6),
       ),
       child: Center(
@@ -102,8 +103,8 @@ class Calendar extends StatelessWidget {
     DateTime focusedDay,
   ) {
     return Container(
-      margin: const EdgeInsets.all(13),
-      decoration: const BoxDecoration(shape: BoxShape.circle),
+      margin: const EdgeInsets.all(15),
+      decoration: const BoxDecoration(borderRadius: UiConstants.borderRadius),
       child: Center(
         child: Text(
           day.day.toString(),
@@ -147,7 +148,8 @@ class Calendar extends StatelessWidget {
         border: Border(
           bottom: BorderSide(
             color: context.colorScheme.onSecondary,
-            width: 0.15,
+            // Weird bug with the border on different platforms 🤷🏻
+            width: UiConstants.borderWidth,
           ),
         ),
       ),

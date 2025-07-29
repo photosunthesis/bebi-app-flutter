@@ -16,6 +16,9 @@ class CalendarEvents extends StatefulWidget {
 }
 
 class _CalendarEventsState extends State<CalendarEvents> {
+  final _kaomoji =
+      Kaomojis.happySet[Random().nextInt(Kaomojis.happySet.length)];
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<CalendarCubit, CalendarState>(
@@ -33,7 +36,7 @@ class _CalendarEventsState extends State<CalendarEvents> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 2),
-                  _buildTitle(context, state.focusedDay),
+                  Expanded(child: _buildTitle(context, state.focusedDay)),
                   const SizedBox(height: 10),
                   _buildEventCard(context, state.focusedDayEvents[index]),
                 ],
@@ -48,9 +51,6 @@ class _CalendarEventsState extends State<CalendarEvents> {
   }
 
   Widget _buildNoEventsPlaceholder(DateTime focusedDay) {
-    final kaomoji =
-        Kaomojis.happySet[Random().nextInt(Kaomojis.happySet.length)];
-
     return IntrinsicHeight(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -65,17 +65,17 @@ class _CalendarEventsState extends State<CalendarEvents> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    kaomoji,
+                    _kaomoji,
                     style: context.textTheme.headlineSmall?.copyWith(
                       fontSize: 30,
-                      color: context.colorScheme.secondary.withAlpha(180),
+                      color: context.colorScheme.secondary.withAlpha(100),
                     ),
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'No events for this day',
+                    'No events for this day.',
                     style: context.textTheme.bodyMedium?.copyWith(
-                      color: context.colorScheme.secondary,
+                      color: context.colorScheme.secondary.withAlpha(100),
                     ),
                   ),
                 ],
@@ -89,10 +89,9 @@ class _CalendarEventsState extends State<CalendarEvents> {
 
   Widget _buildTitle(BuildContext context, DateTime focusedDay) {
     return Text(
-      (focusedDay.isToday
-              ? 'Today, ${focusedDay.toEEEEMMMMd()}'
-              : focusedDay.toEEEEMMMMd())
-          .toUpperCase(),
+      focusedDay.isToday
+          ? 'Today, ${focusedDay.toEEEEMMMMd()}'
+          : focusedDay.toEEEEMMMMd(),
       style: context.textTheme.titleSmall?.copyWith(
         fontWeight: FontWeight.w600,
         color: context.colorScheme.secondary,

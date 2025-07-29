@@ -43,7 +43,7 @@ class _SignInScreenState extends State<SignInScreen> {
           resizeToAvoidBottomInset: true,
           body: Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: UiConstants.defaultPadding,
+              horizontal: UiConstants.padding,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,7 +156,7 @@ class _SignInScreenState extends State<SignInScreen> {
                               );
                         }
                       },
-                child: Text('Sign in'.toUpperCase()),
+                child: const Text('Sign in'),
               ),
             ],
           ),
@@ -171,7 +171,7 @@ class _SignInScreenState extends State<SignInScreen> {
       child: RichText(
         textAlign: TextAlign.center,
         text: TextSpan(
-          style: context.textTheme.bodyMedium,
+          style: context.textTheme.bodySmall,
           children: [
             const TextSpan(text: 'Forgot password? '),
             TextSpan(
@@ -180,10 +180,10 @@ class _SignInScreenState extends State<SignInScreen> {
                 ..onTap = () {
                   // TODO Handle reset password
                   context.showSnackbar(
-                    'Reset password feature is not implemented yet. 😅',
+                    'Reset password feature is not implemented yet.',
                   );
                 },
-              style: context.textTheme.bodyMedium?.copyWith(
+              style: context.textTheme.bodySmall?.copyWith(
                 color: context.colorScheme.primary,
                 fontWeight: FontWeight.w500,
               ),

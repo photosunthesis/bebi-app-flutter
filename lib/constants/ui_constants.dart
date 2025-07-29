@@ -1,3 +1,15 @@
+import 'package:flutter/material.dart';
+
 abstract class UiConstants {
-  static const defaultPadding = 16.0;
+  static const padding = 16.0;
+  static final borderWidth = 0.2;
+
+  static const borderRadiusValue = 4.0;
+  static const borderRadiusLargeValue = 8.0;
+  static const borderRadius = BorderRadius.all(
+    Radius.circular(borderRadiusValue),
+  );
+  static const borderRadiusLarge = BorderRadius.all(
+    Radius.circular(borderRadiusLargeValue),
+  );
 }

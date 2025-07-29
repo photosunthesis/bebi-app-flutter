@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:bebi_app/config/firebase_services.dart';
 import 'package:flutter/foundation.dart';
+
+bool get _isTest => Platform.environment.containsKey('FLUTTER_TEST');
 
 FutureOr<T?> guard<T>(
   FutureOr<T> Function() body, {
@@ -12,7 +15,7 @@ FutureOr<T?> guard<T>(
   try {
     return await body();
   } catch (e, s) {
-    if (kDebugMode || disableLogging) {
+    if ((kDebugMode && _isTest) || disableLogging) {
       debugPrint('Error caught by guard: $e\n$s');
     } else {
       FirebaseServices.crashlytics.recordError(e, s, fatal: true);

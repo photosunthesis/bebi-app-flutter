@@ -43,18 +43,14 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
           resizeToAvoidBottomInset: true,
           body: Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: UiConstants.defaultPadding,
+              horizontal: UiConstants.padding,
             ),
             child: ListView(
               children: [
                 const SafeArea(child: SizedBox(height: 10)),
                 Text(
                   'Set up your profile',
-                  // textAlign: TextAlign.center,
-                  style: context.primaryTextTheme.headlineSmall?.copyWith(
-                    // fontWeight: FontWeight.w600,
-                    // letterSpacing: 0.9,
-                  ),
+                  style: context.primaryTextTheme.headlineSmall,
                 ),
                 const SizedBox(height: 30),
                 _buildProfilePicture(),
@@ -109,7 +105,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                 right: -18,
                 child: ShadowContainer(
                   shape: BoxShape.circle,
-                  offset: const Offset(0, 0),
+                  shadowOffset: const Offset(0, 0),
                   child: TextButton(
                     onPressed: hasProfilePicture
                         ? _cubit.removeProfilePicture
@@ -200,7 +196,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   Widget _buildBottomBar() {
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.all(UiConstants.defaultPadding),
+        padding: const EdgeInsets.all(UiConstants.padding),
         child: BlocSelector<ProfileSetupCubit, ProfileSetupState, bool>(
           selector: (state) => state.loading,
           builder: (context, loading) {
@@ -217,7 +213,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                         }
                       },
 
-                child: Text('Save'.toUpperCase()),
+                child: const Text('Save'),
               ),
             );
           },

@@ -5,9 +5,10 @@ class UserProfile {
     required this.userId,
     required this.code,
     required this.birthDate,
-    required this.createdAt,
     required this.displayName,
     required this.photoUrl,
+    required this.createdBy,
+    required this.createdAt,
     required this.updatedAt,
   });
 
@@ -17,9 +18,10 @@ class UserProfile {
       userId: doc.id,
       code: data['code'] as String,
       birthDate: (data['birth_date'] as Timestamp).toDate(),
-      createdAt: (data['created_at'] as Timestamp).toDate(),
       displayName: data['display_name'] as String,
       photoUrl: data['photo_url'] as String?,
+      createdBy: data['created_by'] as String,
+      createdAt: (data['created_at'] as Timestamp).toDate(),
       updatedAt: (data['updated_at'] as Timestamp).toDate(),
     );
   }
@@ -27,9 +29,10 @@ class UserProfile {
   final String userId;
   final String code;
   final DateTime birthDate;
-  final DateTime createdAt;
   final String displayName;
   final String? photoUrl;
+  final String createdBy;
+  final DateTime createdAt;
   final DateTime updatedAt;
 
   Map<String, dynamic> toFirestore() {
@@ -37,9 +40,10 @@ class UserProfile {
       // ID is managed by Firestore
       'code': code,
       'birth_date': Timestamp.fromDate(birthDate),
-      'created_at': Timestamp.fromDate(createdAt),
       'display_name': displayName,
       'photo_url': photoUrl,
+      'created_by': createdBy,
+      'created_at': Timestamp.fromDate(createdAt),
       'updated_at': Timestamp.fromDate(updatedAt),
     };
   }
@@ -52,18 +56,20 @@ class UserProfile {
     String? userId,
     String? code,
     DateTime? birthDate,
-    DateTime? createdAt,
     String? displayName,
     String? photoUrl,
+    String? createdBy,
+    DateTime? createdAt,
     DateTime? updatedAt,
   }) {
     return UserProfile(
       userId: userId ?? this.userId,
       code: code ?? this.code,
       birthDate: birthDate ?? this.birthDate,
-      createdAt: createdAt ?? this.createdAt,
       displayName: displayName ?? this.displayName,
       photoUrl: photoUrl ?? this.photoUrl,
+      createdBy: createdBy ?? this.createdBy,
+      createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }

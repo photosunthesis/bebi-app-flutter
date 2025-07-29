@@ -1,4 +1,5 @@
 import 'package:bebi_app/app/theme/app_colors.dart';
+import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -16,11 +17,11 @@ abstract class AppTheme {
     appBarTheme: _appBarTheme,
     cardTheme: _cardTheme,
     floatingActionButtonTheme: _floatingActionButtonTheme,
+    iconButtonTheme: _iconButtonTheme,
   );
 
   static const _colorScheme = ColorScheme.light(
     primary: AppColors.stone900,
-    onPrimary: AppColors.stone50,
     secondary: AppColors.stone500,
     tertiary: AppColors.stone700,
     surface: AppColors.stone50,
@@ -46,33 +47,20 @@ abstract class AppTheme {
     decorationColor: _colorScheme.onSecondary,
   );
 
+  static const _inputDecorationBorder = OutlineInputBorder(
+    borderRadius: UiConstants.borderRadius,
+    borderSide: BorderSide.none,
+  );
+
   static final _inputDecorationTheme = InputDecorationTheme(
     filled: true,
     fillColor: _colorScheme.onSurface.withAlpha(20),
-    border: UnderlineInputBorder(
-      borderRadius: BorderRadius.zero,
-      borderSide: BorderSide(color: _colorScheme.onSecondary, width: 1),
-    ),
-    errorBorder: UnderlineInputBorder(
-      borderRadius: BorderRadius.zero,
-      borderSide: BorderSide(color: _colorScheme.onSecondary, width: 1),
-    ),
-    focusedBorder: UnderlineInputBorder(
-      borderRadius: BorderRadius.zero,
-      borderSide: BorderSide(color: _colorScheme.onSecondary, width: 1),
-    ),
-    focusedErrorBorder: UnderlineInputBorder(
-      borderRadius: BorderRadius.zero,
-      borderSide: BorderSide(color: _colorScheme.onSecondary, width: 1),
-    ),
-    disabledBorder: UnderlineInputBorder(
-      borderRadius: BorderRadius.zero,
-      borderSide: BorderSide(color: _colorScheme.onSecondary, width: 1),
-    ),
-    enabledBorder: UnderlineInputBorder(
-      borderRadius: BorderRadius.zero,
-      borderSide: BorderSide(color: _colorScheme.onSecondary, width: 1),
-    ),
+    border: _inputDecorationBorder,
+    errorBorder: _inputDecorationBorder,
+    focusedBorder: _inputDecorationBorder,
+    focusedErrorBorder: _inputDecorationBorder,
+    disabledBorder: _inputDecorationBorder,
+    enabledBorder: _inputDecorationBorder,
     contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
   );
 
@@ -81,11 +69,12 @@ abstract class AppTheme {
         ElevatedButton.styleFrom(
           backgroundColor: _colorScheme.primary,
           foregroundColor: _colorScheme.onPrimary,
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+          shape: const RoundedRectangleBorder(
+            borderRadius: UiConstants.borderRadius,
+          ),
           minimumSize: const Size.fromHeight(44),
           textStyle: _textTheme.labelLarge?.copyWith(
             fontSize: 14,
-            letterSpacing: 0.9,
             fontWeight: FontWeight.w600,
           ),
         ).copyWith(
@@ -104,8 +93,34 @@ abstract class AppTheme {
     style: TextButton.styleFrom(
       backgroundColor: _colorScheme.onPrimary,
       foregroundColor: _colorScheme.primary,
-      textStyle: _textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+      textStyle: _textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600),
+      // padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
+      // maximumSize: const Size.fromHeight(24),
+      shape: RoundedRectangleBorder(
+        borderRadius: UiConstants.borderRadius,
+        side: BorderSide(
+          color: _colorScheme.onSecondary,
+          width: UiConstants.borderWidth,
+        ),
+      ),
+    ),
+  );
+
+  static final _iconButtonTheme = IconButtonThemeData(
+    style: IconButton.styleFrom(
+      visualDensity: VisualDensity.compact,
+      padding: EdgeInsets.zero,
+      backgroundColor: _colorScheme.onPrimary,
+      foregroundColor: _colorScheme.primary,
+      // padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
+      // maximumSize: const Size.fromHeight(24),
+      side: BorderSide(
+        color: _colorScheme.onSecondary,
+        width: UiConstants.borderWidth,
+      ),
+      shape: const RoundedRectangleBorder(
+        borderRadius: UiConstants.borderRadius,
+      ),
     ),
   );
 
@@ -114,8 +129,7 @@ abstract class AppTheme {
     centerTitle: false,
     backgroundColor: _colorScheme.surface,
     foregroundColor: _colorScheme.onSecondary,
-    titleTextStyle: _primaryTextTheme.titleLarge?.copyWith(fontSize: 24),
-    systemOverlayStyle: SystemUiOverlayStyle.dark,
+    titleTextStyle: _primaryTextTheme.headlineMedium,
   );
 
   static final _cardTheme = CardThemeData(
@@ -126,8 +140,8 @@ abstract class AppTheme {
   );
 
   static final _floatingActionButtonTheme = FloatingActionButtonThemeData(
-    elevation: 2,
-    backgroundColor: _colorScheme.primary,
+    elevation: 0,
     foregroundColor: _colorScheme.onPrimary,
+    backgroundColor: _colorScheme.primary,
   );
 }

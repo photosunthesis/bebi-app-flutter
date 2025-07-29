@@ -31,14 +31,21 @@ class UserProfileRepository {
   }
 
   Future<UserProfile> createOrUpdate(UserProfile userProfile) async {
-    final docRef = _firestore.collection(_collection).doc(userProfile.userId);
-
-    await docRef.set(
-      userProfile.updated().toFirestore(),
-      SetOptions(merge: true),
+    final updatedUserProfile = userProfile.copyWith(
+      createdAt: userProfile.createdAt.toUtc(),
+      updatedAt: DateTime.now().toUtc(),
     );
 
-    return userProfile;
+    final docRef = userProfile.userId.isEmpty
+        ? _firestore.collection(_collection).doc()
+        : _firestore.collection(_collection).doc(userProfile.userId);
+
+    await docRef.set(
+      updatedUserProfile.toFirestore(),
+      SetOptions(merge: userProfile.userId.isNotEmpty),
+    );
+
+    return updatedUserProfile;
   }
 
   Future<String> uploadProfileImage(String userId, File imageFile) async {

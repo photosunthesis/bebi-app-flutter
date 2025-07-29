@@ -1,6 +1,8 @@
 import 'package:bebi_app/config/firebase_services.dart';
 import 'package:bebi_app/ui/features/calendar/calendar_cubit.dart';
 import 'package:bebi_app/ui/features/calendar/calendar_screen.dart';
+import 'package:bebi_app/ui/features/calendar_event_form/calendar_event_form_bottom_sheet.dart';
+import 'package:bebi_app/ui/features/calendar_event_form/calendar_event_form_cubit.dart';
 import 'package:bebi_app/ui/features/home/home_cubit.dart';
 import 'package:bebi_app/ui/features/home/home_screen.dart';
 import 'package:bebi_app/ui/features/profile_setup/profile_setup_cubit.dart';
@@ -8,6 +10,7 @@ import 'package:bebi_app/ui/features/profile_setup/profile_setup_screen.dart';
 import 'package:bebi_app/ui/features/sign_in/sign_in_cubit.dart';
 import 'package:bebi_app/ui/features/sign_in/sign_in_screen.dart';
 import 'package:bebi_app/ui/shared_widgets/layouts/main_scaffold.dart';
+import 'package:bebi_app/ui/shared_widgets/modals/bottom_sheet_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -104,6 +107,25 @@ abstract class AppRouter {
             ],
           ),
         ],
+      ),
+      GoRoute(
+        path: '/calendar/create-event',
+        name: AppRoutes.createCalendarEvent,
+        pageBuilder: (context, state) => BottomSheetPage(
+          BlocProvider(
+            create: (context) => CalendarEventFormCubit(
+              context.read(),
+              context.read(),
+              context.read(),
+              context.read(),
+            ),
+            child: CalendarEventFormBottomSheet(
+              selectedDate: DateTime.tryParse(
+                state.uri.queryParameters['selectedDate'] ?? '',
+              ),
+            ),
+          ),
+        ),
       ),
     ],
     observers: [

@@ -1,3 +1,4 @@
+import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:flutter/material.dart';
@@ -42,18 +43,16 @@ class _MainScaffoldState extends State<MainScaffold> {
   }
 
   Widget _buildBottomBar(BuildContext context) {
-    final height = context.screenHeight * 0.11;
     return Container(
-      height: height > 110 ? 110 : height,
+      height: context.screenHeight * 0.12,
       decoration: BoxDecoration(
         color: context.colorScheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: context.colorScheme.shadow.withAlpha(14),
-            blurRadius: 8,
-            offset: const Offset(0, -1.5),
+        border: Border(
+          top: BorderSide(
+            color: context.colorScheme.onSecondary,
+            width: UiConstants.borderWidth,
           ),
-        ],
+        ),
       ),
       child: SafeArea(
         child: Row(
@@ -86,7 +85,12 @@ class _MainScaffoldState extends State<MainScaffold> {
             splashColor: context.colorScheme.primary.withAlpha(20),
             highlightColor: context.colorScheme.primary.withAlpha(10),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 14, 12, 12),
+              padding: EdgeInsets.fromLTRB(
+                12,
+                context.screenHeight > 100 ? 0 : 14,
+                12,
+                12,
+              ),
               child: Icon(icon, color: color, size: 28),
             ),
           ),

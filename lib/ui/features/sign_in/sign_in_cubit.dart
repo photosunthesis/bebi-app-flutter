@@ -7,11 +7,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 part 'sign_in_state.dart';
 
 class SignInCubit extends Cubit<SignInState> {
-  SignInCubit(this._firebaseAuth, this._analytics)
+  SignInCubit(this._firebaseAuth, this._firebaseAnalytics)
     : super(const SignInInitial());
 
   final FirebaseAuth _firebaseAuth;
-  final FirebaseAnalytics _analytics;
+  final FirebaseAnalytics _firebaseAnalytics;
 
   Future<void> signInWithEmailAndPassword(String email, String password) async {
     await guard(
@@ -23,7 +23,7 @@ class SignInCubit extends Cubit<SignInState> {
         );
         emit(const SignInSuccess());
         if (!kDebugMode) {
-          _analytics.logLogin(
+          _firebaseAnalytics.logLogin(
             loginMethod: 'email',
             parameters: {'email': email},
           );
@@ -39,7 +39,7 @@ class SignInCubit extends Cubit<SignInState> {
         emit(SignInFailure(errorMessage));
 
         if (!kDebugMode) {
-          _analytics.logEvent(
+          _firebaseAnalytics.logEvent(
             name: 'sign_in_error',
             parameters: {'error': error.toString()},
           );

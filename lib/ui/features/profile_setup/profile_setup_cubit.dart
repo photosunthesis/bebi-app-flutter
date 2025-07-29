@@ -60,18 +60,19 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
         await _userProfileRepository.createOrUpdate(
           UserProfile(
             userId: _firebaseAuth.currentUser!.uid,
+            createdBy: _firebaseAuth.currentUser!.uid,
             code: await _generateUserCode(),
             birthDate: DateFormat('mm/dd/yyyy').parse(birthDate),
-            createdAt: DateTime.now().toUtc(),
-            updatedAt: DateTime.now().toUtc(),
             displayName: displayName,
             photoUrl: photoUrl,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
           ),
         );
 
         emit(state.copyWith(success: true));
       },
-      onError: (_, _) {
+      onError: (error, _) {
         emit(
           state.copyWith(
             error:
@@ -81,7 +82,7 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
         );
       },
       onComplete: () {
-        emit(state.copyWith(loading: false));
+        emit(state.copyWith(loading: false, error: null, errorChanged: true));
       },
     );
   }
