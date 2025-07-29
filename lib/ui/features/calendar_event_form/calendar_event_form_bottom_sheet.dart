@@ -45,7 +45,7 @@ class _CalendarEventFormBottomSheetState
   bool _allDay = false;
   bool _shareWithPartner = true;
   EventColors _selectedColor = EventColors.black;
-  RepeatFrequency? _repeatFrequency;
+  RepeatFrequency _repeatFrequency = RepeatFrequency.doNotRepeat;
 
   bool get _isEditing => widget.calendarEventId != null;
 
@@ -71,6 +71,10 @@ class _CalendarEventFormBottomSheetState
     return BlocListener<CalendarEventFormCubit, CalendarEventFormState>(
       listener: (context, state) {
         if (state.error != null) context.showSnackbar(state.error!);
+        if (state.success) {
+          // Return true to indicate success to whatever called this method
+          context.pop(true);
+        }
       },
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -142,21 +146,27 @@ class _CalendarEventFormBottomSheetState
     if (_formKey.currentState?.validate() ?? false) {
       final startDate = _allDay
           ? DateFormat(
-              'EEEE MMMM d, yyyy h:mm',
-            ).parse(_startDateController.text)
+              'EEEE MMMM d, yyyy',
+            ).parseStrict(_startDateController.text)
           : DateFormat(
               'EEEE MMMM d, yyyy h:mm a',
-            ).parse(_startDateController.text);
+            ).parseStrict(_startDateController.text);
 
       final endDate = DateFormat(
         'EEEE MMMM d, yyyy h:mm a',
-      ).parse(_endDateController.text);
+      ).tryParseStrict(_endDateController.text);
+
+      final endRepeatDate = _allDay
+          ? DateFormat(
+              'EEEE MMMM d, yyyy',
+            ).tryParseStrict(_endRepeatDateController.text)
+          : DateFormat(
+              'EEEE MMMM d, yyyy h:mm a',
+            ).tryParseStrict(_endRepeatDateController.text);
 
       final repeat = RepeatRule(
-        frequency: _repeatFrequency ?? RepeatFrequency.doNotRepeat,
-        endDate: DateFormat(
-          'EEEE MMMM d, yyyy h:mm a',
-        ).parse(_endRepeatDateController.text),
+        frequency: _repeatFrequency,
+        endDate: endRepeatDate,
       );
 
       _cubit.save(
@@ -191,7 +201,7 @@ class _CalendarEventFormBottomSheetState
               AppTextFormField(
                 controller: _titleController,
                 hintText: 'Title',
-                textInputAction: TextInputAction.next,
+                textInputAction: TextInputAction.done,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return 'Title is required';
@@ -203,7 +213,7 @@ class _CalendarEventFormBottomSheetState
               AppTextFormField(
                 controller: _locationController,
                 hintText: 'Location (optional)',
-                textInputAction: TextInputAction.next,
+                textInputAction: TextInputAction.done,
                 keyboardType: TextInputType.streetAddress,
                 autofillHints: [AutofillHints.fullStreetAddress],
               ),
@@ -259,10 +269,11 @@ class _CalendarEventFormBottomSheetState
               _buildDateFields(),
               const SizedBox(height: 4),
               RepeatPicker(
-                endDateController: _endRepeatDateController,
                 repeatFrequency: _repeatFrequency,
                 onRepeatFrequencyChanged: (value) =>
                     setState(() => _repeatFrequency = value),
+                endDateController: _endRepeatDateController,
+                hasTime: !_allDay,
               ),
             ],
           ),
@@ -312,6 +323,7 @@ class _CalendarEventFormBottomSheetState
                     AppDateTimeFormField(
                       controller: _endDateController,
                       hintText: 'End date',
+                      hasTime: !_allDay,
                       minSelectableDate: DateFormat(
                         'EEEE MMMM d, yyyy h:mm a',
                       ).tryParseStrict(_startDateController.text),

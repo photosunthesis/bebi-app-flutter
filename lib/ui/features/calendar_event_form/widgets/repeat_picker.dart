@@ -7,14 +7,16 @@ import 'package:flutter/cupertino.dart';
 class RepeatPicker extends StatefulWidget {
   const RepeatPicker({
     required this.endDateController,
-    this.repeatFrequency,
+    this.repeatFrequency = RepeatFrequency.doNotRepeat,
     this.onRepeatFrequencyChanged,
+    this.hasTime = true,
     super.key,
   });
 
-  final RepeatFrequency? repeatFrequency;
-  final ValueChanged<RepeatFrequency?>? onRepeatFrequencyChanged;
   final TextEditingController endDateController;
+  final RepeatFrequency repeatFrequency;
+  final ValueChanged<RepeatFrequency>? onRepeatFrequencyChanged;
+  final bool hasTime;
 
   @override
   State<RepeatPicker> createState() => _RepeatPickerState();
@@ -22,7 +24,6 @@ class RepeatPicker extends StatefulWidget {
 
 class _RepeatPickerState extends State<RepeatPicker> {
   bool get _shouldShowEndDate =>
-      widget.repeatFrequency != null &&
       widget.repeatFrequency != RepeatFrequency.doNotRepeat;
 
   // TODO Implement custom repeats
@@ -42,9 +43,7 @@ class _RepeatPickerState extends State<RepeatPicker> {
           AppTextDropdownPicker(
             hintText: 'Repeat',
             height: 100,
-            selectedIndex: widget.repeatFrequency != null
-                ? frequencies.indexOf(widget.repeatFrequency!)
-                : frequencies.length - 1,
+            selectedIndex: frequencies.indexOf(widget.repeatFrequency),
             items: frequencies,
             labelBuilder: (item) => item.label,
             onChanged: (value) => widget.onRepeatFrequencyChanged?.call(value),
@@ -57,7 +56,7 @@ class _RepeatPickerState extends State<RepeatPicker> {
                     child: AppDateTimeFormField(
                       controller: widget.endDateController,
                       hintText: 'End repeat date',
-                      hasTime: false,
+                      hasTime: widget.hasTime,
                     ),
                   )
                 : null,
