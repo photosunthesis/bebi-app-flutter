@@ -52,6 +52,7 @@ class AppTextButton extends StatelessWidget {
               color: context.colorScheme.onSecondary,
               width: UiConstants.borderWidth,
             ),
+            color: context.colorScheme.surface,
             borderRadius: BorderRadius.circular(UiConstants.borderRadiusValue),
           ),
       child: InkWell(

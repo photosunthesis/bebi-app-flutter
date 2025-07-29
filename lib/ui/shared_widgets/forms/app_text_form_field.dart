@@ -85,10 +85,10 @@ class _AppTextFormFieldState extends State<AppTextFormField> {
         children: [
           if (widget.labelText != null) ...[
             Text(
-              widget.labelText!.toUpperCase(),
-              style: context.textTheme.titleSmall?.copyWith(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
+              widget.labelText!,
+              style: context.textTheme.labelLarge?.copyWith(
+                // fontSize: 12,
+                fontWeight: FontWeight.normal,
               ),
             ),
             const SizedBox(height: 8),
@@ -133,6 +133,7 @@ class _AppTextFormFieldState extends State<AppTextFormField> {
                         key: ValueKey(_errorText),
                         style: context.textTheme.bodySmall?.copyWith(
                           color: context.colorScheme.error,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     )

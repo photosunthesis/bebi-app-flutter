@@ -1,6 +1,8 @@
 import 'package:flutter/services.dart';
 
 class BirthDateFormatter extends TextInputFormatter {
+  const BirthDateFormatter();
+
   static const _mask = 'DD/MM/YYYY';
 
   @override

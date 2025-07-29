@@ -24,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return BlocListener<HomeCubit, HomeState>(
       listener: (context, state) => switch (state) {
         HomeShouldSetUpProfile() => context.goNamed(AppRoutes.profileSetup),
+        HomeShouldAddPartner() => context.goNamed(AppRoutes.addPartner),
         HomeError(:final message) => context.showSnackbar(message),
         _ => null,
       },

@@ -1,7 +1,6 @@
 import 'package:bebi_app/app/theme/app_colors.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 // TODO Add dark theme support
 
@@ -27,6 +26,7 @@ abstract class AppTheme {
     surface: AppColors.stone50,
     surfaceContainerHighest: AppColors.stone900,
     error: AppColors.red,
+    inversePrimary: AppColors.green,
 
     // Text colors
     onSecondary: AppColors.stone900,
@@ -83,7 +83,7 @@ abstract class AppTheme {
           backgroundColor: WidgetStatePropertyAll(_colorScheme.primary),
           foregroundColor: WidgetStateColor.resolveWith(
             (states) => states.contains(WidgetState.disabled)
-                ? _colorScheme.onPrimary.withAlpha(150)
+                ? _colorScheme.onPrimary.withAlpha(100)
                 : _colorScheme.onPrimary,
           ),
         ),
