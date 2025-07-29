@@ -54,14 +54,7 @@ class HomeCubit extends Cubit<HomeState> {
         emit(HomeLoaded(currentUser: userProfile));
       },
       onError: (error, _) {
-        emit(const HomeError('An error occured while fetching data.'));
-
-        if (!kDebugMode) {
-          _analytics.logEvent(
-            name: 'home_initialization_error',
-            parameters: {'error': error.toString()},
-          );
-        }
+        emit(HomeError(error.toString()));
       },
     );
   }

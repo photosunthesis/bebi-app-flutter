@@ -13,7 +13,7 @@ class UserPartnership {
     final data = doc.data() as Map<String, dynamic>;
     return UserPartnership(
       id: doc.id,
-      users: data['users'] as List<String>,
+      users: (data['users'] as List<dynamic>).map((e) => e as String).toList(),
       createdBy: data['created_by'] as String,
       createdAt: (data['created_at'] as Timestamp).toDate(),
       updatedAt: (data['updated_at'] as Timestamp).toDate(),
