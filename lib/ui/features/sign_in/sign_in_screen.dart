@@ -45,46 +45,42 @@ class _SignInScreenState extends State<SignInScreen> {
             padding: const EdgeInsets.symmetric(
               horizontal: UiConstants.padding,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: ListView(
               children: [
-                const SizedBox(height: 28),
-                _buildLogo(),
-                const SizedBox(height: 32),
-                _buildGreeting(),
+                const SafeArea(child: SizedBox(height: UiConstants.padding)),
+                _buildHeader(),
                 const SizedBox(height: 32),
                 _buildFormFields(),
-                const SizedBox(height: 48),
               ],
             ),
           ),
-          bottomNavigationBar: _buildBottomNavigation(),
+          bottomNavigationBar: _bottomBar(),
         ),
       ),
     );
   }
 
-  Widget _buildLogo() {
-    return SafeArea(
-      child: Center(
-        child: SizedBox(
-          width: 34,
-          height: 34,
-          child: Image.asset(AppAssets.appLogo),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGreeting() {
+  Widget _buildHeader() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Welcome back!', style: context.primaryTextTheme.headlineSmall),
-        const SizedBox(height: 8),
+        SizedBox(width: 42, height: 42, child: Image.asset(AppAssets.appLogo)),
+        const SizedBox(height: 24),
         Text(
-          'Sign in to continue sharing experiences and moments with a loved one.',
-          style: context.textTheme.bodyMedium,
+          'Welcome back!',
+          style: context.primaryTextTheme.headlineSmall,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          width: context.screenWidth * 0.85,
+          child: Text(
+            'Sign in to continue sharing special moments and creating beautiful memories with your partner.',
+            style: context.textTheme.bodyLarge?.copyWith(
+              height: 1.4,
+              fontWeight: FontWeight.normal,
+            ),
+            textAlign: TextAlign.center,
+          ),
         ),
       ],
     );
@@ -95,49 +91,60 @@ class _SignInScreenState extends State<SignInScreen> {
       selector: (state) => state is SignInLoading,
       builder: (context, loading) => Column(
         children: [
-          AppTextFormField(
-            enabled: !loading,
-            controller: _emailController,
-            labelText: 'Email',
-            hintText: 'you@example.com',
-            keyboardType: TextInputType.emailAddress,
-            autofillHints: const [AutofillHints.email],
-            textInputAction: TextInputAction.next,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter your email';
-              }
-              return null;
-            },
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: context.screenWidth * 0.05,
+            ),
+            child: AppTextFormField(
+              enabled: !loading,
+              controller: _emailController,
+              labelText: 'Email',
+              hintText: 'you@example.com',
+              keyboardType: TextInputType.emailAddress,
+              autofillHints: const [AutofillHints.email],
+              textInputAction: TextInputAction.next,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your email';
+                }
+                return null;
+              },
+            ),
           ),
           const SizedBox(height: 16),
-          AppTextFormField(
-            enabled: !loading,
-            controller: _passwordController,
-            labelText: 'Password',
-            hintText: 'Your secret password',
-            obscureText: true,
-            keyboardType: TextInputType.visiblePassword,
-            autofillHints: const [AutofillHints.password],
-            textInputAction: TextInputAction.done,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter your password';
-              }
-              return null;
-            },
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: context.screenWidth * 0.05,
+            ),
+            child: AppTextFormField(
+              enabled: !loading,
+              controller: _passwordController,
+              labelText: 'Password',
+              hintText: 'Your secret password',
+              obscureText: true,
+              keyboardType: TextInputType.visiblePassword,
+              autofillHints: const [AutofillHints.password],
+              textInputAction: TextInputAction.done,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your password';
+                }
+                return null;
+              },
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildBottomNavigation() {
+  Widget _bottomBar() {
     return BlocSelector<SignInCubit, SignInState, bool>(
       selector: (state) => state is SignInLoading,
       builder: (context, loading) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
+        child: Container(
+          margin: EdgeInsets.symmetric(horizontal: context.screenWidth * 0.05),
+          padding: const EdgeInsets.all(UiConstants.padding),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
