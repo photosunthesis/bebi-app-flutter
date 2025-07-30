@@ -1,10 +1,17 @@
+import 'dart:async';
+
 import 'package:bebi_app/data/models/calendar_event.dart';
+import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+// ignore: depend_on_referenced_packages
+import 'package:collection/collection.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
 
 class CalendarEventsRepository {
-  const CalendarEventsRepository(this._firestore);
+  const CalendarEventsRepository(this._firestore, this._calendarEventBox);
 
   final FirebaseFirestore _firestore;
+  final Box<CalendarEvent> _calendarEventBox;
 
   static const _collection = 'calendar_events';
 
@@ -12,7 +19,13 @@ class CalendarEventsRepository {
     required String userId,
     DateTime? startDate,
     DateTime? endDate,
+    bool useCache = true,
   }) async {
+    if (useCache) {
+      final cachedEvents = _getCachedEvents(userId, startDate, endDate);
+      if (cachedEvents.isNotEmpty) return cachedEvents;
+    }
+
     var userEventsQuery = _firestore
         .collection(_collection)
         .where('users', arrayContains: userId);
@@ -32,14 +45,31 @@ class CalendarEventsRepository {
     }
 
     final userEvents = await userEventsQuery.get();
+    final events = userEvents.docs.map(CalendarEvent.fromFirestore).toList();
 
-    return userEvents.docs.map(CalendarEvent.fromFirestore).toList();
+    unawaited(_cacheEvents(events));
+
+    return events;
   }
 
-  Future<CalendarEvent?> getById(String id) async {
+  Future<CalendarEvent?> getById(String id, {bool useCache = true}) async {
+    if (useCache) {
+      final cachedEvent = _calendarEventBox.values.firstWhereOrNull(
+        (e) => e.id == id,
+      );
+
+      if (cachedEvent != null) return cachedEvent;
+    }
+
     final docRef = _firestore.collection(_collection).doc(id);
     final docSnapshot = await docRef.get();
-    return docSnapshot.exists ? CalendarEvent.fromFirestore(docSnapshot) : null;
+    final event = docSnapshot.exists
+        ? CalendarEvent.fromFirestore(docSnapshot)
+        : null;
+
+    if (event != null) unawaited(_cacheEvents([event]));
+
+    return event;
   }
 
   Future<CalendarEvent> createOrUpdate(CalendarEvent event) async {
@@ -61,6 +91,39 @@ class CalendarEventsRepository {
       SetOptions(merge: event.id.isEmpty),
     );
 
+    unawaited(_cacheEvents([updatedEvent]));
+
     return updatedEvent;
+  }
+
+  List<CalendarEvent> _getCachedEvents(
+    String userId,
+    DateTime? startDate,
+    DateTime? endDate,
+  ) {
+    return _calendarEventBox.values.where((event) {
+      if (!event.users.contains(userId)) return false;
+
+      // Check if the event is within the date range
+      if (startDate != null &&
+          event.date.isBefore(startDate) &&
+          !event.date.isSameDay(startDate)) {
+        return false;
+      }
+
+      if (endDate != null &&
+          event.date.isAfter(endDate) &&
+          !event.date.isSameDay(endDate)) {
+        return false;
+      }
+
+      return true;
+    }).toList();
+  }
+
+  Future<void> _cacheEvents(List<CalendarEvent> events) async {
+    await _calendarEventBox.putAll(
+      Map.fromEntries(events.map((e) => MapEntry(e.id, e))),
+    );
   }
 }

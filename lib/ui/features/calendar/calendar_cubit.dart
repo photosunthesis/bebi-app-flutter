@@ -16,10 +16,11 @@ class CalendarCubit extends Cubit<CalendarState> {
   final CalendarEventsRepository _calendarEventsRepository;
   final FirebaseAuth _firebaseAuth;
 
-  Future<void> initialize() async {
+  Future<void> initialize({bool useCache = true}) async {
     await guard(
       () async {
         emit(state.copyWith(loading: true));
+
         final events = await _calendarEventsRepository.getByUserId(
           userId: _firebaseAuth.currentUser!.uid,
           startDate: DateTime(
@@ -32,7 +33,9 @@ class CalendarCubit extends Cubit<CalendarState> {
             state.focusedDay.month + 1,
             0, // last day of the month
           ),
+          useCache: useCache,
         );
+
         emit(
           state.copyWith(
             focusedMonthEvents: events,
@@ -52,9 +55,12 @@ class CalendarCubit extends Cubit<CalendarState> {
   }
 
   Future<void> setFocusedDay(DateTime date) async {
-    final shouldInitialize = state.focusedDay.isSameMonth(date);
+    final shouldFetchNewMonth = !state.focusedDay.isSameMonth(date);
+
     emit(state.copyWith(focusedDay: date));
-    if (shouldInitialize) return initialize();
+
+    if (shouldFetchNewMonth) return initialize(useCache: true);
+
     emit(
       state.copyWith(
         focusedDayEvents: _sortEvents(

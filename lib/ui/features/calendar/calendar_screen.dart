@@ -27,7 +27,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   void initState() {
     super.initState();
-    _cubit.initialize();
+    _cubit.initialize(useCache: false);
   }
 
   @override

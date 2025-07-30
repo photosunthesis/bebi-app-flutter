@@ -2,6 +2,9 @@ import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/app/theme/app_colors.dart';
 import 'package:bebi_app/app/theme/app_theme.dart';
 import 'package:bebi_app/config/firebase_services.dart';
+import 'package:bebi_app/data/models/calendar_event.dart';
+import 'package:bebi_app/data/models/user_partnership.dart';
+import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:bebi_app/data/repositories/calendar_events_repository.dart';
 import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
@@ -13,9 +16,16 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 
 class App extends StatelessWidget {
-  const App({required this.hiveBoxes, super.key});
+  const App(
+    this.calendarEventsBox,
+    this.userProfileBox,
+    this.userPartnershipBox, {
+    super.key,
+  });
 
-  final List<Box> hiveBoxes;
+  final Box<CalendarEvent> calendarEventsBox;
+  final Box<UserProfile> userProfileBox;
+  final Box<UserPartnership> userPartnershipBox;
 
   @override
   Widget build(BuildContext context) {
@@ -28,19 +38,28 @@ class App extends StatelessWidget {
         RepositoryProvider.value(value: FirebaseServices.storage),
 
         // Other services
-        RepositoryProvider.value(value: ImagePicker()),
-        ...hiveBoxes.map((box) => RepositoryProvider.value(value: box)),
+        RepositoryProvider(create: (_) => ImagePicker()),
+
+        // Hive boxes (local storage)
+        RepositoryProvider.value(value: calendarEventsBox),
+        RepositoryProvider.value(value: userProfileBox),
+        RepositoryProvider.value(value: userPartnershipBox),
 
         // Repositories
         RepositoryProvider(
+          create: (context) => UserProfileRepository(
+            context.read(),
+            context.read(),
+            context.read(),
+          ),
+        ),
+        RepositoryProvider(
           create: (context) =>
-              UserProfileRepository(context.read(), context.read()),
+              UserPartnershipsRepository(context.read(), context.read()),
         ),
         RepositoryProvider(
-          create: (context) => UserPartnershipsRepository(context.read()),
-        ),
-        RepositoryProvider(
-          create: (context) => CalendarEventsRepository(context.read()),
+          create: (context) =>
+              CalendarEventsRepository(context.read(), context.read()),
         ),
       ],
       child: MaterialApp.router(

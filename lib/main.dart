@@ -5,8 +5,6 @@ import 'package:bebi_app/config/firebase_options.dart';
 import 'package:bebi_app/config/firebase_services.dart';
 import 'package:bebi_app/constants/hive_constants.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
-import 'package:bebi_app/data/models/event_color.dart';
-import 'package:bebi_app/data/models/repeat_rule.dart';
 import 'package:bebi_app/data/models/user_partnership.dart';
 import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:bebi_app/hive_registrar.g.dart';
@@ -28,7 +26,20 @@ void main() {
       _initializeHive(),
     ]);
 
-    runApp(App(hiveBoxes: await _provideHiveBoxes()));
+    final calendarEventsBox = await Hive.openBox<CalendarEvent>(
+      HiveBoxNames.calendarEvent,
+    );
+
+    final userProfileBox = await Hive.openBox<UserProfile>(
+      HiveBoxNames.userProfile,
+    );
+
+    final userPartnershipBox = await Hive.openBox<UserPartnership>(
+      HiveBoxNames.userPartnership,
+    );
+
+    // Add more hive boxes as needed
+    runApp(App(calendarEventsBox, userProfileBox, userPartnershipBox));
   });
 }
 
@@ -64,16 +75,4 @@ Future<void> _configureHighRefreshScreen() async {
 Future<void> _initializeHive() async {
   await Hive.initFlutter();
   Hive.registerAdapters();
-}
-
-Future<List<Box>> _provideHiveBoxes() async {
-  return [
-    await Hive.openBox<CalendarEvent>(HiveBoxNames.calendarEvent),
-    await Hive.openBox<CycleEventType>(HiveBoxNames.cycleEventType),
-    await Hive.openBox<EventColors>(HiveBoxNames.eventColors),
-    await Hive.openBox<RepeatRule>(HiveBoxNames.repeatRule),
-    await Hive.openBox<RepeatFrequency>(HiveBoxNames.repeatFrequency),
-    await Hive.openBox<UserPartnership>(HiveBoxNames.userPartnership),
-    await Hive.openBox<UserProfile>(HiveBoxNames.userProfile),
-  ];
 }
