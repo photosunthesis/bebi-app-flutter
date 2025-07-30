@@ -27,7 +27,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   void initState() {
     super.initState();
-    _cubit.initialize(useCache: false);
+    _cubit.initialize();
+    // Load events from server after a couple seconds to refresh the cached data
+    Future.delayed(3.seconds, () => _cubit.initialize(useCache: false));
   }
 
   @override
@@ -65,16 +67,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
               Flexible(
                 flex: 1,
                 child: AnimatedSwitcher(
-                  duration: 200.milliseconds,
+                  duration: 150.milliseconds,
                   child: focusedDay.isSameDay(DateTime.now())
                       ? Container()
                       : Align(
                           alignment: Alignment.centerLeft,
-                          child: AppTextButton(
-                            text: 'Today',
-                            onTap: () => context
-                                .read<CalendarCubit>()
-                                .setFocusedDay(DateTime.now()),
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 38),
+                            child: AppTextButton(
+                              text: 'Today',
+                              onTap: () => context
+                                  .read<CalendarCubit>()
+                                  .setFocusedDay(DateTime.now()),
+                            ),
                           ),
                         ),
                 ),
@@ -95,13 +100,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   child: AppIconButton(
                     icon: Symbols.add,
                     onTap: () async {
-                      final shouldReinitialize = await context.pushNamed<bool>(
+                      final eventWasCreated = await context.pushNamed<bool>(
                         AppRoutes.createCalendarEvent,
                         queryParameters: {
                           'selectedDate': focusedDay.toIso8601String(),
                         },
                       );
-                      if (shouldReinitialize ?? false) _cubit.initialize();
+                      if (eventWasCreated ?? false) {
+                        _cubit.initialize(useCache: false);
+                      }
                     },
                   ),
                 ),

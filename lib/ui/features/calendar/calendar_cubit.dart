@@ -23,22 +23,12 @@ class CalendarCubit extends Cubit<CalendarState> {
 
         final events = await _calendarEventsRepository.getByUserId(
           userId: _firebaseAuth.currentUser!.uid,
-          startDate: DateTime(
-            state.focusedDay.year,
-            state.focusedDay.month,
-            1, // first day of the month
-          ),
-          endDate: DateTime(
-            state.focusedDay.year,
-            state.focusedDay.month + 1,
-            0, // last day of the month
-          ),
           useCache: useCache,
         );
 
         emit(
           state.copyWith(
-            focusedMonthEvents: events,
+            events: events,
             focusedDayEvents: _sortEvents(
               events.where((e) => e.date.isSameDay(state.focusedDay)).toList(),
             ),
@@ -64,9 +54,7 @@ class CalendarCubit extends Cubit<CalendarState> {
     emit(
       state.copyWith(
         focusedDayEvents: _sortEvents(
-          state.focusedMonthEvents
-              .where((e) => e.date.isSameDay(date))
-              .toList(),
+          state.events.where((e) => e.date.isSameDay(date)).toList(),
         ),
       ),
     );

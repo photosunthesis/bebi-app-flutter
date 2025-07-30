@@ -5,7 +5,7 @@ abstract class CalendarState with _$CalendarState {
   const factory CalendarState({
     required DateTime focusedDay,
     required List<CalendarEvent> focusedDayEvents,
-    required List<CalendarEvent> focusedMonthEvents,
+    required List<CalendarEvent> events,
     @Default(false) bool loading,
     String? error,
   }) = _CalendarState;
@@ -13,7 +13,7 @@ abstract class CalendarState with _$CalendarState {
   factory CalendarState.initial() => CalendarState(
     focusedDay: DateTime.now(),
     focusedDayEvents: [],
-    focusedMonthEvents: [],
+    events: [],
     loading: false,
   );
 }

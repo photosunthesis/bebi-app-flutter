@@ -16,6 +16,7 @@ class Calendar extends StatelessWidget {
     return BlocBuilder<CalendarCubit, CalendarState>(
       builder: (context, state) {
         return TableCalendar<CalendarEvent>(
+          eventLoader: (_) => state.events,
           headerVisible: false,
           focusedDay: state.focusedDay,
           currentDay: DateTime.now(),
@@ -32,6 +33,8 @@ class Calendar extends StatelessWidget {
             todayBuilder: _todayBuilder,
             dowBuilder: _buildDayOfWeek,
             defaultBuilder: _defaultDayBuilder,
+            outsideBuilder: _outsideBuilder,
+            markerBuilder: _markerBuilder,
           ),
           onDaySelected: (day, _) {
             context.read<CalendarCubit>().setFocusedDay(day);
@@ -54,7 +57,7 @@ class Calendar extends StatelessWidget {
     DateTime focusedDay,
   ) {
     return Container(
-      margin: const EdgeInsets.all(15),
+      margin: const EdgeInsets.fromLTRB(15, 11, 15, 16),
       decoration: BoxDecoration(
         color: context.colorScheme.primary,
         borderRadius: UiConstants.borderRadius,
@@ -77,7 +80,7 @@ class Calendar extends StatelessWidget {
     DateTime focusedDay,
   ) {
     return Container(
-      margin: const EdgeInsets.all(15),
+      margin: const EdgeInsets.fromLTRB(15, 11, 15, 16),
       decoration: BoxDecoration(
         color: day.isSameDay(focusedDay) ? context.colorScheme.primary : null,
         borderRadius: UiConstants.borderRadius,
@@ -103,7 +106,7 @@ class Calendar extends StatelessWidget {
     DateTime focusedDay,
   ) {
     return Container(
-      margin: const EdgeInsets.all(15),
+      margin: const EdgeInsets.fromLTRB(15, 11, 15, 16),
       decoration: const BoxDecoration(borderRadius: UiConstants.borderRadius),
       child: Center(
         child: Text(
@@ -113,6 +116,66 @@ class Calendar extends StatelessWidget {
             color: context.colorScheme.onSurface,
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _outsideBuilder(
+    BuildContext context,
+    DateTime day,
+    DateTime focusedDay,
+  ) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(15, 11, 15, 16),
+      decoration: const BoxDecoration(borderRadius: UiConstants.borderRadius),
+      child: Center(
+        child: Text(
+          day.day.toString(),
+          style: context.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: context.colorScheme.onSurface.withAlpha(80),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _markerBuilder(
+    BuildContext context,
+    DateTime day,
+    List<CalendarEvent> events,
+  ) {
+    final dayEvents = events.where((e) => e.date.isSameDay(day)).toList();
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 5),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ...{...dayEvents.map((e) => e.color)}
+              .take(3)
+              .map(
+                (color) => Container(
+                  width: 6,
+                  height: 6,
+                  margin: const EdgeInsets.symmetric(horizontal: 1),
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+          if (dayEvents.length > 3)
+            Container(
+              width: 5,
+              height: 5,
+              margin: const EdgeInsets.symmetric(horizontal: 1),
+              decoration: BoxDecoration(
+                color: dayEvents.last.color.withAlpha(100),
+                shape: BoxShape.circle,
+              ),
+            ),
+        ],
       ),
     );
   }
