@@ -7,7 +7,7 @@ import 'package:material_symbols_icons/symbols.dart';
 
 // Items here must match the order in the BottomNavigationBar
 // and the order of the StatefulShellBranches in AppRouter.
-enum _Tabs { home, calendar, stories, location, account }
+enum _Tabs { home, calendar, stories, cycles, location }
 
 class MainScaffold extends StatefulWidget {
   const MainScaffold({
@@ -61,8 +61,8 @@ class _MainScaffoldState extends State<MainScaffold> {
             _buildTabIcon(_Tabs.home, Symbols.home),
             _buildTabIcon(_Tabs.calendar, Symbols.calendar_month),
             _buildTabIcon(_Tabs.stories, Symbols.calendar_view_day),
+            _buildTabIcon(_Tabs.cycles, Symbols.menstrual_health),
             _buildTabIcon(_Tabs.location, Symbols.location_pin),
-            _buildTabIcon(_Tabs.account, Symbols.account_circle),
           ],
         ),
       ),

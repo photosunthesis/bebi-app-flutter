@@ -3,8 +3,8 @@ import 'package:bebi_app/ui/features/add_partner/add_partner_cubit.dart';
 import 'package:bebi_app/ui/features/add_partner/add_partner_screen.dart';
 import 'package:bebi_app/ui/features/calendar/calendar_cubit.dart';
 import 'package:bebi_app/ui/features/calendar/calendar_screen.dart';
-import 'package:bebi_app/ui/features/calendar_event_form/calendar_event_form_screen.dart';
 import 'package:bebi_app/ui/features/calendar_event_form/calendar_event_form_cubit.dart';
+import 'package:bebi_app/ui/features/calendar_event_form/calendar_event_form_screen.dart';
 import 'package:bebi_app/ui/features/home/home_cubit.dart';
 import 'package:bebi_app/ui/features/home/home_screen.dart';
 import 'package:bebi_app/ui/features/profile_setup/profile_setup_cubit.dart';
@@ -90,10 +90,10 @@ abstract class AppRouter {
             routes: [
               GoRoute(
                 // TODO
-                path: '/account',
-                name: AppRoutes.account,
+                path: '/cycles',
+                name: AppRoutes.cycles,
                 builder: (context, state) =>
-                    const Scaffold(body: Center(child: Text('Account Screen'))),
+                    const Scaffold(body: Center(child: Text('Cycles Screen'))),
               ),
             ],
           ),
