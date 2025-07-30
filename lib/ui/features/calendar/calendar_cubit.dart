@@ -34,9 +34,9 @@ class CalendarCubit extends Cubit<CalendarState> {
         emit(
           state.copyWith(
             focusedMonthEvents: events,
-            focusedDayEvents: events
-                .where((e) => e.date.isSameDay(state.focusedDay))
-                .toList(),
+            focusedDayEvents: _sortEvents(
+              events.where((e) => e.date.isSameDay(state.focusedDay)).toList(),
+            ),
           ),
         );
       },
@@ -61,10 +61,29 @@ class CalendarCubit extends Cubit<CalendarState> {
     if (shouldInitialize) return initialize();
     emit(
       state.copyWith(
-        focusedDayEvents: state.focusedMonthEvents
-            .where((e) => e.date.isSameDay(date))
-            .toList(),
+        focusedDayEvents: _sortEvents(
+          state.focusedMonthEvents
+              .where((e) => e.date.isSameDay(date))
+              .toList(),
+        ),
       ),
     );
+  }
+
+  List<CalendarEvent> _sortEvents(List<CalendarEvent> events) {
+    events.sort((a, b) {
+      // Sort cycle events first
+      if (a.isCycleEvent && !b.isCycleEvent) return -1;
+      if (!a.isCycleEvent && b.isCycleEvent) return 1;
+
+      // Sort all-day events first
+      if (a.allDay && !b.allDay) return -1;
+      if (!a.allDay && b.allDay) return 1;
+
+      // Sort by start time
+      return a.startTime.compareTo(b.startTime);
+    });
+
+    return events;
   }
 }

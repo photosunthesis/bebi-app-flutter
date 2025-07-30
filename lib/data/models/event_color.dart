@@ -12,7 +12,7 @@ enum EventColors {
   orange;
 
   Color get color => switch (this) {
-    EventColors.black => AppColors.stone900,
+    EventColors.black => AppColors.stone600,
     EventColors.green => AppColors.green,
     EventColors.blue => AppColors.blue,
     EventColors.yellow => AppColors.yellow,

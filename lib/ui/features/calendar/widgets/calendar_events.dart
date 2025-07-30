@@ -40,7 +40,7 @@ class _CalendarEventsState extends State<CalendarEvents> {
   Widget _buildEventsList(List<CalendarEvent> events) {
     return ListView.builder(
       itemCount: events.length,
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
       itemBuilder: (context, index) => _buildEventCard(context, events[index]),
     );
   }
@@ -59,11 +59,17 @@ class _CalendarEventsState extends State<CalendarEvents> {
 
   Widget _buildEventCard(BuildContext context, CalendarEvent event) {
     return IntrinsicHeight(
-      child: Padding(
+      child: Container(
         padding: const EdgeInsets.symmetric(vertical: 8),
+        margin: const EdgeInsets.only(bottom: 8),
+        decoration: BoxDecoration(
+          color: event.color.withAlpha(40),
+          borderRadius: UiConstants.borderRadius,
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            const SizedBox(width: 8),
             _buildColorBar(event),
             const SizedBox(width: 8),
             Expanded(child: _buildEventDetails(context, event)),
