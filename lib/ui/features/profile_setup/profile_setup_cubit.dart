@@ -6,10 +6,12 @@ import 'package:bebi_app/data/repositories/user_profile_repository.dart';
 import 'package:bebi_app/utils/guard.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 part 'profile_setup_state.dart';
+part 'profile_setup_cubit.freezed.dart';
 
 class ProfileSetupCubit extends Cubit<ProfileSetupState> {
   ProfileSetupCubit(
@@ -32,17 +34,12 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
     );
 
     if (pickedFile != null) {
-      emit(
-        state.copyWith(
-          profilePicture: File(pickedFile.path),
-          profilePictureChanged: true,
-        ),
-      );
+      emit(state.copyWith(profilePicture: File(pickedFile.path)));
     }
   }
 
   void removeProfilePicture() {
-    emit(state.copyWith(profilePicture: null, profilePictureChanged: true));
+    emit(state.copyWith(profilePicture: null));
   }
 
   Future<void> updateUserProfile(String displayName, String birthDate) async {
@@ -77,12 +74,11 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
           state.copyWith(
             error:
                 'There was an issue with the server. Please try again later.',
-            errorChanged: true,
           ),
         );
       },
       onComplete: () {
-        emit(state.copyWith(loading: false, error: null, errorChanged: true));
+        emit(state.copyWith(loading: false, error: null));
       },
     );
   }

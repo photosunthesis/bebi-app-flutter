@@ -1,4 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'repeat_rule.freezed.dart';
 
 enum RepeatFrequency {
   daily,
@@ -18,14 +21,16 @@ enum RepeatFrequency {
   };
 }
 
-class RepeatRule {
-  const RepeatRule({
-    required this.frequency,
-    this.interval = 1,
-    this.daysOfWeek,
-    this.endDate,
-    this.count,
-  });
+@freezed
+abstract class RepeatRule with _$RepeatRule {
+  const RepeatRule._();
+  const factory RepeatRule({
+    required RepeatFrequency frequency,
+    @Default(1) int interval,
+    List<int>? daysOfWeek,
+    DateTime? endDate,
+    int? occurrences,
+  }) = _RepeatRule;
 
   factory RepeatRule.fromMap(Map<String, dynamic> map) {
     return RepeatRule(
@@ -39,15 +44,9 @@ class RepeatRule {
       endDate: map['end_date'] != null
           ? (map['end_date'] as Timestamp).toDate()
           : null,
-      count: map['count'],
+      occurrences: map['occurrences'],
     );
   }
-
-  final RepeatFrequency frequency;
-  final int interval; // e.g., every n units
-  final List<int>? daysOfWeek; // 1=Monday, 7=Sunday, for weekly repeats
-  final DateTime? endDate;
-  final int? count;
 
   Map<String, dynamic> toMap() {
     return {
@@ -55,7 +54,7 @@ class RepeatRule {
       'interval': interval,
       if (daysOfWeek != null) 'days_of_week': daysOfWeek,
       if (endDate != null) 'end_date': Timestamp.fromDate(endDate!),
-      if (count != null) 'count': count,
+      if (occurrences != null) 'occurrences': occurrences,
     };
   }
 }

@@ -4,8 +4,10 @@ import 'package:bebi_app/data/repositories/user_profile_repository.dart';
 import 'package:bebi_app/utils/guard.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'add_partner_state.dart';
+part 'add_partner_cubit.freezed.dart';
 
 class AddPartnerCubit extends Cubit<AddPartnerState> {
   AddPartnerCubit(
@@ -76,10 +78,10 @@ class AddPartnerCubit extends Cubit<AddPartnerState> {
         emit(state.copyWith(success: true));
       },
       onError: (e, _) {
-        emit(state.copyWith(error: e.toString(), errorChanged: true));
+        emit(state.copyWith(error: e.toString()));
       },
       onComplete: () {
-        emit(state.copyWith(loading: false, error: null, errorChanged: true));
+        emit(state.copyWith(loading: false, error: null));
       },
     );
   }

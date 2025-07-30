@@ -6,8 +6,10 @@ import 'package:bebi_app/data/repositories/calendar_events_repository.dart';
 import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/utils/guard.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'calendar_event_form_state.dart';
+part 'calendar_event_form_cubit.freezed.dart';
 
 class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
   CalendarEventFormCubit(

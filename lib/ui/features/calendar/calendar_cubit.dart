@@ -4,8 +4,10 @@ import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/guard.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'calendar_state.dart';
+part 'calendar_cubit.freezed.dart';
 
 class CalendarCubit extends Cubit<CalendarState> {
   CalendarCubit(this._calendarEventsRepository, this._firebaseAuth)
@@ -41,16 +43,10 @@ class CalendarCubit extends Cubit<CalendarState> {
         );
       },
       onError: (error, _) {
-        emit(state.copyWith(error: error.toString(), didErrorChange: true));
+        emit(state.copyWith(error: error.toString()));
       },
       onComplete: () {
-        emit(
-          state.copyWith(
-            loading: false,
-            error: null,
-            didErrorChange: state.error != null,
-          ),
-        );
+        emit(state.copyWith(loading: false, error: null));
       },
     );
   }

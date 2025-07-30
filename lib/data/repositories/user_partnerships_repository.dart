@@ -28,7 +28,7 @@ class UserPartnershipsRepository {
 
   Future<UserPartnership> update(UserPartnership partnership) async {
     final docRef = _firestore.collection(_collection).doc(partnership.id);
-    await docRef.update(partnership.updated().toFirestore());
+    await docRef.update(partnership.toFirestore());
     return partnership;
   }
 }

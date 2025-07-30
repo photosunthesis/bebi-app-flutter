@@ -1,31 +1,12 @@
 part of 'home_cubit.dart';
 
-sealed class HomeState {
-  const HomeState();
-}
-
-class HomeInitial extends HomeState {
-  const HomeInitial();
-}
-
-class HomeLoading extends HomeState {
-  const HomeLoading();
-}
-
-class HomeError extends HomeState {
-  const HomeError(this.message);
-  final String message;
-}
-
-class HomeLoaded extends HomeState {
-  const HomeLoaded({required this.currentUser});
-  final UserProfile currentUser;
-}
-
-class HomeShouldSetUpProfile extends HomeState {
-  const HomeShouldSetUpProfile();
-}
-
-class HomeShouldAddPartner extends HomeState {
-  const HomeShouldAddPartner();
+@freezed
+sealed class HomeState with _$HomeState {
+  const factory HomeState.initial() = HomeInitial;
+  const factory HomeState.loading() = HomeLoading;
+  const factory HomeState.error(String message) = HomeError;
+  const factory HomeState.loaded({required UserProfile currentUser}) =
+      HomeLoaded;
+  const factory HomeState.shouldSetUpProfile() = HomeShouldSetUpProfile;
+  const factory HomeState.shouldAddPartner() = HomeShouldAddPartner;
 }

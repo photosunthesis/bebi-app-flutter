@@ -1,16 +1,22 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-class UserProfile {
-  const UserProfile({
-    required this.userId,
-    required this.code,
-    required this.birthDate,
-    required this.displayName,
-    required this.photoUrl,
-    required this.createdBy,
-    required this.createdAt,
-    required this.updatedAt,
-  });
+part 'user_profile.freezed.dart';
+
+@freezed
+abstract class UserProfile with _$UserProfile {
+  const UserProfile._();
+
+  const factory UserProfile({
+    required String userId,
+    required String code,
+    required DateTime birthDate,
+    required String displayName,
+    required String? photoUrl,
+    required String createdBy,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+  }) = _UserProfile;
 
   factory UserProfile.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
@@ -26,15 +32,6 @@ class UserProfile {
     );
   }
 
-  final String userId;
-  final String code;
-  final DateTime birthDate;
-  final String displayName;
-  final String? photoUrl;
-  final String createdBy;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-
   Map<String, dynamic> toFirestore() {
     return {
       // ID is managed by Firestore
@@ -46,31 +43,5 @@ class UserProfile {
       'created_at': Timestamp.fromDate(createdAt),
       'updated_at': Timestamp.fromDate(updatedAt),
     };
-  }
-
-  UserProfile updated() {
-    return copyWith(updatedAt: DateTime.now().toUtc());
-  }
-
-  UserProfile copyWith({
-    String? userId,
-    String? code,
-    DateTime? birthDate,
-    String? displayName,
-    String? photoUrl,
-    String? createdBy,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-  }) {
-    return UserProfile(
-      userId: userId ?? this.userId,
-      code: code ?? this.code,
-      birthDate: birthDate ?? this.birthDate,
-      displayName: displayName ?? this.displayName,
-      photoUrl: photoUrl ?? this.photoUrl,
-      createdBy: createdBy ?? this.createdBy,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-    );
   }
 }

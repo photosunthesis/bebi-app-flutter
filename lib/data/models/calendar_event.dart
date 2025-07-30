@@ -1,32 +1,63 @@
 import 'dart:ui';
 
-import 'package:bebi_app/data/models/cycle_event.dart';
 import 'package:bebi_app/data/models/event_color.dart';
 import 'package:bebi_app/data/models/repeat_rule.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-class CalendarEvent {
-  const CalendarEvent({
-    required this.id,
-    required this.title,
-    this.notes,
-    this.isCycleEvent = false,
+part 'calendar_event.freezed.dart';
+
+enum CycleEventType { period, fertile }
+
+@freezed
+abstract class CalendarEvent with _$CalendarEvent {
+  const CalendarEvent._();
+  const factory CalendarEvent({
+    required String id,
+    required String title,
+    String? notes,
+    @Default(false) bool isCycleEvent,
     required DateTime date,
     required DateTime startTime,
     DateTime? endTime,
-    this.allDay = false,
-    required this.repeatRule,
-    this.location,
-    required this.eventColor,
-    required this.createdBy,
-    required this.users,
+    @Default(false) bool allDay,
+    required RepeatRule repeatRule,
+    String? location,
+    required EventColors eventColor,
+    required String createdBy,
+    required List<String> users,
     required DateTime createdAt,
     required DateTime updatedAt,
-  }) : _date = date,
-       _startTime = startTime,
-       _endTime = endTime,
-       _createdAt = createdAt,
-       _updatedAt = updatedAt;
+  }) = _CalendarEvent;
+
+  factory CalendarEvent.cycle({
+    required String id,
+    required String title,
+    String? notes,
+    required DateTime date,
+    required DateTime startTime,
+    DateTime? endTime,
+    required CycleEventType cycleEventType,
+    required bool isPrediction,
+  }) {
+    return CalendarEvent(
+      id: id,
+      title: title,
+      notes:
+          '${cycleEventType == CycleEventType.period ? 'Period' : 'Fertile'}|##|${isPrediction ? 'prediction' : 'actual'}',
+      isCycleEvent: true,
+      date: date,
+      startTime: startTime,
+      endTime: endTime,
+      allDay: true,
+      repeatRule: const RepeatRule(frequency: RepeatFrequency.doNotRepeat),
+      eventColor: EventColors.red,
+      createdBy: '',
+      users: [],
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+  }
 
   factory CalendarEvent.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
@@ -55,29 +86,31 @@ class CalendarEvent {
     );
   }
 
-  final String id;
-  final String title;
-  final String? notes;
-  final bool isCycleEvent;
-  final DateTime _date;
-  final DateTime _startTime;
-  final DateTime? _endTime;
-  final bool allDay;
-  final RepeatRule repeatRule;
-  final String? location;
-  final EventColors eventColor;
-  final String createdBy;
-  final List<String> users;
-  final DateTime _createdAt;
-  final DateTime _updatedAt;
-
-  DateTime get date => _date.toLocal();
-  DateTime get startTime => _startTime.toLocal();
-  DateTime? get endTime => _endTime?.toLocal();
-  DateTime get createdAt => _createdAt.toLocal();
-  DateTime get updatedAt => _updatedAt.toLocal();
+  DateTime get dateLocal => date.toLocal();
+  DateTime get startTimeLocal => startTime.toLocal();
+  DateTime? get endTimeLocal => endTime?.toLocal();
+  DateTime get createdAtLocal => createdAt.toLocal();
+  DateTime get updatedAtLocal => updatedAt.toLocal();
 
   Color get color => eventColor.color;
+
+  /// Returns the cycle event type.
+  ///
+  /// Throws an exception if the event is not a cycle event.
+  CycleEventType get cycleEventType {
+    assert(isCycleEvent, 'Event is not a cycle event.');
+    return notes!.split('|##|')[0] == 'Period'
+        ? CycleEventType.period
+        : CycleEventType.fertile;
+  }
+
+  /// Returns the prediction flag.
+  ///
+  /// Throws an exception if the event is not a cycle event.
+  bool get isPrediction {
+    assert(isCycleEvent, 'Event is not a cycle event.');
+    return notes!.split('|##|')[1] == 'prediction';
+  }
 
   Map<String, dynamic> toFirestore() {
     return {
@@ -85,59 +118,17 @@ class CalendarEvent {
       'title': title,
       'notes': notes,
       'is_cycle_event': isCycleEvent,
-      'date': Timestamp.fromDate(_date),
-      'start_time': Timestamp.fromDate(_startTime),
-      'end_time': _endTime != null ? Timestamp.fromDate(_endTime) : null,
+      'date': Timestamp.fromDate(date),
+      'start_time': Timestamp.fromDate(startTime),
+      'end_time': endTime != null ? Timestamp.fromDate(endTime!) : null,
       'all_day': allDay,
       'repeat_rule': repeatRule.toMap(),
       'location': location,
       'event_color': eventColor.name,
       'created_by': createdBy,
       'users': users,
-      'created_at': Timestamp.fromDate(_createdAt),
-      'updated_at': Timestamp.fromDate(_updatedAt),
+      'created_at': Timestamp.fromDate(createdAt),
+      'updated_at': Timestamp.fromDate(updatedAt),
     };
-  }
-
-  CalendarEvent copyWith({
-    String? id,
-    String? title,
-    String? notes,
-    bool? isCycleEvent,
-    DateTime? date,
-    DateTime? startTime,
-    DateTime? endTime,
-    bool? allDay,
-    RepeatRule? repeatRule,
-    String? location,
-    EventColors? eventColor,
-    String? createdBy,
-    List<String>? users,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-  }) {
-    return CalendarEvent(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      notes: notes ?? this.notes,
-      isCycleEvent: isCycleEvent ?? this.isCycleEvent,
-      date: date ?? _date,
-      startTime: startTime ?? _startTime,
-      endTime: endTime ?? _endTime,
-      allDay: allDay ?? this.allDay,
-      repeatRule: repeatRule ?? this.repeatRule,
-      location: location ?? this.location,
-      eventColor: eventColor ?? this.eventColor,
-      createdBy: createdBy ?? this.createdBy,
-      users: users ?? this.users,
-      createdAt: createdAt ?? _createdAt,
-      updatedAt: updatedAt ?? _updatedAt,
-    );
-  }
-
-  CycleEvent toCycleEvent() {
-    // TODO Add more robust checks
-    assert(isCycleEvent, 'Event is not a cycle event.');
-    return this as CycleEvent;
   }
 }

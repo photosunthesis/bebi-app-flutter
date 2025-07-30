@@ -3,8 +3,10 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'sign_in_state.dart';
+part 'sign_in_cubit.freezed.dart';
 
 class SignInCubit extends Cubit<SignInState> {
   SignInCubit(this._firebaseAuth, this._firebaseAnalytics)
