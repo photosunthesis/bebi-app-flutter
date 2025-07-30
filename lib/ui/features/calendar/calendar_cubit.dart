@@ -74,10 +74,6 @@ class CalendarCubit extends Cubit<CalendarState> {
 
   List<CalendarEvent> _sortEvents(List<CalendarEvent> events) {
     events.sort((a, b) {
-      // Sort cycle events first
-      if (a.isCycleEvent && !b.isCycleEvent) return -1;
-      if (!a.isCycleEvent && b.isCycleEvent) return 1;
-
       // Sort all-day events first
       if (a.allDay && !b.allDay) return -1;
       if (!a.allDay && b.allDay) return 1;
