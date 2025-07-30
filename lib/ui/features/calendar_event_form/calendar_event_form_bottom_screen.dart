@@ -17,8 +17,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 
-class CalendarEventFormBottomSheet extends StatefulWidget {
-  const CalendarEventFormBottomSheet({
+class CalendarEventFormScreen extends StatefulWidget {
+  const CalendarEventFormScreen({
     super.key,
     this.calendarEventId,
     this.selectedDate,
@@ -28,12 +28,11 @@ class CalendarEventFormBottomSheet extends StatefulWidget {
   final DateTime? selectedDate;
 
   @override
-  State<CalendarEventFormBottomSheet> createState() =>
-      _CalendarEventFormBottomSheetState();
+  State<CalendarEventFormScreen> createState() =>
+      _CalendarEventFormScreenState();
 }
 
-class _CalendarEventFormBottomSheetState
-    extends State<CalendarEventFormBottomSheet> {
+class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
   late final _cubit = context.read<CalendarEventFormCubit>();
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
