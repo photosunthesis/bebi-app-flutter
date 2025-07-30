@@ -24,31 +24,10 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
   final FirebaseAuth _firebaseAuth;
   final FirebaseAnalytics _firebaseAnalytics;
 
-  Future<void> initialize(String? calendarEventId) async {
-    await guard(
-      () async {
-        emit(state.copyWith(loading: true));
-
-        if (calendarEventId == null) return;
-
-        final calendarEvent = await _calendarEventsRepository.getById(
-          calendarEventId,
-        );
-
-        emit(
-          state.copyWith(
-            calendarEventId: calendarEventId,
-            calendarEvent: calendarEvent,
-          ),
-        );
-      },
-      onError: (error, _) {
-        emit(state.copyWith(error: error.toString()));
-      },
-      onComplete: () {
-        emit(state.copyWith(loading: false));
-      },
-    );
+  Future<void> initialize(CalendarEvent? calendarEvent) async {
+    emit(state.copyWith(loading: true));
+    if (calendarEvent == null) return;
+    emit(state.copyWith(calendarEvent: calendarEvent));
   }
 
   Future<void> save({
@@ -75,9 +54,10 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
               )
             : null;
 
+        final calendarEvent = state.calendarEvent;
         await _calendarEventsRepository.createOrUpdate(
           CalendarEvent(
-            id: state.calendarEventId ?? '',
+            id: calendarEvent?.id ?? '',
             title: title,
             date: date,
             startTime: startTime,
@@ -87,9 +67,10 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
             repeatRule: repeatRule,
             location: location,
             eventColor: eventColor,
-            createdBy: _firebaseAuth.currentUser!.uid,
+            createdBy:
+                calendarEvent?.createdBy ?? _firebaseAuth.currentUser!.uid,
             users: partnership?.users ?? [_firebaseAuth.currentUser!.uid],
-            createdAt: DateTime.now(),
+            createdAt: calendarEvent?.createdAt ?? DateTime.now(),
             updatedAt: DateTime.now(),
           ),
         );

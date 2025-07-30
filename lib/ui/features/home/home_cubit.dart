@@ -46,7 +46,6 @@ class HomeCubit extends Cubit<HomeState> {
 
         final userPartnership = await _userPartnershipsRepository.getByUserId(
           _firebaseAuth.currentUser!.uid,
-          useCache: true,
         );
 
         if (userPartnership == null) {

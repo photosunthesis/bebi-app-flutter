@@ -21,7 +21,7 @@ class AppTextButton extends StatelessWidget {
   static Widget primary({
     required String text,
     VoidCallback? onTap,
-    EdgeInsets? padding = const EdgeInsets.all(8),
+    EdgeInsets? padding = const EdgeInsets.symmetric(horizontal: 10),
   }) {
     return Builder(
       builder: (context) {
@@ -33,7 +33,7 @@ class AppTextButton extends StatelessWidget {
             color: context.colorScheme.primary,
             borderRadius: BorderRadius.circular(UiConstants.borderRadiusValue),
           ),
-          textStyle: context.textTheme.bodySmall?.copyWith(
+          textStyle: context.textTheme.bodyMedium?.copyWith(
             color: context.colorScheme.onPrimary,
             fontWeight: FontWeight.w600,
           ),
@@ -60,14 +60,16 @@ class AppTextButton extends StatelessWidget {
         onTap: onTap,
         child: Padding(
           padding: padding ?? const EdgeInsets.all(6),
-          child: Text(
-            text,
-            style:
-                textStyle ??
-                context.textTheme.bodySmall?.copyWith(
-                  color: context.colorScheme.primary,
-                  fontWeight: FontWeight.w600,
-                ),
+          child: Center(
+            child: Text(
+              text,
+              style:
+                  textStyle ??
+                  context.textTheme.bodySmall?.copyWith(
+                    color: context.colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
           ),
         ),
       ),

@@ -94,8 +94,6 @@ abstract class AppTheme {
       backgroundColor: _colorScheme.onPrimary,
       foregroundColor: _colorScheme.primary,
       textStyle: _textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600),
-      // padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
-      // maximumSize: const Size.fromHeight(24),
       shape: RoundedRectangleBorder(
         borderRadius: UiConstants.borderRadius,
         side: BorderSide(
@@ -112,8 +110,6 @@ abstract class AppTheme {
       padding: EdgeInsets.zero,
       backgroundColor: _colorScheme.onPrimary,
       foregroundColor: _colorScheme.primary,
-      // padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
-      // maximumSize: const Size.fromHeight(24),
       side: BorderSide(
         color: _colorScheme.onSecondary,
         width: UiConstants.borderWidth,

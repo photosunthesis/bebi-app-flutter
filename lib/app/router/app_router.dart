@@ -3,7 +3,7 @@ import 'package:bebi_app/ui/features/add_partner/add_partner_cubit.dart';
 import 'package:bebi_app/ui/features/add_partner/add_partner_screen.dart';
 import 'package:bebi_app/ui/features/calendar/calendar_cubit.dart';
 import 'package:bebi_app/ui/features/calendar/calendar_screen.dart';
-import 'package:bebi_app/ui/features/calendar_event_form/calendar_event_form_bottom_screen.dart';
+import 'package:bebi_app/ui/features/calendar_event_form/calendar_event_form_screen.dart';
 import 'package:bebi_app/ui/features/calendar_event_form/calendar_event_form_cubit.dart';
 import 'package:bebi_app/ui/features/home/home_cubit.dart';
 import 'package:bebi_app/ui/features/home/home_screen.dart';

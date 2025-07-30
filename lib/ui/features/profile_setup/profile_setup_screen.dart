@@ -8,12 +8,12 @@ import 'package:bebi_app/ui/shared_widgets/shadow/shadow_container.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
+import 'package:bebi_app/utils/extension/string_extensions.dart';
 import 'package:bebi_app/utils/extension/text_style_extensions.dart';
 import 'package:bebi_app/utils/formatter/birth_date_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 class ProfileSetupScreen extends StatefulWidget {
@@ -202,7 +202,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             return 'Please enter your birthdate.';
           }
 
-          final date = DateFormat('dd/MM/yyyy').tryParseStrict(value);
+          final date = value.toDateTimeStrict('dd/MM/yyyy');
 
           if (date == null) {
             return 'Please enter a valid date in DD/MM/YYYY format.';
