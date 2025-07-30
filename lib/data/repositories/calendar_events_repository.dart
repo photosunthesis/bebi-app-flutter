@@ -8,40 +8,57 @@ class CalendarEventsRepository {
 
   static const _collection = 'calendar_events';
 
-  Future<List<CalendarEvent>> getEventsByUserId(String userId) async {
-    final querySnapshot = await _firestore
+  Future<List<CalendarEvent>> getByUserId({
+    required String userId,
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
+    var userEventsQuery = _firestore
         .collection(_collection)
-        .where('users', arrayContains: {'id': userId})
-        .get();
+        .where('users', arrayContains: userId);
 
-    return querySnapshot.docs.map(CalendarEvent.fromFirestore).toList();
+    if (startDate != null) {
+      userEventsQuery = userEventsQuery.where(
+        'date',
+        isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
+      );
+    }
+
+    if (endDate != null) {
+      userEventsQuery = userEventsQuery.where(
+        'date',
+        isLessThanOrEqualTo: Timestamp.fromDate(endDate),
+      );
+    }
+
+    final userEvents = await userEventsQuery.get();
+
+    return userEvents.docs.map(CalendarEvent.fromFirestore).toList();
   }
 
   Future<CalendarEvent?> getById(String id) async {
     final docRef = _firestore.collection(_collection).doc(id);
     final docSnapshot = await docRef.get();
-    if (!docSnapshot.exists) return null;
-    return CalendarEvent.fromFirestore(docSnapshot);
+    return docSnapshot.exists ? CalendarEvent.fromFirestore(docSnapshot) : null;
   }
 
-  /// Creates or updates a calendar event.
-  ///
-  /// Dates will be converted to UTC if they are not already.
   Future<CalendarEvent> createOrUpdate(CalendarEvent event) async {
     final updatedEvent = event.copyWith(
-      startDate: event.startDate.toUtc(),
-      endDate: event.endDate?.toUtc(),
+      date: event.date.toUtc(),
+      startTime: event.startTime.toUtc(),
+      endTime: event.endTime?.toUtc(),
       createdAt: event.createdAt.toUtc(),
       updatedAt: DateTime.now().toUtc(),
     );
 
-    final docRef = event.id.isEmpty
-        ? _firestore.collection(_collection).doc()
-        : _firestore.collection(_collection).doc(event.id);
+    final eventsCollection = _firestore.collection(_collection);
+    final eventDoc = event.id.isEmpty
+        ? eventsCollection.doc()
+        : eventsCollection.doc(event.id);
 
-    await docRef.set(
+    await eventDoc.set(
       updatedEvent.toFirestore(),
-      SetOptions(merge: event.id.isNotEmpty),
+      SetOptions(merge: event.id.isEmpty),
     );
 
     return updatedEvent;

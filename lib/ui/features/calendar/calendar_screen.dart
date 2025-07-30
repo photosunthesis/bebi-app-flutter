@@ -5,6 +5,7 @@ import 'package:bebi_app/ui/features/calendar/widgets/calendar.dart';
 import 'package:bebi_app/ui/features/calendar/widgets/calendar_events.dart';
 import 'package:bebi_app/ui/shared_widgets/buttons/app_icon_button.dart';
 import 'package:bebi_app/ui/shared_widgets/buttons/app_text_button.dart';
+import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
@@ -21,17 +22,30 @@ class CalendarScreen extends StatefulWidget {
 }
 
 class _CalendarScreenState extends State<CalendarScreen> {
+  late final _cubit = context.read<CalendarCubit>();
+
+  @override
+  void initState() {
+    super.initState();
+    _cubit.initialize();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildTitle(),
-          const SizedBox(height: 12),
-          const Calendar(),
-          const Expanded(child: CalendarEvents()),
-        ],
+    return BlocListener<CalendarCubit, CalendarState>(
+      listener: (context, state) {
+        if (state.error != null) context.showSnackbar(state.error!);
+      },
+      child: Scaffold(
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildTitle(),
+            const SizedBox(height: 12),
+            const Calendar(),
+            const CalendarEvents(),
+          ],
+        ),
       ),
     );
   }
@@ -80,12 +94,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   alignment: Alignment.centerRight,
                   child: AppIconButton(
                     icon: Symbols.add,
-                    onTap: () => context.pushNamed(
-                      AppRoutes.createCalendarEvent,
-                      queryParameters: {
-                        'selectedDate': focusedDay.toIso8601String(),
-                      },
-                    ),
+                    onTap: () async {
+                      final shouldReinitialize = await context.pushNamed<bool>(
+                        AppRoutes.createCalendarEvent,
+                        queryParameters: {
+                          'selectedDate': focusedDay.toIso8601String(),
+                        },
+                      );
+                      if (shouldReinitialize ?? false) _cubit.initialize();
+                    },
                   ),
                 ),
               ),

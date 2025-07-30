@@ -54,22 +54,4 @@ class UserProfileRepository {
     final downloadUrl = await ref.getDownloadURL();
     return downloadUrl;
   }
-
-  // Future<String> _generatePartnershipCode() async {
-  //   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-
-  //   // Safety limit to prevent infinite loops
-  //   for (int attempts = 0; attempts < 100; attempts++) {
-  //     final code = List.generate(
-  //       6,
-  //       (_) => chars[Random().nextInt(chars.length)],
-  //     ).join();
-
-  //     if (await _partnershipsRepository.getByCode(code) == null) {
-  //       return code;
-  //     }
-  //   }
-
-  //   throw Exception('Failed to generate unique code after 100 attempts');
-  // }
 }

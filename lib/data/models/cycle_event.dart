@@ -8,10 +8,12 @@ class CycleEvent extends CalendarEvent {
   const CycleEvent({
     required super.id,
     required super.title,
-    required super.startDate,
+    required super.date,
+    required super.startTime,
+    required super.endTime,
     required super.createdAt,
     required super.updatedAt,
-    required super.partnershipId,
+    required super.users,
     required CycleEventType cycleEventType,
     required bool isPrediction,
   }) : super(

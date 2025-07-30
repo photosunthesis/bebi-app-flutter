@@ -4,8 +4,9 @@ import 'package:bebi_app/data/models/repeat_rule.dart';
 import 'package:bebi_app/ui/features/calendar_event_form/calendar_event_form_cubit.dart';
 import 'package:bebi_app/ui/features/calendar_event_form/widgets/repeat_picker.dart';
 import 'package:bebi_app/ui/shared_widgets/buttons/app_text_button.dart';
-import 'package:bebi_app/ui/shared_widgets/forms/app_date_time_form_field.dart';
+import 'package:bebi_app/ui/shared_widgets/forms/app_date_form_field.dart';
 import 'package:bebi_app/ui/shared_widgets/forms/app_text_form_field.dart';
+import 'package:bebi_app/ui/shared_widgets/forms/app_time_form_field.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/ui/shared_widgets/switch/app_switch.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
@@ -37,8 +38,9 @@ class _CalendarEventFormBottomSheetState
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _locationController = TextEditingController();
-  final _startDateController = TextEditingController();
-  final _endDateController = TextEditingController();
+  final _dateController = TextEditingController();
+  final _startTimeController = TextEditingController();
+  final _endTimeController = TextEditingController();
   final _endRepeatDateController = TextEditingController();
   final _notesController = TextEditingController();
 
@@ -46,8 +48,6 @@ class _CalendarEventFormBottomSheetState
   bool _shareWithPartner = true;
   EventColors _selectedColor = EventColors.black;
   RepeatFrequency _repeatFrequency = RepeatFrequency.doNotRepeat;
-
-  bool get _isEditing => widget.calendarEventId != null;
 
   @override
   void initState() {
@@ -59,8 +59,9 @@ class _CalendarEventFormBottomSheetState
   void dispose() {
     _titleController.dispose();
     _locationController.dispose();
-    _startDateController.dispose();
-    _endDateController.dispose();
+    _dateController.dispose();
+    _startTimeController.dispose();
+    _endTimeController.dispose();
     _endRepeatDateController.dispose();
     _notesController.dispose();
     super.dispose();
@@ -72,8 +73,15 @@ class _CalendarEventFormBottomSheetState
       listener: (context, state) {
         if (state.error != null) context.showSnackbar(state.error!);
         if (state.success) {
-          // Return true to indicate success to whatever called this method
-          context.pop(true);
+          try {
+            context.pop(true);
+          } catch (_) {
+            // GoRouter thinks there's nothing left to pop, even though this
+            // route was definitely pushed somewhere in the code. The pop
+            // actually works and returns the boolean just fine, but throws
+            // an error anyway. So we're just catching and ignoring it...
+            // because sometimes that's just how routing rolls :D
+          }
         }
       },
       child: Scaffold(
@@ -109,7 +117,6 @@ class _CalendarEventFormBottomSheetState
                 ),
                 sliver: SliverToBoxAdapter(child: _buildOtherDetailsSection()),
               ),
-              if (_isEditing) _buildDeleteEventSection(),
             ],
           ),
         ),
@@ -144,25 +151,21 @@ class _CalendarEventFormBottomSheetState
 
   void _onSave() {
     if (_formKey.currentState?.validate() ?? false) {
-      final startDate = _allDay
-          ? DateFormat(
-              'EEEE MMMM d, yyyy',
-            ).parseStrict(_startDateController.text)
-          : DateFormat(
-              'EEEE MMMM d, yyyy h:mm a',
-            ).parseStrict(_startDateController.text);
+      final date = DateFormat(
+        'EEEE MMMM d, yyyy',
+      ).parseStrict(_dateController.text);
 
-      final endDate = DateFormat(
-        'EEEE MMMM d, yyyy h:mm a',
-      ).tryParseStrict(_endDateController.text);
+      final startTimeParsed = DateFormat(
+        'h:mm a',
+      ).tryParseStrict(_startTimeController.text);
 
-      final endRepeatDate = _allDay
-          ? DateFormat(
-              'EEEE MMMM d, yyyy',
-            ).tryParseStrict(_endRepeatDateController.text)
-          : DateFormat(
-              'EEEE MMMM d, yyyy h:mm a',
-            ).tryParseStrict(_endRepeatDateController.text);
+      final endTimeParsed = DateFormat(
+        'h:mm a',
+      ).tryParseStrict(_endTimeController.text);
+
+      final endRepeatDate = DateFormat(
+        'EEEE MMMM d, yyyy',
+      ).tryParseStrict(_endRepeatDateController.text);
 
       final repeat = RepeatRule(
         frequency: _repeatFrequency,
@@ -173,8 +176,21 @@ class _CalendarEventFormBottomSheetState
         title: _titleController.text,
         location: _locationController.text,
         notes: _notesController.text,
-        startDate: startDate,
-        endDate: endDate,
+        date: date,
+        startTime: DateTime(
+          date.year,
+          date.month,
+          date.day,
+          startTimeParsed?.hour ?? 0,
+          startTimeParsed?.minute ?? 0,
+        ),
+        endTime: DateTime(
+          date.year,
+          date.month,
+          date.day,
+          endTimeParsed?.hour ?? 0,
+          endTimeParsed?.minute ?? 0,
+        ),
         allDay: _allDay,
         eventColor: _selectedColor,
         shareWithPartner: _shareWithPartner,
@@ -266,14 +282,13 @@ class _CalendarEventFormBottomSheetState
             children: [
               _buildAllDayToggle(),
               const SizedBox(height: 6),
-              _buildDateFields(),
+              _buildDateTimeFields(),
               const SizedBox(height: 4),
               RepeatPicker(
                 repeatFrequency: _repeatFrequency,
                 onRepeatFrequencyChanged: (value) =>
                     setState(() => _repeatFrequency = value),
                 endDateController: _endRepeatDateController,
-                hasTime: !_allDay,
               ),
             ],
           ),
@@ -296,47 +311,66 @@ class _CalendarEventFormBottomSheetState
     );
   }
 
-  Widget _buildDateFields() {
+  Widget _buildDateTimeFields() {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        AppDateTimeFormField(
-          controller: _startDateController,
-          hintText: 'Start date',
-          hasTime: !_allDay,
+        AppDateFormField(
+          controller: _dateController,
+          hintText: 'Date',
           focusedDay: widget.selectedDate,
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return 'Start date is required';
+              return 'Date is required';
             }
             return null;
           },
         ),
         AnimatedSize(
-          alignment: Alignment.center,
           duration: 150.milliseconds,
+          alignment: Alignment.topCenter,
           child: !_allDay
               ? Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const SizedBox(height: 4),
-                    AppDateTimeFormField(
-                      controller: _endDateController,
-                      hintText: 'End date',
-                      hasTime: !_allDay,
-                      minSelectableDate: DateFormat(
-                        'EEEE MMMM d, yyyy h:mm a',
-                      ).tryParseStrict(_startDateController.text),
+                    AppTimeFormField(
+                      controller: _startTimeController,
+                      hintText: 'Start time',
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'End date is required';
+                          return 'Start time is required';
                         }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 4),
+                    AppTimeFormField(
+                      controller: _endTimeController,
+                      hintText: 'End time',
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'End time is required';
+                        }
+
+                        final startTime = DateFormat(
+                          'h:mm a',
+                        ).tryParse(_startTimeController.text);
+
+                        if (startTime != null) {
+                          final endTime = DateFormat('h:mm a').parse(value);
+                          if (endTime.isBefore(startTime) ||
+                              endTime.isAtSameMomentAs(startTime)) {
+                            return 'End time must be after start time';
+                          }
+                        }
+
                         return null;
                       },
                     ),
                   ],
                 )
-              : const SizedBox(height: 0, width: double.infinity),
+              : Container(),
         ),
       ],
     );
@@ -384,32 +418,6 @@ class _CalendarEventFormBottomSheetState
           onChanged: (value) => setState(() => _shareWithPartner = value),
         ),
       ],
-    );
-  }
-
-  Widget _buildDeleteEventSection() {
-    return SliverFillRemaining(
-      hasScrollBody: false,
-      child: Column(
-        children: [
-          const Spacer(),
-          const SizedBox(height: 16),
-          SafeArea(
-            child: InkWell(
-              onTap: () {
-                // TODO
-              },
-              child: Text(
-                'Delete event',
-                style: context.textTheme.titleMedium?.copyWith(
-                  color: context.colorScheme.error,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

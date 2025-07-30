@@ -11,24 +11,22 @@ class CalendarEvent {
     required this.title,
     this.notes,
     this.isCycleEvent = false,
-    required DateTime startDate,
-    DateTime? endDate,
+    required DateTime date,
+    required DateTime startTime,
+    DateTime? endTime,
     this.allDay = false,
     required this.repeatRule,
     this.location,
     required this.eventColor,
     required this.createdBy,
-    this.partnershipId,
+    required this.users,
     required DateTime createdAt,
     required DateTime updatedAt,
-  }) : _startDate = startDate,
-       _endDate = endDate,
+  }) : _date = date,
+       _startTime = startTime,
+       _endTime = endTime,
        _createdAt = createdAt,
-       _updatedAt = updatedAt,
-       assert(
-         allDay || endDate != null,
-         'End date must be provided if event is not all-day',
-       );
+       _updatedAt = updatedAt;
 
   factory CalendarEvent.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
@@ -37,9 +35,10 @@ class CalendarEvent {
       title: data['title'] as String,
       notes: data['notes'] as String?,
       isCycleEvent: data['is_cycle_event'] as bool? ?? false,
-      startDate: (data['start_date'] as Timestamp).toDate(),
-      endDate: data['end_date'] != null
-          ? (data['end_date'] as Timestamp).toDate()
+      date: (data['date'] as Timestamp).toDate(),
+      startTime: (data['start_time'] as Timestamp).toDate(),
+      endTime: data['end_time'] != null
+          ? (data['end_time'] as Timestamp).toDate()
           : null,
       allDay: data['all_day'] as bool? ?? false,
       repeatRule: RepeatRule.fromMap(
@@ -50,6 +49,7 @@ class CalendarEvent {
         (e) => e.name == data['event_color'],
       ),
       createdBy: data['created_by'] as String,
+      users: List<String>.from(data['users'] as List<dynamic>),
       createdAt: (data['created_at'] as Timestamp).toDate(),
       updatedAt: (data['updated_at'] as Timestamp).toDate(),
     );
@@ -59,19 +59,21 @@ class CalendarEvent {
   final String title;
   final String? notes;
   final bool isCycleEvent;
-  final DateTime _startDate;
-  final DateTime? _endDate;
+  final DateTime _date;
+  final DateTime _startTime;
+  final DateTime? _endTime;
   final bool allDay;
   final RepeatRule repeatRule;
   final String? location;
   final EventColors eventColor;
   final String createdBy;
-  final String? partnershipId;
+  final List<String> users;
   final DateTime _createdAt;
   final DateTime _updatedAt;
 
-  DateTime get startDate => _startDate.toLocal();
-  DateTime? get endDate => _endDate?.toLocal();
+  DateTime get date => _date.toLocal();
+  DateTime get startTime => _startTime.toLocal();
+  DateTime? get endTime => _endTime?.toLocal();
   DateTime get createdAt => _createdAt.toLocal();
   DateTime get updatedAt => _updatedAt.toLocal();
 
@@ -83,14 +85,15 @@ class CalendarEvent {
       'title': title,
       'notes': notes,
       'is_cycle_event': isCycleEvent,
-      'start_date': Timestamp.fromDate(_startDate),
-      'end_date': _endDate != null ? Timestamp.fromDate(_endDate) : null,
+      'date': Timestamp.fromDate(_date),
+      'start_time': Timestamp.fromDate(_startTime),
+      'end_time': _endTime != null ? Timestamp.fromDate(_endTime) : null,
       'all_day': allDay,
       'repeat_rule': repeatRule.toMap(),
       'location': location,
       'event_color': eventColor.name,
       'created_by': createdBy,
-      'partnership_id': partnershipId,
+      'users': users,
       'created_at': Timestamp.fromDate(_createdAt),
       'updated_at': Timestamp.fromDate(_updatedAt),
     };
@@ -101,14 +104,15 @@ class CalendarEvent {
     String? title,
     String? notes,
     bool? isCycleEvent,
-    DateTime? startDate,
-    DateTime? endDate,
+    DateTime? date,
+    DateTime? startTime,
+    DateTime? endTime,
     bool? allDay,
     RepeatRule? repeatRule,
     String? location,
     EventColors? eventColor,
     String? createdBy,
-    String? partnershipId,
+    List<String>? users,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -117,14 +121,15 @@ class CalendarEvent {
       title: title ?? this.title,
       notes: notes ?? this.notes,
       isCycleEvent: isCycleEvent ?? this.isCycleEvent,
-      startDate: startDate ?? _startDate,
-      endDate: endDate ?? _endDate,
+      date: date ?? _date,
+      startTime: startTime ?? _startTime,
+      endTime: endTime ?? _endTime,
       allDay: allDay ?? this.allDay,
       repeatRule: repeatRule ?? this.repeatRule,
       location: location ?? this.location,
       eventColor: eventColor ?? this.eventColor,
       createdBy: createdBy ?? this.createdBy,
-      partnershipId: partnershipId ?? this.partnershipId,
+      users: users ?? this.users,
       createdAt: createdAt ?? _createdAt,
       updatedAt: updatedAt ?? _updatedAt,
     );

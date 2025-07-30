@@ -68,7 +68,8 @@ abstract class AppRouter {
                 path: '/calendar',
                 name: AppRoutes.calendar,
                 builder: (context, state) => BlocProvider(
-                  create: (context) => CalendarCubit(),
+                  create: (context) =>
+                      CalendarCubit(context.read(), context.read()),
                   child: const CalendarScreen(),
                 ),
               ),
