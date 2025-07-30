@@ -1,14 +1,24 @@
+import 'package:bebi_app/constants/hive_constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
 
 part 'repeat_rule.freezed.dart';
+part 'repeat_rule.g.dart';
 
+@HiveType(typeId: HiveTypeIds.repeatFrequency)
 enum RepeatFrequency {
+  @HiveField(0)
   daily,
+  @HiveField(1)
   weekly,
+  @HiveField(2)
   monthly,
+  @HiveField(3)
   yearly,
+  @HiveField(4)
   custom,
+  @HiveField(5)
   doNotRepeat;
 
   String get label => switch (this) {
@@ -24,12 +34,14 @@ enum RepeatFrequency {
 @freezed
 abstract class RepeatRule with _$RepeatRule {
   const RepeatRule._();
+
+  @HiveType(typeId: HiveTypeIds.repeatRule)
   const factory RepeatRule({
-    required RepeatFrequency frequency,
-    @Default(1) int interval,
-    List<int>? daysOfWeek,
-    DateTime? endDate,
-    int? occurrences,
+    @HiveField(0) required RepeatFrequency frequency,
+    @HiveField(1) @Default(1) int interval,
+    @HiveField(2) List<int>? daysOfWeek,
+    @HiveField(3) DateTime? endDate,
+    @HiveField(4) int? occurrences,
   }) = _RepeatRule;
 
   factory RepeatRule.fromMap(Map<String, dynamic> map) {

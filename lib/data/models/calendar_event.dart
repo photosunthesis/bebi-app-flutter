@@ -1,33 +1,44 @@
 import 'dart:ui';
 
+import 'package:bebi_app/constants/hive_constants.dart';
 import 'package:bebi_app/data/models/event_color.dart';
 import 'package:bebi_app/data/models/repeat_rule.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
 
 part 'calendar_event.freezed.dart';
+part 'calendar_event.g.dart';
 
-enum CycleEventType { period, fertile }
+@HiveType(typeId: HiveTypeIds.cycleEventType)
+enum CycleEventType {
+  @HiveField(0)
+  period,
+  @HiveField(1)
+  fertile,
+}
 
 @freezed
 abstract class CalendarEvent with _$CalendarEvent {
   const CalendarEvent._();
+
+  @HiveType(typeId: HiveTypeIds.calendarEvent)
   const factory CalendarEvent({
-    required String id,
-    required String title,
-    String? notes,
-    @Default(false) bool isCycleEvent,
-    required DateTime date,
-    required DateTime startTime,
-    DateTime? endTime,
-    @Default(false) bool allDay,
-    required RepeatRule repeatRule,
-    String? location,
-    required EventColors eventColor,
-    required String createdBy,
-    required List<String> users,
-    required DateTime createdAt,
-    required DateTime updatedAt,
+    @HiveField(0) required String id,
+    @HiveField(1) required String title,
+    @HiveField(2) String? notes,
+    @HiveField(3) @Default(false) bool isCycleEvent,
+    @HiveField(4) required DateTime date,
+    @HiveField(5) required DateTime startTime,
+    @HiveField(6) DateTime? endTime,
+    @HiveField(7) @Default(false) bool allDay,
+    @HiveField(8) required RepeatRule repeatRule,
+    @HiveField(9) String? location,
+    @HiveField(10) required EventColors eventColor,
+    @HiveField(11) required String createdBy,
+    @HiveField(12) required List<String> users,
+    @HiveField(13) required DateTime createdAt,
+    @HiveField(14) required DateTime updatedAt,
   }) = _CalendarEvent;
 
   factory CalendarEvent.cycle({

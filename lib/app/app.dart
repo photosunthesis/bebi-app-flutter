@@ -9,10 +9,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_keyboard_visibility_temp_fork/flutter_keyboard_visibility_temp_fork.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 
 class App extends StatelessWidget {
-  const App({super.key});
+  const App({required this.hiveBoxes, super.key});
+
+  final List<Box> hiveBoxes;
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +29,7 @@ class App extends StatelessWidget {
 
         // Other services
         RepositoryProvider.value(value: ImagePicker()),
+        ...hiveBoxes.map((box) => RepositoryProvider.value(value: box)),
 
         // Repositories
         RepositoryProvider(

@@ -1,18 +1,22 @@
+import 'package:bebi_app/constants/hive_constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
 
 part 'user_partnership.freezed.dart';
+part 'user_partnership.g.dart';
 
 @freezed
 abstract class UserPartnership with _$UserPartnership {
   const UserPartnership._();
 
+  @HiveType(typeId: HiveTypeIds.userPartnership)
   const factory UserPartnership({
-    required String id,
-    required List<String> users,
-    required String createdBy,
-    required DateTime createdAt,
-    required DateTime updatedAt,
+    @HiveField(0) required String id,
+    @HiveField(1) required List<String> users,
+    @HiveField(2) required String createdBy,
+    @HiveField(3) required DateTime createdAt,
+    @HiveField(4) required DateTime updatedAt,
   }) = _UserPartnership;
 
   factory UserPartnership.fromFirestore(DocumentSnapshot doc) {

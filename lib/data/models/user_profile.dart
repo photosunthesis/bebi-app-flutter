@@ -1,21 +1,25 @@
+import 'package:bebi_app/constants/hive_constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
 
 part 'user_profile.freezed.dart';
+part 'user_profile.g.dart';
 
 @freezed
 abstract class UserProfile with _$UserProfile {
   const UserProfile._();
 
+  @HiveType(typeId: HiveTypeIds.userProfile)
   const factory UserProfile({
-    required String userId,
-    required String code,
-    required DateTime birthDate,
-    required String displayName,
-    required String? photoUrl,
-    required String createdBy,
-    required DateTime createdAt,
-    required DateTime updatedAt,
+    @HiveField(0) required String userId,
+    @HiveField(1) required String code,
+    @HiveField(2) required DateTime birthDate,
+    @HiveField(3) required String displayName,
+    @HiveField(4) String? photoUrl,
+    @HiveField(5) required String createdBy,
+    @HiveField(6) required DateTime createdAt,
+    @HiveField(7) required DateTime updatedAt,
   }) = _UserProfile;
 
   factory UserProfile.fromFirestore(DocumentSnapshot doc) {
