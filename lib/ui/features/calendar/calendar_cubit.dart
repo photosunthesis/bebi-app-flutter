@@ -87,10 +87,22 @@ class CalendarCubit extends Cubit<CalendarState> {
     );
   }
 
-  Future<void> loadMoreEvents({
-    required DateTime rangeStart,
-    required DateTime rangeEnd,
-  }) async {
+  Future<void> _expandTimeRange(DateTime focusDate) async {
+    var newStart = focusDate.subtract(_defaultTimeWindow);
+    var newEnd = focusDate.add(_defaultTimeWindow);
+
+    if (state.windowStart != null) {
+      newStart = state.windowStart!.earlierDate(newStart);
+    }
+
+    if (state.windowEnd != null) {
+      newEnd = state.windowEnd!.laterDate(newEnd);
+    }
+
+    await _loadMoreEvents(newStart, newEnd);
+  }
+
+  Future<void> _loadMoreEvents(DateTime rangeStart, DateTime rangeEnd) async {
     await guard(() async {
       emit(state.copyWith(loading: true));
 
@@ -115,20 +127,5 @@ class CalendarCubit extends Cubit<CalendarState> {
         ),
       );
     });
-  }
-
-  Future<void> _expandTimeRange(DateTime focusDate) async {
-    var newStart = focusDate.subtract(_defaultTimeWindow);
-    var newEnd = focusDate.add(_defaultTimeWindow);
-
-    if (state.windowStart != null) {
-      newStart = state.windowStart!.earlierDate(newStart);
-    }
-
-    if (state.windowEnd != null) {
-      newEnd = state.windowEnd!.laterDate(newEnd);
-    }
-
-    await loadMoreEvents(rangeStart: newStart, rangeEnd: newEnd);
   }
 }
