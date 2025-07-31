@@ -13,9 +13,9 @@ class BirthDateFormatter extends TextInputFormatter {
     final digits = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
 
     final buffer = StringBuffer();
-    int digitIndex = 0;
+    var digitIndex = 0;
 
-    for (int i = 0; i < _mask.length; i++) {
+    for (var i = 0; i < _mask.length; i++) {
       if (_mask[i] == 'D' || _mask[i] == 'M' || _mask[i] == 'Y') {
         if (digitIndex < digits.length) {
           buffer.write(digits[digitIndex]);
@@ -39,7 +39,7 @@ class BirthDateFormatter extends TextInputFormatter {
     }
 
     // Calculate new cursor position
-    int selectionIndex = result.indexOf(RegExp(r'[DMY]'));
+    var selectionIndex = result.indexOf(RegExp(r'[DMY]'));
     if (selectionIndex == -1) {
       selectionIndex = result.length;
     } else {

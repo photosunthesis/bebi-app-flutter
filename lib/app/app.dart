@@ -8,6 +8,7 @@ import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:bebi_app/data/repositories/calendar_events_repository.dart';
 import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
+import 'package:bebi_app/data/services/recurring_calendar_events_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -45,6 +46,9 @@ class App extends StatelessWidget {
         RepositoryProvider.value(value: userProfileBox),
         RepositoryProvider.value(value: userPartnershipBox),
 
+        // Services
+        RepositoryProvider(create: (_) => RecurringCalendarEventsService()),
+
         // Repositories
         RepositoryProvider(
           create: (context) => UserProfileRepository(
@@ -58,8 +62,12 @@ class App extends StatelessWidget {
               UserPartnershipsRepository(context.read(), context.read()),
         ),
         RepositoryProvider(
+          lazy: false,
           create: (context) =>
-              CalendarEventsRepository(context.read(), context.read()),
+              CalendarEventsRepository(context.read(), context.read())
+                ..loadEventsFromServer(
+                  context.read<FirebaseAuth>().currentUser?.uid,
+                ),
         ),
       ],
       child: MaterialApp.router(

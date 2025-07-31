@@ -35,7 +35,6 @@ class UserProfileRepository {
 
     final userProfile = UserProfile.fromFirestore(doc);
 
-    // Cache the result
     await _cacheUserProfile(userProfile);
 
     return userProfile;

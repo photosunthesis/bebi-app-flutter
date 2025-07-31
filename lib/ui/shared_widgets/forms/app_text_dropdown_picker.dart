@@ -3,7 +3,6 @@ import 'package:bebi_app/ui/shared_widgets/forms/app_text_form_field.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
 
 class AppTextDropdownPicker<T> extends StatefulWidget {
   const AppTextDropdownPicker({
@@ -116,7 +115,6 @@ class _AppTextDropdownPickerState<T> extends State<AppTextDropdownPicker<T>> {
           hintText: widget.hintText,
           readOnly: true,
           focusNode: _focusNode,
-          inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r'.*'))],
         ),
         if (_isPickerVisible)
           Positioned(

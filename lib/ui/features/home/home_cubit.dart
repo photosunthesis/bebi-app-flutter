@@ -38,7 +38,7 @@ class HomeCubit extends Cubit<HomeState> {
           if (!kDebugMode) {
             _analytics.logEvent(
               name: 'user_redirected_to_profile_setup',
-              parameters: {'userId': _firebaseAuth.currentUser!.uid},
+              parameters: <String, Object>{'userId': _firebaseAuth.currentUser!.uid},
             );
           }
           return;

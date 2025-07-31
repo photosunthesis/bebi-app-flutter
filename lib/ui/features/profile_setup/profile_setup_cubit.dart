@@ -87,7 +87,7 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     final rand = Random();
 
-    for (int attempts = 0; attempts < 100; attempts++) {
+    for (var attempts = 0; attempts < 100; attempts++) {
       final code = List.generate(
         6,
         (_) => chars[rand.nextInt(chars.length)],

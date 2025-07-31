@@ -17,6 +17,7 @@ abstract class AppTheme {
     cardTheme: _cardTheme,
     floatingActionButtonTheme: _floatingActionButtonTheme,
     iconButtonTheme: _iconButtonTheme,
+    iconTheme: _iconTheme,
   );
 
   static const _colorScheme = ColorScheme.light(
@@ -123,7 +124,7 @@ abstract class AppTheme {
   static final _appBarTheme = AppBarTheme(
     elevation: 0,
     centerTitle: false,
-    backgroundColor: _colorScheme.surface,
+    backgroundColor: Colors.transparent,
     foregroundColor: _colorScheme.onSecondary,
     titleTextStyle: _primaryTextTheme.headlineMedium,
   );
@@ -140,4 +141,6 @@ abstract class AppTheme {
     foregroundColor: _colorScheme.onPrimary,
     backgroundColor: _colorScheme.primary,
   );
+
+  static final _iconTheme = IconThemeData(color: _colorScheme.secondary);
 }

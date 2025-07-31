@@ -6,7 +6,7 @@ extension StringExtensions on String {
   DateTime? toDateTimeStrict(String format) =>
       DateFormat(format).tryParseStrict(this);
 
-  DateTime toEEEEMMMMdyyyyDate() => toDateTimeStrict('EEEE MMMM d, yyyy')!;
+  DateTime? toEEEEMMMMdyyyyDate() => toDateTimeStrict('EEEE MMMM d, yyyy');
 
   DateTime? toHHmmaTime() => toDateTimeStrict('h:mm a');
 }

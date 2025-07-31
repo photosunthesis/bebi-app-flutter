@@ -153,8 +153,8 @@ class _AddPartnerScreenState extends State<AddPartnerScreen> {
         hintText: 'XXX-XXX',
         keyboardType: TextInputType.text,
         textInputAction: TextInputAction.done,
-        inputFormatters: const [UserCodeFormatter()],
-        autofillHints: const [AutofillHints.oneTimeCode],
+        inputFormatters: const <TextInputFormatter>[UserCodeFormatter()],
+        autofillHints: const <String>[AutofillHints.oneTimeCode],
         validator: (value) {
           if (value == null || value.isEmpty) return null;
           if (value.length != 7) return 'Code must be 6 characters long.';

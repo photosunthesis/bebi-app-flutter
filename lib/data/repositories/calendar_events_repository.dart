@@ -15,6 +15,15 @@ class CalendarEventsRepository {
 
   static const _collection = 'calendar_events';
 
+  Future<void> loadEventsFromServer([String? userId]) async {
+    if (userId == null) return;
+    final events = await _firestore
+        .collection(_collection)
+        .where('users', arrayContains: userId)
+        .get();
+    await _cacheEvents(events.docs.map(CalendarEvent.fromFirestore).toList());
+  }
+
   Future<List<CalendarEvent>> getByUserId({
     required String userId,
     DateTime? startDate,
@@ -67,7 +76,7 @@ class CalendarEventsRepository {
         ? CalendarEvent.fromFirestore(docSnapshot)
         : null;
 
-    if (event != null) unawaited(_cacheEvents([event]));
+    if (event != null) unawaited(_cacheEvents(<CalendarEvent>[event]));
 
     return event;
   }
@@ -91,9 +100,20 @@ class CalendarEventsRepository {
       SetOptions(merge: event.id.isEmpty),
     );
 
-    unawaited(_cacheEvents([updatedEvent]));
+    final returnedEvent = event.id.isEmpty
+        ? updatedEvent.copyWith(id: eventDoc.id)
+        : updatedEvent;
 
-    return updatedEvent;
+    unawaited(_cacheEvents(<CalendarEvent>[returnedEvent]));
+
+    return returnedEvent;
+  }
+
+  Future<void> deleteById(String calendarEventId) async {
+    await Future.wait(<Future<void>>[
+      _calendarEventBox.delete(calendarEventId),
+      _firestore.collection(_collection).doc(calendarEventId).delete(),
+    ]);
   }
 
   List<CalendarEvent> _getCachedEvents(

@@ -6,7 +6,6 @@ import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 class AppTimeFormField extends StatefulWidget {
   const AppTimeFormField({
@@ -134,7 +133,6 @@ class _AppTimeFormFieldState extends State<AppTimeFormField> {
             readOnly: true,
             focusNode: _focusNode,
             validator: widget.validator,
-            inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r'.*'))],
           ),
         ),
         if (_showTimePicker)
@@ -177,16 +175,16 @@ class _AppTimeFormFieldState extends State<AppTimeFormField> {
             }) => Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.only(
-                  topLeft: [1, 2].contains(selectedIndex)
+                  topLeft: <int>[1, 2].contains(selectedIndex)
                       ? Radius.zero
                       : const Radius.circular(UiConstants.borderRadiusValue),
-                  topRight: [0, 1].contains(selectedIndex)
+                  topRight: <int>[0, 1].contains(selectedIndex)
                       ? Radius.zero
                       : const Radius.circular(UiConstants.borderRadiusValue),
-                  bottomLeft: [1, 2].contains(selectedIndex)
+                  bottomLeft: <int>[1, 2].contains(selectedIndex)
                       ? Radius.zero
                       : const Radius.circular(UiConstants.borderRadiusValue),
-                  bottomRight: [0, 1].contains(selectedIndex)
+                  bottomRight: <int>[0, 1].contains(selectedIndex)
                       ? Radius.zero
                       : const Radius.circular(UiConstants.borderRadiusValue),
                 ),

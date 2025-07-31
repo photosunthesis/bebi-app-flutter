@@ -38,7 +38,7 @@ abstract class RepeatRule with _$RepeatRule {
   @HiveType(typeId: HiveTypeIds.repeatRule)
   const factory RepeatRule({
     @HiveField(0) required RepeatFrequency frequency,
-    @HiveField(1) @Default(1) int interval,
+    @HiveField(1) int? interval,
     @HiveField(2) List<int>? daysOfWeek,
     @HiveField(3) DateTime? endDate,
     @HiveField(4) int? occurrences,
@@ -49,7 +49,7 @@ abstract class RepeatRule with _$RepeatRule {
       frequency: RepeatFrequency.values.firstWhere(
         (e) => e.name == map['frequency'],
       ),
-      interval: map['interval'] ?? 1,
+      interval: map['interval'],
       daysOfWeek: map['days_of_week'] != null
           ? List<int>.from(map['days_of_week'])
           : null,
@@ -61,7 +61,7 @@ abstract class RepeatRule with _$RepeatRule {
   }
 
   Map<String, dynamic> toMap() {
-    return {
+    return <String, dynamic>{
       'frequency': frequency.name,
       'interval': interval,
       if (daysOfWeek != null) 'days_of_week': daysOfWeek,

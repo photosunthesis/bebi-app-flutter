@@ -28,8 +28,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
   void initState() {
     super.initState();
     _cubit.initialize();
-    // Load events from server after a couple seconds to refresh the cached data
-    Future.delayed(3.seconds, () => _cubit.initialize(useCache: false));
   }
 
   @override
@@ -73,7 +71,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       : Align(
                           alignment: Alignment.centerLeft,
                           child: Padding(
-                            padding: const EdgeInsets.only(right: 38),
+                            padding: const EdgeInsets.only(right: 42),
                             child: AppTextButton(
                               text: 'Today',
                               onTap: () => context
@@ -106,9 +104,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           'selectedDate': focusedDay.toIso8601String(),
                         },
                       );
-                      if (eventWasCreated ?? false) {
-                        _cubit.initialize(useCache: false);
-                      }
+                      if (eventWasCreated == true) _cubit.initialize();
                     },
                   ),
                 ),

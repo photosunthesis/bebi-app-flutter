@@ -1,5 +1,7 @@
+import 'package:bebi_app/data/models/day_of_week.dart';
 import 'package:bebi_app/data/models/repeat_rule.dart';
 import 'package:bebi_app/ui/shared_widgets/forms/app_date_form_field.dart';
+import 'package:bebi_app/ui/shared_widgets/forms/app_multiple_choice_dropdown.dart';
 import 'package:bebi_app/ui/shared_widgets/forms/app_text_dropdown_picker.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:flutter/cupertino.dart';
@@ -7,25 +9,41 @@ import 'package:flutter/cupertino.dart';
 class RepeatPicker extends StatefulWidget {
   const RepeatPicker({
     required this.endDateController,
+    required this.daysOfWeekSelected,
+    required this.onRepeatFrequencyChanged,
+    required this.onDaysOfWeekChanged,
     this.repeatFrequency = RepeatFrequency.doNotRepeat,
-    this.onRepeatFrequencyChanged,
+    this.minimumDate,
     super.key,
   });
 
   final TextEditingController endDateController;
   final RepeatFrequency repeatFrequency;
-  final ValueChanged<RepeatFrequency>? onRepeatFrequencyChanged;
+  final List<DayOfWeek> daysOfWeekSelected;
+  final ValueChanged<RepeatFrequency> onRepeatFrequencyChanged;
+  final ValueChanged<List<DayOfWeek>> onDaysOfWeekChanged;
+  final DateTime? minimumDate;
 
   @override
   State<RepeatPicker> createState() => _RepeatPickerState();
 }
 
 class _RepeatPickerState extends State<RepeatPicker> {
-  bool get _shouldShowEndDate =>
+  late final TextEditingController _daysOfWeekController =
+      TextEditingController(
+        text: widget.daysOfWeekSelected
+            .map((e) => e.toTitle().substring(0, 3))
+            .join(', '),
+      );
+
+  bool get _showEndDate =>
       widget.repeatFrequency != RepeatFrequency.doNotRepeat;
 
+  late bool _showDaysOfWeekPicker =
+      widget.repeatFrequency == RepeatFrequency.weekly;
+
   // TODO Implement custom repeats
-  final frequencies = RepeatFrequency.values
+  final List<RepeatFrequency> frequencies = RepeatFrequency.values
       .where((f) => f != RepeatFrequency.custom)
       .toList();
 
@@ -44,20 +62,34 @@ class _RepeatPickerState extends State<RepeatPicker> {
             selectedIndex: frequencies.indexOf(widget.repeatFrequency),
             items: frequencies,
             labelBuilder: (item) => item.label,
-            onChanged: (value) => widget.onRepeatFrequencyChanged?.call(value),
+            onChanged: (freq) {
+              widget.onRepeatFrequencyChanged(freq);
+              setState(
+                () => _showDaysOfWeekPicker = freq == RepeatFrequency.weekly,
+              );
+            },
           ),
-          AnimatedSwitcher(
-            duration: 150.milliseconds,
-            child: _shouldShowEndDate
-                ? Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: AppDateFormField(
-                      controller: widget.endDateController,
-                      hintText: 'End repeat date',
-                    ),
-                  )
-                : null,
-          ),
+          if (_showDaysOfWeekPicker)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: AppMultipleChoiceDropdown<DayOfWeek>(
+                controller: _daysOfWeekController,
+                hintText: 'Days of week',
+                items: DayOfWeek.values,
+                selectedItems: widget.daysOfWeekSelected,
+                onChanged: widget.onDaysOfWeekChanged,
+                itemLabelBuilder: (item) => item.toTitle(),
+              ),
+            ),
+          if (_showEndDate)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: AppDateFormField(
+                controller: widget.endDateController,
+                hintText: 'End repeat date',
+                minimumDate: widget.minimumDate,
+              ),
+            ),
           // TODO Implement widgets to handle custom repeats
         ],
       ),

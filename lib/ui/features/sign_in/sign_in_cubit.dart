@@ -27,13 +27,13 @@ class SignInCubit extends Cubit<SignInState> {
         if (!kDebugMode) {
           _firebaseAnalytics.logLogin(
             loginMethod: 'email',
-            parameters: {'email': email},
+            parameters: <String, Object>{'email': email},
           );
         }
       },
       onError: (error, _) {
         final errorMessage = switch (error) {
-          FirebaseAuthException(:final message) =>
+          FirebaseAuthException(:final String? message) =>
             message ?? 'There was an issue with the sign-in process.',
           _ => 'An unexpected error occurred. Please try again later.',
         };
@@ -43,7 +43,7 @@ class SignInCubit extends Cubit<SignInState> {
         if (!kDebugMode) {
           _firebaseAnalytics.logEvent(
             name: 'sign_in_error',
-            parameters: {'error': error.toString()},
+            parameters: <String, Object>{'error': error.toString()},
           );
         }
       },

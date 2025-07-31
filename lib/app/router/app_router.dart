@@ -1,8 +1,11 @@
 import 'package:bebi_app/config/firebase_services.dart';
+import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/ui/features/add_partner/add_partner_cubit.dart';
 import 'package:bebi_app/ui/features/add_partner/add_partner_screen.dart';
 import 'package:bebi_app/ui/features/calendar/calendar_cubit.dart';
 import 'package:bebi_app/ui/features/calendar/calendar_screen.dart';
+import 'package:bebi_app/ui/features/calendar_event_details/calendar_event_details_cubit.dart';
+import 'package:bebi_app/ui/features/calendar_event_details/calendar_event_details_screen.dart';
 import 'package:bebi_app/ui/features/calendar_event_form/calendar_event_form_cubit.dart';
 import 'package:bebi_app/ui/features/calendar_event_form/calendar_event_form_screen.dart';
 import 'package:bebi_app/ui/features/home/home_cubit.dart';
@@ -44,7 +47,7 @@ abstract class AppRouter {
         builder: (context, state, shell) => shell,
         navigatorContainerBuilder: (context, navigationShell, children) =>
             MainScaffold(navigationShell: navigationShell, children: children),
-        branches: [
+        branches: <StatefulShellBranch>[
           StatefulShellBranch(
             routes: [
               GoRoute(
@@ -68,8 +71,11 @@ abstract class AppRouter {
                 path: '/calendar',
                 name: AppRoutes.calendar,
                 builder: (context, state) => BlocProvider(
-                  create: (context) =>
-                      CalendarCubit(context.read(), context.read()),
+                  create: (context) => CalendarCubit(
+                    context.read(),
+                    context.read(),
+                    context.read(),
+                  ),
                   child: const CalendarScreen(),
                 ),
               ),
@@ -112,7 +118,7 @@ abstract class AppRouter {
         ],
       ),
       GoRoute(
-        path: '/calendar/create-event',
+        path: '/calendar/create',
         name: AppRoutes.createCalendarEvent,
         pageBuilder: (context, state) => BottomSheetPage(
           BlocProvider(
@@ -131,6 +137,37 @@ abstract class AppRouter {
         ),
       ),
       GoRoute(
+        path: '/calendar/:id',
+        name: AppRoutes.viewCalendarEvent,
+        builder: (context, state) => BlocProvider(
+          create: (context) => CalendarEventDetailsCubit(
+            context.read(),
+            context.read(),
+            context.read(),
+          ),
+          child: CalendarEventDetailsScreen(
+            calendarEvent: state.extra as CalendarEvent,
+          ),
+        ),
+      ),
+      GoRoute(
+        path: '/calendar/:id/edit',
+        name: AppRoutes.updateCalendarEvent,
+        pageBuilder: (context, state) => BottomSheetPage(
+          BlocProvider(
+            create: (context) => CalendarEventFormCubit(
+              context.read(),
+              context.read(),
+              context.read(),
+              context.read(),
+            ),
+            child: CalendarEventFormScreen(
+              calendarEvent: state.extra as CalendarEvent,
+            ),
+          ),
+        ),
+      ),
+      GoRoute(
         path: '/add-partner',
         name: AppRoutes.addPartner,
         builder: (context, state) => BlocProvider(
@@ -140,7 +177,7 @@ abstract class AppRouter {
         ),
       ),
     ],
-    observers: [
+    observers: <NavigatorObserver>[
       if (!kDebugMode)
         FirebaseAnalyticsObserver(analytics: FirebaseServices.analytics),
     ],

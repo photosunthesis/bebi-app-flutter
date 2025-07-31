@@ -22,7 +22,7 @@ class ShadowContainer extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         shape: shape,
-        boxShadow: [
+        boxShadow: <BoxShadow>[
           BoxShadow(
             color: color ?? context.colorScheme.shadow.withAlpha(10),
             blurRadius: shadowBlurRadius,

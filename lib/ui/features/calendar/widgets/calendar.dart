@@ -16,7 +16,7 @@ class Calendar extends StatelessWidget {
     return BlocBuilder<CalendarCubit, CalendarState>(
       builder: (context, state) {
         return TableCalendar<CalendarEvent>(
-          eventLoader: (_) => state.events,
+          eventLoader: (_) => [...state.events, ...state.recurringEvents],
           headerVisible: false,
           focusedDay: state.focusedDay,
           currentDay: DateTime.now(),
@@ -25,7 +25,9 @@ class Calendar extends StatelessWidget {
           selectedDayPredicate: (day) => day.isSameDay(state.focusedDay),
           daysOfWeekHeight: 32,
           calendarFormat: CalendarFormat.month,
-          availableCalendarFormats: const {CalendarFormat.month: 'Month'},
+          availableCalendarFormats: const <CalendarFormat, String>{
+            CalendarFormat.month: 'Month',
+          },
           daysOfWeekStyle: _dayOfWeekStyle(context),
           calendarStyle: _calendarStyle(context),
           calendarBuilders: CalendarBuilders(
@@ -34,7 +36,8 @@ class Calendar extends StatelessWidget {
             dowBuilder: _buildDayOfWeek,
             defaultBuilder: _defaultDayBuilder,
             outsideBuilder: _outsideBuilder,
-            markerBuilder: _markerBuilder,
+            markerBuilder: (context, day, events) =>
+                _markerBuilder(context, day, events, state.focusedDay),
           ),
           onDaySelected: (day, _) {
             context.read<CalendarCubit>().setFocusedDay(day);
@@ -57,7 +60,7 @@ class Calendar extends StatelessWidget {
     DateTime focusedDay,
   ) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(15, 11, 15, 16),
+      margin: const EdgeInsets.fromLTRB(15, 10, 15, 18),
       decoration: BoxDecoration(
         color: context.colorScheme.primary,
         borderRadius: UiConstants.borderRadius,
@@ -80,11 +83,16 @@ class Calendar extends StatelessWidget {
     DateTime focusedDay,
   ) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(15, 11, 15, 16),
+      margin: const EdgeInsets.fromLTRB(15, 10, 15, 18),
       decoration: BoxDecoration(
         color: day.isSameDay(focusedDay) ? context.colorScheme.primary : null,
         borderRadius: UiConstants.borderRadius,
-        border: Border.all(color: context.colorScheme.primary, width: 0.6),
+        border: Border.all(
+          color: context.colorScheme.primary.withAlpha(
+            day.isSameMonth(focusedDay) ? 255 : 80,
+          ),
+          width: 0.6,
+        ),
       ),
       child: Center(
         child: Text(
@@ -93,7 +101,9 @@ class Calendar extends StatelessWidget {
             fontWeight: FontWeight.w600,
             color: day.isSameDay(focusedDay)
                 ? context.colorScheme.onPrimary
-                : context.colorScheme.onSurface,
+                : day.isSameMonth(focusedDay)
+                ? context.colorScheme.onSurface
+                : context.colorScheme.onSurface.withAlpha(80),
           ),
         ),
       ),
@@ -106,7 +116,7 @@ class Calendar extends StatelessWidget {
     DateTime focusedDay,
   ) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(15, 11, 15, 16),
+      margin: const EdgeInsets.fromLTRB(15, 10, 15, 18),
       decoration: const BoxDecoration(borderRadius: UiConstants.borderRadius),
       child: Center(
         child: Text(
@@ -126,7 +136,7 @@ class Calendar extends StatelessWidget {
     DateTime focusedDay,
   ) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(15, 11, 15, 16),
+      margin: const EdgeInsets.fromLTRB(15, 10, 15, 18),
       decoration: const BoxDecoration(borderRadius: UiConstants.borderRadius),
       child: Center(
         child: Text(
@@ -144,38 +154,43 @@ class Calendar extends StatelessWidget {
     BuildContext context,
     DateTime day,
     List<CalendarEvent> events,
+    DateTime focusedDay,
   ) {
-    final dayEvents = events.where((e) => e.date.isSameDay(day)).toList();
+    final dayEvents = events.where((e) => e.dateLocal.isSameDay(day)).toList();
+    final dayColors = dayEvents.map((e) => e.color).toSet();
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 5),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ...{...dayEvents.map((e) => e.color)}
-              .take(3)
-              .map(
-                (color) => Container(
-                  width: 6,
-                  height: 6,
-                  margin: const EdgeInsets.symmetric(horizontal: 1),
-                  decoration: BoxDecoration(
-                    color: color,
-                    shape: BoxShape.circle,
+    return Opacity(
+      opacity: day.isSameMonth(focusedDay) ? 1 : 0.4,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 7),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ...dayColors
+                .take(3)
+                .map(
+                  (color) => Container(
+                    width: 6,
+                    height: 6,
+                    margin: const EdgeInsets.symmetric(horizontal: 1),
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                    ),
                   ),
                 ),
+            if (dayColors.length > 3)
+              Container(
+                width: 5,
+                height: 5,
+                margin: const EdgeInsets.symmetric(horizontal: 1),
+                decoration: BoxDecoration(
+                  color: dayColors.last.withAlpha(100),
+                  shape: BoxShape.circle,
+                ),
               ),
-          if (dayEvents.length > 3)
-            Container(
-              width: 5,
-              height: 5,
-              margin: const EdgeInsets.symmetric(horizontal: 1),
-              decoration: BoxDecoration(
-                color: dayEvents.last.color.withAlpha(100),
-                shape: BoxShape.circle,
-              ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

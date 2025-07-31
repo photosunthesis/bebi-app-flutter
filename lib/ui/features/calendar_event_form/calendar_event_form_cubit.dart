@@ -47,43 +47,46 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
     await guard(
       () async {
         emit(state.copyWith(loading: true));
-
         final partnership = shareWithPartner
             ? await _userPartnershipsRepository.getByUserId(
                 _firebaseAuth.currentUser!.uid,
               )
             : null;
 
-        final calendarEvent = state.calendarEvent;
-        await _calendarEventsRepository.createOrUpdate(
-          CalendarEvent(
-            id: calendarEvent?.id ?? '',
-            title: title,
-            date: date,
-            startTime: startTime,
-            endTime: allDay ? null : endTime,
-            allDay: allDay,
-            notes: notes,
-            repeatRule: repeatRule,
-            location: location,
-            eventColor: eventColor,
-            createdBy:
-                calendarEvent?.createdBy ?? _firebaseAuth.currentUser!.uid,
-            users: partnership?.users ?? [_firebaseAuth.currentUser!.uid],
-            createdAt: calendarEvent?.createdAt ?? DateTime.now(),
-            updatedAt: DateTime.now(),
-          ),
+        var updatedEvent = CalendarEvent(
+          id: state.calendarEvent?.id ?? '',
+          title: title,
+          date: date,
+          startTime: startTime,
+          endTime: allDay ? null : endTime,
+          allDay: allDay,
+          notes: notes,
+          repeatRule: repeatRule,
+          location: location,
+          eventColor: eventColor,
+          createdBy:
+              state.calendarEvent?.createdBy ?? _firebaseAuth.currentUser!.uid,
+          users: partnership?.users ?? <String>[_firebaseAuth.currentUser!.uid],
+          createdAt: state.calendarEvent?.createdAt ?? DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+
+        updatedEvent = await _calendarEventsRepository.createOrUpdate(
+          updatedEvent,
         );
 
         _firebaseAnalytics.logEvent(
-          name: 'create_calendar_event',
-          parameters: {
+          name: state.calendarEvent?.id.isNotEmpty ?? false
+              ? 'update_calendar_event'
+              : 'create_calendar_event',
+          parameters: <String, Object>{
             'user_id': _firebaseAuth.currentUser!.uid,
             'created_at': DateTime.now().toUtc().toIso8601String(),
+            'updated_at': DateTime.now().toUtc().toIso8601String(),
           },
         );
 
-        emit(state.copyWith(success: true));
+        emit(state.copyWith(success: true, calendarEvent: updatedEvent));
       },
       onError: (error, _) {
         emit(state.copyWith(error: error.toString()));

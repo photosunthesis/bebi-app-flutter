@@ -5,7 +5,6 @@ import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class AppDateFormField extends StatefulWidget {
@@ -113,11 +112,7 @@ class _AppDateFormFieldState extends State<AppDateFormField> {
       children: [
         GestureDetector(
           onTap: () {
-            if (!_showCalendar) {
-              setState(() {
-                _showCalendar = true;
-              });
-            }
+            if (!_showCalendar) setState(() => _showCalendar = true);
           },
           child: AppTextFormField(
             controller: _controller,
@@ -125,7 +120,6 @@ class _AppDateFormFieldState extends State<AppDateFormField> {
             readOnly: true,
             focusNode: _focusNode,
             validator: widget.validator,
-            inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r'.*'))],
           ),
         ),
         if (_showCalendar)
@@ -177,7 +171,9 @@ class _AppDateFormFieldState extends State<AppDateFormField> {
         selectedDayPredicate: (day) => _selectedDay?.isSameDay(day) ?? false,
         daysOfWeekHeight: 32,
         calendarFormat: CalendarFormat.month,
-        availableCalendarFormats: const {CalendarFormat.month: 'Month'},
+        availableCalendarFormats: const <CalendarFormat, String>{
+          CalendarFormat.month: 'Month',
+        },
         calendarBuilders: CalendarBuilders(
           selectedBuilder: _selectedDayBuilder,
           todayBuilder: _todayBuilder,

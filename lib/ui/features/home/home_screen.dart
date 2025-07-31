@@ -25,7 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
       listener: (context, state) => switch (state) {
         HomeShouldSetUpProfile() => context.goNamed(AppRoutes.profileSetup),
         HomeShouldAddPartner() => context.goNamed(AppRoutes.addPartner),
-        HomeError(:final message) => context.showSnackbar(message),
+        HomeError(:final String message) => context.showSnackbar(message),
         _ => null,
       },
       child: const Scaffold(body: Center(child: Text('Home Screen'))),

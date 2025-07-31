@@ -68,7 +68,7 @@ class AddPartnerCubit extends Cubit<AddPartnerState> {
         await _userPartnershipsRepository.create(
           UserPartnership(
             id: '', // Firebase will generate this
-            users: [partnerProfile.userId, _firebaseAuth.currentUser!.uid],
+            users: <String>[partnerProfile.userId, _firebaseAuth.currentUser!.uid],
             createdBy: _firebaseAuth.currentUser!.uid,
             createdAt: DateTime.now(),
             updatedAt: DateTime.now(),

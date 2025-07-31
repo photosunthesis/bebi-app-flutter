@@ -21,3 +21,6 @@ linter:
     prefer_single_quotes: true
     sort_constructors_first: true
     prefer_constructors_over_static_methods: true
+    avoid_types_on_closure_parameters: true
+    omit_local_variable_types: true
+    prefer_function_declarations_over_variables: true

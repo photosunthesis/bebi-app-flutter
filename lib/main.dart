@@ -20,7 +20,7 @@ void main() {
     WidgetsFlutterBinding.ensureInitialized();
     _configureFontLicenses();
 
-    await Future.wait([
+    await Future.wait(<Future<void>>[
       _configureFirebase(),
       _configureHighRefreshScreen(),
       _initializeHive(),
@@ -53,14 +53,14 @@ Future<void> _configureFirebase() async {
 
 void _configureFontLicenses() {
   LicenseRegistry.addLicense(() async* {
-    final licenses = await Future.wait([
+    final licenses = await Future.wait(<Future<String>>[
       rootBundle.loadString('assets/fonts/ibm_plex_mono/OFL.txt'),
       rootBundle.loadString('assets/fonts/ibm_plex_sans/OFL.txt'),
       rootBundle.loadString('assets/fonts/vidaloka/OFL.txt'),
     ]);
-    yield LicenseEntryWithLineBreaks(['IBMPlexMono'], licenses[0]);
-    yield LicenseEntryWithLineBreaks(['IBMPlexSans'], licenses[1]);
-    yield LicenseEntryWithLineBreaks(['Vidaloka'], licenses[2]);
+    yield LicenseEntryWithLineBreaks(<String>['IBMPlexMono'], licenses[0]);
+    yield LicenseEntryWithLineBreaks(<String>['IBMPlexSans'], licenses[1]);
+    yield LicenseEntryWithLineBreaks(<String>['Vidaloka'], licenses[2]);
   });
 }
 

@@ -46,7 +46,7 @@ class AppTextFormField extends StatefulWidget {
 }
 
 class _AppTextFormFieldState extends State<AppTextFormField> {
-  late final _focusNode = widget.focusNode ?? FocusNode();
+  late final FocusNode _focusNode = widget.focusNode ?? FocusNode();
 
   String? _errorText;
 

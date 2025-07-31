@@ -31,7 +31,7 @@ abstract class UserPartnership with _$UserPartnership {
   }
 
   Map<String, dynamic> toFirestore() {
-    return {
+    return <String, dynamic>{
       // ID is managed by Firestore
       'users': users,
       'created_by': createdBy,

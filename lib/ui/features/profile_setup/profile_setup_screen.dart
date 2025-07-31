@@ -24,11 +24,11 @@ class ProfileSetupScreen extends StatefulWidget {
 }
 
 class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
-  late final _cubit = context.read<ProfileSetupCubit>();
+  late final ProfileSetupCubit _cubit = context.read<ProfileSetupCubit>();
 
-  final _formKey = GlobalKey<FormState>();
-  final _displayNameController = TextEditingController();
-  final _birthdayController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _displayNameController = TextEditingController();
+  final TextEditingController _birthdayController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -165,7 +165,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         hintText: 'Your nickname',
         keyboardType: TextInputType.text,
         textInputAction: TextInputAction.next,
-        autofillHints: const [AutofillHints.nickname],
+        autofillHints: const <String>[AutofillHints.nickname],
         validator: (value) {
           if (value == null || value.isEmpty) {
             return 'Please enter your preferred name.';

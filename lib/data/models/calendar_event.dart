@@ -17,6 +17,7 @@ abstract class CalendarEvent with _$CalendarEvent {
   @HiveType(typeId: HiveTypeIds.calendarEvent)
   const factory CalendarEvent({
     @HiveField(0) required String id,
+    String? recurringEventId, // Used only in UI, not saved in Firestore
     @HiveField(1) required String title,
     @HiveField(2) String? notes,
     @HiveField(3) required DateTime date,
@@ -67,7 +68,7 @@ abstract class CalendarEvent with _$CalendarEvent {
   Color get color => eventColor.color;
 
   Map<String, dynamic> toFirestore() {
-    return {
+    return <String, dynamic>{
       // ID is handled by Firestore
       'title': title,
       'notes': notes,

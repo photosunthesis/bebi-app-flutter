@@ -18,30 +18,6 @@ class AppTextButton extends StatelessWidget {
   final BoxDecoration? decoration;
   final TextStyle? textStyle;
 
-  static Widget primary({
-    required String text,
-    VoidCallback? onTap,
-    EdgeInsets? padding = const EdgeInsets.symmetric(horizontal: 10),
-  }) {
-    return Builder(
-      builder: (context) {
-        return AppTextButton(
-          text: text,
-          onTap: onTap,
-          padding: padding,
-          decoration: BoxDecoration(
-            color: context.colorScheme.primary,
-            borderRadius: BorderRadius.circular(UiConstants.borderRadiusValue),
-          ),
-          textStyle: context.textTheme.bodyMedium?.copyWith(
-            color: context.colorScheme.onPrimary,
-            fontWeight: FontWeight.w600,
-          ),
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(

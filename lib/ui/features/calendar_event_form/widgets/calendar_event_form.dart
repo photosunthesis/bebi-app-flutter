@@ -1,4 +1,5 @@
 import 'package:bebi_app/constants/ui_constants.dart';
+import 'package:bebi_app/data/models/day_of_week.dart';
 import 'package:bebi_app/data/models/event_color.dart';
 import 'package:bebi_app/data/models/repeat_rule.dart';
 import 'package:bebi_app/ui/features/calendar_event_form/widgets/repeat_picker.dart';
@@ -14,7 +15,6 @@ import 'package:material_symbols_icons/material_symbols_icons.dart';
 
 class CalendarEventForm extends StatefulWidget {
   const CalendarEventForm({
-    super.key,
     required this.formKey,
     required this.titleController,
     required this.locationController,
@@ -30,8 +30,11 @@ class CalendarEventForm extends StatefulWidget {
     required this.selectedColor,
     required this.onSelectedColorChanged,
     required this.repeatFrequency,
+    required this.daysOfWeekSelected,
+    required this.onDaysOfWeekChanged,
     required this.onRepeatFrequencyChanged,
     this.selectedDate,
+    super.key,
   });
 
   final GlobalKey<FormState> formKey;
@@ -49,6 +52,8 @@ class CalendarEventForm extends StatefulWidget {
   final EventColors selectedColor;
   final ValueChanged<EventColors> onSelectedColorChanged;
   final RepeatFrequency repeatFrequency;
+  final List<DayOfWeek> daysOfWeekSelected;
+  final ValueChanged<List<DayOfWeek>> onDaysOfWeekChanged;
   final ValueChanged<RepeatFrequency> onRepeatFrequencyChanged;
   final DateTime? selectedDate;
 
@@ -57,6 +62,22 @@ class CalendarEventForm extends StatefulWidget {
 }
 
 class _CalendarEventFormState extends State<CalendarEventForm> {
+  late DateTime? _repeateEndDateMinimum = widget.dateController.text.isEmpty
+      ? null
+      : widget.dateController.text.toEEEEMMMMdyyyyDate();
+
+  @override
+  void initState() {
+    super.initState();
+    widget.dateController.addListener(() {
+      setState(() {
+        _repeateEndDateMinimum = widget.dateController.text.isEmpty
+            ? null
+            : widget.dateController.text.toEEEEMMMMdyyyyDate();
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -86,6 +107,9 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
               right: UiConstants.padding,
             ),
             sliver: SliverToBoxAdapter(child: _buildOtherDetailsSection()),
+          ),
+          const SliverToBoxAdapter(
+            child: SafeArea(child: SizedBox(height: UiConstants.padding)),
           ),
         ],
       ),
@@ -124,7 +148,7 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
                 hintText: 'Location (optional)',
                 textInputAction: TextInputAction.done,
                 keyboardType: TextInputType.streetAddress,
-                autofillHints: [AutofillHints.fullStreetAddress],
+                autofillHints: <String>[AutofillHints.fullStreetAddress],
               ),
               const SizedBox(height: 4),
               _buildColorSelector(),
@@ -178,9 +202,12 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
               _buildDateTimeFields(),
               const SizedBox(height: 4),
               RepeatPicker(
+                minimumDate: _repeateEndDateMinimum,
                 repeatFrequency: widget.repeatFrequency,
                 onRepeatFrequencyChanged: widget.onRepeatFrequencyChanged,
                 endDateController: widget.endRepeatDateController,
+                daysOfWeekSelected: widget.daysOfWeekSelected,
+                onDaysOfWeekChanged: widget.onDaysOfWeekChanged,
               ),
             ],
           ),

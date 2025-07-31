@@ -14,7 +14,7 @@ class UserCodeFormatter extends TextInputFormatter {
 
     final buffer = StringBuffer();
 
-    for (int i = 0; i < rawInput.length && i < 6; i++) {
+    for (var i = 0; i < rawInput.length && i < 6; i++) {
       if (i == 3) buffer.write('-');
       buffer.write(rawInput[i]);
     }
