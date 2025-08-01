@@ -41,18 +41,13 @@ class _SignInScreenState extends State<SignInScreen> {
         key: _formKey,
         child: Scaffold(
           resizeToAvoidBottomInset: true,
-          body: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: UiConstants.padding,
-            ),
-            child: ListView(
-              children: [
-                const SafeArea(child: SizedBox(height: UiConstants.padding)),
-                _buildHeader(),
-                const SizedBox(height: 32),
-                _buildFormFields(),
-              ],
-            ),
+          body: ListView(
+            children: [
+              const SafeArea(child: SizedBox(height: UiConstants.padding)),
+              _buildHeader(),
+              const SizedBox(height: 32),
+              _buildFormFields(),
+            ],
           ),
           bottomNavigationBar: _bottomBar(),
         ),
@@ -62,24 +57,32 @@ class _SignInScreenState extends State<SignInScreen> {
 
   Widget _buildHeader() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(width: 42, height: 42, child: Image.asset(AppAssets.appLogo)),
-        const SizedBox(height: 24),
-        Text(
-          'Welcome back!',
-          style: context.primaryTextTheme.headlineSmall,
-          textAlign: TextAlign.center,
+        Center(
+          child: SizedBox(
+            width: 42,
+            height: 42,
+            child: Image.asset(AppAssets.appLogo),
+          ),
+        ),
+        const SizedBox(height: 32),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
+          child: Text(
+            'Welcome back!',
+            style: context.primaryTextTheme.headlineSmall,
+          ),
         ),
         const SizedBox(height: 12),
-        SizedBox(
-          width: context.screenWidth * 0.85,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
           child: Text(
-            'Sign in to continue sharing special moments and creating beautiful memories with your partner.',
+            'Sign in to continue sharing experiences and moments with your partner.',
             style: context.textTheme.bodyLarge?.copyWith(
               height: 1.4,
               fontWeight: FontWeight.normal,
             ),
-            textAlign: TextAlign.center,
           ),
         ),
       ],
@@ -92,8 +95,8 @@ class _SignInScreenState extends State<SignInScreen> {
       builder: (context, loading) => Column(
         children: [
           Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: context.screenWidth * 0.05,
+            padding: const EdgeInsets.symmetric(
+              horizontal: UiConstants.padding,
             ),
             child: AppTextFormField(
               enabled: !loading,
@@ -113,8 +116,8 @@ class _SignInScreenState extends State<SignInScreen> {
           ),
           const SizedBox(height: 16),
           Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: context.screenWidth * 0.05,
+            padding: const EdgeInsets.symmetric(
+              horizontal: UiConstants.padding,
             ),
             child: AppTextFormField(
               enabled: !loading,
@@ -143,8 +146,7 @@ class _SignInScreenState extends State<SignInScreen> {
       selector: (state) => state is SignInLoading,
       builder: (context, loading) => SafeArea(
         child: Container(
-          margin: EdgeInsets.symmetric(horizontal: context.screenWidth * 0.05),
-          padding: const EdgeInsets.all(UiConstants.padding),
+          margin: const EdgeInsets.all(UiConstants.padding),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
