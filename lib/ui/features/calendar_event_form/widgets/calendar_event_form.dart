@@ -62,7 +62,7 @@ class CalendarEventForm extends StatefulWidget {
 }
 
 class _CalendarEventFormState extends State<CalendarEventForm> {
-  late DateTime? _repeateEndDateMinimum = widget.dateController.text.isEmpty
+  late DateTime? _repeatEndDateMinimum = widget.dateController.text.isEmpty
       ? null
       : widget.dateController.text.toEEEEMMMMdyyyyDate();
 
@@ -71,7 +71,7 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
     super.initState();
     widget.dateController.addListener(() {
       setState(() {
-        _repeateEndDateMinimum = widget.dateController.text.isEmpty
+        _repeatEndDateMinimum = widget.dateController.text.isEmpty
             ? null
             : widget.dateController.text.toEEEEMMMMdyyyyDate();
       });
@@ -202,7 +202,7 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
               _buildDateTimeFields(),
               const SizedBox(height: 4),
               RepeatPicker(
-                minimumDate: _repeateEndDateMinimum,
+                minimumDate: _repeatEndDateMinimum,
                 repeatFrequency: widget.repeatFrequency,
                 onRepeatFrequencyChanged: widget.onRepeatFrequencyChanged,
                 endDateController: widget.endRepeatDateController,

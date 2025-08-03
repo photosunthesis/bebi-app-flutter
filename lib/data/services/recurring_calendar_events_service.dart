@@ -1,23 +1,18 @@
 import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/data/models/repeat_rule.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
+import 'package:bebi_app/utils/extension/int_extensions.dart';
 
 class RecurringCalendarEventsService {
   RecurringCalendarEventsService();
 
-  final _cache = <String, CalendarEvent>{};
-  final _baseEventCache = <String, CalendarEvent>{};
-  final _generatedWindowRanges = <String>{};
-  static const _maxOccurrences = 1000;
-  static const _recurringPrefix = 'recurring';
+  final Map<DateTime, List<CalendarEvent>> _cache = {};
+  final Map<String, CalendarEvent> _baseEventCache = {};
+  final Map<String, Set<String>> _generatedWindowsPerEvent = {};
+  final Map<String, int> _eventHashes = {};
 
-  String _windowRangeKey(DateTime start, DateTime end) {
-    return '${start.millisecondsSinceEpoch}_${end.millisecondsSinceEpoch}';
-  }
-
-  String _instanceKey(String eventId, DateTime date) {
-    return '$_recurringPrefix:$eventId:${date.millisecondsSinceEpoch}';
-  }
+  static const int _maxOccurrences = 1000;
+  static const String _recurringPrefix = 'recurring';
 
   List<CalendarEvent> generateRecurringEventsInWindow(
     List<CalendarEvent> events,
@@ -27,19 +22,21 @@ class RecurringCalendarEventsService {
     final windowRangeKey = _windowRangeKey(windowStart, windowEnd);
     final generatedEvents = <CalendarEvent>[];
 
-    final filteredEvents = events
-        .where((e) => e.repeatRule.frequency != RepeatFrequency.doNotRepeat)
-        .toList();
+    final filteredEvents = events.where((e) => e.isRecurring).toList();
 
     for (final event in filteredEvents) {
       _baseEventCache[event.id] = event;
-    }
+      final currentHash = _computeEventHash(event);
+      final previousHash = _eventHashes[event.id];
 
-    if (_generatedWindowRanges.contains(windowRangeKey)) {
-      return _getEventsFromCacheForWindow(windowStart, windowEnd);
-    }
+      final hasWindow =
+          _generatedWindowsPerEvent[event.id]?.contains(windowRangeKey) ??
+          false;
 
-    for (final event in filteredEvents) {
+      if (hasWindow && currentHash == previousHash) {
+        continue;
+      }
+
       final recurringEvents = _generateRecurringEvents(
         baseEvent: event,
         windowStart: windowStart,
@@ -47,15 +44,30 @@ class RecurringCalendarEventsService {
       );
 
       for (final instance in recurringEvents) {
-        final key = _instanceKey(event.id, instance.date);
-        _cache[key] = instance;
+        final dateKey = _startOfDay(instance.date);
+        _cache.putIfAbsent(dateKey, () => []).add(instance);
         generatedEvents.add(instance);
       }
+
+      _generatedWindowsPerEvent
+          .putIfAbsent(event.id, () => {})
+          .add(windowRangeKey);
+      _eventHashes[event.id] = currentHash;
     }
 
-    _generatedWindowRanges.add(windowRangeKey);
     return generatedEvents;
   }
+
+  String _windowRangeKey(DateTime start, DateTime end) =>
+      '${start.millisecondsSinceEpoch}_${end.millisecondsSinceEpoch}';
+
+  int _computeEventHash(CalendarEvent event) => event.hashCode;
+
+  DateTime _startOfDay(DateTime date) =>
+      DateTime(date.year, date.month, date.day);
+
+  String _instanceKey(String eventId, DateTime date) =>
+      '$_recurringPrefix:$eventId:${date.millisecondsSinceEpoch}';
 
   List<CalendarEvent> _generateRecurringEvents({
     required CalendarEvent baseEvent,
@@ -67,8 +79,14 @@ class RecurringCalendarEventsService {
     var occurrenceCount = 0;
 
     while (currentDate.isBefore(windowEnd) &&
-        occurrenceCount < _maxOccurrences) {
-      if (_isDateInWindow(currentDate, windowStart, windowEnd)) {
+        occurrenceCount < _maxOccurrences &&
+        !_shouldStopRepeating(
+          baseEvent.repeatRule,
+          currentDate,
+          occurrenceCount,
+        )) {
+      if (_isDateInWindow(currentDate, windowStart, windowEnd) &&
+          !_isExcludedDate(currentDate, baseEvent.repeatRule)) {
         events.add(
           baseEvent.copyWith(
             recurringEventId: _instanceKey(baseEvent.id, currentDate),
@@ -77,7 +95,7 @@ class RecurringCalendarEventsService {
         );
       }
 
-      currentDate = _getNextOccurrence(currentDate, baseEvent.repeatRule);
+      currentDate = getNextOccurrence(currentDate, baseEvent.repeatRule);
       occurrenceCount++;
 
       if (_shouldStopRepeating(
@@ -92,26 +110,46 @@ class RecurringCalendarEventsService {
     return events;
   }
 
-  DateTime _getNextOccurrence(DateTime current, RepeatRule rule) {
+  DateTime getNextOccurrence(DateTime current, RepeatRule rule) {
     return switch (rule.frequency) {
-      RepeatFrequency.daily => current.add(Duration(days: rule.interval ?? 1)),
-      RepeatFrequency.weekly => current.add(
-        Duration(days: 7 * (rule.interval ?? 1)),
-      ),
+      RepeatFrequency.daily => current.add(1.days),
+
+      RepeatFrequency.weekly
+          when rule.daysOfWeek == null || rule.daysOfWeek!.isEmpty =>
+        current.add(7.days),
+
+      RepeatFrequency.weekly => () {
+        final sortedDays = [...rule.daysOfWeek!]..sort();
+        final currentWeekday = current.weekday % 7; // Sunday as 0
+
+        // Find next valid weekday in the list
+        for (final dayIndex in sortedDays) {
+          if (dayIndex > currentWeekday) {
+            return current.add((dayIndex - currentWeekday).days);
+          }
+        }
+
+        // If no next day found in same week, jump to next week's first selected day
+        final daysUntilNext = (7 - currentWeekday) + sortedDays.first;
+        return current.add(daysUntilNext.days);
+      }(),
+
       RepeatFrequency.monthly => DateTime(
         current.year,
-        current.month + (rule.interval ?? 1),
+        current.month + 1,
         current.day,
         current.hour,
         current.minute,
       ),
+
       RepeatFrequency.yearly => DateTime(
-        current.year + (rule.interval ?? 1),
+        current.year + 1,
         current.month,
         current.day,
         current.hour,
         current.minute,
       ),
+
       _ => current,
     };
   }
@@ -130,12 +168,21 @@ class RecurringCalendarEventsService {
     return false;
   }
 
-  bool _isDateInWindow(
-    DateTime date,
-    DateTime windowStart,
-    DateTime windowEnd,
-  ) {
-    return !date.isBefore(windowStart) && !date.isAfter(windowEnd);
+  bool _isExcludedDate(DateTime date, RepeatRule rule) {
+    if (rule.excludedDates == null) return false;
+    return rule.excludedDates!.any((d) => d.isSameDay(date));
+  }
+
+  bool _isDateInWindow(DateTime date, DateTime start, DateTime end) =>
+      !date.isBefore(start) && !date.isAfter(end);
+
+  List<CalendarEvent> sortRecurringEvents(List<CalendarEvent> events) {
+    events.sort((a, b) {
+      if (a.allDay && !b.allDay) return -1;
+      if (!a.allDay && b.allDay) return 1;
+      return a.startTime.compareTo(b.startTime);
+    });
+    return events;
   }
 
   List<CalendarEvent> mergeRecurringEvents(
@@ -148,7 +195,7 @@ class RecurringCalendarEventsService {
       final key = event.recurringEventId ?? event.id;
       merged[key] = event;
 
-      if (event.repeatRule.frequency != RepeatFrequency.doNotRepeat) {
+      if (event.isRecurring) {
         _baseEventCache[event.id] = event;
       }
     }
@@ -157,11 +204,12 @@ class RecurringCalendarEventsService {
       final key = event.recurringEventId ?? event.id;
       merged[key] = event;
 
-      if (event.repeatRule.frequency != RepeatFrequency.doNotRepeat) {
+      if (event.isRecurring) {
         _baseEventCache[event.id] = event;
 
         if (event.recurringEventId != null) {
-          _cache[event.recurringEventId!] = event;
+          final dateKey = _startOfDay(event.date);
+          _cache.putIfAbsent(dateKey, () => []).add(event);
         }
       }
     }
@@ -169,108 +217,41 @@ class RecurringCalendarEventsService {
     return merged.values.toList();
   }
 
-  List<CalendarEvent> sortRecurringEvents(List<CalendarEvent> events) {
-    events.sort((a, b) {
-      if (a.allDay && !b.allDay) return -1;
-      if (!a.allDay && b.allDay) return 1;
-      return a.startTime.compareTo(b.startTime);
-    });
-    return events;
-  }
-
-  List<CalendarEvent> getFocusedDayEvents(
-    DateTime focusedDay,
-    List<CalendarEvent> events,
-    List<CalendarEvent> recurringEvents,
-  ) {
-    final dayEvents = <CalendarEvent>[];
-
-    final nonRecurring = events
-        .where(
-          (e) =>
-              e.repeatRule.frequency == RepeatFrequency.doNotRepeat &&
-              e.date.isSameDay(focusedDay),
-        )
-        .map((e) => e.copyWith(date: e.date, recurringEventId: null))
-        .toList();
-
-    final cachedRecurring = _getCachedEventsForDay(focusedDay);
-    if (cachedRecurring.isNotEmpty) {
-      dayEvents.addAll(nonRecurring);
-      dayEvents.addAll(cachedRecurring);
-      return sortRecurringEvents(dayEvents);
-    }
-
-    final recurring = recurringEvents
-        .where((e) => e.date.isSameDay(focusedDay))
-        .toList();
-
-    dayEvents.addAll(nonRecurring);
-    dayEvents.addAll(recurring);
-
-    return sortRecurringEvents(dayEvents);
-  }
-
-  List<CalendarEvent> _getCachedEventsForDay(DateTime day) {
-    return _cache.values.where((event) => event.date.isSameDay(day)).toList();
-  }
-
-  List<CalendarEvent> _getEventsFromCacheForWindow(
-    DateTime windowStart,
-    DateTime windowEnd,
-  ) {
-    return _cache.values
-        .where((event) => _isDateInWindow(event.date, windowStart, windowEnd))
-        .toList();
-  }
-
   void updateEventInCache(CalendarEvent event) {
-    if (event.repeatRule.frequency != RepeatFrequency.doNotRepeat) {
+    if (event.isRecurring) {
       _baseEventCache[event.id] = event;
-
-      final key = event.recurringEventId ?? _instanceKey(event.id, event.date);
-      _cache[key] = event;
-
       _regenerateEventsForBaseEvent(event);
     }
   }
 
   void _regenerateEventsForBaseEvent(CalendarEvent baseEvent) {
-    final keysToRemove = <String>[];
+    final dateKeysToRemove = _cache.keys.where((key) {
+      final events = _cache[key];
+      return events?.any((e) => e.id == baseEvent.id) ?? false;
+    }).toList();
 
-    for (final key in _cache.keys) {
-      if (key.startsWith('$_recurringPrefix:${baseEvent.id}:')) {
-        keysToRemove.add(key);
-      }
-    }
-
-    for (final key in keysToRemove) {
+    for (final key in dateKeysToRemove) {
       _cache.remove(key);
     }
 
-    _generatedWindowRanges.removeWhere((rangeKey) {
-      // Remove any window keys that might be affected
-      // TODO Track a mapping of eventId to window keys to be more precise
-      return true;
-    });
+    _generatedWindowsPerEvent.remove(baseEvent.id);
+    _eventHashes.remove(baseEvent.id);
   }
 
-  void removeEventFromCache(String eventId, {DateTime? specificDate}) {
+  void removeEventFromCache(String eventId, [DateTime? specificDate]) {
     if (specificDate != null) {
-      final instanceKey = _instanceKey(eventId, specificDate);
-      _cache.remove(instanceKey);
+      final key = _startOfDay(specificDate);
+      _cache[key]?.removeWhere((e) => e.id == eventId);
     } else {
       _baseEventCache.remove(eventId);
+      _eventHashes.remove(eventId);
+      _generatedWindowsPerEvent.remove(eventId);
 
-      final keysToRemove = <String>[];
-      for (final key in _cache.keys) {
-        if (key.startsWith('$_recurringPrefix:$eventId:')) {
-          keysToRemove.add(key);
+      for (final key in _cache.keys.toList()) {
+        _cache[key]?.removeWhere((e) => e.id == eventId);
+        if (_cache[key]?.isEmpty ?? false) {
+          _cache.remove(key);
         }
-      }
-
-      for (final key in keysToRemove) {
-        _cache.remove(key);
       }
     }
   }
@@ -278,6 +259,7 @@ class RecurringCalendarEventsService {
   void clearCache() {
     _cache.clear();
     _baseEventCache.clear();
-    _generatedWindowRanges.clear();
+    _generatedWindowsPerEvent.clear();
+    _eventHashes.clear();
   }
 }

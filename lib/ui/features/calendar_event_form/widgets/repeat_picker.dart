@@ -29,12 +29,11 @@ class RepeatPicker extends StatefulWidget {
 }
 
 class _RepeatPickerState extends State<RepeatPicker> {
-  late final TextEditingController _daysOfWeekController =
-      TextEditingController(
-        text: widget.daysOfWeekSelected
-            .map((e) => e.toTitle().substring(0, 3))
-            .join(', '),
-      );
+  late final _daysOfWeekController = TextEditingController(
+    text: widget.daysOfWeekSelected
+        .map((e) => e.toTitle().substring(0, 3))
+        .join(', '),
+  );
 
   bool get _showEndDate =>
       widget.repeatFrequency != RepeatFrequency.doNotRepeat;
@@ -43,9 +42,20 @@ class _RepeatPickerState extends State<RepeatPicker> {
       widget.repeatFrequency == RepeatFrequency.weekly;
 
   // TODO Implement custom repeats
-  final List<RepeatFrequency> frequencies = RepeatFrequency.values
+  final frequencies = RepeatFrequency.values
       .where((f) => f != RepeatFrequency.custom)
       .toList();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.daysOfWeekSelected.isEmpty && widget.minimumDate != null) {
+        final dayOfWeek = DayOfWeek.values[widget.minimumDate!.weekday - 1];
+        widget.onDaysOfWeekChanged([dayOfWeek]);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

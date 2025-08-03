@@ -31,35 +31,33 @@ class CalendarEventFormScreen extends StatefulWidget {
 
 class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  late final CalendarEventFormCubit _cubit = context
-      .read<CalendarEventFormCubit>();
-  late final TextEditingController _titleController = TextEditingController(
+  late final _cubit = context.read<CalendarEventFormCubit>();
+  late final _titleController = TextEditingController(
     text: widget.calendarEvent?.title,
   );
-  late final TextEditingController _locationController = TextEditingController(
+  late final _locationController = TextEditingController(
     text: widget.calendarEvent?.location,
   );
-  late final TextEditingController _dateController = TextEditingController(
+  late final _dateController = TextEditingController(
     text: (widget.calendarEvent?.date ?? widget.selectedDate)!
         .toEEEEMMMMdyyyy(),
   );
-  late final TextEditingController _startTimeController = TextEditingController(
+  late final _startTimeController = TextEditingController(
     text: widget.calendarEvent?.startTime.toHHmma(),
   );
-  late final TextEditingController _endTimeController = TextEditingController(
+  late final _endTimeController = TextEditingController(
     text: widget.calendarEvent?.endTime?.toHHmma(),
   );
-  late final TextEditingController _endRepeatDateController =
-      TextEditingController(
-        text: widget.calendarEvent?.repeatRule.endDate?.toEEEEMMMMdyyyy(),
-      );
-  late final TextEditingController _notesController = TextEditingController(
+  late final _endRepeatDateController = TextEditingController(
+    text: widget.calendarEvent?.repeatRule.endDate?.toEEEEMMMMdyyyy(),
+  );
+  late final _notesController = TextEditingController(
     text: widget.calendarEvent?.notes,
   );
   late List<DayOfWeek> _daysOfWeekSelected =
       widget.calendarEvent?.repeatRule.daysOfWeek != null
       ? widget.calendarEvent!.repeatRule.daysOfWeek!
-            .map((e) => DayOfWeek.fromIndex(e))
+            .map(DayOfWeek.fromIndex)
             .toList()
       : const <DayOfWeek>[];
   late bool _allDay = widget.calendarEvent?.allDay ?? false;

@@ -2,6 +2,7 @@ import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/data/repositories/calendar_events_repository.dart';
 import 'package:bebi_app/data/services/recurring_calendar_events_service.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
+import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:bebi_app/utils/guard.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,32 +21,37 @@ class CalendarCubit extends Cubit<CalendarState> {
   final CalendarEventsRepository _calendarEventsRepository;
   final RecurringCalendarEventsService _recurringCalendarEventsService;
   final FirebaseAuth _firebaseAuth;
+  DateTime? _windowStart;
+  DateTime? _windowEnd;
 
   static const _defaultTimeWindow = Duration(days: 90);
 
   Future<void> initialize({bool useCache = true}) async {
     await guard(
       () async {
-        emit(state.copyWith(loading: true));
+        if (!useCache) emit(state.copyWith(loading: true));
 
         final events = await _calendarEventsRepository.getByUserId(
           userId: _firebaseAuth.currentUser!.uid,
           useCache: useCache,
         );
 
-        final windowStart = state.focusedDay.subtract(_defaultTimeWindow);
-        final windowEnd = state.focusedDay.add(_defaultTimeWindow);
+        _windowStart = state.focusedDay.subtract(_defaultTimeWindow);
+        _windowEnd = state.focusedDay.add(_defaultTimeWindow);
+
         final recurringEvents = _recurringCalendarEventsService
-            .generateRecurringEventsInWindow(events, windowStart, windowEnd);
+            .generateRecurringEventsInWindow(
+              events,
+              _windowStart!,
+              _windowEnd!,
+            );
+
+        final allEvents = [...events, ...recurringEvents];
 
         emit(
           state.copyWith(
-            events: events,
-            recurringEvents: recurringEvents,
-            focusedDayEvents: _recurringCalendarEventsService
-                .getFocusedDayEvents(state.focusedDay, events, recurringEvents),
-            windowStart: windowStart,
-            windowEnd: windowEnd,
+            events: allEvents,
+            focusedDayEvents: _filterFocusedDayEvents(allEvents),
           ),
         );
       },
@@ -70,20 +76,14 @@ class CalendarCubit extends Cubit<CalendarState> {
     emit(state.copyWith(focusedDay: date));
 
     final needsExpansion =
-        (state.windowStart == null && state.windowEnd == null) ||
-        date.isBefore(state.windowStart!.add(const Duration(days: 30))) ||
-        date.isAfter(state.windowEnd!.subtract(const Duration(days: 30)));
+        (_windowStart == null && _windowEnd == null) ||
+        date.isBefore(_windowStart!.add(30.days)) ||
+        date.isAfter(_windowEnd!.subtract(30.days));
 
-    if (needsExpansion) await _expandTimeRange(date);
+    if (needsExpansion) return await _expandTimeRange(date);
 
     emit(
-      state.copyWith(
-        focusedDayEvents: _recurringCalendarEventsService.getFocusedDayEvents(
-          date,
-          state.events,
-          state.recurringEvents,
-        ),
-      ),
+      state.copyWith(focusedDayEvents: _filterFocusedDayEvents(state.events)),
     );
   }
 
@@ -91,12 +91,12 @@ class CalendarCubit extends Cubit<CalendarState> {
     var newStart = focusDate.subtract(_defaultTimeWindow);
     var newEnd = focusDate.add(_defaultTimeWindow);
 
-    if (state.windowStart != null) {
-      newStart = state.windowStart!.earlierDate(newStart);
+    if (_windowStart != null) {
+      newStart = _windowStart!.earlierDate(newStart);
     }
 
-    if (state.windowEnd != null) {
-      newEnd = state.windowEnd!.laterDate(newEnd);
+    if (_windowEnd != null) {
+      newEnd = _windowEnd!.laterDate(newEnd);
     }
 
     await _loadMoreEvents(newStart, newEnd);
@@ -108,24 +108,30 @@ class CalendarCubit extends Cubit<CalendarState> {
 
       final newRecurringEvents = _recurringCalendarEventsService
           .generateRecurringEventsInWindow(state.events, rangeStart, rangeEnd);
-      final mergedRecurringEvents = _recurringCalendarEventsService
-          .mergeRecurringEvents(state.recurringEvents, newRecurringEvents);
-      final newStartWindow =
-          state.windowStart?.earlierDate(rangeStart) ?? rangeStart;
-      final newEndWindow = state.windowEnd?.laterDate(rangeEnd) ?? rangeEnd;
+      _windowStart = _windowStart?.earlierDate(rangeStart) ?? rangeStart;
+      _windowEnd = _windowEnd?.laterDate(rangeEnd) ?? rangeEnd;
 
       emit(
         state.copyWith(
-          recurringEvents: mergedRecurringEvents,
-          focusedDayEvents: _recurringCalendarEventsService.getFocusedDayEvents(
-            state.focusedDay,
-            state.events,
-            mergedRecurringEvents,
-          ),
-          windowStart: newStartWindow,
-          windowEnd: newEndWindow,
+          events: [...state.events, ...newRecurringEvents],
+          focusedDayEvents: _filterFocusedDayEvents([
+            ...state.events,
+            ...newRecurringEvents,
+          ]),
         ),
       );
     });
+  }
+
+  List<CalendarEvent> _filterFocusedDayEvents(List<CalendarEvent> events) {
+    return events
+        .where((e) => e.date.isSameDay(state.focusedDay))
+        .fold<Map<String, CalendarEvent>>({}, (map, event) {
+          final key = '${event.id}_${event.date}';
+          if (!map.containsKey(key)) map[key] = event;
+          return map;
+        })
+        .values
+        .toList();
   }
 }

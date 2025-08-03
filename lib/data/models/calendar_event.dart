@@ -64,11 +64,19 @@ abstract class CalendarEvent with _$CalendarEvent {
   DateTime? get endTimeLocal => endTime?.toLocal();
   DateTime get createdAtLocal => createdAt.toLocal();
   DateTime get updatedAtLocal => updatedAt.toLocal();
-
   Color get color => eventColor.color;
+  bool get isRecurring => repeatRule.frequency != RepeatFrequency.doNotRepeat;
+  bool get isLastRecurringEvent =>
+      isRecurring &&
+      ((repeatRule.endDate != null &&
+              date.isAtSameMomentAs(repeatRule.endDate!)) ||
+          (repeatRule.occurrences != null &&
+              recurringEventId != null &&
+              int.parse(recurringEventId!.split('_').last) >=
+                  repeatRule.occurrences! - 1));
 
   Map<String, dynamic> toFirestore() {
-    return <String, dynamic>{
+    return {
       // ID is handled by Firestore
       'title': title,
       'notes': notes,

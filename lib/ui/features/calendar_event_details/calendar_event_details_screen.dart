@@ -3,11 +3,14 @@ import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/data/models/day_of_week.dart';
 import 'package:bebi_app/data/models/repeat_rule.dart';
+import 'package:bebi_app/ui/features/calendar_event_details/calendar_event_details_cubit.dart';
+import 'package:bebi_app/ui/features/calendar_event_details/widgets/delete_event_bottom_dialog.dart';
 import 'package:bebi_app/ui/shared_widgets/buttons/app_text_button.dart';
 import 'package:bebi_app/ui/shared_widgets/layouts/main_app_bar.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
@@ -40,86 +43,126 @@ class _CalendarEventDetailsScreenState
       actions: [
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 12),
-          child: AppTextButton(
-            text: 'Edit',
-            onTap: () async {
-              final updatedEvent = await context.pushNamed<CalendarEvent>(
-                AppRoutes.updateCalendarEvent,
-                extra: _event,
-                pathParameters: {'id': _event.id},
-              );
-              if (updatedEvent != null) {
-                setState(() => _event = updatedEvent);
-              }
-            },
-          ),
+          child:
+              BlocSelector<
+                CalendarEventDetailsCubit,
+                CalendarEventDetailsState,
+                bool
+              >(
+                selector: (state) => state is CalendarEventDetailsStateLoading,
+                builder: (context, loading) {
+                  return AppTextButton(
+                    text: 'Edit',
+                    onTap: loading
+                        ? null
+                        : () async {
+                            final updatedEvent = await context
+                                .pushNamed<CalendarEvent>(
+                                  AppRoutes.updateCalendarEvent,
+                                  extra: _event,
+                                  pathParameters: {'id': _event.id},
+                                );
+                            if (updatedEvent != null) {
+                              setState(() => _event = updatedEvent);
+                            }
+                          },
+                  );
+                },
+              ),
         ),
       ],
     );
   }
 
   Widget _buildBody() {
-    return ListView(
-      children: [
-        const SizedBox(height: 24),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                width: 20,
-                height: 20,
-                margin: const EdgeInsets.only(right: UiConstants.padding),
-                decoration: BoxDecoration(
-                  color: _event.color,
-                  shape: BoxShape.circle,
+    return CustomScrollView(
+      slivers: [
+        const SliverToBoxAdapter(child: SizedBox(height: 24)),
+        _buildTitleSection(),
+        _buildDateTimeSection(),
+        if (_event.repeatRule.frequency != RepeatFrequency.doNotRepeat)
+          _buildRepeatSection(),
+        if (_event.location != null && _event.location!.isNotEmpty)
+          _buildLocationSection(),
+        if (_event.notes != null && _event.notes!.isNotEmpty)
+          _buildNotesSection(),
+        _buildDeleteButton(),
+      ],
+    );
+  }
+
+  Widget _buildTitleSection() {
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      sliver: SliverToBoxAdapter(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              width: 20,
+              height: 20,
+              margin: const EdgeInsets.only(right: UiConstants.padding),
+              decoration: BoxDecoration(
+                color: _event.color,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Expanded(
+              child: Text(
+                _event.title,
+                style: context.primaryTextTheme.headlineSmall,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDateTimeSection() {
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      sliver: SliverToBoxAdapter(
+        child: Column(
+          children: [
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                const Icon(Symbols.calendar_clock),
+                const SizedBox(width: 16),
+                Text(
+                  _event.date.toEEEEMMMMdyyyy(),
+                  style: context.textTheme.bodyMedium,
                 ),
-              ),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(
-                  _event.title,
-                  style: context.primaryTextTheme.headlineSmall,
+              ],
+            ),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                const SizedBox(width: 40),
+                Text(
+                  _event.allDay
+                      ? 'All day'
+                      : '${_event.startTimeLocal.toHHmma()} → ${_event.endTimeLocal!.toHHmma()}',
+                  style: context.textTheme.bodyMedium,
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
+          ],
         ),
-        const SizedBox(height: 24),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Row(
-            children: [
-              const Icon(Symbols.calendar_clock),
-              const SizedBox(width: 16),
-              Text(
-                _event.date.toEEEEMMMMdyyyy(),
-                style: context.textTheme.bodyMedium,
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 6),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Row(
-            children: [
-              const SizedBox(width: 40),
-              Text(
-                _event.allDay
-                    ? 'All day'
-                    : '${_event.startTimeLocal.toHHmma()} → ${_event.endTimeLocal!.toHHmma()}',
-                style: context.textTheme.bodyMedium,
-              ),
-            ],
-          ),
-        ),
-        if (_event.repeatRule.frequency != RepeatFrequency.doNotRepeat) ...[
-          const SizedBox(height: 6),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Row(
+      ),
+    );
+  }
+
+  Widget _buildRepeatSection() {
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      sliver: SliverToBoxAdapter(
+        child: Column(
+          children: [
+            const SizedBox(height: 6),
+            Row(
               children: [
                 const SizedBox(width: 40),
                 Text(
@@ -130,14 +173,21 @@ class _CalendarEventDetailsScreenState
                 ),
               ],
             ),
-          ),
-        ],
-        if (_event.location != null && _event.location!.isNotEmpty) ...[
-          const SizedBox(height: 24),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLocationSection() {
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      sliver: SliverToBoxAdapter(
+        child: Column(
+          children: [
+            const SizedBox(height: 24),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const Icon(Symbols.location_on),
                 const SizedBox(width: 16),
@@ -149,13 +199,20 @@ class _CalendarEventDetailsScreenState
                 ),
               ],
             ),
-          ),
-        ],
-        if (_event.notes != null && _event.notes!.isNotEmpty) ...[
-          const SizedBox(height: 24),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Row(
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNotesSection() {
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      sliver: SliverToBoxAdapter(
+        child: Column(
+          children: [
+            const SizedBox(height: 24),
+            Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Icon(Symbols.notes),
@@ -168,9 +225,75 @@ class _CalendarEventDetailsScreenState
                 ),
               ],
             ),
-          ),
-        ],
-      ],
+          ],
+        ),
+      ),
     );
+  }
+
+  Widget _buildDeleteButton() {
+    return SliverFillRemaining(
+      hasScrollBody: false,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Spacer(),
+          const SizedBox(height: 32),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(UiConstants.padding),
+              child: SizedBox(
+                width: 105,
+                child:
+                    BlocSelector<
+                      CalendarEventDetailsCubit,
+                      CalendarEventDetailsState,
+                      bool
+                    >(
+                      selector: (state) =>
+                          state is CalendarEventDetailsStateLoading,
+                      builder: (context, loading) {
+                        return AppTextButton(
+                          text: 'Delete event',
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 8,
+                          ),
+                          textStyle: context.textTheme.bodyMedium?.copyWith(
+                            color: context.colorScheme.error,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          onTap: loading ? null : _onDelete,
+                        );
+                      },
+                    ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _onDelete() async {
+    final result = await DeleteEventBottomDialog.show(
+      context,
+      widget.calendarEvent,
+    );
+
+    if (result == DeleteEventResult.deleteThisEvent ||
+        result == DeleteEventResult.deleteFutureEvents) {
+      await context.read<CalendarEventDetailsCubit>().deleteCalendarEvent(
+        widget.calendarEvent.id,
+        deleteAllEvents: result == DeleteEventResult.deleteFutureEvents,
+        instanceDate: widget.calendarEvent.date,
+      );
+
+      context.goNamed(
+        AppRoutes.calendar,
+        queryParameters: {'loadEventsFromServer': 'true'},
+      );
+    }
   }
 }

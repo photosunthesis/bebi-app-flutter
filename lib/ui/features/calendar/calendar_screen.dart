@@ -15,7 +15,9 @@ import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 class CalendarScreen extends StatefulWidget {
-  const CalendarScreen({super.key});
+  const CalendarScreen({this.shouldLoadEventsFromServer = false, super.key});
+
+  final bool shouldLoadEventsFromServer;
 
   @override
   State<CalendarScreen> createState() => _CalendarScreenState();
@@ -28,6 +30,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
   void initState() {
     super.initState();
     _cubit.initialize();
+  }
+
+  @override
+  void didUpdateWidget(covariant CalendarScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.shouldLoadEventsFromServer) {
+      _cubit.initialize(useCache: !widget.shouldLoadEventsFromServer);
+    }
   }
 
   @override

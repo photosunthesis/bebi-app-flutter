@@ -76,7 +76,11 @@ abstract class AppRouter {
                     context.read(),
                     context.read(),
                   ),
-                  child: const CalendarScreen(),
+                  child: CalendarScreen(
+                    shouldLoadEventsFromServer:
+                        state.uri.queryParameters['loadEventsFromServer'] ==
+                        'true',
+                  ),
                 ),
               ),
             ],
@@ -141,6 +145,7 @@ abstract class AppRouter {
         name: AppRoutes.viewCalendarEvent,
         builder: (context, state) => BlocProvider(
           create: (context) => CalendarEventDetailsCubit(
+            context.read(),
             context.read(),
             context.read(),
             context.read(),

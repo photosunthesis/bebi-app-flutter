@@ -17,19 +17,19 @@ enum EventColors {
   @HiveField(3)
   yellow,
   @HiveField(4)
-  red,
+  pink,
   @HiveField(5)
-  purple,
+  orange,
   @HiveField(6)
-  orange;
+  red;
 
   Color get color => switch (this) {
     EventColors.black => AppColors.stone600,
     EventColors.green => AppColors.green,
     EventColors.blue => AppColors.blue,
     EventColors.yellow => AppColors.yellow,
-    EventColors.red => AppColors.red,
-    EventColors.purple => AppColors.purple,
+    EventColors.pink => AppColors.pink,
     EventColors.orange => AppColors.orange,
+    EventColors.red => AppColors.red,
   };
 }

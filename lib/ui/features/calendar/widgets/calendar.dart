@@ -16,7 +16,7 @@ class Calendar extends StatelessWidget {
     return BlocBuilder<CalendarCubit, CalendarState>(
       builder: (context, state) {
         return TableCalendar<CalendarEvent>(
-          eventLoader: (_) => [...state.events, ...state.recurringEvents],
+          eventLoader: (day) => state.events,
           headerVisible: false,
           focusedDay: state.focusedDay,
           currentDay: DateTime.now(),
@@ -162,7 +162,7 @@ class Calendar extends StatelessWidget {
     return Opacity(
       opacity: day.isSameMonth(focusedDay) ? 1 : 0.4,
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 7),
+        padding: const EdgeInsets.only(bottom: 8),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

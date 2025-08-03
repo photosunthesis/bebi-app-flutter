@@ -37,7 +37,7 @@ abstract class UserProfile with _$UserProfile {
   }
 
   Map<String, dynamic> toFirestore() {
-    return <String, dynamic>{
+    return {
       // ID is managed by Firestore
       'code': code,
       'birth_date': Timestamp.fromDate(birthDate),

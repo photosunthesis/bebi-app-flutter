@@ -27,5 +27,6 @@ extension DatetimeExtensions on DateTime {
   bool get isToday => isSameDay(DateTime.now());
 
   DateTime earlierDate(DateTime other) => isBefore(other) ? this : other;
+
   DateTime laterDate(DateTime other) => isAfter(other) ? this : other;
 }

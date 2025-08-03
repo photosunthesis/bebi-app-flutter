@@ -19,7 +19,7 @@ class CalendarEvents extends StatefulWidget {
 }
 
 class _CalendarEventsState extends State<CalendarEvents> {
-  final String _kaomoji =
+  final _kaomoji =
       Kaomojis.happySet[Random().nextInt(Kaomojis.happySet.length)];
 
   @override
@@ -76,12 +76,23 @@ class _CalendarEventsState extends State<CalendarEvents> {
 
   Widget _buildNoEventsPlaceholder() {
     return Center(
-      child: Text(
-        _kaomoji,
-        style: context.textTheme.headlineSmall?.copyWith(
-          fontSize: 30,
-          color: context.colorScheme.secondary.withAlpha(80),
-        ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            _kaomoji,
+            style: context.textTheme.titleLarge?.copyWith(
+              color: context.colorScheme.secondary.withAlpha(80),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'No events',
+            style: context.textTheme.bodyLarge?.copyWith(
+              color: context.colorScheme.secondary.withAlpha(80),
+            ),
+          ),
+        ],
       ),
     );
   }

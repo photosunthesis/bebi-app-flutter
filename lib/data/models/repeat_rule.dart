@@ -38,10 +38,10 @@ abstract class RepeatRule with _$RepeatRule {
   @HiveType(typeId: HiveTypeIds.repeatRule)
   const factory RepeatRule({
     @HiveField(0) required RepeatFrequency frequency,
-    @HiveField(1) int? interval,
-    @HiveField(2) List<int>? daysOfWeek,
-    @HiveField(3) DateTime? endDate,
-    @HiveField(4) int? occurrences,
+    @HiveField(1) List<int>? daysOfWeek,
+    @HiveField(2) DateTime? endDate,
+    @HiveField(3) int? occurrences,
+    @HiveField(4) List<DateTime>? excludedDates,
   }) = _RepeatRule;
 
   factory RepeatRule.fromMap(Map<String, dynamic> map) {
@@ -49,7 +49,6 @@ abstract class RepeatRule with _$RepeatRule {
       frequency: RepeatFrequency.values.firstWhere(
         (e) => e.name == map['frequency'],
       ),
-      interval: map['interval'],
       daysOfWeek: map['days_of_week'] != null
           ? List<int>.from(map['days_of_week'])
           : null,
@@ -57,16 +56,22 @@ abstract class RepeatRule with _$RepeatRule {
           ? (map['end_date'] as Timestamp).toDate()
           : null,
       occurrences: map['occurrences'],
+      excludedDates: map['excluded_dates'] != null
+          ? List<DateTime>.from(
+              map['excluded_dates'].map((e) => (e as Timestamp).toDate()),
+            )
+          : null,
     );
   }
 
   Map<String, dynamic> toMap() {
-    return <String, dynamic>{
+    return {
       'frequency': frequency.name,
-      'interval': interval,
       if (daysOfWeek != null) 'days_of_week': daysOfWeek,
       if (endDate != null) 'end_date': Timestamp.fromDate(endDate!),
       if (occurrences != null) 'occurrences': occurrences,
+      if (excludedDates != null)
+        'excluded_dates': excludedDates!.map(Timestamp.fromDate).toList(),
     };
   }
 }
