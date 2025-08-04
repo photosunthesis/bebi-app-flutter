@@ -24,11 +24,11 @@ class ProfileSetupScreen extends StatefulWidget {
 }
 
 class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
-  late final ProfileSetupCubit _cubit = context.read<ProfileSetupCubit>();
+  late final _cubit = context.read<ProfileSetupCubit>();
 
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _displayNameController = TextEditingController();
-  final TextEditingController _birthdayController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final _displayNameController = TextEditingController();
+  final _birthdayController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -41,22 +41,17 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         key: _formKey,
         child: Scaffold(
           resizeToAvoidBottomInset: true,
-          body: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: UiConstants.padding,
-            ),
-            child: ListView(
-              children: [
-                const SafeArea(child: SizedBox(height: UiConstants.padding)),
-                _buildHeader(),
-                const SizedBox(height: 32),
-                _buildProfilePicture(),
-                const SizedBox(height: 44),
-                _buildDisplayNameField(),
-                const SizedBox(height: 16),
-                _buildBirthdateField(),
-              ],
-            ),
+          body: ListView(
+            children: [
+              const SafeArea(child: SizedBox(height: UiConstants.padding)),
+              _buildHeader(),
+              const SizedBox(height: 32),
+              _buildProfilePicture(),
+              const SizedBox(height: 44),
+              _buildDisplayNameField(),
+              const SizedBox(height: 16),
+              _buildBirthdateField(),
+            ],
           ),
           bottomNavigationBar: _buildBottomBar(),
         ),
@@ -65,100 +60,104 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   }
 
   Widget _buildProfilePicture() {
-    return BlocSelector<ProfileSetupCubit, ProfileSetupState, File?>(
-      selector: (state) => state.profilePicture,
-      builder: (context, profilePicture) {
-        final hasProfilePicture = profilePicture != null;
-        return Align(
-          alignment: Alignment.center,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              ShadowContainer(
-                shape: BoxShape.circle,
-                child: AnimatedSwitcher(
-                  duration: 300.milliseconds,
-                  child: CircleAvatar(
-                    key: ValueKey(profilePicture),
-                    radius: 60,
-                    backgroundColor: context.colorScheme.secondary.withAlpha(
-                      20,
-                    ),
-                    backgroundImage: hasProfilePicture
-                        ? FileImage(profilePicture)
-                        : null,
-                    child: !hasProfilePicture
-                        ? Icon(
-                            Symbols.face,
-                            size: 69,
-                            color: context.colorScheme.primary.withAlpha(90),
-                          )
-                        : null,
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: -5,
-                right: -18,
-                child: ShadowContainer(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
+      child: BlocSelector<ProfileSetupCubit, ProfileSetupState, File?>(
+        selector: (state) => state.profilePicture,
+        builder: (context, profilePicture) {
+          final hasProfilePicture = profilePicture != null;
+          return Align(
+            alignment: Alignment.center,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                ShadowContainer(
                   shape: BoxShape.circle,
-                  shadowOffset: const Offset(0, 0),
-                  child: TextButton(
-                    onPressed: hasProfilePicture
-                        ? _cubit.removeProfilePicture
-                        : _cubit.setProfilePicture,
-                    style: IconButton.styleFrom(
-                      backgroundColor: context.colorScheme.onPrimary,
-                      foregroundColor: hasProfilePicture
-                          ? context.colorScheme.error
-                          : context.colorScheme.primary,
-                      padding: const EdgeInsets.all(8),
-                      shape: const CircleBorder(),
-                    ),
-                    child: Icon(
-                      profilePicture != null
-                          ? Symbols.delete
-                          : Symbols.add_a_photo,
-
-                      size: 20,
+                  child: AnimatedSwitcher(
+                    duration: 300.milliseconds,
+                    child: CircleAvatar(
+                      key: ValueKey(profilePicture),
+                      radius: 60,
+                      backgroundColor: context.colorScheme.secondary.withAlpha(
+                        20,
+                      ),
+                      backgroundImage: hasProfilePicture
+                          ? FileImage(profilePicture)
+                          : null,
+                      child: !hasProfilePicture
+                          ? Icon(
+                              Symbols.face,
+                              size: 69,
+                              color: context.colorScheme.primary.withAlpha(90),
+                            )
+                          : null,
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        );
-      },
+                Positioned(
+                  bottom: -5,
+                  right: -18,
+                  child: ShadowContainer(
+                    shape: BoxShape.circle,
+                    shadowOffset: const Offset(0, 0),
+                    child: TextButton(
+                      onPressed: hasProfilePicture
+                          ? _cubit.removeProfilePicture
+                          : _cubit.setProfilePicture,
+                      style: IconButton.styleFrom(
+                        backgroundColor: context.colorScheme.onPrimary,
+                        foregroundColor: hasProfilePicture
+                            ? context.colorScheme.error
+                            : context.colorScheme.primary,
+                        padding: const EdgeInsets.all(8),
+                        shape: const CircleBorder(),
+                      ),
+                      child: Icon(
+                        profilePicture != null
+                            ? Symbols.delete
+                            : Symbols.add_a_photo,
+
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 
   Widget _buildHeader() {
-    return Column(
-      children: [
-        Text(
-          'Set up your profile',
-          style: context.primaryTextTheme.headlineSmall,
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 16),
-        SizedBox(
-          width: context.screenWidth * 0.85,
-          child: Text(
-            'Add a photo and name to personalize your profile. These details will be visible on your account.',
-            style: context.textTheme.bodyLarge?.copyWith(
-              height: 1.4,
-              fontWeight: FontWeight.normal,
-            ),
-            textAlign: TextAlign.center,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Set up your profile',
+            style: context.primaryTextTheme.headlineSmall,
           ),
-        ),
-      ],
+          const SizedBox(height: 16),
+          SizedBox(
+            child: Text(
+              'Add a photo and name to personalize your profile. These details will be visible on your account.',
+              style: context.textTheme.bodyLarge?.copyWith(
+                height: 1.4,
+                fontWeight: FontWeight.normal,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildDisplayNameField() {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: context.screenWidth * 0.05),
+      padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
       child: AppTextFormField(
         controller: _displayNameController,
         labelText: 'Display name',
@@ -187,11 +186,11 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
 
   Widget _buildBirthdateField() {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: context.screenWidth * 0.05),
+      padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
       child: AppTextFormField(
         controller: _birthdayController,
         labelText: 'Birthdate',
-        hintText: 'DD/MM/YYYY',
+        hintText: 'MM/DD/YYYY',
         keyboardType: TextInputType.number,
         textInputAction: TextInputAction.done,
         autofillHints: const [AutofillHints.birthday],
@@ -202,10 +201,10 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             return 'Please enter your birthdate.';
           }
 
-          final date = value.toDateTimeStrict('dd/MM/yyyy');
+          final date = value.toDateTimeStrict('mm/dd/yyyy');
 
           if (date == null) {
-            return 'Please enter a valid date in DD/MM/YYYY format.';
+            return 'Please enter a valid date in MM/DD/YYYY format.';
           }
 
           if (date.isAfter(DateTime.now())) {
@@ -220,8 +219,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
 
   Widget _buildBottomBar() {
     return SafeArea(
-      child: Container(
-        margin: EdgeInsets.symmetric(horizontal: context.screenWidth * 0.05),
+      child: Padding(
         padding: const EdgeInsets.all(UiConstants.padding),
         child: BlocSelector<ProfileSetupCubit, ProfileSetupState, bool>(
           selector: (state) => state.loading,

@@ -59,7 +59,7 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
             userId: _firebaseAuth.currentUser!.uid,
             createdBy: _firebaseAuth.currentUser!.uid,
             code: await _generateUserCode(),
-            birthDate: DateFormat('mm/dd/yyyy').parse(birthDate),
+            birthDate: DateFormat('mm/dd/yyyy').parseStrict(birthDate),
             displayName: displayName,
             photoUrl: photoUrl,
             createdAt: DateTime.now(),
