@@ -4,9 +4,9 @@ import 'package:bebi_app/data/models/event_color.dart';
 import 'package:bebi_app/data/models/repeat_rule.dart';
 import 'package:bebi_app/ui/features/calendar_event_form/calendar_event_form_cubit.dart';
 import 'package:bebi_app/ui/features/calendar_event_form/widgets/calendar_event_form.dart';
-import 'package:bebi_app/ui/shared_widgets/buttons/app_text_button.dart';
 import 'package:bebi_app/ui/shared_widgets/layouts/main_app_bar.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
+import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/extension/string_extensions.dart';
 import 'package:flutter/material.dart';
@@ -138,15 +138,24 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
 
   AppBar _buildAppBar() {
     return MainAppBar.build(
+      context,
       darkStatusBarIcons: false,
       leading: IconButton(
         icon: const Icon(Symbols.close),
         onPressed: context.pop,
       ),
       actions: [
-        Padding(
+        Container(
+          width: 48,
           padding: const EdgeInsets.symmetric(vertical: 12),
-          child: AppTextButton(text: 'Save', onTap: _onSave),
+          child: TextButton(
+            onPressed: _onSave,
+            style: TextButton.styleFrom(
+              foregroundColor: context.colorScheme.onPrimary,
+              backgroundColor: context.colorScheme.primary,
+            ),
+            child: const Text('Save'),
+          ),
         ),
       ],
     );

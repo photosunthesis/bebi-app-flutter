@@ -9,7 +9,6 @@ import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 
 class CalendarEvents extends StatefulWidget {
   const CalendarEvents({super.key});
@@ -29,7 +28,7 @@ class _CalendarEventsState extends State<CalendarEvents> {
         selector: (state) => state.focusedDayEvents,
         builder: (context, events) {
           return AnimatedSwitcher(
-            duration: 150.milliseconds,
+            duration: 120.milliseconds,
             reverseDuration: 0.milliseconds,
             transitionBuilder: (child, animation) {
               return SizeTransition(
@@ -100,14 +99,11 @@ class _CalendarEventsState extends State<CalendarEvents> {
   Widget _buildEventCard(BuildContext context, CalendarEvent event) {
     return IntrinsicHeight(
       child: InkWell(
-        onTap: () async {
-          await context.pushNamed(
-            AppRoutes.viewCalendarEvent,
-            extra: event,
-            pathParameters: {'id': event.id},
-          );
-          context.read<CalendarCubit>().initialize();
-        },
+        onTap: () async => context.pushNamed(
+          AppRoutes.viewCalendarEvent,
+          extra: event,
+          pathParameters: {'id': event.id},
+        ),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(

@@ -3,7 +3,6 @@ import 'package:bebi_app/ui/features/home/home_cubit.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,10 +12,12 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  late final _cubit = context.read<HomeCubit>();
+
   @override
   void initState() {
     super.initState();
-    context.read<HomeCubit>().initialize();
+    _cubit.initialize();
   }
 
   @override
@@ -28,7 +29,24 @@ class _HomeScreenState extends State<HomeScreen> {
         HomeError(:final String message) => context.showSnackbar(message),
         _ => null,
       },
-      child: const Scaffold(body: Center(child: Text('Home Screen'))),
+      child: Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Home Screen'),
+              const SizedBox(height: 12),
+              TextButton(
+                onPressed: () async {
+                  await _cubit.signOut();
+                  context.goNamed(AppRoutes.signIn);
+                },
+                child: const Text('Sign out'),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

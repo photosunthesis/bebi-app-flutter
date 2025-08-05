@@ -5,13 +5,12 @@ import 'package:bebi_app/data/models/day_of_week.dart';
 import 'package:bebi_app/data/models/repeat_rule.dart';
 import 'package:bebi_app/ui/features/calendar_event_details/calendar_event_details_cubit.dart';
 import 'package:bebi_app/ui/features/calendar_event_details/widgets/delete_event_bottom_dialog.dart';
-import 'package:bebi_app/ui/shared_widgets/buttons/app_text_button.dart';
 import 'package:bebi_app/ui/shared_widgets/layouts/main_app_bar.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
+import 'package:bebi_app/utils/extension/color_extensions.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 class CalendarEventDetailsScreen extends StatefulWidget {
@@ -40,6 +39,7 @@ class _CalendarEventDetailsScreenState
 
   AppBar _buildAppBar() {
     return MainAppBar.build(
+      context,
       actions: [
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 12),
@@ -51,21 +51,22 @@ class _CalendarEventDetailsScreenState
               >(
                 selector: (state) => state is CalendarEventDetailsStateLoading,
                 builder: (context, loading) {
-                  return AppTextButton(
-                    text: 'Edit',
-                    onTap: loading
-                        ? null
-                        : () async {
-                            final updatedEvent = await context
-                                .pushNamed<CalendarEvent>(
-                                  AppRoutes.updateCalendarEvent,
-                                  extra: _event,
-                                  pathParameters: {'id': _event.id},
-                                );
-                            if (updatedEvent != null) {
-                              setState(() => _event = updatedEvent);
-                            }
-                          },
+                  return SizedBox(
+                    width: 48,
+                    child: TextButton(
+                      onPressed: () async {
+                        final updatedEvent = await context
+                            .pushNamed<CalendarEvent>(
+                              AppRoutes.updateCalendarEvent,
+                              extra: _event,
+                              pathParameters: {'id': _event.id},
+                            );
+                        if (updatedEvent != null) {
+                          setState(() => _event = updatedEvent);
+                        }
+                      },
+                      child: const Text('Edit'),
+                    ),
                   );
                 },
               ),
@@ -253,17 +254,17 @@ class _CalendarEventDetailsScreenState
                       selector: (state) =>
                           state is CalendarEventDetailsStateLoading,
                       builder: (context, loading) {
-                        return AppTextButton(
-                          text: 'Delete event',
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 8,
+                        return TextButton(
+                          style: TextButton.styleFrom(
+                            textStyle: context.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                            foregroundColor: context.colorScheme.error.darken(
+                              0.1,
+                            ),
                           ),
-                          textStyle: context.textTheme.bodyMedium?.copyWith(
-                            color: context.colorScheme.error,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          onTap: loading ? null : _onDelete,
+                          onPressed: loading ? null : _onDelete,
+                          child: const Text('Delete event'),
                         );
                       },
                     ),
@@ -277,7 +278,7 @@ class _CalendarEventDetailsScreenState
   }
 
   Future<void> _onDelete() async {
-    final result = await DeleteEventBottomDialog.show(
+    final result = await showDeleteEventBottomDialog(
       context,
       widget.calendarEvent,
     );

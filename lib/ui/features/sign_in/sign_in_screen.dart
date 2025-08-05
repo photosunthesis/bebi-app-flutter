@@ -8,7 +8,6 @@ import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -165,7 +164,7 @@ class _SignInScreenState extends State<SignInScreen> {
                               );
                         }
                       },
-                child: const Text('Sign in'),
+                child: Text(loading ? 'Signing in...' : 'Sign in'),
               ),
             ],
           ),

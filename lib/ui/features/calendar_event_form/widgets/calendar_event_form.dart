@@ -243,7 +243,7 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
           },
         ),
         AnimatedSize(
-          duration: 150.milliseconds,
+          duration: 120.milliseconds,
           alignment: Alignment.topCenter,
           child: !widget.allDay
               ? Column(

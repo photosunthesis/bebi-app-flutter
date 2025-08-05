@@ -10,10 +10,9 @@ import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:bebi_app/utils/extension/string_extensions.dart';
 import 'package:bebi_app/utils/extension/text_style_extensions.dart';
-import 'package:bebi_app/utils/formatter/birth_date_formatter.dart';
+import 'package:bebi_app/utils/formatter/date_input_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 class ProfileSetupScreen extends StatefulWidget {
@@ -194,7 +193,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         keyboardType: TextInputType.number,
         textInputAction: TextInputAction.done,
         autofillHints: const [AutofillHints.birthday],
-        inputFormatters: const [BirthDateFormatter()],
+        inputFormatters: const [DateInputFormatter()],
         inputStyle: context.textTheme.bodyMedium?.monospace,
         validator: (value) {
           if (value == null || value.isEmpty) {
@@ -237,7 +236,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                         }
                       },
 
-                child: const Text('Save'),
+                child: Text(loading ? 'Saving...' : 'Save'),
               ),
             );
           },

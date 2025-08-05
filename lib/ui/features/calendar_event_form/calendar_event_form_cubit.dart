@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bebi_app/config/firebase_services.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/data/models/event_color.dart';
@@ -75,15 +77,17 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
           updatedEvent,
         );
 
-        _firebaseAnalytics.logEvent(
-          name: state.calendarEvent?.id.isNotEmpty ?? false
-              ? 'update_calendar_event'
-              : 'create_calendar_event',
-          parameters: <String, Object>{
-            'user_id': _firebaseAuth.currentUser!.uid,
-            'created_at': DateTime.now().toUtc().toIso8601String(),
-            'updated_at': DateTime.now().toUtc().toIso8601String(),
-          },
+        unawaited(
+          _firebaseAnalytics.logEvent(
+            name: state.calendarEvent?.id.isNotEmpty ?? false
+                ? 'update_calendar_event'
+                : 'create_calendar_event',
+            parameters: {
+              'user_id': _firebaseAuth.currentUser!.uid,
+              'created_at': DateTime.now().toUtc().toIso8601String(),
+              'updated_at': DateTime.now().toUtc().toIso8601String(),
+            },
+          ),
         );
 
         emit(state.copyWith(success: true, calendarEvent: updatedEvent));

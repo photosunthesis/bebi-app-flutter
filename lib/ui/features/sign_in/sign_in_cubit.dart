@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bebi_app/utils/guard.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -25,9 +27,11 @@ class SignInCubit extends Cubit<SignInState> {
         );
         emit(const SignInSuccess());
         if (!kDebugMode) {
-          _firebaseAnalytics.logLogin(
-            loginMethod: 'email',
-            parameters: <String, Object>{'email': email},
+          unawaited(
+            _firebaseAnalytics.logLogin(
+              loginMethod: 'email',
+              parameters: {'email': email},
+            ),
           );
         }
       },
@@ -39,13 +43,6 @@ class SignInCubit extends Cubit<SignInState> {
         };
 
         emit(SignInFailure(errorMessage));
-
-        if (!kDebugMode) {
-          _firebaseAnalytics.logEvent(
-            name: 'sign_in_error',
-            parameters: <String, Object>{'error': error.toString()},
-          );
-        }
       },
     );
   }

@@ -25,9 +25,7 @@ class Calendar extends StatelessWidget {
           selectedDayPredicate: (day) => day.isSameDay(state.focusedDay),
           daysOfWeekHeight: 32,
           calendarFormat: CalendarFormat.month,
-          availableCalendarFormats: const <CalendarFormat, String>{
-            CalendarFormat.month: 'Month',
-          },
+          availableCalendarFormats: {CalendarFormat.month: 'Month'},
           daysOfWeekStyle: _dayOfWeekStyle(context),
           calendarStyle: _calendarStyle(context),
           calendarBuilders: CalendarBuilders(

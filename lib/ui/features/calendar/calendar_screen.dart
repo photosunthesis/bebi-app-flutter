@@ -3,15 +3,12 @@ import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/ui/features/calendar/calendar_cubit.dart';
 import 'package:bebi_app/ui/features/calendar/widgets/calendar.dart';
 import 'package:bebi_app/ui/features/calendar/widgets/calendar_events.dart';
-import 'package:bebi_app/ui/shared_widgets/buttons/app_icon_button.dart';
-import 'package:bebi_app/ui/shared_widgets/buttons/app_text_button.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 class CalendarScreen extends StatefulWidget {
@@ -29,14 +26,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   void initState() {
     super.initState();
-    _cubit.initialize();
+    _cubit.loadCalendarEvents();
   }
 
   @override
   void didUpdateWidget(covariant CalendarScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.shouldLoadEventsFromServer) {
-      _cubit.initialize(useCache: !widget.shouldLoadEventsFromServer);
+      _cubit.loadCalendarEvents(useCache: !widget.shouldLoadEventsFromServer);
     }
   }
 
@@ -61,62 +58,67 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   Widget _buildTitle() {
-    return Padding(
-      padding: const EdgeInsets.only(
-        left: UiConstants.padding,
-        right: UiConstants.padding,
-        top: 8,
-      ),
-      child: SafeArea(
-        child: BlocSelector<CalendarCubit, CalendarState, DateTime>(
-          selector: (state) => state.focusedDay,
-          builder: (context, focusedDay) => Row(
+    return SafeArea(
+      child: BlocSelector<CalendarCubit, CalendarState, DateTime>(
+        selector: (state) => state.focusedDay,
+        builder: (context, focusedDay) => SizedBox(
+          height: 30,
+          child: Stack(
             children: [
-              Flexible(
-                flex: 1,
-                child: AnimatedSwitcher(
-                  duration: 150.milliseconds,
-                  child: focusedDay.isSameDay(DateTime.now())
-                      ? Container()
-                      : Align(
-                          alignment: Alignment.centerLeft,
-                          child: Padding(
-                            padding: const EdgeInsets.only(right: 42),
-                            child: AppTextButton(
-                              text: 'Today',
-                              onTap: () => context
-                                  .read<CalendarCubit>()
-                                  .setFocusedDay(DateTime.now()),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: UiConstants.padding,
+                  vertical: 0,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    AnimatedSwitcher(
+                      duration: 150.milliseconds,
+                      child: focusedDay.isSameDay(DateTime.now())
+                          ? const SizedBox.shrink()
+                          : SizedBox(
+                              key: const ValueKey('today'),
+                              width: 56,
+                              height: 30,
+                              child: TextButton(
+                                onPressed: () => context
+                                    .read<CalendarCubit>()
+                                    .setFocusedDay(DateTime.now()),
+                                child: const Text('Today'),
+                              ),
                             ),
-                          ),
+                    ),
+                    SizedBox(
+                      width: 30,
+                      height: 30,
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          visualDensity: VisualDensity.compact,
                         ),
-                ),
-              ),
-              Flexible(
-                flex: 2,
-                child: Center(
-                  child: Text(
-                    focusedDay.toMMMMyyyy(),
-                    style: context.primaryTextTheme.headlineSmall,
-                  ),
-                ),
-              ),
-              Flexible(
-                flex: 1,
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: AppIconButton(
-                    icon: Symbols.add,
-                    onTap: () async {
-                      final eventWasCreated = await context.pushNamed<bool>(
-                        AppRoutes.createCalendarEvent,
-                        queryParameters: {
-                          'selectedDate': focusedDay.toIso8601String(),
+                        child: const Icon(Symbols.add),
+                        onPressed: () async {
+                          final eventWasCreated = await context.pushNamed<bool>(
+                            AppRoutes.createCalendarEvent,
+                            queryParameters: {
+                              'selectedDate': focusedDay.toIso8601String(),
+                            },
+                          );
+                          if (eventWasCreated == true) {
+                            await _cubit.loadCalendarEvents();
+                          }
                         },
-                      );
-                      if (eventWasCreated == true) _cubit.initialize();
-                    },
-                  ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Align(
+                alignment: Alignment.center,
+                child: Text(
+                  focusedDay.toMMMMyyyy(),
+                  style: context.primaryTextTheme.headlineSmall,
                 ),
               ),
             ],

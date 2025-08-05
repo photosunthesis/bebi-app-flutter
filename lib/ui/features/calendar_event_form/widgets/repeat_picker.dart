@@ -60,7 +60,7 @@ class _RepeatPickerState extends State<RepeatPicker> {
   @override
   Widget build(BuildContext context) {
     return AnimatedSize(
-      duration: 150.milliseconds,
+      duration: 120.milliseconds,
       curve: Curves.easeOutCirc,
       alignment: Alignment.topCenter,
       child: Column(

@@ -26,7 +26,7 @@ class CalendarCubit extends Cubit<CalendarState> {
 
   static const _defaultTimeWindow = Duration(days: 90);
 
-  Future<void> initialize({bool useCache = true}) async {
+  Future<void> loadCalendarEvents({bool useCache = true}) async {
     await guard(
       () async {
         if (!useCache) emit(state.copyWith(loading: true));
