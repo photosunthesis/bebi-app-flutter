@@ -5,9 +5,21 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
-// Items here must match the order in the BottomNavigationBar
-// and the order of the StatefulShellBranches in AppRouter.
-enum _Tabs { home, calendar, stories, cycles, location }
+enum MainScaffoldTab {
+  home,
+  calendar,
+  stories,
+  cycles,
+  location;
+
+  IconData get iconData => switch (this) {
+    MainScaffoldTab.home => Symbols.home,
+    MainScaffoldTab.calendar => Symbols.calendar_month,
+    MainScaffoldTab.stories => Symbols.calendar_view_day,
+    MainScaffoldTab.cycles => Symbols.menstrual_health,
+    MainScaffoldTab.location => Symbols.location_pin,
+  };
+}
 
 class MainScaffold extends StatefulWidget {
   const MainScaffold({
@@ -24,8 +36,8 @@ class MainScaffold extends StatefulWidget {
 }
 
 class _MainScaffoldState extends State<MainScaffold> {
-  _Tabs activeTab = _Tabs.home;
-  _Tabs? previousTab;
+  MainScaffoldTab activeTab = MainScaffoldTab.home;
+  MainScaffoldTab? previousTab;
   DateTime? _lastTapTime;
 
   @override
@@ -34,7 +46,7 @@ class _MainScaffoldState extends State<MainScaffold> {
       body: _AnimatedBranchContainer(
         currentIndex: widget.navigationShell.currentIndex,
         previousIndex: previousTab != null
-            ? _Tabs.values.indexOf(previousTab!)
+            ? MainScaffoldTab.values.indexOf(previousTab!)
             : null,
         children: widget.children,
       ),
@@ -44,56 +56,39 @@ class _MainScaffoldState extends State<MainScaffold> {
 
   Widget _buildBottomBar(BuildContext context) {
     return Container(
-      height: context.screenHeight * 0.12,
       decoration: BoxDecoration(
         color: context.colorScheme.surface,
         border: Border(
           top: BorderSide(
-            color: context.colorScheme.onSecondary,
+            color: context.colorScheme.outline,
             width: UiConstants.borderWidth,
           ),
         ),
       ),
       child: SafeArea(
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildTabIcon(_Tabs.home, Symbols.home),
-            _buildTabIcon(_Tabs.calendar, Symbols.calendar_month),
-            _buildTabIcon(_Tabs.stories, Symbols.calendar_view_day),
-            _buildTabIcon(_Tabs.cycles, Symbols.menstrual_health),
-            _buildTabIcon(_Tabs.location, Symbols.location_pin),
-          ],
-        ),
-      ),
-    );
-  }
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: MainScaffoldTab.values.map((tab) {
+            final isActive = tab == activeTab;
+            final color = isActive
+                ? context.colorScheme.primary
+                : context.colorScheme.secondary.withAlpha(120);
 
-  Widget _buildTabIcon(_Tabs tab, IconData icon) {
-    final isActive = tab == activeTab;
-    final color = isActive
-        ? context.colorScheme.primary
-        : context.colorScheme.secondary.withAlpha(120);
-    return Flexible(
-      child: Center(
-        child: Material(
-          color: Colors.transparent,
-          shape: const CircleBorder(),
-          child: InkWell(
-            onTap: () => _onTap(_Tabs.values.indexOf(tab)),
-            customBorder: const CircleBorder(),
-            splashColor: context.colorScheme.primary.withAlpha(20),
-            highlightColor: context.colorScheme.primary.withAlpha(10),
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(
-                12,
-                context.screenHeight > 100 ? 0 : 14,
-                12,
-                12,
+            return Padding(
+              padding: const EdgeInsets.all(4),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: () => _onTap(MainScaffoldTab.values.indexOf(tab)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Icon(tab.iconData, color: color, size: 28),
+                  ),
+                ),
               ),
-              child: Icon(icon, color: color, size: 28),
-            ),
-          ),
+            );
+          }).toList(),
         ),
       ),
     );
@@ -103,13 +98,13 @@ class _MainScaffoldState extends State<MainScaffold> {
     final now = DateTime.now();
 
     if (_lastTapTime != null &&
-        now.difference(_lastTapTime!) < 160.milliseconds) {
+        now.difference(_lastTapTime!) < 120.milliseconds) {
       return; // Ignore taps within debounce window
     }
 
     _lastTapTime = now;
 
-    final tab = _Tabs.values[index];
+    final tab = MainScaffoldTab.values[index];
 
     if (tab == activeTab) return; // Ignore if the same tab is tapped
 
@@ -151,7 +146,7 @@ class _AnimatedBranchContainerState extends State<_AnimatedBranchContainer>
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: 150.milliseconds,
+      duration: 120.milliseconds,
       vsync: this,
     );
   }
@@ -184,7 +179,6 @@ class _AnimatedBranchContainerState extends State<_AnimatedBranchContainer>
     return Stack(
       children: widget.children.asMap().entries.map((entry) {
         final index = entry.key;
-        final child = entry.value;
         var shouldShow = index == widget.currentIndex;
 
         if (_isAnimating && index == _animatingFromIndex) {
@@ -193,41 +187,66 @@ class _AnimatedBranchContainerState extends State<_AnimatedBranchContainer>
 
         return AnimatedBuilder(
           animation: _animationController,
-          builder: (context, _) {
-            // Calculate slide offset for animation inside AnimatedBuilder
-            var slideOffset = Offset.zero;
-
-            if (_isAnimating) {
-              final isForward =
-                  widget.currentIndex > (_animatingFromIndex ?? 0);
-              final animationValue = Curves.easeInOutQuad.transform(
-                _animationController.value,
+          builder: (context, child) {
+            if (!_isAnimating) {
+              return _branchNavigatorWrapper(
+                index,
+                Visibility(
+                  visible: shouldShow,
+                  maintainState: true,
+                  child: entry.value,
+                ),
               );
-
-              if (index == _animatingFromIndex) {
-                // Outgoing tab - slide out
-                slideOffset = Offset(
-                  (isForward ? -1.0 : 1.0) * animationValue,
-                  0,
-                );
-              } else if (index == widget.currentIndex) {
-                // Incoming tab - slide in
-                slideOffset = Offset(
-                  (isForward ? 1.0 : -1.0) * (1.0 - animationValue),
-                  0,
-                );
-              }
             }
 
-            return Transform.translate(
-              offset: Offset(
-                slideOffset.dx * context.screenWidth,
-                slideOffset.dy * context.screenHeight,
-              ),
-              child: Visibility(
-                visible: shouldShow,
-                maintainState: true, // Keep widget state alive
-                child: _branchNavigatorWrapper(index, child),
+            final isForward = widget.currentIndex > (_animatingFromIndex ?? 0);
+
+            Animation<double> fadeAnimation;
+            Animation<Offset> slideAnimation;
+
+            if (index == widget.currentIndex) {
+              fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
+                CurvedAnimation(
+                  parent: _animationController,
+                  curve: Curves.easeIn,
+                ),
+              );
+              slideAnimation =
+                  Tween<Offset>(
+                    begin: Offset(isForward ? 0.1 : -0.1, 0),
+                    end: Offset.zero,
+                  ).animate(
+                    CurvedAnimation(
+                      parent: _animationController,
+                      curve: Curves.easeIn,
+                    ),
+                  );
+            } else if (index == _animatingFromIndex) {
+              fadeAnimation = Tween<double>(begin: 1, end: 0).animate(
+                CurvedAnimation(
+                  parent: _animationController,
+                  curve: Curves.easeOut,
+                ),
+              );
+              slideAnimation =
+                  Tween<Offset>(
+                    begin: Offset.zero,
+                    end: Offset(isForward ? -0.1 : 0.1, 0),
+                  ).animate(
+                    CurvedAnimation(
+                      parent: _animationController,
+                      curve: Curves.easeOut,
+                    ),
+                  );
+            } else {
+              return const SizedBox.shrink();
+            }
+
+            return FadeTransition(
+              opacity: fadeAnimation,
+              child: SlideTransition(
+                position: slideAnimation,
+                child: _branchNavigatorWrapper(index, entry.value),
               ),
             );
           },

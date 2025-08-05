@@ -1,6 +1,7 @@
 import 'package:bebi_app/app/theme/app_colors.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 // TODO Add dark theme support
 
@@ -12,12 +13,19 @@ abstract class AppTheme {
     primaryTextTheme: _primaryTextTheme,
     inputDecorationTheme: _inputDecorationTheme,
     elevatedButtonTheme: _elevatedButtonTheme,
+    outlinedButtonTheme: _outlinedButtonTheme,
+    iconButtonTheme: _iconButtonTheme,
     textButtonTheme: _textButtonTheme,
     appBarTheme: _appBarTheme,
     cardTheme: _cardTheme,
     floatingActionButtonTheme: _floatingActionButtonTheme,
-    iconButtonTheme: _iconButtonTheme,
     iconTheme: _iconTheme,
+    actionIconTheme: _actionIconTheme,
+  );
+
+  static final _actionIconTheme = ActionIconThemeData(
+    backButtonIconBuilder: (context) => const Icon(Symbols.arrow_back),
+    closeButtonIconBuilder: (context) => const Icon(Symbols.close),
   );
 
   static const _colorScheme = ColorScheme.light(
@@ -28,6 +36,7 @@ abstract class AppTheme {
     surfaceContainerHighest: AppColors.stone900,
     error: AppColors.red,
     inversePrimary: AppColors.green,
+    outline: AppColors.stone700,
 
     // Text colors
     onSecondary: AppColors.stone900,
@@ -69,56 +78,108 @@ abstract class AppTheme {
     style:
         ElevatedButton.styleFrom(
           backgroundColor: _colorScheme.primary,
-          foregroundColor: _colorScheme.onPrimary,
+          foregroundColor: _colorScheme.surface,
           shape: const RoundedRectangleBorder(
             borderRadius: UiConstants.borderRadius,
           ),
-          minimumSize: const Size.fromHeight(44),
           textStyle: _textTheme.labelLarge?.copyWith(
             fontSize: 14,
             fontWeight: FontWeight.w600,
           ),
+          minimumSize: const Size.fromHeight(42),
         ).copyWith(
           elevation: const WidgetStatePropertyAll(0),
           shadowColor: WidgetStatePropertyAll(_colorScheme.shadow),
           backgroundColor: WidgetStatePropertyAll(_colorScheme.primary),
           foregroundColor: WidgetStateColor.resolveWith(
             (states) => states.contains(WidgetState.disabled)
-                ? _colorScheme.onPrimary.withAlpha(100)
-                : _colorScheme.onPrimary,
+                ? _colorScheme.surface.withAlpha(100)
+                : _colorScheme.surface,
+          ),
+        ),
+  );
+
+  static final _outlinedButtonTheme = OutlinedButtonThemeData(
+    style:
+        OutlinedButton.styleFrom(
+          backgroundColor: _colorScheme.surface,
+          foregroundColor: _colorScheme.primary,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              color: _colorScheme.secondary,
+              width: UiConstants.borderWidth,
+            ),
+            borderRadius: UiConstants.borderRadius,
+          ),
+          textStyle: _textTheme.labelLarge?.copyWith(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+        ).copyWith(
+          elevation: const WidgetStatePropertyAll(0),
+          shadowColor: WidgetStatePropertyAll(_colorScheme.shadow),
+          backgroundColor: WidgetStatePropertyAll(_colorScheme.surface),
+          foregroundColor: WidgetStateColor.resolveWith(
+            (states) => states.contains(WidgetState.disabled)
+                ? _colorScheme.primary.withAlpha(100)
+                : _colorScheme.primary,
           ),
         ),
   );
 
   static final _textButtonTheme = TextButtonThemeData(
-    style: TextButton.styleFrom(
-      backgroundColor: _colorScheme.onPrimary,
-      foregroundColor: _colorScheme.primary,
-      textStyle: _textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600),
-      shape: RoundedRectangleBorder(
-        borderRadius: UiConstants.borderRadius,
-        side: BorderSide(
-          color: _colorScheme.onSecondary,
-          width: UiConstants.borderWidth,
+    style:
+        TextButton.styleFrom(
+          backgroundColor: _colorScheme.surface,
+          foregroundColor: _colorScheme.primary,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              color: _colorScheme.secondary,
+              width: UiConstants.borderWidth,
+            ),
+            borderRadius: UiConstants.borderRadius,
+          ),
+          textStyle: _textTheme.labelLarge?.copyWith(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+        ).copyWith(
+          elevation: const WidgetStatePropertyAll(0),
+          shadowColor: WidgetStatePropertyAll(_colorScheme.shadow),
+          backgroundColor: WidgetStatePropertyAll(_colorScheme.surface),
+          foregroundColor: WidgetStateColor.resolveWith(
+            (states) => states.contains(WidgetState.disabled)
+                ? _colorScheme.primary.withAlpha(100)
+                : _colorScheme.primary,
+          ),
         ),
-      ),
-    ),
   );
 
   static final _iconButtonTheme = IconButtonThemeData(
-    style: IconButton.styleFrom(
-      visualDensity: VisualDensity.compact,
-      padding: EdgeInsets.zero,
-      backgroundColor: _colorScheme.onPrimary,
-      foregroundColor: _colorScheme.primary,
-      side: BorderSide(
-        color: _colorScheme.onSecondary,
-        width: UiConstants.borderWidth,
-      ),
-      shape: const RoundedRectangleBorder(
-        borderRadius: UiConstants.borderRadius,
-      ),
-    ),
+    style:
+        IconButton.styleFrom(
+          backgroundColor: _colorScheme.surface,
+          foregroundColor: _colorScheme.primary,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              color: AppColors.stone900,
+              width: UiConstants.borderWidth,
+            ),
+            borderRadius: UiConstants.borderRadius,
+          ),
+          visualDensity: VisualDensity.compact,
+        ).copyWith(
+          elevation: const WidgetStatePropertyAll(0),
+          shadowColor: WidgetStatePropertyAll(_colorScheme.shadow),
+          backgroundColor: WidgetStatePropertyAll(_colorScheme.surface),
+          foregroundColor: WidgetStateColor.resolveWith(
+            (states) => states.contains(WidgetState.disabled)
+                ? _colorScheme.primary.withAlpha(100)
+                : _colorScheme.primary,
+          ),
+        ),
   );
 
   static final _appBarTheme = AppBarTheme(

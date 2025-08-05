@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:bebi_app/app/app.dart';
 import 'package:bebi_app/config/firebase_options.dart';
 import 'package:bebi_app/config/firebase_services.dart';
 import 'package:bebi_app/constants/hive_constants.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
+import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/data/models/user_partnership.dart';
 import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:bebi_app/hive_registrar.g.dart';
@@ -20,26 +22,22 @@ void main() {
     WidgetsFlutterBinding.ensureInitialized();
     _configureFontLicenses();
 
-    await Future.wait(<Future<void>>[
+    await Future.wait([
       _configureFirebase(),
       _configureHighRefreshScreen(),
       _initializeHive(),
     ]);
 
-    final calendarEventsBox = await Hive.openBox<CalendarEvent>(
-      HiveBoxNames.calendarEvent,
-    );
-
-    final userProfileBox = await Hive.openBox<UserProfile>(
-      HiveBoxNames.userProfile,
-    );
-
-    final userPartnershipBox = await Hive.openBox<UserPartnership>(
-      HiveBoxNames.userPartnership,
-    );
-
     // Add more hive boxes as needed
-    runApp(App(calendarEventsBox, userProfileBox, userPartnershipBox));
+    await Future.wait([
+      Hive.openBox<CalendarEvent>(HiveBoxNames.calendarEvent),
+      Hive.openBox<UserProfile>(HiveBoxNames.userProfile),
+      Hive.openBox<UserPartnership>(HiveBoxNames.userPartnership),
+      Hive.openBox<CycleLog>(HiveBoxNames.cycleLog),
+      Hive.openBox<bool>(HiveBoxNames.userPreferences),
+    ]);
+
+    runApp(const App());
   });
 }
 
@@ -66,9 +64,11 @@ void _configureFontLicenses() {
 
 Future<void> _configureHighRefreshScreen() async {
   try {
-    await FlutterRefreshRateControl().requestHighRefreshRate();
+    if (Platform.isAndroid) {
+      await FlutterRefreshRateControl().requestHighRefreshRate();
+    }
   } catch (e, s) {
-    if (!kDebugMode) FirebaseServices.crashlytics.recordError(e, s);
+    if (!kDebugMode) await FirebaseServices.crashlytics.recordError(e, s);
   }
 }
 

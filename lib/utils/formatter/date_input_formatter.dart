@@ -1,9 +1,9 @@
 import 'package:flutter/services.dart';
 
-class BirthDateFormatter extends TextInputFormatter {
-  const BirthDateFormatter();
+class DateInputFormatter extends TextInputFormatter {
+  const DateInputFormatter();
 
-  static const _mask = 'DD/MM/YYYY';
+  static const _mask = 'MM/DD/YYYY';
 
   @override
   TextEditingValue formatEditUpdate(
@@ -39,7 +39,7 @@ class BirthDateFormatter extends TextInputFormatter {
     }
 
     // Calculate new cursor position
-    var selectionIndex = result.indexOf(RegExp(r'[DMY]'));
+    var selectionIndex = result.indexOf(RegExp(r'[DDMMYY]'));
     if (selectionIndex == -1) {
       selectionIndex = result.length;
     } else {

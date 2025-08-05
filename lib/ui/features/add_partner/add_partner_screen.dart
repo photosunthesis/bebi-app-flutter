@@ -1,7 +1,6 @@
 import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/ui/features/add_partner/add_partner_cubit.dart';
-import 'package:bebi_app/ui/shared_widgets/buttons/app_text_button.dart';
 import 'package:bebi_app/ui/shared_widgets/forms/app_text_form_field.dart';
 import 'package:bebi_app/ui/shared_widgets/shadow/shadow_container.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
@@ -11,7 +10,6 @@ import 'package:bebi_app/utils/formatter/user_code_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 
 class AddPartnerScreen extends StatefulWidget {
   const AddPartnerScreen({super.key});
@@ -122,9 +120,9 @@ class _AddPartnerScreenState extends State<AddPartnerScreen> {
           Positioned(
             right: 10,
             top: 10,
-            child: AppTextButton(
-              text: 'Copy',
-              onTap: () async {
+            child: TextButton(
+              child: const Text('Copy'),
+              onPressed: () async {
                 if (_userCodeController.text.isEmpty) return;
 
                 await Clipboard.setData(

@@ -16,6 +16,7 @@ abstract class AppRoutes {
   static const updateCalendarEvent = 'update-calendar-event';
   static const viewCalendarEvent = 'view-calendar-event';
   static const cycles = 'cycles';
+  static const cyclesSetup = 'cycles-setup';
   static const location = 'location';
   static const addPartner = 'add-partner';
 }

@@ -8,6 +8,10 @@ import 'package:bebi_app/ui/features/calendar_event_details/calendar_event_detai
 import 'package:bebi_app/ui/features/calendar_event_details/calendar_event_details_screen.dart';
 import 'package:bebi_app/ui/features/calendar_event_form/calendar_event_form_cubit.dart';
 import 'package:bebi_app/ui/features/calendar_event_form/calendar_event_form_screen.dart';
+import 'package:bebi_app/ui/features/cycles/cycles_cubit.dart';
+import 'package:bebi_app/ui/features/cycles/cycles_screen.dart';
+import 'package:bebi_app/ui/features/cycles_setup/cycle_setup_cubit.dart';
+import 'package:bebi_app/ui/features/cycles_setup/cycles_setup_screen.dart';
 import 'package:bebi_app/ui/features/home/home_cubit.dart';
 import 'package:bebi_app/ui/features/home/home_screen.dart';
 import 'package:bebi_app/ui/features/profile_setup/profile_setup_cubit.dart';
@@ -21,10 +25,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+export 'package:go_router/go_router.dart' show GoRouterHelper;
+
 part 'app_routes.dart';
 
 abstract class AppRouter {
-  static final GoRouter instance = GoRouter(
+  static final instance = GoRouter(
     routes: [
       GoRoute(
         path: '/sign-in',
@@ -99,11 +105,18 @@ abstract class AppRouter {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                // TODO
                 path: '/cycles',
                 name: AppRoutes.cycles,
-                builder: (context, state) =>
-                    const Scaffold(body: Center(child: Text('Cycles Screen'))),
+                builder: (context, state) => BlocProvider(
+                  create: (context) => CyclesCubit(
+                    context.read(),
+                    context.read(),
+                    context.read(),
+                    context.read(),
+                    context.read(),
+                  ),
+                  child: const CyclesScreen(),
+                ),
               ),
             ],
           ),
@@ -170,6 +183,19 @@ abstract class AppRouter {
               calendarEvent: state.extra as CalendarEvent,
             ),
           ),
+        ),
+      ),
+      GoRoute(
+        path: '/cycles/setup',
+        name: AppRoutes.cyclesSetup,
+        builder: (context, state) => BlocProvider(
+          create: (context) => CycleSetupCubit(
+            context.read(),
+            context.read(),
+            context.read(),
+            context.read(),
+          ),
+          child: const CyclesSetupScreen(),
         ),
       ),
       GoRoute(

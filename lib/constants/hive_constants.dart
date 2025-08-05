@@ -5,13 +5,17 @@ abstract class HiveTypeIds {
   static const repeatRule = 3;
   static const repeatFrequency = 4;
   static const eventColors = 5;
+  static const cycleLog = 6;
+  static const cycleLogType = 7;
+  static const cycleLogFlowIntensity = 8;
+  static const cycleLogIntimacyType = 9;
 }
 
 abstract class HiveBoxNames {
-  static const calendarEvent = 'calendar_event';
-  static const userPartnership = 'user_partnership';
-  static const userProfile = 'user_profile';
-  static const repeatRule = 'repeat_rule';
-  static const repeatFrequency = 'repeat_frequency';
-  static const eventColors = 'event_colors';
+  // Generate keys here: http://bit.ly/random-strings-generator
+  static const calendarEvent = 'V8HVPbuK31jr';
+  static const userPartnership = 'k2hkPKUOpun8';
+  static const userProfile = 'SJ9lxdTrMTzt';
+  static const cycleLog = 'odyFO8RVi9LD';
+  static const userPreferences = '8cLDTwp8jxKe';
 }

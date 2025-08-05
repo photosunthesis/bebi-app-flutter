@@ -1,5 +1,5 @@
-import 'package:bebi_app/ui/shared_widgets/buttons/app_text_button.dart';
 import 'package:bebi_app/ui/shared_widgets/forms/app_text_form_field.dart';
+import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
@@ -70,9 +70,18 @@ class _AppMultipleChoiceDropdownState<T>
           Positioned(
             top: 10,
             right: 8,
-            child: AppTextButton(
-              text: 'Done',
-              onTap: () => setState(() => _pickerIsVisible = false),
+            child: SizedBox(
+              width: 46,
+              height: 28,
+              child: TextButton(
+                onPressed: () => setState(() => _pickerIsVisible = false),
+                style: TextButton.styleFrom(
+                  textStyle: context.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                child: const Text('Done'),
+              ),
             ),
           ),
       ],

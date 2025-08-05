@@ -1,5 +1,4 @@
 import 'package:bebi_app/constants/ui_constants.dart';
-import 'package:bebi_app/ui/shared_widgets/buttons/app_text_button.dart';
 import 'package:bebi_app/ui/shared_widgets/forms/app_text_form_field.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
@@ -97,7 +96,7 @@ class _AppDateFormFieldState extends State<AppDateFormField> {
   @override
   Widget build(BuildContext context) {
     return AnimatedSize(
-      duration: 150.milliseconds,
+      duration: 120.milliseconds,
       curve: Curves.easeOutCirc,
       alignment: Alignment.topCenter,
       child: Column(
@@ -126,7 +125,19 @@ class _AppDateFormFieldState extends State<AppDateFormField> {
           Positioned(
             top: 10,
             right: 8,
-            child: AppTextButton(text: 'Done', onTap: _onDone),
+            child: SizedBox(
+              width: 46,
+              height: 28,
+              child: TextButton(
+                onPressed: _onDone,
+                style: TextButton.styleFrom(
+                  textStyle: context.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                child: const Text('Done'),
+              ),
+            ),
           ),
       ],
     );
@@ -134,7 +145,7 @@ class _AppDateFormFieldState extends State<AppDateFormField> {
 
   Widget _buildPickerContainer() {
     return AnimatedSwitcher(
-      duration: 150.milliseconds,
+      duration: 120.milliseconds,
       child: _showCalendar ? _buildCalendar() : const SizedBox.shrink(),
     );
   }
@@ -171,9 +182,7 @@ class _AppDateFormFieldState extends State<AppDateFormField> {
         selectedDayPredicate: (day) => _selectedDay?.isSameDay(day) ?? false,
         daysOfWeekHeight: 32,
         calendarFormat: CalendarFormat.month,
-        availableCalendarFormats: const <CalendarFormat, String>{
-          CalendarFormat.month: 'Month',
-        },
+        availableCalendarFormats: const {CalendarFormat.month: 'Month'},
         calendarBuilders: CalendarBuilders(
           selectedBuilder: _selectedDayBuilder,
           todayBuilder: _todayBuilder,

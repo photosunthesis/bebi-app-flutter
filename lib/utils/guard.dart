@@ -18,7 +18,7 @@ FutureOr<T?> guard<T>(
     if ((kDebugMode && _isTest) || disableLogging) {
       debugPrint('Error caught by guard: $e\n$s');
     } else {
-      FirebaseServices.crashlytics.recordError(e, s, fatal: true);
+      unawaited(FirebaseServices.crashlytics.recordError(e, s));
     }
     onError?.call(e, s);
     return null;
