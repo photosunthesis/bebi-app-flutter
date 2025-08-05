@@ -22,18 +22,27 @@ class CalendarScreen extends StatefulWidget {
 
 class _CalendarScreenState extends State<CalendarScreen> {
   late final _cubit = context.read<CalendarCubit>();
+  bool _showCalendar = false;
 
   @override
   void initState() {
     super.initState();
     _cubit.loadCalendarEvents();
+
+    // For some reason, rendering the calendar widget directly causes the tab
+    // switching animation to stutter. Not entirely sure why, but showing a loading
+    // skeleton first and delaying the calendar render makes the animation smooth.
+    Future.delayed(
+      600.milliseconds,
+      () => setState(() => _showCalendar = true),
+    );
   }
 
   @override
   void didUpdateWidget(covariant CalendarScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.shouldLoadEventsFromServer) {
-      _cubit.loadCalendarEvents(useCache: !widget.shouldLoadEventsFromServer);
+      _cubit.loadCalendarEvents(useCache: false);
     }
   }
 
@@ -49,7 +58,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
           children: [
             _buildTitle(),
             const SizedBox(height: 12),
-            const Calendar(),
+            AnimatedSwitcher(
+              duration: 300.milliseconds,
+              child: _showCalendar
+                  ? const Calendar()
+                  : _buildCalendarSkeleton(),
+            ),
             const CalendarEvents(),
           ],
         ),
@@ -74,7 +88,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     AnimatedSwitcher(
-                      duration: 150.milliseconds,
+                      duration: 120.milliseconds,
                       child: focusedDay.isSameDay(DateTime.now())
                           ? const SizedBox.shrink()
                           : SizedBox(
@@ -125,6 +139,74 @@ class _CalendarScreenState extends State<CalendarScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildCalendarSkeleton() {
+    return Column(
+      children: [
+        Container(
+          height: 32,
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: context.colorScheme.onSecondary,
+                width: 0.2,
+              ),
+            ),
+          ),
+          child: Row(
+            children: List.generate(7, (index) {
+              return Expanded(
+                child: Center(
+                  child: Container(
+                    width: 20,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: context.colorScheme.onSurface.withAlpha(40),
+                      borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ),
+        ),
+        ...List.generate(6, (weekIndex) {
+          return Container(
+            height: 52,
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: context.colorScheme.onSecondary,
+                  width: UiConstants.borderWidth,
+                ),
+              ),
+            ),
+            child: Row(
+              children: List.generate(7, (dayIndex) {
+                return Expanded(
+                  child: Container(
+                    margin: const EdgeInsets.fromLTRB(15, 10, 15, 18),
+                    child: Center(
+                      child: Container(
+                        width: 24,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          color: context.colorScheme.onSurface.withAlpha(40),
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            ),
+          );
+        }),
+      ],
     );
   }
 }
