@@ -5,7 +5,7 @@ version: 1.0.0
 
 environment:
   sdk: ">=3.8.1 <4.0.0"
-  flutter: ">= 3.32.7"
+  flutter: ">= 3.32.8"
 
 dependencies:
   cloud_firestore: ^6.0.0
@@ -21,7 +21,7 @@ dependencies:
   flutter_keyboard_visibility_temp_fork: ^0.1.5
   flutter_refresh_rate_control: ^0.0.4+1
   freezed_annotation: ^3.1.0
-  go_router: ^16.0.0
+  go_router: ^16.1.0
   hive_ce_flutter: ^2.3.1
   image_picker: ^1.1.2
   intl: any

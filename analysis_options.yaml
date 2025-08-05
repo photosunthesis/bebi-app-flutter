@@ -24,3 +24,4 @@ linter:
     avoid_types_on_closure_parameters: true
     omit_local_variable_types: true
     prefer_function_declarations_over_variables: true
+    unawaited_futures: true
