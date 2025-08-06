@@ -7,9 +7,7 @@ import 'package:bebi_app/ui/shared_widgets/modals/options_bottom_dialog.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/ui/shared_widgets/switch/app_switch.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
-import 'package:bebi_app/utils/extension/button_style_extensions.dart';
 import 'package:bebi_app/utils/extension/string_extensions.dart';
-import 'package:bebi_app/utils/extension/text_style_extensions.dart';
 import 'package:bebi_app/utils/formatter/date_input_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -108,9 +106,7 @@ class _CyclesSetupScreenState extends State<CyclesSetupScreen> {
         hintText: 'MM/DD/YYYY',
         keyboardType: TextInputType.number,
         textInputAction: TextInputAction.next,
-        autofillHints: const [AutofillHints.birthday],
         inputFormatters: const [DateInputFormatter()],
-        inputStyle: context.textTheme.bodyMedium?.monospace,
         validator: (value) {
           if (value == null || value.isEmpty) {
             return 'Please enter your last period date.';
@@ -188,30 +184,27 @@ class _CyclesSetupScreenState extends State<CyclesSetupScreen> {
         BlocSelector<CycleSetupCubit, CycleSetupState, bool>(
           selector: (state) => state is CycleSetupStateLoading,
           builder: (context, loading) {
-            return Container(
-              width: 60,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: TextButton(
-                style: TextButton.styleFrom(
-                  foregroundColor: context.colorScheme.onPrimary,
-                  backgroundColor: context.colorScheme.primary,
-                ).asPrimary(context),
-                onPressed: loading
-                    ? null
-                    : () {
-                        if (_formKey.currentState?.validate() ?? false) {
-                          context.read<CycleSetupCubit>().setUpCycleTracking(
-                            periodStartDate: _lastPeriodDateController.text
-                                .toDateTime('MM/dd/yyyy')!,
-                            periodDurationInDays: int.parse(
-                              _periodDurationController.text,
-                            ),
-                            shouldShareWithPartner: _shareWithPartner,
-                          );
-                        }
-                      },
-                child: Text(loading ? 'Saving' : 'Save'),
+            return TextButton(
+              style: TextButton.styleFrom(
+                textStyle: context.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
               ),
+              onPressed: loading
+                  ? null
+                  : () {
+                      if (_formKey.currentState?.validate() ?? false) {
+                        context.read<CycleSetupCubit>().setUpCycleTracking(
+                          periodStartDate: _lastPeriodDateController.text
+                              .toDateTime('MM/dd/yyyy')!,
+                          periodDurationInDays: int.parse(
+                            _periodDurationController.text,
+                          ),
+                          shouldShareWithPartner: _shareWithPartner,
+                        );
+                      }
+                    },
+              child: Text(loading ? 'Saving' : 'Save'),
             );
           },
         ),

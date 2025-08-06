@@ -9,7 +9,6 @@ import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:bebi_app/utils/extension/string_extensions.dart';
-import 'package:bebi_app/utils/extension/text_style_extensions.dart';
 import 'package:bebi_app/utils/formatter/date_input_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -194,7 +193,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         textInputAction: TextInputAction.done,
         autofillHints: const [AutofillHints.birthday],
         inputFormatters: const [DateInputFormatter()],
-        inputStyle: context.textTheme.bodyMedium?.monospace,
         validator: (value) {
           if (value == null || value.isEmpty) {
             return 'Please enter your birthdate.';

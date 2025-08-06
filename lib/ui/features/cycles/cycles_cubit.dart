@@ -1,7 +1,6 @@
 import 'package:bebi_app/data/models/cycle_day_insights.dart';
 import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/data/repositories/cycle_logs_repository.dart';
-import 'package:bebi_app/data/repositories/user_preferences_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
 import 'package:bebi_app/data/services/cycle_day_insights_service.dart';
 import 'package:bebi_app/data/services/cycle_predictions_service.dart';
@@ -24,7 +23,6 @@ class CyclesCubit extends Cubit<CyclesState> {
     this._cyclePredictionsService,
     this._cycleDayInsightsService,
     this._userProfileRepository,
-    this._userPreferencesRepository,
     this._firebaseAuth,
   ) : super(CyclesState.initial());
 
@@ -32,7 +30,6 @@ class CyclesCubit extends Cubit<CyclesState> {
   final CyclePredictionsService _cyclePredictionsService;
   final CycleDayInsightsService _cycleDayInsightsService;
   final UserProfileRepository _userProfileRepository;
-  final UserPreferencesRepository _userPreferencesRepository;
   final FirebaseAuth _firebaseAuth;
 
   Future<void> initialize({bool loadDataFromCache = true}) async {
@@ -40,10 +37,11 @@ class CyclesCubit extends Cubit<CyclesState> {
       () async {
         emit(state.copyWith(loading: true, loadingCycleDayInsights: true));
 
-        final shouldSetupCycles = !_userPreferencesRepository
-            .isCycleSetupCompleted();
+        final userProfile = await _userProfileRepository.getByUserId(
+          _firebaseAuth.currentUser!.uid,
+        );
 
-        if (shouldSetupCycles) {
+        if (!userProfile!.didSetUpCycles) {
           emit(state.copyWith(shouldSetupCycles: true));
           return;
         }
@@ -83,7 +81,7 @@ class CyclesCubit extends Cubit<CyclesState> {
   Future<void> setFocusedDate(DateTime date) async {
     await guard(
       () async {
-        emit(state.copyWith(loadingCycleDayInsights: true));
+        emit(state.copyWith(loadingCycleDayInsights: true, focusedDate: date));
 
         final updatedCycleDayInsights = await _cycleDayInsightsService
             .getInsightsFromDateAndEvents(date, state.cycleLogs);
@@ -106,14 +104,9 @@ class CyclesCubit extends Cubit<CyclesState> {
           _firebaseAuth.currentUser!.uid,
         );
 
-        await Future.wait([
-          _userProfileRepository.createOrUpdate(
-            userProfile!.copyWith(hasCycle: false),
-          ),
-          _userPreferencesRepository.saveCycleSetupCompletion(
-            isCompleted: true,
-          ),
-        ]);
+        await _userProfileRepository.createOrUpdate(
+          userProfile!.copyWith(hasCycle: false, didSetUpCycles: false),
+        );
 
         emit(state.copyWith(shouldSetupCycles: false));
       },

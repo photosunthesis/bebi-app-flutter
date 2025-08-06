@@ -1,7 +1,6 @@
 import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/data/repositories/cycle_logs_repository.dart';
 import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
-import 'package:bebi_app/data/repositories/user_preferences_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:bebi_app/utils/guard.dart';
@@ -19,14 +18,12 @@ class CycleSetupCubit extends Cubit<CycleSetupState> {
     this._userProfileRepository,
     this._cycleLogsRepository,
     this._userPartnershipsRepository,
-    this._userPreferencesRepository,
     this._firebaseAuth,
   ) : super(const CycleSetupState.initial());
 
   final UserProfileRepository _userProfileRepository;
   final CycleLogsRepository _cycleLogsRepository;
   final UserPartnershipsRepository _userPartnershipsRepository;
-  final UserPreferencesRepository _userPreferencesRepository;
   final FirebaseAuth _firebaseAuth;
 
   Future<void> setUpCycleTracking({
@@ -48,13 +45,10 @@ class CycleSetupCubit extends Cubit<CycleSetupState> {
 
         await _userProfileRepository.createOrUpdate(
           userProfile!.copyWith(
+            didSetUpCycles: true,
             hasCycle: true,
             isSharingCycleWithPartner: shouldShareWithPartner,
           ),
-        );
-
-        await _userPreferencesRepository.saveCycleSetupCompletion(
-          isCompleted: true,
         );
 
         final cycleLogs = List.generate(periodDurationInDays, (index) {

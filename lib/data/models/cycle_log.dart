@@ -163,7 +163,9 @@ enum LogType {
   @HiveField(2)
   symptom,
   @HiveField(3)
-  intimacy,
+  intimacy;
+
+  String get label => name[0].toUpperCase() + name.substring(1);
 }
 
 @HiveType(typeId: HiveTypeIds.cycleLogFlowIntensity)
@@ -173,7 +175,9 @@ enum FlowIntensity {
   @HiveField(1)
   medium,
   @HiveField(2)
-  heavy,
+  heavy;
+
+  String get label => name[0].toUpperCase() + name.substring(1);
 }
 
 @HiveType(typeId: HiveTypeIds.cycleLogIntimacyType)
@@ -181,5 +185,7 @@ enum IntimacyType {
   @HiveField(0)
   protected,
   @HiveField(1)
-  unprotected,
+  unprotected;
+
+  String get label => name[0].toUpperCase() + name.substring(1);
 }

@@ -55,16 +55,20 @@ class _CycleCalendarState extends State<CycleCalendar> {
     return BlocListener<CyclesCubit, CyclesState>(
       listenWhen: (previous, current) => current.focusedDate.isToday,
       listener: (context, state) {
-        // final targetIndex = _dates.indexWhere(
-        //   (d) => d.isSameDay(state.focusedDate),
-        // );
-        // if (targetIndex != -1) {
-        //   _pageController.animateToPage(
-        //     targetIndex,
-        //     duration: 300.milliseconds,
-        //     curve: Curves.easeOutCubic,
-        //   );
-        // }
+        // Only respond to "back to today" button presses to avoid unnecessary
+        // page animations from other focus date changes
+        if (!state.focusedDate.isToday) return;
+
+        final targetIndex = _dates.indexWhere(
+          (d) => d.isSameDay(state.focusedDate),
+        );
+        if (targetIndex != -1) {
+          _pageController.animateToPage(
+            targetIndex,
+            duration: 200.milliseconds,
+            curve: Curves.easeOutCubic,
+          );
+        }
       },
       child: SizedBox(
         height: 85,
