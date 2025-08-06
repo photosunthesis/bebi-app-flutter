@@ -42,6 +42,7 @@ class CyclesCubit extends Cubit<CyclesState> {
         );
 
         if (!userProfile!.didSetUpCycles) {
+          if (state.shouldSetupCycles) return;
           emit(state.copyWith(shouldSetupCycles: true));
           return;
         }

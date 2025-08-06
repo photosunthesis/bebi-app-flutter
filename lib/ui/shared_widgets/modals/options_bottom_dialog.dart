@@ -105,7 +105,7 @@ class OptionsBottomDialog<T> extends StatelessWidget {
       case OptionStyle.secondary:
         buttonStyle = ElevatedButton.styleFrom(
           backgroundColor: context.colorScheme.surface,
-          foregroundColor: context.colorScheme.secondary,
+          foregroundColor: context.colorScheme.primary,
         );
         break;
       case OptionStyle.destructive:

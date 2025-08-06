@@ -40,7 +40,7 @@ class _CyclesSetupScreenState extends State<CyclesSetupScreen> {
         if (state is CycleSetupStateError) context.showSnackbar(state.error);
       },
       builder: (context, state) => Form(
-        canPop: state is! CycleSetupStateSuccess,
+        canPop: false,
         onPopInvokedWithResult: _onPop,
         key: _formKey,
         child: Scaffold(
