@@ -1,18 +1,21 @@
 import 'dart:async';
 
-import 'package:bebi_app/config/firebase_services.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/data/models/event_color.dart';
 import 'package:bebi_app/data/models/repeat_rule.dart';
 import 'package:bebi_app/data/repositories/calendar_events_repository.dart';
 import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/utils/guard.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:injectable/injectable.dart';
 
 part 'calendar_event_form_state.dart';
 part 'calendar_event_form_cubit.freezed.dart';
 
+@Injectable()
 class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
   CalendarEventFormCubit(
     this._calendarEventsRepository,

@@ -8,11 +8,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
+import 'package:injectable/injectable.dart';
 
 part 'profile_setup_state.dart';
 part 'profile_setup_cubit.freezed.dart';
 
+@Injectable()
 class ProfileSetupCubit extends Cubit<ProfileSetupState> {
   ProfileSetupCubit(
     this._userProfileRepository,
@@ -42,7 +43,7 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
     emit(state.copyWith(profilePicture: null));
   }
 
-  Future<void> updateUserProfile(String displayName, String birthDate) async {
+  Future<void> updateUserProfile(String displayName, DateTime birthDate) async {
     await guard(
       () async {
         emit(state.copyWith(loading: true));
@@ -59,7 +60,7 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
             userId: _firebaseAuth.currentUser!.uid,
             createdBy: _firebaseAuth.currentUser!.uid,
             code: await _generateUserCode(),
-            birthDate: DateFormat('mm/dd/yyyy').parseStrict(birthDate),
+            birthDate: birthDate,
             displayName: displayName,
             photoUrl: photoUrl,
             createdAt: DateTime.now(),

@@ -5,7 +5,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 // ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:injectable/injectable.dart';
 
+@Injectable()
 class UserPartnershipsRepository {
   const UserPartnershipsRepository(this._firestore, this._userPartnershipBox);
 

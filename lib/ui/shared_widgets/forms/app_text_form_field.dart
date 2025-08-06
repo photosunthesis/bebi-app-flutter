@@ -21,6 +21,7 @@ class AppTextFormField extends StatefulWidget {
     this.minLines,
     this.maxLines,
     this.readOnly = false,
+    this.fillColor,
     super.key,
   });
 
@@ -40,6 +41,7 @@ class AppTextFormField extends StatefulWidget {
   final int? minLines;
   final int? maxLines;
   final bool readOnly;
+  final Color? fillColor;
 
   @override
   State<AppTextFormField> createState() => _AppTextFormFieldState();
@@ -110,9 +112,11 @@ class _AppTextFormFieldState extends State<AppTextFormField> {
             minLines: widget.minLines,
             maxLines: widget.maxLines ?? 1,
             decoration: InputDecoration(
+              fillColor: widget.fillColor,
               hintText: widget.hintText,
-              hintStyle: (widget.inputStyle ?? context.textTheme.bodyMedium)
-                  ?.copyWith(
+              hintStyle:
+                  widget.inputStyle ??
+                  context.textTheme.bodyMedium?.copyWith(
                     color: context.colorScheme.onSurface.withAlpha(120),
                   ),
               errorText: '',

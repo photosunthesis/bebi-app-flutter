@@ -7,10 +7,12 @@ import 'package:bebi_app/utils/guard.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:injectable/injectable.dart';
 
 part 'calendar_state.dart';
 part 'calendar_cubit.freezed.dart';
 
+@Injectable()
 class CalendarCubit extends Cubit<CalendarState> {
   CalendarCubit(
     this._calendarEventsRepository,
@@ -66,9 +68,7 @@ class CalendarCubit extends Cubit<CalendarState> {
 
   Future<void> fetchLatestEventsFromServer() async {
     await guard(() async {
-      await _calendarEventsRepository.loadEventsFromServer(
-        _firebaseAuth.currentUser?.uid,
-      );
+      await _calendarEventsRepository.loadEventsFromServer();
     });
   }
 

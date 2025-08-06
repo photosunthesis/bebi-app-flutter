@@ -3,14 +3,10 @@ import 'dart:io';
 
 import 'package:bebi_app/app/app.dart';
 import 'package:bebi_app/config/firebase_options.dart';
-import 'package:bebi_app/config/firebase_services.dart';
-import 'package:bebi_app/constants/hive_constants.dart';
-import 'package:bebi_app/data/models/calendar_event.dart';
-import 'package:bebi_app/data/models/cycle_log.dart';
-import 'package:bebi_app/data/models/user_partnership.dart';
-import 'package:bebi_app/data/models/user_profile.dart';
+import 'package:bebi_app/config/injectable.dart';
 import 'package:bebi_app/hive_registrar.g.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -28,14 +24,8 @@ void main() {
       _initializeHive(),
     ]);
 
-    // Add more hive boxes as needed
-    await Future.wait([
-      Hive.openBox<CalendarEvent>(HiveBoxNames.calendarEvent),
-      Hive.openBox<UserProfile>(HiveBoxNames.userProfile),
-      Hive.openBox<UserPartnership>(HiveBoxNames.userPartnership),
-      Hive.openBox<CycleLog>(HiveBoxNames.cycleLog),
-      Hive.openBox<bool>(HiveBoxNames.userPreferences),
-    ]);
+    // Configure dependencies after Firebase and Hive are initialized
+    await configureDependencies();
 
     runApp(const App());
   });
@@ -45,7 +35,7 @@ Future<void> _configureFirebase() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   if (!kDebugMode) {
-    FlutterError.onError = FirebaseServices.crashlytics.recordFlutterFatalError;
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
   }
 }
 
@@ -68,7 +58,7 @@ Future<void> _configureHighRefreshScreen() async {
       await FlutterRefreshRateControl().requestHighRefreshRate();
     }
   } catch (e, s) {
-    if (!kDebugMode) await FirebaseServices.crashlytics.recordError(e, s);
+    if (!kDebugMode) await FirebaseCrashlytics.instance.recordError(e, s);
   }
 }
 

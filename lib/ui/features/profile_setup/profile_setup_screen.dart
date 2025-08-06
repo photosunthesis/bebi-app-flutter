@@ -200,7 +200,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             return 'Please enter your birthdate.';
           }
 
-          final date = value.toDateTimeStrict('mm/dd/yyyy');
+          final date = value.toDateTime('MM/dd/yyyy');
 
           if (date == null) {
             return 'Please enter a valid date in MM/DD/YYYY format.';
@@ -231,7 +231,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                         if (_formKey.currentState?.validate() ?? false) {
                           _cubit.updateUserProfile(
                             _displayNameController.text,
-                            _birthdayController.text,
+                            _birthdayController.text.toDateTime('MM/dd/yyyy')!,
                           );
                         }
                       },

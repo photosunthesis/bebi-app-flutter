@@ -1,3 +1,6 @@
+import 'dart:ui';
+
+import 'package:bebi_app/app/theme/app_colors.dart';
 import 'package:bebi_app/constants/hive_constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -26,20 +29,21 @@ abstract class CycleLog with _$CycleLog {
   }) = _CycleLog;
 
   factory CycleLog.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
     return CycleLog(
       id: doc.id,
-      date: doc['date'].toDate(),
-      type: LogType.values[doc['type']],
-      flow: doc['flow'] != null ? FlowIntensity.values[doc['flow']] : null,
-      symptoms: doc['symptoms'],
-      intimacyType: doc['intimacy_type'] != null
-          ? IntimacyType.values[doc['intimacy_type']]
+      date: data['date'].toDate(),
+      type: LogType.values[data['type']],
+      flow: data['flow'] != null ? FlowIntensity.values[data['flow']] : null,
+      symptoms: data['symptoms'],
+      intimacyType: data['intimacy_type'] != null
+          ? IntimacyType.values[data['intimacy_type']]
           : null,
-      createdBy: doc['created_by'],
-      createdAt: doc['created_at'].toDate(),
-      updatedAt: doc['updated_at'].toDate(),
-      users: doc['users'],
-      isPrediction: doc['is_prediction'],
+      createdBy: data['created_by'],
+      createdAt: data['created_at'].toDate(),
+      updatedAt: data['updated_at'].toDate(),
+      users: List<String>.from(data['users'] as List<dynamic>),
+      isPrediction: data['is_prediction'],
     );
   }
 
@@ -104,7 +108,34 @@ abstract class CycleLog with _$CycleLog {
     );
   }
 
+  factory CycleLog.intimacy({
+    required String id,
+    required DateTime date,
+    required IntimacyType intimacyType,
+    required String createdBy,
+    required List<String> users,
+    required bool isPrediction,
+  }) {
+    return CycleLog(
+      id: id,
+      date: date,
+      type: LogType.intimacy,
+      createdBy: createdBy,
+      createdAt: DateTime.now().toUtc(),
+      updatedAt: DateTime.now().toUtc(),
+      intimacyType: intimacyType,
+      users: users,
+      isPrediction: isPrediction,
+    );
+  }
+
   DateTime get dateLocal => date.toLocal();
+  Color get color => switch (type) {
+    LogType.period => AppColors.red,
+    LogType.ovulation => AppColors.blue,
+    LogType.symptom => AppColors.orange,
+    LogType.intimacy => AppColors.pink,
+  };
 
   Map<String, dynamic> toFirestore() {
     return {

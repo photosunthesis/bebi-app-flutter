@@ -7,7 +7,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collection/collection.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:injectable/injectable.dart';
 
+@Injectable()
 class UserProfileRepository {
   const UserProfileRepository(
     this._firestore,

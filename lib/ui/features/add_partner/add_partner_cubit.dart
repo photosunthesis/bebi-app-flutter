@@ -5,10 +5,12 @@ import 'package:bebi_app/utils/guard.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:injectable/injectable.dart';
 
 part 'add_partner_state.dart';
 part 'add_partner_cubit.freezed.dart';
 
+@Injectable()
 class AddPartnerCubit extends Cubit<AddPartnerState> {
   AddPartnerCubit(
     this._userPartnershipsRepository,
@@ -68,7 +70,10 @@ class AddPartnerCubit extends Cubit<AddPartnerState> {
         await _userPartnershipsRepository.create(
           UserPartnership(
             id: '', // Firebase will generate this
-            users: <String>[partnerProfile.userId, _firebaseAuth.currentUser!.uid],
+            users: <String>[
+              partnerProfile.userId,
+              _firebaseAuth.currentUser!.uid,
+            ],
             createdBy: _firebaseAuth.currentUser!.uid,
             createdAt: DateTime.now(),
             updatedAt: DateTime.now(),

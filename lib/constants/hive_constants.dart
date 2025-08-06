@@ -18,4 +18,5 @@ abstract class HiveBoxNames {
   static const userProfile = 'SJ9lxdTrMTzt';
   static const cycleLog = 'odyFO8RVi9LD';
   static const userPreferences = '8cLDTwp8jxKe';
+  static const aiSummaryAndInsights = 'dDALrqpo741m';
 }

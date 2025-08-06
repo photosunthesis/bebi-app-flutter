@@ -2,7 +2,9 @@ import 'dart:math';
 
 import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
+import 'package:injectable/injectable.dart';
 
+@Injectable()
 class CyclePredictionsService {
   const CyclePredictionsService();
 

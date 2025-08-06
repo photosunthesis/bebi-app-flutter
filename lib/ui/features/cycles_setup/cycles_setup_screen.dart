@@ -4,8 +4,10 @@ import 'package:bebi_app/ui/features/cycles_setup/cycle_setup_cubit.dart';
 import 'package:bebi_app/ui/shared_widgets/forms/app_text_form_field.dart';
 import 'package:bebi_app/ui/shared_widgets/layouts/main_app_bar.dart';
 import 'package:bebi_app/ui/shared_widgets/modals/options_bottom_dialog.dart';
+import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/ui/shared_widgets/switch/app_switch.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
+import 'package:bebi_app/utils/extension/button_style_extensions.dart';
 import 'package:bebi_app/utils/extension/string_extensions.dart';
 import 'package:bebi_app/utils/extension/text_style_extensions.dart';
 import 'package:bebi_app/utils/formatter/date_input_formatter.dart';
@@ -23,7 +25,7 @@ class _CyclesSetupScreenState extends State<CyclesSetupScreen> {
   final _formKey = GlobalKey<FormState>();
   final _lastPeriodDateController = TextEditingController();
   final _periodDurationController = TextEditingController();
-  bool _shareWithPartner = false;
+  bool _shareWithPartner = true;
 
   @override
   void dispose() {
@@ -34,36 +36,42 @@ class _CyclesSetupScreenState extends State<CyclesSetupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      canPop: false,
-      onPopInvokedWithResult: _onPop,
-      key: _formKey,
-      child: Scaffold(
-        appBar: _buildAppbar(),
-        body: CustomScrollView(
-          slivers: [
-            SliverPadding(
-              padding: const EdgeInsets.only(top: UiConstants.padding),
-              sliver: SliverToBoxAdapter(child: _buildHeader()),
-            ),
-            const SliverPadding(
-              padding: EdgeInsets.only(top: 24),
-              sliver: SliverToBoxAdapter(child: SizedBox.shrink()),
-            ),
-            SliverToBoxAdapter(child: _buildLastPeriodDateField()),
-            const SliverPadding(
-              padding: EdgeInsets.only(top: 16),
-              sliver: SliverToBoxAdapter(child: SizedBox.shrink()),
-            ),
-            SliverToBoxAdapter(child: _buildPeriodDurationField()),
-            const SliverPadding(
-              padding: EdgeInsets.only(top: 12),
-              sliver: SliverToBoxAdapter(child: SizedBox.shrink()),
-            ),
-            SliverToBoxAdapter(child: _buildSharingOption()),
-          ],
+    return BlocConsumer<CycleSetupCubit, CycleSetupState>(
+      listener: (context, state) {
+        if (state is CycleSetupStateSuccess) context.pop(true);
+        if (state is CycleSetupStateError) context.showSnackbar(state.error);
+      },
+      builder: (context, state) => Form(
+        canPop: state is! CycleSetupStateSuccess,
+        onPopInvokedWithResult: _onPop,
+        key: _formKey,
+        child: Scaffold(
+          appBar: _buildAppbar(),
+          body: CustomScrollView(
+            slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.only(top: UiConstants.padding),
+                sliver: SliverToBoxAdapter(child: _buildHeader()),
+              ),
+              const SliverPadding(
+                padding: EdgeInsets.only(top: 24),
+                sliver: SliverToBoxAdapter(child: SizedBox.shrink()),
+              ),
+              SliverToBoxAdapter(child: _buildLastPeriodDateField()),
+              const SliverPadding(
+                padding: EdgeInsets.only(top: 16),
+                sliver: SliverToBoxAdapter(child: SizedBox.shrink()),
+              ),
+              SliverToBoxAdapter(child: _buildPeriodDurationField()),
+              const SliverPadding(
+                padding: EdgeInsets.only(top: 12),
+                sliver: SliverToBoxAdapter(child: SizedBox.shrink()),
+              ),
+              SliverToBoxAdapter(child: _buildSharingOption()),
+            ],
+          ),
+          bottomNavigationBar: _buildBottomSection(),
         ),
-        bottomNavigationBar: _buildBottomSection(),
       ),
     );
   }
@@ -108,7 +116,7 @@ class _CyclesSetupScreenState extends State<CyclesSetupScreen> {
             return 'Please enter your last period date.';
           }
 
-          final date = value.toDateTimeStrict('mm/dd/yyyy');
+          final date = value.toDateTime('MM/dd/yyyy');
 
           if (date == null) {
             return 'Please enter a valid date in MM/DD/YYYY format.';
@@ -178,24 +186,31 @@ class _CyclesSetupScreenState extends State<CyclesSetupScreen> {
       context,
       actions: [
         BlocSelector<CycleSetupCubit, CycleSetupState, bool>(
-          selector: (state) => state == const CycleSetupState.loading(),
+          selector: (state) => state is CycleSetupStateLoading,
           builder: (context, loading) {
             return Container(
-              width: 58,
+              width: 60,
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: TextButton(
                 style: TextButton.styleFrom(
                   foregroundColor: context.colorScheme.onPrimary,
                   backgroundColor: context.colorScheme.primary,
-                ),
+                ).asPrimary(context),
                 onPressed: loading
                     ? null
                     : () {
                         if (_formKey.currentState?.validate() ?? false) {
-                          // context.read<CycleSetupCubit>().submit();
+                          context.read<CycleSetupCubit>().setUpCycleTracking(
+                            periodStartDate: _lastPeriodDateController.text
+                                .toDateTime('MM/dd/yyyy')!,
+                            periodDurationInDays: int.parse(
+                              _periodDurationController.text,
+                            ),
+                            shouldShareWithPartner: _shareWithPartner,
+                          );
                         }
                       },
-                child: const Text('Finish'),
+                child: Text(loading ? 'Saving' : 'Save'),
               ),
             );
           },

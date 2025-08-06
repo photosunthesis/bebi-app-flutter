@@ -6,6 +6,7 @@ import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/ui/features/calendar/calendar_cubit.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
+import 'package:bebi_app/utils/extension/color_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -144,45 +145,49 @@ class _CalendarEventsState extends State<CalendarEvents> {
   }
 
   Widget _buildEventDetails(BuildContext context, CalendarEvent event) {
+    final color = event.eventColor.color;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildEventTitle(event.title),
-        _buildEventTime(event, allDay: event.allDay),
+        _buildEventTitle(event.title, color),
+        _buildEventTime(event, event.allDay, color),
         if (event.location != null && event.location!.isNotEmpty)
-          _buildEventLocation(event.location!),
+          _buildEventLocation(event.location!, color),
       ],
     );
   }
 
-  Widget _buildEventTitle(String title) {
+  Widget _buildEventTitle(String title, Color color) {
     return Text(
       title,
-      style: context.primaryTextTheme.titleLarge,
+      style: context.primaryTextTheme.titleLarge?.copyWith(
+        color: color.darken(0.3),
+      ),
       overflow: TextOverflow.ellipsis,
     );
   }
 
-  Widget _buildEventTime(CalendarEvent event, {required bool allDay}) {
+  Widget _buildEventTime(CalendarEvent event, bool allDay, Color color) {
     return Padding(
       padding: const EdgeInsets.only(top: 2),
       child: Text(
         allDay
             ? 'All day'
             : _formatDuration(event.startTimeLocal, event.endTimeLocal),
-        style: context.textTheme.bodyMedium,
+        style: context.textTheme.bodyMedium?.copyWith(color: color.darken(0.3)),
       ),
     );
   }
 
-  Widget _buildEventLocation(String location) {
+  Widget _buildEventLocation(String location, Color color) {
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.only(top: 2),
         child: Text(
           location,
           style: context.textTheme.bodyMedium?.copyWith(
-            color: context.colorScheme.secondary,
+            color: color.darken(0.3),
           ),
           overflow: TextOverflow.ellipsis,
           maxLines: 1,

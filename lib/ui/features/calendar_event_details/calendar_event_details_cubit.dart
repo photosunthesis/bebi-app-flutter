@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:bebi_app/config/firebase_services.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/data/models/repeat_rule.dart';
 import 'package:bebi_app/data/repositories/calendar_events_repository.dart';
@@ -8,12 +7,16 @@ import 'package:bebi_app/data/services/recurring_calendar_events_service.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:bebi_app/utils/guard.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:injectable/injectable.dart';
 
 part 'calendar_event_details_cubit.freezed.dart';
 part 'calendar_event_details_state.dart';
 
+@Injectable()
 class CalendarEventDetailsCubit extends Cubit<CalendarEventDetailsState> {
   CalendarEventDetailsCubit(
     this._calendarEventsRepository,

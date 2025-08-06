@@ -24,8 +24,12 @@ class Calendar extends StatelessWidget {
           lastDay: DateTime.now().add(2.years),
           selectedDayPredicate: (day) => day.isSameDay(state.focusedDay),
           daysOfWeekHeight: 32,
+          // TODO Add feature to switch to week view
           calendarFormat: CalendarFormat.month,
-          availableCalendarFormats: {CalendarFormat.month: 'Month'},
+          availableCalendarFormats: {
+            CalendarFormat.month: 'Month',
+            CalendarFormat.week: 'Week',
+          },
           daysOfWeekStyle: _dayOfWeekStyle(context),
           calendarStyle: _calendarStyle(context),
           calendarBuilders: CalendarBuilders(
@@ -155,39 +159,44 @@ class Calendar extends StatelessWidget {
     DateTime focusedDay,
   ) {
     final dayEvents = events.where((e) => e.dateLocal.isSameDay(day)).toList();
-    final dayColors = dayEvents.map((e) => e.color).toSet();
+
+    if (dayEvents.isEmpty) return const SizedBox.shrink();
+
+    final colorCounts = <Color, int>{};
+    for (final event in dayEvents) {
+      colorCounts[event.color] = (colorCounts[event.color] ?? 0) + 1;
+    }
+
+    final totalEvents = dayEvents.length;
+    final colorSegments = colorCounts.entries.toList();
+
+    final baseWidth = 8.0;
+    final maxWidth = 24.0;
+    final width = (baseWidth + (totalEvents - 1) * 4).clamp(
+      baseWidth,
+      maxWidth,
+    );
 
     return Opacity(
       opacity: day.isSameMonth(focusedDay) ? 1 : 0.4,
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 8),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ...dayColors
-                .take(3)
-                .map(
-                  (color) => Container(
-                    width: 6,
-                    height: 6,
-                    margin: const EdgeInsets.symmetric(horizontal: 1),
-                    decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
-            if (dayColors.length > 3)
-              Container(
-                width: 5,
-                height: 5,
-                margin: const EdgeInsets.symmetric(horizontal: 1),
-                decoration: BoxDecoration(
-                  color: dayColors.last.withAlpha(100),
-                  shape: BoxShape.circle,
-                ),
-              ),
-          ],
+        padding: const EdgeInsets.only(bottom: 9),
+        child: Container(
+          width: width,
+          height: 6,
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(2)),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(2),
+            child: Row(
+              children: colorSegments.map((entry) {
+                final proportion = entry.value / totalEvents;
+                return Expanded(
+                  flex: (proportion * 100).round(),
+                  child: Container(color: entry.key),
+                );
+              }).toList(),
+            ),
+          ),
         ),
       ),
     );
@@ -196,9 +205,9 @@ class Calendar extends StatelessWidget {
   Widget _buildDayOfWeek(BuildContext context, DateTime day) {
     return Center(
       child: Text(
-        day.weekDayInitial,
+        day.toEEE(),
         style: context.textTheme.bodyMedium?.copyWith(
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w500,
           color: context.colorScheme.onSurface,
         ),
       ),

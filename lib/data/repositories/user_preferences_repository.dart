@@ -1,5 +1,7 @@
 import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:injectable/injectable.dart';
 
+@Injectable()
 class UserPreferencesRepository {
   const UserPreferencesRepository(this._userPreferencesBox);
 

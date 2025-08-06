@@ -32,6 +32,7 @@ abstract class AppTheme {
     primary: AppColors.stone900,
     secondary: AppColors.stone500,
     tertiary: AppColors.stone700,
+    onTertiary: AppColors.stone300,
     surface: AppColors.stone50,
     surfaceContainerHighest: AppColors.stone900,
     error: AppColors.red,
@@ -90,11 +91,15 @@ abstract class AppTheme {
         ).copyWith(
           elevation: const WidgetStatePropertyAll(0),
           shadowColor: WidgetStatePropertyAll(_colorScheme.shadow),
-          backgroundColor: WidgetStatePropertyAll(_colorScheme.primary),
+          backgroundColor: WidgetStateColor.resolveWith(
+            (states) => states.contains(WidgetState.disabled)
+                ? _colorScheme.secondary
+                : _colorScheme.primary,
+          ),
           foregroundColor: WidgetStateColor.resolveWith(
             (states) => states.contains(WidgetState.disabled)
-                ? _colorScheme.surface.withAlpha(100)
-                : _colorScheme.surface,
+                ? _colorScheme.onTertiary
+                : _colorScheme.onPrimary,
           ),
         ),
   );
