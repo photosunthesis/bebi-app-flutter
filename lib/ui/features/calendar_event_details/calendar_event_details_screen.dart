@@ -130,7 +130,10 @@ class _CalendarEventDetailsScreenState
             const SizedBox(height: 24),
             Row(
               children: [
-                const Icon(Symbols.calendar_clock),
+                Icon(
+                  Symbols.calendar_clock,
+                  color: widget.calendarEvent.color.darken(0.1),
+                ),
                 const SizedBox(width: 16),
                 Text(
                   _event.date.toEEEEMMMMdyyyy(),
@@ -190,7 +193,10 @@ class _CalendarEventDetailsScreenState
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const Icon(Symbols.location_on),
+                Icon(
+                  Symbols.location_on,
+                  color: widget.calendarEvent.color.darken(0.1),
+                ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Text(
@@ -216,7 +222,10 @@ class _CalendarEventDetailsScreenState
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Symbols.notes),
+                Icon(
+                  Symbols.notes,
+                  color: widget.calendarEvent.color.darken(0.1),
+                ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Text(
