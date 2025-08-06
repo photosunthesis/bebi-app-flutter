@@ -30,7 +30,6 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
   final FirebaseAnalytics _firebaseAnalytics;
 
   Future<void> initialize(CalendarEvent? calendarEvent) async {
-    emit(state.copyWith(loading: true));
     if (calendarEvent == null) return;
     emit(state.copyWith(calendarEvent: calendarEvent));
   }
@@ -52,6 +51,7 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
     await guard(
       () async {
         emit(state.copyWith(loading: true));
+
         final partnership = shareWithPartner
             ? await _userPartnershipsRepository.getByUserId(
                 _firebaseAuth.currentUser!.uid,
