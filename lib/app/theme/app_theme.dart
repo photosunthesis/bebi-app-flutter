@@ -109,11 +109,7 @@ abstract class AppTheme {
         OutlinedButton.styleFrom(
           backgroundColor: _colorScheme.surface,
           foregroundColor: _colorScheme.primary,
-          shape: RoundedRectangleBorder(
-            side: BorderSide(
-              color: _colorScheme.secondary,
-              width: UiConstants.borderWidth,
-            ),
+          shape: const RoundedRectangleBorder(
             borderRadius: UiConstants.borderRadius,
           ),
           textStyle: _textTheme.labelLarge?.copyWith(
@@ -138,13 +134,7 @@ abstract class AppTheme {
         TextButton.styleFrom(
           backgroundColor: _colorScheme.surface,
           foregroundColor: _colorScheme.primary,
-          shape: RoundedRectangleBorder(
-            side: BorderSide(
-              color: _colorScheme.secondary,
-              width: UiConstants.borderWidth,
-            ),
-            borderRadius: UiConstants.borderRadius,
-          ),
+          shape: const RoundedRectangleBorder(borderRadius: UiConstants.borderRadius),
           textStyle: _textTheme.labelLarge?.copyWith(
             fontSize: 14,
             fontWeight: FontWeight.w600,

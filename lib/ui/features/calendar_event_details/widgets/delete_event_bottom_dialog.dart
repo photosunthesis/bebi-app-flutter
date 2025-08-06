@@ -29,7 +29,7 @@ Future<DeleteEventResult?> showDeleteEventBottomDialog(
       const Option(
         text: 'Cancel',
         value: DeleteEventResult.cancel,
-        style: OptionStyle.cancel,
+        style: OptionStyle.secondary,
       ),
     ],
   );

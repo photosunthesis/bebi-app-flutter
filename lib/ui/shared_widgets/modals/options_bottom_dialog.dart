@@ -3,7 +3,7 @@ import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-enum OptionStyle { primary, secondary, destructive, cancel }
+enum OptionStyle { primary, secondary, destructive }
 
 class Option<T> {
   const Option({
@@ -114,12 +114,6 @@ class OptionsBottomDialog<T> extends StatelessWidget {
           foregroundColor: context.colorScheme.surface,
         );
         break;
-      case OptionStyle.cancel:
-        buttonStyle = ElevatedButton.styleFrom(
-          backgroundColor: context.colorScheme.surface,
-          foregroundColor: context.colorScheme.secondary,
-        );
-        break;
     }
 
     return Padding(
@@ -129,16 +123,6 @@ class OptionsBottomDialog<T> extends StatelessWidget {
       ),
       child: ElevatedButton(
         style: buttonStyle.copyWith(
-          side: WidgetStatePropertyAll(
-            BorderSide(
-              color:
-                  option.style == OptionStyle.destructive ||
-                      option.style == OptionStyle.primary
-                  ? Colors.transparent
-                  : context.colorScheme.primary,
-              width: UiConstants.borderWidth,
-            ),
-          ),
           minimumSize: const WidgetStatePropertyAll(Size(double.infinity, 44)),
         ),
         onPressed: () => context.pop(option.value),

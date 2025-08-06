@@ -6,6 +6,7 @@ import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/ui/features/calendar/calendar_cubit.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
+import 'package:bebi_app/utils/extension/color_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -104,14 +105,22 @@ class _CalendarEventsState extends State<CalendarEvents> {
           extra: event,
           pathParameters: {'id': event.id},
         ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildColorBar(event.eventColor.color),
-            const SizedBox(width: 8),
-            Expanded(child: _buildEventDetails(context, event)),
-            const SizedBox(width: 12),
-          ],
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            color: event.eventColor.color.withAlpha(40),
+            borderRadius: UiConstants.borderRadius,
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(width: 8),
+              _buildColorBar(event.eventColor.color),
+              const SizedBox(width: 8),
+              Expanded(child: _buildEventDetails(context, event)),
+              const SizedBox(width: 12),
+            ],
+          ),
         ),
       ),
     );
@@ -119,7 +128,7 @@ class _CalendarEventsState extends State<CalendarEvents> {
 
   Widget _buildColorBar(Color color) {
     return Container(
-      width: 3,
+      width: 4,
       decoration: BoxDecoration(
         color: color,
         borderRadius: UiConstants.borderRadius,
@@ -139,48 +148,44 @@ class _CalendarEventsState extends State<CalendarEvents> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildEventTitle(event.title),
-        const SizedBox(height: 2),
-        _buildEventTime(event, event.allDay),
+        _buildEventTitle(event.title, event.eventColor.color),
+        _buildEventTime(event, event.allDay, event.eventColor.color),
         if (event.location != null && event.location!.isNotEmpty)
-          _buildEventLocation(event.location!),
-        const SizedBox(height: 2),
+          _buildEventLocation(event.location!, event.eventColor.color),
       ],
     );
   }
 
-  Widget _buildEventTitle(String title) {
+  Widget _buildEventTitle(String title, Color color) {
     return Text(
       title,
       style: context.primaryTextTheme.titleLarge?.copyWith(
-        color: context.colorScheme.primary,
+        color: color.darken(0.3),
       ),
       overflow: TextOverflow.ellipsis,
     );
   }
 
-  Widget _buildEventTime(CalendarEvent event, bool allDay) {
+  Widget _buildEventTime(CalendarEvent event, bool allDay, Color color) {
     return Padding(
       padding: const EdgeInsets.only(top: 2),
       child: Text(
         allDay
             ? 'All day'
             : _formatDuration(event.startTimeLocal, event.endTimeLocal),
-        style: context.textTheme.bodyMedium?.copyWith(
-          color: context.colorScheme.primary,
-        ),
+        style: context.textTheme.bodyMedium?.copyWith(color: color.darken(0.3)),
       ),
     );
   }
 
-  Widget _buildEventLocation(String location) {
+  Widget _buildEventLocation(String location, Color color) {
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.only(top: 2),
         child: Text(
           location,
           style: context.textTheme.bodyMedium?.copyWith(
-            color: context.colorScheme.secondary,
+            color: color.darken(0.3),
           ),
           overflow: TextOverflow.ellipsis,
           maxLines: 1,

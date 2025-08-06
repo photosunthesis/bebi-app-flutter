@@ -7,7 +7,6 @@ import 'package:bebi_app/ui/features/calendar_event_form/widgets/calendar_event_
 import 'package:bebi_app/ui/shared_widgets/layouts/main_app_bar.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
-import 'package:bebi_app/utils/extension/button_style_extensions.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/extension/string_extensions.dart';
 import 'package:flutter/material.dart';
@@ -149,17 +148,14 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
         BlocSelector<CalendarEventFormCubit, CalendarEventFormState, bool>(
           selector: (state) => state.loading,
           builder: (context, loading) {
-            return Container(
-              width: 60,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: TextButton(
-                style: TextButton.styleFrom(
-                  foregroundColor: context.colorScheme.onPrimary,
-                  backgroundColor: context.colorScheme.primary,
-                ).asPrimary(context),
-                onPressed: loading ? null : _onSave,
-                child: Text(loading ? 'Saving' : 'Save'),
+            return TextButton(
+              style: TextButton.styleFrom(
+                textStyle: context.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
               ),
+              onPressed: loading ? null : _onSave,
+              child: Text(loading ? 'Saving' : 'Save'),
             );
           },
         ),

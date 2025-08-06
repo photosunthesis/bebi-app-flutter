@@ -92,8 +92,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     SizedBox(
                       width: 30,
                       height: 30,
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
+                      child: TextButton(
+                        style: TextButton.styleFrom(
                           padding: EdgeInsets.zero,
                           visualDensity: VisualDensity.compact,
                         ),

@@ -15,42 +15,51 @@ class Calendar extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<CalendarCubit, CalendarState>(
       builder: (context, state) {
-        return TableCalendar<CalendarEvent>(
-          eventLoader: (day) => state.events,
-          headerVisible: false,
-          focusedDay: state.focusedDay,
-          currentDay: DateTime.now(),
-          firstDay: DateTime.now().subtract(2.years),
-          lastDay: DateTime.now().add(2.years),
-          selectedDayPredicate: (day) => day.isSameDay(state.focusedDay),
-          daysOfWeekHeight: 32,
-          // TODO Add feature to switch to week view
-          calendarFormat: CalendarFormat.month,
-          availableCalendarFormats: {
-            CalendarFormat.month: 'Month',
-            CalendarFormat.week: 'Week',
-          },
-          daysOfWeekStyle: _dayOfWeekStyle(context),
-          calendarStyle: _calendarStyle(context),
-          calendarBuilders: CalendarBuilders(
-            selectedBuilder: _selectedDayBuilder,
-            todayBuilder: _todayBuilder,
-            dowBuilder: _buildDayOfWeek,
-            defaultBuilder: _defaultDayBuilder,
-            outsideBuilder: _outsideBuilder,
-            markerBuilder: (context, day, events) =>
-                _markerBuilder(context, day, events, state.focusedDay),
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
+          decoration: BoxDecoration(
+            borderRadius: UiConstants.borderRadius,
+            border: Border.all(
+              color: context.colorScheme.outline,
+              width: UiConstants.borderWidth,
+            ),
           ),
-          onDaySelected: (day, _) {
-            context.read<CalendarCubit>().setFocusedDay(day);
-          },
-          onPageChanged: (focusedDay) {
-            context.read<CalendarCubit>().setFocusedDay(
-              DateTime.now().isSameMonth(focusedDay)
-                  ? DateTime.now()
-                  : focusedDay,
-            );
-          },
+          child: TableCalendar<CalendarEvent>(
+            eventLoader: (day) => state.events,
+            headerVisible: false,
+            focusedDay: state.focusedDay,
+            currentDay: DateTime.now(),
+            firstDay: DateTime.now().subtract(2.years),
+            lastDay: DateTime.now().add(2.years),
+            selectedDayPredicate: (day) => day.isSameDay(state.focusedDay),
+            daysOfWeekHeight: 32,
+            // TODO Add feature to switch to week view
+            calendarFormat: CalendarFormat.month,
+            availableCalendarFormats: {
+              CalendarFormat.month: 'Month',
+              CalendarFormat.week: 'Week',
+            },
+            daysOfWeekStyle: _dayOfWeekStyle(context),
+            calendarBuilders: CalendarBuilders(
+              selectedBuilder: _selectedDayBuilder,
+              todayBuilder: _todayBuilder,
+              dowBuilder: _buildDayOfWeek,
+              defaultBuilder: _defaultDayBuilder,
+              outsideBuilder: _outsideBuilder,
+              markerBuilder: (context, day, events) =>
+                  _markerBuilder(context, day, events, state.focusedDay),
+            ),
+            onDaySelected: (day, _) {
+              context.read<CalendarCubit>().setFocusedDay(day);
+            },
+            onPageChanged: (focusedDay) {
+              context.read<CalendarCubit>().setFocusedDay(
+                DateTime.now().isSameMonth(focusedDay)
+                    ? DateTime.now()
+                    : focusedDay,
+              );
+            },
+          ),
         );
       },
     );
@@ -62,10 +71,10 @@ class Calendar extends StatelessWidget {
     DateTime focusedDay,
   ) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(15, 10, 15, 18),
+      margin: const EdgeInsets.fromLTRB(12, 10, 12, 18),
       decoration: BoxDecoration(
         color: context.colorScheme.primary,
-        borderRadius: UiConstants.borderRadius,
+        shape: BoxShape.circle,
       ),
       child: Center(
         child: Text(
@@ -85,10 +94,10 @@ class Calendar extends StatelessWidget {
     DateTime focusedDay,
   ) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(15, 10, 15, 18),
+      margin: const EdgeInsets.fromLTRB(12, 10, 12, 18),
       decoration: BoxDecoration(
         color: day.isSameDay(focusedDay) ? context.colorScheme.primary : null,
-        borderRadius: UiConstants.borderRadius,
+        shape: BoxShape.circle,
         border: Border.all(
           color: context.colorScheme.primary.withAlpha(
             day.isSameMonth(focusedDay) ? 255 : 80,
@@ -118,7 +127,7 @@ class Calendar extends StatelessWidget {
     DateTime focusedDay,
   ) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(15, 10, 15, 18),
+      margin: const EdgeInsets.fromLTRB(12, 10, 12, 18),
       decoration: const BoxDecoration(borderRadius: UiConstants.borderRadius),
       child: Center(
         child: Text(
@@ -138,7 +147,7 @@ class Calendar extends StatelessWidget {
     DateTime focusedDay,
   ) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(15, 10, 15, 18),
+      margin: const EdgeInsets.fromLTRB(12, 10, 12, 18),
       decoration: const BoxDecoration(borderRadius: UiConstants.borderRadius),
       child: Center(
         child: Text(
@@ -180,7 +189,7 @@ class Calendar extends StatelessWidget {
     return Opacity(
       opacity: day.isSameMonth(focusedDay) ? 1 : 0.4,
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 9),
+        padding: const EdgeInsets.only(bottom: 8),
         child: Container(
           width: width,
           height: 6,
@@ -220,20 +229,6 @@ class Calendar extends StatelessWidget {
         border: Border(
           bottom: BorderSide(
             color: context.colorScheme.onSecondary,
-            width: 0.2,
-          ),
-        ),
-      ),
-    );
-  }
-
-  CalendarStyle _calendarStyle(BuildContext context) {
-    return CalendarStyle(
-      rowDecoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: context.colorScheme.onSecondary,
-            // Weird bug with the border on different platforms 🤷🏻
             width: UiConstants.borderWidth,
           ),
         ),

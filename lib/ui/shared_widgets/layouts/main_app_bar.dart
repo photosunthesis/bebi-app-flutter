@@ -19,10 +19,7 @@ abstract class MainAppBar {
             : Brightness.light,
       ),
       leading: leading,
-      actions: [
-        ...actions,
-        const SizedBox(width: UiConstants.padding),
-      ],
+      actions: [...actions, const SizedBox(width: 8)],
       centerTitle: true,
       titleSpacing: 0,
       bottom: PreferredSize(

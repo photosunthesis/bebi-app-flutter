@@ -51,22 +51,24 @@ class _CalendarEventDetailsScreenState
               >(
                 selector: (state) => state is CalendarEventDetailsStateLoading,
                 builder: (context, loading) {
-                  return SizedBox(
-                    width: 48,
-                    child: TextButton(
-                      onPressed: () async {
-                        final updatedEvent = await context
-                            .pushNamed<CalendarEvent>(
-                              AppRoutes.updateCalendarEvent,
-                              extra: _event,
-                              pathParameters: {'id': _event.id},
-                            );
-                        if (updatedEvent != null) {
-                          setState(() => _event = updatedEvent);
-                        }
-                      },
-                      child: const Text('Edit'),
+                  return TextButton(
+                    style: TextButton.styleFrom(
+                      textStyle: context.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
+                    onPressed: () async {
+                      final updatedEvent = await context
+                          .pushNamed<CalendarEvent>(
+                            AppRoutes.updateCalendarEvent,
+                            extra: _event,
+                            pathParameters: {'id': _event.id},
+                          );
+                      if (updatedEvent != null) {
+                        setState(() => _event = updatedEvent);
+                      }
+                    },
+                    child: const Text('Edit'),
                   );
                 },
               ),
@@ -100,7 +102,7 @@ class _CalendarEventDetailsScreenState
           child: Text(
             _event.title,
             style: context.primaryTextTheme.headlineSmall?.copyWith(
-              color: _event.color.darken(),
+              color: _event.color.darken(0.2),
             ),
           ),
         ),
@@ -239,35 +241,32 @@ class _CalendarEventDetailsScreenState
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(UiConstants.padding),
-              child: SizedBox(
-                width: 105,
-                child:
-                    BlocSelector<
-                      CalendarEventDetailsCubit,
-                      CalendarEventDetailsState,
-                      bool
-                    >(
-                      selector: (state) =>
-                          state is CalendarEventDetailsStateLoading,
-                      builder: (context, loading) {
-                        return TextButton(
-                          style: TextButton.styleFrom(
-                            textStyle: context.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                            foregroundColor: context.colorScheme.error.darken(
-                              0.1,
-                            ),
+              child:
+                  BlocSelector<
+                    CalendarEventDetailsCubit,
+                    CalendarEventDetailsState,
+                    bool
+                  >(
+                    selector: (state) =>
+                        state is CalendarEventDetailsStateLoading,
+                    builder: (context, loading) {
+                      return TextButton(
+                        style: TextButton.styleFrom(
+                          textStyle: context.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w500,
                           ),
-                          onPressed: loading ? null : _onDelete,
-                          child: const Text('Delete event'),
-                        );
-                      },
-                    ),
-              ),
+                          foregroundColor: context.colorScheme.error.darken(
+                            0.1,
+                          ),
+                        ),
+                        onPressed: loading ? null : _onDelete,
+                        child: const Text('Delete event'),
+                      );
+                    },
+                  ),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 2),
         ],
       ),
     );
