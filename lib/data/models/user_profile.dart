@@ -20,8 +20,9 @@ abstract class UserProfile with _$UserProfile {
     @HiveField(5) required String createdBy,
     @HiveField(6) required DateTime createdAt,
     @HiveField(7) required DateTime updatedAt,
-    @HiveField(8) @Default(false) bool hasCycle,
-    @HiveField(9) @Default(false) bool isSharingCycleWithPartner,
+    @HiveField(8) @Default(false) bool didSetUpCycles,
+    @HiveField(9) @Default(false) bool hasCycle,
+    @HiveField(10) @Default(false) bool isSharingCycleWithPartner,
   }) = _UserProfile;
 
   factory UserProfile.fromFirestore(DocumentSnapshot doc) {
@@ -35,6 +36,7 @@ abstract class UserProfile with _$UserProfile {
       createdBy: data['created_by'] as String,
       createdAt: (data['created_at'] as Timestamp).toDate(),
       updatedAt: (data['updated_at'] as Timestamp).toDate(),
+      didSetUpCycles: data['did_set_up_cycles'] as bool,
       hasCycle: data['has_cycle'] as bool,
       isSharingCycleWithPartner: data['is_sharing_cycle_with_partner'] as bool,
     );
@@ -50,6 +52,7 @@ abstract class UserProfile with _$UserProfile {
       'created_by': createdBy,
       'created_at': Timestamp.fromDate(createdAt),
       'updated_at': Timestamp.fromDate(updatedAt),
+      'did_set_up_cycles': didSetUpCycles,
       'has_cycle': hasCycle,
       'is_sharing_cycle_with_partner': isSharingCycleWithPartner,
     };
