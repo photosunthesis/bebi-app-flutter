@@ -96,26 +96,13 @@ class _CalendarEventDetailsScreenState
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       sliver: SliverToBoxAdapter(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              width: 20,
-              height: 20,
-              margin: const EdgeInsets.only(right: UiConstants.padding),
-              decoration: BoxDecoration(
-                color: _event.color,
-                shape: BoxShape.circle,
-              ),
+        child: Expanded(
+          child: Text(
+            _event.title,
+            style: context.primaryTextTheme.headlineSmall?.copyWith(
+              color: _event.color.darken(),
             ),
-            const SizedBox(width: 4),
-            Expanded(
-              child: Text(
-                _event.title,
-                style: context.primaryTextTheme.headlineSmall,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
