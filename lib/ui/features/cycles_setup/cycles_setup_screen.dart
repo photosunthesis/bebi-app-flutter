@@ -47,10 +47,7 @@ class _CyclesSetupScreenState extends State<CyclesSetupScreen> {
           appBar: _buildAppbar(),
           body: CustomScrollView(
             slivers: [
-              SliverPadding(
-                padding: const EdgeInsets.only(top: UiConstants.padding),
-                sliver: SliverToBoxAdapter(child: _buildHeader()),
-              ),
+              SliverToBoxAdapter(child: _buildHeader()),
               const SliverPadding(
                 padding: EdgeInsets.only(top: 24),
                 sliver: SliverToBoxAdapter(child: SizedBox.shrink()),
