@@ -196,9 +196,9 @@ class Calendar extends StatelessWidget {
         child: Container(
           width: width,
           height: 6,
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(2)),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(4)),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(2),
+            borderRadius: BorderRadius.circular(4),
             child: Row(
               children: colorSegments.map((entry) {
                 final proportion = entry.value / totalEvents;
