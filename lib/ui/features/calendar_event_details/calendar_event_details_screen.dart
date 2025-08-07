@@ -248,17 +248,18 @@ class _CalendarEventDetailsScreenState
                     selector: (state) =>
                         state is CalendarEventDetailsStateLoading,
                     builder: (context, loading) {
-                      return TextButton(
-                        style: TextButton.styleFrom(
-                          textStyle: context.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
+                      return OutlinedButton(
+                        style: OutlinedButton.styleFrom(
                           foregroundColor: context.colorScheme.error.darken(
                             0.1,
                           ),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 10,
+                          ),
                         ),
                         onPressed: loading ? null : _onDelete,
-                        child: const Text('Delete event'),
+                        child: Text('Delete event'.toUpperCase()),
                       );
                     },
                   ),

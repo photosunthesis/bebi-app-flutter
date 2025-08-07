@@ -111,9 +111,9 @@ class _CalendarEventsState extends State<CalendarEvents> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // const SizedBox(width: 8),
+            const SizedBox(width: 4),
             _buildColorBar(event.eventColor.color),
-            const SizedBox(width: 8),
+            const SizedBox(width: 10),
             Expanded(child: _buildEventDetails(context, event)),
             const SizedBox(width: 12),
           ],
