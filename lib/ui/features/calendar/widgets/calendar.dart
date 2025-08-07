@@ -33,6 +33,7 @@ class Calendar extends StatelessWidget {
             headerVisible: false,
             focusedDay: state.focusedDay,
             currentDay: DateTime.now(),
+            // TODO Make first and last days dynamic
             firstDay: DateTime.now().subtract(2.years),
             lastDay: DateTime.now().add(2.years),
             selectedDayPredicate: (day) => day.isSameDay(state.focusedDay),

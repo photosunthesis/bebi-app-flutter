@@ -77,8 +77,10 @@ class RecurringCalendarEventsService {
     required DateTime windowEnd,
   }) {
     final events = <CalendarEvent>[];
-    var currentDate = baseEvent.date;
-    var occurrenceCount = 0;
+    final seenDates = <DateTime>{};
+    
+    var currentDate = getNextOccurrence(baseEvent.date, baseEvent.repeatRule);
+    var occurrenceCount = 1;
 
     while (currentDate.isBefore(windowEnd) &&
         occurrenceCount < _maxOccurrences &&
@@ -87,8 +89,12 @@ class RecurringCalendarEventsService {
           currentDate,
           occurrenceCount,
         )) {
+      final dateKey = _startOfDay(currentDate);
+      
       if (_isDateInWindow(currentDate, windowStart, windowEnd) &&
-          !_isExcludedDate(currentDate, baseEvent.repeatRule)) {
+          !_isExcludedDate(currentDate, baseEvent.repeatRule) &&
+          !seenDates.contains(dateKey)) {
+        seenDates.add(dateKey);
         events.add(
           baseEvent.copyWith(
             recurringEventId: _instanceKey(baseEvent.id, currentDate),
