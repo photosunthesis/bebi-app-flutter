@@ -2,11 +2,9 @@ import 'dart:math';
 
 import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/constants/kaomojis.dart';
-import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/ui/features/calendar/calendar_cubit.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
-import 'package:bebi_app/utils/extension/color_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -66,12 +64,9 @@ class _CalendarEventsState extends State<CalendarEvents> {
     return ListView.builder(
       key: ValueKey(events),
       itemCount: events.length,
-      padding: const EdgeInsets.symmetric(
-        vertical: UiConstants.padding,
-        horizontal: 12,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       itemBuilder: (context, index) => Padding(
-        padding: const EdgeInsets.only(bottom: 14),
+        padding: EdgeInsets.only(bottom: 8, top: index == 0 ? 10 : 4),
         child: _buildEventCard(context, events[index]),
       ),
     );
@@ -111,9 +106,8 @@ class _CalendarEventsState extends State<CalendarEvents> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(width: 4),
             _buildColorBar(event.eventColor.color),
-            const SizedBox(width: 10),
+            const SizedBox(width: 8),
             Expanded(child: _buildEventDetails(context, event)),
             const SizedBox(width: 12),
           ],
@@ -123,7 +117,14 @@ class _CalendarEventsState extends State<CalendarEvents> {
   }
 
   Widget _buildColorBar(Color color) {
-    return Container(width: 2, decoration: BoxDecoration(color: color));
+    return Container(
+      width: 4,
+      margin: const EdgeInsets.symmetric(vertical: 3),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(2),
+      ),
+    );
   }
 
   String _formatDuration(DateTime start, DateTime? end) {
@@ -147,35 +148,42 @@ class _CalendarEventsState extends State<CalendarEvents> {
   }
 
   Widget _buildEventTitle(String title, Color color) {
-    return Text(
-      title,
-      style: context.primaryTextTheme.titleLarge?.copyWith(
-        color: color.darken(0.3),
+    return Expanded(
+      child: Text(
+        title,
+        style: context.primaryTextTheme.titleLarge?.copyWith(
+          color: context.colorScheme.primary,
+        ),
+        overflow: TextOverflow.ellipsis,
       ),
-      overflow: TextOverflow.ellipsis,
     );
   }
 
   Widget _buildEventTime(CalendarEvent event, bool allDay, Color color) {
     return Padding(
       padding: const EdgeInsets.only(top: 2),
-      child: Text(
-        allDay
-            ? 'All day'
-            : _formatDuration(event.startTimeLocal, event.endTimeLocal),
-        style: context.textTheme.bodyMedium?.copyWith(color: color.darken(0.3)),
+      child: Expanded(
+        child: Text(
+          allDay
+              ? 'All day'
+              : _formatDuration(event.startTimeLocal, event.endTimeLocal),
+          style: context.textTheme.bodyMedium?.copyWith(
+            color: context.colorScheme.secondary,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
       ),
     );
   }
 
   Widget _buildEventLocation(String location, Color color) {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.only(top: 2),
+    return Padding(
+      padding: const EdgeInsets.only(top: 2),
+      child: Expanded(
         child: Text(
           location,
           style: context.textTheme.bodyMedium?.copyWith(
-            color: color.darken(0.3),
+            color: context.colorScheme.secondary,
           ),
           overflow: TextOverflow.ellipsis,
           maxLines: 1,
