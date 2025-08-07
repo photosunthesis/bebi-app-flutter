@@ -69,24 +69,30 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             child: Stack(
               clipBehavior: Clip.none,
               children: [
-                ShadowContainer(
-                  shape: BoxShape.circle,
-                  child: AnimatedSwitcher(
-                    duration: 300.milliseconds,
+                AnimatedSwitcher(
+                  duration: 300.milliseconds,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: context.colorScheme.outline,
+                        width: UiConstants.borderWidth,
+                      ),
+                    ),
                     child: CircleAvatar(
                       key: ValueKey(profilePicture),
                       radius: 60,
-                      backgroundColor: context.colorScheme.secondary.withAlpha(
-                        20,
-                      ),
+                      backgroundColor: Colors.transparent,
                       backgroundImage: hasProfilePicture
                           ? FileImage(profilePicture)
                           : null,
                       child: !hasProfilePicture
                           ? Icon(
                               Symbols.face,
-                              size: 69,
-                              color: context.colorScheme.primary.withAlpha(90),
+                              size: 50,
+                              color: context.colorScheme.secondary.withAlpha(
+                                100,
+                              ),
                             )
                           : null,
                     ),
@@ -234,7 +240,10 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                         }
                       },
 
-                child: Text(loading ? 'Saving...' : 'Save'),
+                child: Text(
+                  (loading ? 'Updating profile...' : 'Update profile')
+                      .toUpperCase(),
+                ),
               ),
             );
           },

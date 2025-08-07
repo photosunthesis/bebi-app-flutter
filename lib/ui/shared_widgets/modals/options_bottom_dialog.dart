@@ -56,10 +56,7 @@ class OptionsBottomDialog<T> extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: context.colorScheme.surface,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(UiConstants.borderRadiusLargeValue),
-          topRight: Radius.circular(UiConstants.borderRadiusLargeValue),
-        ),
+        borderRadius: BorderRadius.zero,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -126,7 +123,7 @@ class OptionsBottomDialog<T> extends StatelessWidget {
           minimumSize: const WidgetStatePropertyAll(Size(double.infinity, 44)),
         ),
         onPressed: () => context.pop(option.value),
-        child: Text(option.text),
+        child: Text(option.text.toUpperCase()),
       ),
     );
   }

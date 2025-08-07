@@ -1,4 +1,3 @@
-import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/ui/shared_widgets/forms/app_text_form_field.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
@@ -179,29 +178,13 @@ class _AppTimeFormFieldState extends State<AppTimeFormField> {
         minimumDate: widget.minimumDate,
         maximumDate: widget.maximumDate,
         selectionOverlayBuilder:
-            (
-              context, {
-              required columnCount,
-              required selectedIndex,
-            }) => Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  topLeft: <int>[1, 2].contains(selectedIndex)
-                      ? Radius.zero
-                      : const Radius.circular(UiConstants.borderRadiusValue),
-                  topRight: <int>[0, 1].contains(selectedIndex)
-                      ? Radius.zero
-                      : const Radius.circular(UiConstants.borderRadiusValue),
-                  bottomLeft: <int>[1, 2].contains(selectedIndex)
-                      ? Radius.zero
-                      : const Radius.circular(UiConstants.borderRadiusValue),
-                  bottomRight: <int>[0, 1].contains(selectedIndex)
-                      ? Radius.zero
-                      : const Radius.circular(UiConstants.borderRadiusValue),
+            (context, {required columnCount, required selectedIndex}) =>
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.zero,
+                    color: context.colorScheme.onSurface.withAlpha(20),
+                  ),
                 ),
-                color: context.colorScheme.onSurface.withAlpha(20),
-              ),
-            ),
       ),
     );
   }

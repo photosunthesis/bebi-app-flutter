@@ -36,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               const Text('Home Screen'),
               const SizedBox(height: 12),
-              TextButton(
+              OutlinedButton(
                 onPressed: () async {
                   await _cubit.signOut();
                   context.goNamed(AppRoutes.signIn);

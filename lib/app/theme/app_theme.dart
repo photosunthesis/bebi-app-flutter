@@ -1,12 +1,16 @@
 import 'package:bebi_app/app/theme/app_colors.dart';
+import 'package:bebi_app/constants/font_family.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:flutter/material.dart';
+import 'package:injectable/injectable.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 // TODO Add dark theme support
 
+@module
 abstract class AppTheme {
-  static final instance = ThemeData.light(useMaterial3: false).copyWith(
+  @singleton
+  ThemeData get instance => ThemeData.light(useMaterial3: false).copyWith(
     scaffoldBackgroundColor: _colorScheme.surface,
     colorScheme: _colorScheme,
     textTheme: _textTheme,
@@ -45,33 +49,22 @@ abstract class AppTheme {
   );
 
   static final _textTheme = Typography.material2021().black.apply(
-    fontFamily: 'IBMPlexSans',
+    fontFamily: FontFamily.ibmPlexSans,
     bodyColor: _colorScheme.onSurface,
     displayColor: _colorScheme.onSurface,
     decorationColor: _colorScheme.onSurface,
   );
 
   static final _primaryTextTheme = Typography.material2021().black.apply(
-    fontFamily: 'Vidaloka',
+    fontFamily: FontFamily.vidaloka,
     bodyColor: _colorScheme.onSecondary,
     displayColor: _colorScheme.onSecondary,
     decorationColor: _colorScheme.onSecondary,
   );
 
-  static const _inputDecorationBorder = OutlineInputBorder(
-    borderRadius: UiConstants.borderRadius,
-    borderSide: BorderSide.none,
-  );
-
   static final _inputDecorationTheme = InputDecorationTheme(
     filled: true,
-    fillColor: _colorScheme.onSurface.withAlpha(20),
-    border: _inputDecorationBorder,
-    errorBorder: _inputDecorationBorder,
-    focusedBorder: _inputDecorationBorder,
-    focusedErrorBorder: _inputDecorationBorder,
-    disabledBorder: _inputDecorationBorder,
-    enabledBorder: _inputDecorationBorder,
+    fillColor: _colorScheme.surface,
     contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
   );
 
@@ -83,9 +76,9 @@ abstract class AppTheme {
           shape: const RoundedRectangleBorder(
             borderRadius: UiConstants.borderRadius,
           ),
-          textStyle: _textTheme.labelLarge?.copyWith(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
+          textStyle: _textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w500,
+            fontSize: 12,
           ),
           minimumSize: const Size.fromHeight(42),
         ).copyWith(
@@ -112,11 +105,15 @@ abstract class AppTheme {
           shape: const RoundedRectangleBorder(
             borderRadius: UiConstants.borderRadius,
           ),
+          side: BorderSide(
+            color: _colorScheme.outline,
+            width: UiConstants.borderWidth,
+          ),
           textStyle: _textTheme.labelLarge?.copyWith(
-            fontSize: 14,
+            fontSize: 12,
             fontWeight: FontWeight.w600,
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
         ).copyWith(
           elevation: const WidgetStatePropertyAll(0),
           shadowColor: WidgetStatePropertyAll(_colorScheme.shadow),
@@ -134,12 +131,12 @@ abstract class AppTheme {
         TextButton.styleFrom(
           backgroundColor: _colorScheme.surface,
           foregroundColor: _colorScheme.primary,
-          shape: const RoundedRectangleBorder(borderRadius: UiConstants.borderRadius),
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
           textStyle: _textTheme.labelLarge?.copyWith(
-            fontSize: 14,
+            fontSize: 12,
             fontWeight: FontWeight.w600,
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
         ).copyWith(
           elevation: const WidgetStatePropertyAll(0),
           shadowColor: WidgetStatePropertyAll(_colorScheme.shadow),
@@ -157,12 +154,11 @@ abstract class AppTheme {
         IconButton.styleFrom(
           backgroundColor: _colorScheme.surface,
           foregroundColor: _colorScheme.primary,
-          shape: RoundedRectangleBorder(
+          shape: const RoundedRectangleBorder(
             side: BorderSide(
               color: AppColors.stone900,
               width: UiConstants.borderWidth,
             ),
-            borderRadius: UiConstants.borderRadius,
           ),
           visualDensity: VisualDensity.compact,
         ).copyWith(

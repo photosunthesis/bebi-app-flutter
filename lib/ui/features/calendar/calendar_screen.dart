@@ -85,7 +85,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                 onPressed: () => context
                                     .read<CalendarCubit>()
                                     .setFocusedDay(DateTime.now()),
-                                child: const Text('Today'),
+                                child: Text('Today'.toUpperCase()),
                               ),
                             ),
                     ),

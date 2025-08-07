@@ -9,7 +9,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:injectable/injectable.dart';
 
 part 'home_state.dart';
@@ -72,7 +71,7 @@ class HomeCubit extends Cubit<HomeState> {
     await guard(
       () async {
         emit(const HomeLoading());
-        await Future.wait([_firebaseAuth.signOut(), Hive.deleteFromDisk()]);
+        await _firebaseAuth.signOut();
         emit(const HomeInitial());
       },
       onError: (error, _) {

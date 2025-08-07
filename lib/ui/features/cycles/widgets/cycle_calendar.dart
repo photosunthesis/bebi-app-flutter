@@ -188,7 +188,6 @@ class _CycleCalendarState extends State<CycleCalendar> {
       child: event?.isPrediction ?? false
           ? DottedBorder(
               color: event?.color ?? Colors.transparent,
-              borderRadius: UiConstants.borderRadius,
               strokeWidth: 1.4,
               dotSpacing: 6.5,
               child: const SizedBox(width: 25, height: 25),
@@ -198,7 +197,6 @@ class _CycleCalendarState extends State<CycleCalendar> {
               height: 25,
               decoration: BoxDecoration(
                 color: event?.color,
-                borderRadius: UiConstants.borderRadius,
               ),
             ),
     );
@@ -216,7 +214,6 @@ class _CycleCalendarState extends State<CycleCalendar> {
         height: 7,
         decoration: BoxDecoration(
           color: symptomLog?.color ?? intimacyLog?.color,
-          borderRadius: UiConstants.borderRadiusLarge,
         ),
       ),
     );

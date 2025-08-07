@@ -15,13 +15,17 @@ class Calendar extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<CalendarCubit, CalendarState>(
       builder: (context, state) {
-        return Container(
-          margin: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
+        return DecoratedBox(
           decoration: BoxDecoration(
-            borderRadius: UiConstants.borderRadius,
-            border: Border.all(
-              color: context.colorScheme.outline,
-              width: UiConstants.borderWidth,
+            border: Border(
+              top: BorderSide(
+                color: context.colorScheme.outline,
+                width: UiConstants.borderWidth,
+              ),
+              bottom: BorderSide(
+                color: context.colorScheme.outline,
+                width: UiConstants.borderWidth,
+              ),
             ),
           ),
           child: TableCalendar<CalendarEvent>(
@@ -128,7 +132,6 @@ class Calendar extends StatelessWidget {
   ) {
     return Container(
       margin: const EdgeInsets.fromLTRB(12, 10, 12, 18),
-      decoration: const BoxDecoration(borderRadius: UiConstants.borderRadius),
       child: Center(
         child: Text(
           day.day.toString(),
@@ -148,7 +151,6 @@ class Calendar extends StatelessWidget {
   ) {
     return Container(
       margin: const EdgeInsets.fromLTRB(12, 10, 12, 18),
-      decoration: const BoxDecoration(borderRadius: UiConstants.borderRadius),
       child: Center(
         child: Text(
           day.day.toString(),

@@ -1,9 +1,9 @@
-import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/app/theme/app_colors.dart';
-import 'package:bebi_app/app/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_keyboard_visibility_temp_fork/flutter_keyboard_visibility_temp_fork.dart';
+import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -12,8 +12,8 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       title: 'Bebi App',
-      theme: AppTheme.instance,
-      routerConfig: AppRouter.instance,
+      theme: GetIt.I<ThemeData>(),
+      routerConfig: GetIt.I<GoRouter>(),
       debugShowCheckedModeBanner: false,
       builder: (_, child) => AnnotatedRegion(
         value: SystemUiOverlayStyle(

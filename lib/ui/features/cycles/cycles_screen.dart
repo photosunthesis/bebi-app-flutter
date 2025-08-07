@@ -28,6 +28,14 @@ class _CyclesScreenState extends State<CyclesScreen> {
   }
 
   @override
+  void didUpdateWidget(CyclesScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // if (oldWidget.currentIndex != widget.currentIndex && !_isAnimating) {
+    //   _startAnimation(oldWidget.currentIndex);
+    // }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BlocListener<CyclesCubit, CyclesState>(
       listener: (context, state) {
@@ -147,16 +155,9 @@ class _CyclesScreenState extends State<CyclesScreen> {
     );
 
     if (shouldSetup == true) {
-      await _finishCycleSetup();
+      await context.pushNamed(AppRoutes.cyclesSetup);
     } else {
       await _cubit.disableUserCycleTracking();
-    }
-  }
-
-  Future<void> _finishCycleSetup() async {
-    final shouldReinitialize = await context.pushNamed(AppRoutes.cyclesSetup);
-    if (shouldReinitialize == true) {
-      await _cubit.initialize(loadDataFromCache: false);
     }
   }
 }

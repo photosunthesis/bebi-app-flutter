@@ -27,13 +27,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:injectable/injectable.dart';
 
 export 'package:go_router/go_router.dart' show GoRouterHelper;
 
 part 'app_routes.dart';
 
+@module
 abstract class AppRouter {
-  static final instance = GoRouter(
+  @singleton
+  GoRouter get instance => GoRouter(
     routes: [
       GoRoute(
         path: '/sign-in',

@@ -1,4 +1,3 @@
-import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/ui/shared_widgets/forms/app_text_form_field.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
@@ -210,7 +209,6 @@ class _AppDateFormFieldState extends State<AppDateFormField> {
       margin: const EdgeInsets.symmetric(vertical: 13, horizontal: 8),
       decoration: BoxDecoration(
         color: context.colorScheme.primary,
-        borderRadius: UiConstants.borderRadius,
       ),
       child: Center(
         child: Text(
@@ -233,7 +231,6 @@ class _AppDateFormFieldState extends State<AppDateFormField> {
       margin: const EdgeInsets.symmetric(vertical: 13, horizontal: 8),
       decoration: BoxDecoration(
         color: day.isSameDay(focusedDay) ? context.colorScheme.primary : null,
-        borderRadius: UiConstants.borderRadius,
         border: Border.all(color: context.colorScheme.primary, width: 0.6),
       ),
       child: Center(
@@ -257,7 +254,6 @@ class _AppDateFormFieldState extends State<AppDateFormField> {
   ) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 13, horizontal: 8),
-      decoration: const BoxDecoration(borderRadius: UiConstants.borderRadius),
       child: Center(
         child: Text(
           day.day.toString(),

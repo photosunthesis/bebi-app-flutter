@@ -1,3 +1,4 @@
+import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:flutter/material.dart';
@@ -48,9 +49,15 @@ class AppTextFormField extends StatefulWidget {
 }
 
 class _AppTextFormFieldState extends State<AppTextFormField> {
-  late final FocusNode _focusNode = widget.focusNode ?? FocusNode();
-
   String? _errorText;
+  late final _focusNode = widget.focusNode ?? FocusNode();
+  late final _inputBorder = OutlineInputBorder(
+    borderRadius: UiConstants.borderRadius,
+    borderSide: BorderSide(
+      color: context.colorScheme.outline,
+      width: UiConstants.borderWidth,
+    ),
+  );
 
   @override
   void initState() {
@@ -112,6 +119,12 @@ class _AppTextFormFieldState extends State<AppTextFormField> {
             minLines: widget.minLines,
             maxLines: widget.maxLines ?? 1,
             decoration: InputDecoration(
+              border: _inputBorder,
+              enabledBorder: _inputBorder,
+              focusedBorder: _inputBorder,
+              errorBorder: _inputBorder,
+              focusedErrorBorder: _inputBorder,
+              disabledBorder: _inputBorder,
               fillColor: widget.fillColor,
               hintText: widget.hintText,
               hintStyle:

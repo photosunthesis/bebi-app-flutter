@@ -109,7 +109,10 @@ class _CalendarEventsState extends State<CalendarEvents> {
           padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
             color: event.eventColor.color.withAlpha(40),
-            borderRadius: UiConstants.borderRadius,
+            border: Border.all(
+              color: event.eventColor.color.darken(0.4),
+              width: UiConstants.borderWidth,
+            ),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -128,10 +131,9 @@ class _CalendarEventsState extends State<CalendarEvents> {
 
   Widget _buildColorBar(Color color) {
     return Container(
-      width: 4,
+      width: 2,
       decoration: BoxDecoration(
         color: color,
-        borderRadius: UiConstants.borderRadius,
       ),
     );
   }

@@ -56,26 +56,26 @@ class _AddPartnerScreenState extends State<AddPartnerScreen> {
       },
       child: Scaffold(
         resizeToAvoidBottomInset: true,
-        body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
-          child: Form(
-            key: _formKey,
-            child: ListView(
-              children: [
-                const SafeArea(child: SizedBox(height: UiConstants.padding)),
-                _buildHeader(),
-                const SizedBox(height: 32),
-                _buildUserCodeSection(),
-                const SizedBox(height: 12),
-                Text(
-                  'or',
-                  style: context.textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
+        body: Form(
+          key: _formKey,
+          child: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: Column(
+                  children: [
+                    const SafeArea(
+                      child: SizedBox(height: UiConstants.padding),
+                    ),
+                    _buildHeader(),
+                    const SizedBox(height: 18),
+                  ],
                 ),
-                const SizedBox(height: 12),
-                _buildPartnerCodeSection(),
-              ],
-            ),
+              ),
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: _buildCodeSections(),
+              ),
+            ],
           ),
         ),
         bottomNavigationBar: _buildBottomBar(),
@@ -84,26 +84,26 @@ class _AddPartnerScreenState extends State<AddPartnerScreen> {
   }
 
   Widget _buildHeader() {
-    return Column(
-      children: [
-        Text(
-          'Connect with a partner',
-          style: context.primaryTextTheme.headlineSmall,
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 16),
-        SizedBox(
-          width: context.screenWidth * 0.85,
-          child: Text(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Connect with a partner',
+            style: context.primaryTextTheme.headlineSmall,
+          ),
+          const SizedBox(height: 12),
+          Text(
             'Share your code with a partner or enter theirs below. It\'s how you\'ll connect and start sharing moments together.',
             style: context.textTheme.bodyLarge?.copyWith(
               height: 1.4,
               fontWeight: FontWeight.normal,
             ),
-            textAlign: TextAlign.center,
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -118,10 +118,12 @@ class _AddPartnerScreenState extends State<AddPartnerScreen> {
             readOnly: true,
           ),
           Positioned(
-            right: 10,
-            top: 10,
+            right: 4,
+            top: 6,
             child: TextButton(
-              child: const Text('Copy'),
+              style: OutlinedButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+              ),
               onPressed: () async {
                 if (_userCodeController.text.isEmpty) return;
 
@@ -133,9 +135,10 @@ class _AddPartnerScreenState extends State<AddPartnerScreen> {
 
                 context.showSnackbar(
                   'Code "${_userCodeController.text}" copied to clipboard.',
-                  type: SnackbarType.success,
+                  type: SnackbarType.secondary,
                 );
               },
+              child: Text('Copy'.toUpperCase()),
             ),
           ),
         ],
@@ -151,8 +154,8 @@ class _AddPartnerScreenState extends State<AddPartnerScreen> {
         hintText: 'XXX-XXX',
         keyboardType: TextInputType.text,
         textInputAction: TextInputAction.done,
-        inputFormatters: const <TextInputFormatter>[UserCodeFormatter()],
-        autofillHints: const <String>[AutofillHints.oneTimeCode],
+        inputFormatters: const [UserCodeFormatter()],
+        autofillHints: const [AutofillHints.oneTimeCode],
         validator: (value) {
           if (value == null || value.isEmpty) return null;
           if (value.length != 7) return 'Code must be 6 characters long.';
@@ -162,22 +165,33 @@ class _AddPartnerScreenState extends State<AddPartnerScreen> {
     );
   }
 
-  Widget _buildCodeContainer({required String title, required Widget child}) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: UiConstants.borderRadius,
-        border: Border.all(
-          color: context.colorScheme.onSecondary,
-          width: UiConstants.borderWidth,
-        ),
+  Widget _buildCodeSections() {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: context.screenWidth * 0.16),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _buildUserCodeSection(),
+          Text(
+            'or',
+            style: context.textTheme.bodyMedium,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
+          _buildPartnerCodeSection(),
+          SizedBox(height: context.screenHeight * 0.12),
+        ],
       ),
-      margin: EdgeInsets.symmetric(horizontal: context.screenWidth * 0.05),
-      padding: const EdgeInsets.all(28),
+    );
+  }
+
+  Widget _buildCodeContainer({required String title, required Widget child}) {
+    return Padding(
+      padding: const EdgeInsets.all(10),
       child: Column(
         children: [
           Text(title, style: context.textTheme.bodyMedium),
-          const SizedBox(height: 18),
+          const SizedBox(height: 12),
           child,
         ],
       ),
@@ -186,8 +200,7 @@ class _AddPartnerScreenState extends State<AddPartnerScreen> {
 
   Widget _buildBottomBar() {
     return SafeArea(
-      child: Container(
-        margin: EdgeInsets.symmetric(horizontal: context.screenWidth * 0.05),
+      child: Padding(
         padding: const EdgeInsets.all(UiConstants.padding),
         child: BlocSelector<AddPartnerCubit, AddPartnerState, bool>(
           selector: (state) => state.loading,
@@ -209,7 +222,10 @@ class _AddPartnerScreenState extends State<AddPartnerScreen> {
                         }
                       },
 
-                child: const Text('Finish connecting'),
+                child: Text(
+                  (loading ? 'Connecting...' : 'Finish connecting')
+                      .toUpperCase(),
+                ),
               ),
             );
           },

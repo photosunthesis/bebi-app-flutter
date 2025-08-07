@@ -36,7 +36,7 @@ class _CyclesSetupScreenState extends State<CyclesSetupScreen> {
   Widget build(BuildContext context) {
     return BlocConsumer<CycleSetupCubit, CycleSetupState>(
       listener: (context, state) {
-        if (state is CycleSetupStateSuccess) context.pop(true);
+        if (state is CycleSetupStateSuccess) context.goNamed(AppRoutes.cycles);
         if (state is CycleSetupStateError) context.showSnackbar(state.error);
       },
       builder: (context, state) => Form(

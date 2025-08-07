@@ -164,7 +164,9 @@ class _SignInScreenState extends State<SignInScreen> {
                               );
                         }
                       },
-                child: Text(loading ? 'Signing in...' : 'Sign in'),
+                child: Text(
+                  (loading ? 'Signing in...' : 'Sign in').toUpperCase(),
+                ),
               ),
             ],
           ),
@@ -180,7 +182,7 @@ class _SignInScreenState extends State<SignInScreen> {
         textAlign: TextAlign.center,
         text: TextSpan(
           style: context.textTheme.bodySmall,
-          children: <InlineSpan>[
+          children: [
             const TextSpan(text: 'Forgot password? '),
             TextSpan(
               text: 'Tap here to reset.',
