@@ -134,7 +134,7 @@ class _AppDateFormFieldState extends State<AppDateFormField> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                child: const Text('Done'),
+                child: Text('Done'.toUpperCase()),
               ),
             ),
           ),
@@ -152,7 +152,9 @@ class _AppDateFormFieldState extends State<AppDateFormField> {
   Widget _buildCalendar() {
     return SizedBox(
       key: const ValueKey('calendar'),
+      height: 240,
       child: TableCalendar(
+        shouldFillViewport: true,
         enabledDayPredicate: (day) {
           if (widget.minimumDate != null) {
             // Check if day is before minimumDate
@@ -206,9 +208,10 @@ class _AppDateFormFieldState extends State<AppDateFormField> {
     DateTime focusedDay,
   ) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 13, horizontal: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
         color: context.colorScheme.primary,
+        shape: BoxShape.circle,
       ),
       child: Center(
         child: Text(
@@ -228,10 +231,11 @@ class _AppDateFormFieldState extends State<AppDateFormField> {
     DateTime focusedDay,
   ) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 13, horizontal: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
         color: day.isSameDay(focusedDay) ? context.colorScheme.primary : null,
         border: Border.all(color: context.colorScheme.primary, width: 0.6),
+        shape: BoxShape.circle,
       ),
       child: Center(
         child: Text(
@@ -253,7 +257,7 @@ class _AppDateFormFieldState extends State<AppDateFormField> {
     DateTime focusedDay,
   ) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 13, horizontal: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 8),
       child: Center(
         child: Text(
           day.day.toString(),

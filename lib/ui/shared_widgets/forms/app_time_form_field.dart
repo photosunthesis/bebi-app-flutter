@@ -147,7 +147,7 @@ class _AppTimeFormFieldState extends State<AppTimeFormField> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                child: const Text('Done'),
+                child: Text('Done'.toUpperCase()),
               ),
             ),
           ),

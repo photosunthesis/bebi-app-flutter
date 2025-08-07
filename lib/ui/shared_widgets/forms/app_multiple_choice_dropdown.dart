@@ -80,7 +80,7 @@ class _AppMultipleChoiceDropdownState<T>
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                child: const Text('Done'),
+                child: Text('Done'.toUpperCase()),
               ),
             ),
           ),

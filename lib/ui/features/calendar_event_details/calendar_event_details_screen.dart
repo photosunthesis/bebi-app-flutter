@@ -51,21 +51,24 @@ class _CalendarEventDetailsScreenState
               >(
                 selector: (state) => state is CalendarEventDetailsStateLoading,
                 builder: (context, loading) {
-                  return OutlinedButton(
-                    onPressed: !loading
-                        ? () async {
-                            final updatedEvent = await context
-                                .pushNamed<CalendarEvent>(
-                                  AppRoutes.updateCalendarEvent,
-                                  extra: _event,
-                                  pathParameters: {'id': _event.id},
-                                );
-                            if (updatedEvent != null) {
-                              setState(() => _event = updatedEvent);
+                  return SizedBox(
+                    width: 50,
+                    child: OutlinedButton(
+                      onPressed: !loading
+                          ? () async {
+                              final updatedEvent = await context
+                                  .pushNamed<CalendarEvent>(
+                                    AppRoutes.updateCalendarEvent,
+                                    extra: _event,
+                                    pathParameters: {'id': _event.id},
+                                  );
+                              if (updatedEvent != null) {
+                                setState(() => _event = updatedEvent);
+                              }
                             }
-                          }
-                        : null,
-                    child: Text((loading ? 'Saving...' : 'Edit').toUpperCase()),
+                          : null,
+                      child: Text('Edit'.toUpperCase()),
+                    ),
                   );
                 },
               ),
