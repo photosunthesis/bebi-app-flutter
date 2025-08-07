@@ -66,9 +66,12 @@ class _CalendarEventsState extends State<CalendarEvents> {
     return ListView.builder(
       key: ValueKey(events),
       itemCount: events.length,
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.symmetric(
+        vertical: UiConstants.padding,
+        horizontal: 12,
+      ),
       itemBuilder: (context, index) => Padding(
-        padding: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.only(bottom: 14),
         child: _buildEventCard(context, events[index]),
       ),
     );
@@ -105,37 +108,22 @@ class _CalendarEventsState extends State<CalendarEvents> {
           extra: event,
           pathParameters: {'id': event.id},
         ),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          decoration: BoxDecoration(
-            color: event.eventColor.color.withAlpha(40),
-            border: Border.all(
-              color: event.eventColor.color.darken(0.4),
-              width: UiConstants.borderWidth,
-            ),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(width: 8),
-              _buildColorBar(event.eventColor.color),
-              const SizedBox(width: 8),
-              Expanded(child: _buildEventDetails(context, event)),
-              const SizedBox(width: 12),
-            ],
-          ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // const SizedBox(width: 8),
+            _buildColorBar(event.eventColor.color),
+            const SizedBox(width: 8),
+            Expanded(child: _buildEventDetails(context, event)),
+            const SizedBox(width: 12),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildColorBar(Color color) {
-    return Container(
-      width: 2,
-      decoration: BoxDecoration(
-        color: color,
-      ),
-    );
+    return Container(width: 2, decoration: BoxDecoration(color: color));
   }
 
   String _formatDuration(DateTime start, DateTime? end) {

@@ -25,10 +25,6 @@ abstract class HiveBoxes {
       Hive.openBox<UserPartnership>(HiveBoxNames.userPartnership);
 
   @preResolve
-  Future<Box<bool>> get userPreferencesBox async =>
-      Hive.openBox<bool>(HiveBoxNames.userPreferences);
-
-  @preResolve
   Future<Box<String>> get aiSummaryAndInsightsBox async =>
       Hive.openBox<String>(HiveBoxNames.aiSummaryAndInsights);
 }

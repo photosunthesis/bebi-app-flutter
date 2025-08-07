@@ -77,27 +77,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       duration: 120.milliseconds,
                       child: focusedDay.isToday
                           ? const SizedBox.shrink()
-                          : SizedBox(
-                              key: const ValueKey('today'),
-                              width: 56,
-                              height: 30,
-                              child: TextButton(
-                                onPressed: () => context
-                                    .read<CalendarCubit>()
-                                    .setFocusedDay(DateTime.now()),
-                                child: Text('Today'.toUpperCase()),
-                              ),
+                          : OutlinedButton(
+                              onPressed: () => context
+                                  .read<CalendarCubit>()
+                                  .setFocusedDay(DateTime.now()),
+                              child: Text('Today'.toUpperCase()),
                             ),
                     ),
                     SizedBox(
                       width: 30,
-                      height: 30,
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          visualDensity: VisualDensity.compact,
-                        ),
-                        child: const Icon(Symbols.add),
+                      child: OutlinedButton(
+                        style: TextButton.styleFrom(padding: EdgeInsets.zero),
                         onPressed: () async {
                           final eventWasCreated = await context.pushNamed<bool>(
                             AppRoutes.createCalendarEvent,
@@ -109,6 +99,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             await _cubit.loadCalendarEvents();
                           }
                         },
+                        child: const Icon(Symbols.add),
                       ),
                     ),
                   ],

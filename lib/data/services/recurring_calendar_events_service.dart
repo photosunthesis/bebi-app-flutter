@@ -194,25 +194,26 @@ class RecurringCalendarEventsService {
     final merged = <String, CalendarEvent>{};
 
     for (final event in existing) {
-      final key = event.recurringEventId ?? event.id;
-      merged[key] = event;
-
       if (event.isRecurring) {
         _baseEventCache[event.id] = event;
+        if (event.recurringEventId != null) {
+          merged[event.recurringEventId!] = event;
+        }
+      } else {
+        merged[event.id] = event;
       }
     }
 
     for (final event in newEvents) {
-      final key = event.recurringEventId ?? event.id;
-      merged[key] = event;
-
       if (event.isRecurring) {
         _baseEventCache[event.id] = event;
-
         if (event.recurringEventId != null) {
+          merged[event.recurringEventId!] = event;
           final dateKey = _startOfDay(event.date);
           _cache.putIfAbsent(dateKey, () => []).add(event);
         }
+      } else {
+        merged[event.id] = event;
       }
     }
 

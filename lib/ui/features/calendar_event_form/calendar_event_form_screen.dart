@@ -6,7 +6,6 @@ import 'package:bebi_app/ui/features/calendar_event_form/calendar_event_form_cub
 import 'package:bebi_app/ui/features/calendar_event_form/widgets/calendar_event_form.dart';
 import 'package:bebi_app/ui/shared_widgets/layouts/main_app_bar.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
-import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/extension/string_extensions.dart';
 import 'package:flutter/material.dart';
@@ -148,14 +147,12 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
         BlocSelector<CalendarEventFormCubit, CalendarEventFormState, bool>(
           selector: (state) => state.loading,
           builder: (context, loading) {
-            return TextButton(
-              style: TextButton.styleFrom(
-                textStyle: context.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(0, 12, 10, 12),
+              child: OutlinedButton(
+                onPressed: loading ? null : _onSave,
+                child: Text((loading ? 'Saving' : 'Save').toUpperCase()),
               ),
-              onPressed: loading ? null : _onSave,
-              child: Text(loading ? 'Saving' : 'Save'),
             );
           },
         ),

@@ -41,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   await _cubit.signOut();
                   context.goNamed(AppRoutes.signIn);
                 },
-                child: const Text('Sign out'),
+                child: Text('Sign out'.toUpperCase()),
               ),
             ],
           ),

@@ -113,7 +113,8 @@ abstract class AppTheme {
             fontSize: 12,
             fontWeight: FontWeight.w600,
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          visualDensity: VisualDensity.compact,
         ).copyWith(
           elevation: const WidgetStatePropertyAll(0),
           shadowColor: WidgetStatePropertyAll(_colorScheme.shadow),
@@ -137,6 +138,7 @@ abstract class AppTheme {
             fontWeight: FontWeight.w600,
           ),
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+          visualDensity: VisualDensity.compact,
         ).copyWith(
           elevation: const WidgetStatePropertyAll(0),
           shadowColor: WidgetStatePropertyAll(_colorScheme.shadow),

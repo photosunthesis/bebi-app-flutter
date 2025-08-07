@@ -53,7 +53,9 @@ class CalendarCubit extends Cubit<CalendarState> {
         emit(
           state.copyWith(
             events: allEvents,
-            focusedDayEvents: _filterFocusedDayEvents(allEvents),
+            focusedDayEvents: allEvents
+                .where((e) => e.date.isSameDay(state.focusedDay))
+                .toList(),
           ),
         );
       },
@@ -83,7 +85,11 @@ class CalendarCubit extends Cubit<CalendarState> {
     if (needsExpansion) return await _expandTimeRange(date);
 
     emit(
-      state.copyWith(focusedDayEvents: _filterFocusedDayEvents(state.events)),
+      state.copyWith(
+        focusedDayEvents: state.events
+            .where((e) => e.date.isSameDay(date))
+            .toList(),
+      ),
     );
   }
 
@@ -111,27 +117,16 @@ class CalendarCubit extends Cubit<CalendarState> {
       _windowStart = _windowStart?.earlierDate(rangeStart) ?? rangeStart;
       _windowEnd = _windowEnd?.laterDate(rangeEnd) ?? rangeEnd;
 
+      final allEvents = [...state.events, ...newRecurringEvents];
+
       emit(
         state.copyWith(
-          events: [...state.events, ...newRecurringEvents],
-          focusedDayEvents: _filterFocusedDayEvents([
-            ...state.events,
-            ...newRecurringEvents,
-          ]),
+          events: allEvents,
+          focusedDayEvents: allEvents
+              .where((e) => e.date.isSameDay(state.focusedDay))
+              .toList(),
         ),
       );
     });
-  }
-
-  List<CalendarEvent> _filterFocusedDayEvents(List<CalendarEvent> events) {
-    return events
-        .where((e) => e.date.isSameDay(state.focusedDay))
-        .fold<Map<String, CalendarEvent>>({}, (map, event) {
-          final key = '${event.id}_${event.date}';
-          if (!map.containsKey(key)) map[key] = event;
-          return map;
-        })
-        .values
-        .toList();
   }
 }

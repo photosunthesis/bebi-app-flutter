@@ -1,5 +1,8 @@
 import 'dart:async';
 
+import 'package:bebi_app/data/models/calendar_event.dart';
+import 'package:bebi_app/data/models/cycle_log.dart';
+import 'package:bebi_app/data/models/user_partnership.dart';
 import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
@@ -9,6 +12,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:injectable/injectable.dart';
 
 part 'home_state.dart';
@@ -21,12 +25,22 @@ class HomeCubit extends Cubit<HomeState> {
     this._userPartnershipsRepository,
     this._analytics,
     this._firebaseAuth,
+    this._calendarEventBox,
+    this._cycleLogBox,
+    this._userProfileBox,
+    this._userPartnershipBox,
+    this._aiSummaryAndInsightsBox,
   ) : super(const HomeInitial());
 
   final UserProfileRepository _userProfileRepository;
   final UserPartnershipsRepository _userPartnershipsRepository;
   final FirebaseAnalytics _analytics;
   final FirebaseAuth _firebaseAuth;
+  final Box<CalendarEvent> _calendarEventBox;
+  final Box<CycleLog> _cycleLogBox;
+  final Box<UserProfile> _userProfileBox;
+  final Box<UserPartnership> _userPartnershipBox;
+  final Box<String> _aiSummaryAndInsightsBox;
 
   Future<void> initialize() async {
     await guard(
@@ -71,7 +85,16 @@ class HomeCubit extends Cubit<HomeState> {
     await guard(
       () async {
         emit(const HomeLoading());
-        await _firebaseAuth.signOut();
+
+        await Future.wait([
+          _firebaseAuth.signOut(),
+          _calendarEventBox.clear(),
+          _cycleLogBox.clear(),
+          _userProfileBox.clear(),
+          _userPartnershipBox.clear(),
+          _aiSummaryAndInsightsBox.clear(),
+        ]);
+
         emit(const HomeInitial());
       },
       onError: (error, _) {

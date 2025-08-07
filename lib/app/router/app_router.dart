@@ -103,9 +103,12 @@ abstract class AppRouter {
               GoRoute(
                 path: '/cycles',
                 name: AppRoutes.cycles,
-                builder: (_, _) => BlocProvider(
+                builder: (_, state) => BlocProvider(
                   create: (_) => GetIt.I<CyclesCubit>(),
-                  child: const CyclesScreen(),
+                  child: CyclesScreen(
+                    shouldReinitialize:
+                        state.uri.queryParameters['reinitialize'] == 'true',
+                  ),
                 ),
               ),
             ],

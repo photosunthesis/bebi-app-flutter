@@ -35,16 +35,20 @@ class _CyclesSetupScreenState extends State<CyclesSetupScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<CycleSetupCubit, CycleSetupState>(
-      listener: (context, state) {
-        if (state is CycleSetupStateSuccess) context.goNamed(AppRoutes.cycles);
-        if (state is CycleSetupStateError) context.showSnackbar(state.error);
+      listener: (context, state) => switch (state) {
+        CycleSetupStateError(:final error) => context.showSnackbar(error),
+        CycleSetupStateSuccess() => context.goNamed(
+          AppRoutes.cycles,
+          queryParameters: {'reinitialize': 'true'},
+        ),
+        _ => null,
       },
       builder: (context, state) => Form(
         canPop: false,
         onPopInvokedWithResult: _onPop,
         key: _formKey,
         child: Scaffold(
-          appBar: _buildAppbar(),
+          appBar: MainAppBar.build(context),
           body: CustomScrollView(
             slivers: [
               SliverToBoxAdapter(child: _buildHeader()),
@@ -174,41 +178,6 @@ class _CyclesSetupScreenState extends State<CyclesSetupScreen> {
     );
   }
 
-  AppBar _buildAppbar() {
-    return MainAppBar.build(
-      context,
-      actions: [
-        BlocSelector<CycleSetupCubit, CycleSetupState, bool>(
-          selector: (state) => state is CycleSetupStateLoading,
-          builder: (context, loading) {
-            return TextButton(
-              style: TextButton.styleFrom(
-                textStyle: context.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              onPressed: loading
-                  ? null
-                  : () {
-                      if (_formKey.currentState?.validate() ?? false) {
-                        context.read<CycleSetupCubit>().setUpCycleTracking(
-                          periodStartDate: _lastPeriodDateController.text
-                              .toDateTime('MM/dd/yyyy')!,
-                          periodDurationInDays: int.parse(
-                            _periodDurationController.text,
-                          ),
-                          shouldShareWithPartner: _shareWithPartner,
-                        );
-                      }
-                    },
-              child: Text(loading ? 'Saving' : 'Save'),
-            );
-          },
-        ),
-      ],
-    );
-  }
-
   Widget _buildHeader() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -228,12 +197,40 @@ class _CyclesSetupScreenState extends State<CyclesSetupScreen> {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(UiConstants.padding),
-        child: Text(
-          'We\'ll help you track your cycles with AI-powered insights, though the insights and predictions may not always be accurate. For any health concerns, it\'s best to check with your doctor. Additionally, you can always update your sharing preferences with your partner anytime.',
-          style: context.textTheme.bodySmall?.copyWith(
-            height: 1.4,
-            color: context.colorScheme.secondary,
-          ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'We\'ll help you track your cycles with AI-powered insights, though the insights and predictions may not always be accurate. For any health concerns, it\'s best to check with your doctor. Additionally, you can always update your sharing preferences with your partner anytime.',
+              style: context.textTheme.bodySmall?.copyWith(
+                height: 1.4,
+                color: context.colorScheme.secondary,
+              ),
+            ),
+            const SizedBox(height: 12),
+            BlocSelector<CycleSetupCubit, CycleSetupState, bool>(
+              selector: (state) => state is CycleSetupStateLoading,
+              builder: (context, loading) {
+                return ElevatedButton(
+                  onPressed: loading
+                      ? null
+                      : () {
+                          if (_formKey.currentState?.validate() ?? false) {
+                            context.read<CycleSetupCubit>().setUpCycleTracking(
+                              periodStartDate: _lastPeriodDateController.text
+                                  .toDateTime('MM/dd/yyyy')!,
+                              periodDurationInDays: int.parse(
+                                _periodDurationController.text,
+                              ),
+                              shouldShareWithPartner: _shareWithPartner,
+                            );
+                          }
+                        },
+                  child: Text((loading ? 'Saving...' : 'Save').toUpperCase()),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );

@@ -42,7 +42,7 @@ class _CalendarEventDetailsScreenState
       context,
       actions: [
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
+          padding: const EdgeInsets.symmetric(vertical: 14),
           child:
               BlocSelector<
                 CalendarEventDetailsCubit,
@@ -51,28 +51,26 @@ class _CalendarEventDetailsScreenState
               >(
                 selector: (state) => state is CalendarEventDetailsStateLoading,
                 builder: (context, loading) {
-                  return TextButton(
-                    style: TextButton.styleFrom(
-                      textStyle: context.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    onPressed: () async {
-                      final updatedEvent = await context
-                          .pushNamed<CalendarEvent>(
-                            AppRoutes.updateCalendarEvent,
-                            extra: _event,
-                            pathParameters: {'id': _event.id},
-                          );
-                      if (updatedEvent != null) {
-                        setState(() => _event = updatedEvent);
-                      }
-                    },
-                    child: const Text('Edit'),
+                  return OutlinedButton(
+                    onPressed: !loading
+                        ? () async {
+                            final updatedEvent = await context
+                                .pushNamed<CalendarEvent>(
+                                  AppRoutes.updateCalendarEvent,
+                                  extra: _event,
+                                  pathParameters: {'id': _event.id},
+                                );
+                            if (updatedEvent != null) {
+                              setState(() => _event = updatedEvent);
+                            }
+                          }
+                        : null,
+                    child: Text((loading ? 'Saving...' : 'Edit').toUpperCase()),
                   );
                 },
               ),
         ),
+        const SizedBox(width: 8),
       ],
     );
   }

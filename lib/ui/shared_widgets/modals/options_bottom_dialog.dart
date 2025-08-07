@@ -41,6 +41,7 @@ class OptionsBottomDialog<T> extends StatelessWidget {
       context: context,
       showDragHandle: false,
       isDismissible: isDismissible,
+      barrierColor: context.colorScheme.primary.withAlpha(40),
       backgroundColor: Colors.transparent,
       builder: (context) => OptionsBottomDialog(
         title: title,

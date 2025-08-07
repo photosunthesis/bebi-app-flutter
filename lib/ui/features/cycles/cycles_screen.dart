@@ -12,7 +12,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 class CyclesScreen extends StatefulWidget {
-  const CyclesScreen({super.key});
+  const CyclesScreen({
+    required this.shouldReinitialize,
+    super.key});
+
+  final bool shouldReinitialize;
 
   @override
   State<CyclesScreen> createState() => _CyclesScreenState();
