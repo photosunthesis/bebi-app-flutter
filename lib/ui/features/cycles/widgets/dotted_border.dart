@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+enum DottedBorderShape { circle, rectangle }
+
 class DottedBorder extends StatelessWidget {
   const DottedBorder({
     super.key,
@@ -8,6 +10,7 @@ class DottedBorder extends StatelessWidget {
     this.dotSpacing = 5.0,
     this.strokeWidth = .2,
     this.borderRadius = BorderRadius.zero,
+    this.shape = DottedBorderShape.circle,
   });
 
   final Widget child;
@@ -15,6 +18,7 @@ class DottedBorder extends StatelessWidget {
   final double dotSpacing;
   final double strokeWidth;
   final BorderRadius borderRadius;
+  final DottedBorderShape shape;
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +28,7 @@ class DottedBorder extends StatelessWidget {
         dotSpacing: dotSpacing,
         strokeWidth: strokeWidth,
         borderRadius: borderRadius,
+        shape: shape,
       ),
       child: ClipRRect(borderRadius: borderRadius, child: child),
     );
@@ -36,12 +41,14 @@ class _DottedBorderPainter extends CustomPainter {
     required this.dotSpacing,
     required this.strokeWidth,
     required this.borderRadius,
+    required this.shape,
   });
 
   final Color color;
   final double dotSpacing;
   final double strokeWidth;
   final BorderRadius borderRadius;
+  final DottedBorderShape shape;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -51,8 +58,12 @@ class _DottedBorderPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 
-    final path = Path()
-      ..addRRect(
+    final path = Path();
+
+    if (shape == DottedBorderShape.circle) {
+      path.addOval(Rect.fromLTWH(0, 0, size.width, size.height));
+    } else {
+      path.addRRect(
         RRect.fromRectAndCorners(
           Rect.fromLTWH(0, 0, size.width, size.height),
           topLeft: borderRadius.topLeft,
@@ -61,6 +72,7 @@ class _DottedBorderPainter extends CustomPainter {
           bottomRight: borderRadius.bottomRight,
         ),
       );
+    }
 
     final pathMetrics = path.computeMetrics().first;
     final dashLength = dotSpacing / 2;

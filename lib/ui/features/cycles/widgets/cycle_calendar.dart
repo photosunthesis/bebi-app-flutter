@@ -27,7 +27,7 @@ class _CycleCalendarState extends State<CycleCalendar> {
   );
 
   static const _initialIndex = 1000;
-  static const _daysToShow = 9;
+  static const _daysToShow = 7;
 
   @override
   void initState() {
@@ -188,14 +188,15 @@ class _CycleCalendarState extends State<CycleCalendar> {
       child: event?.isPrediction ?? false
           ? DottedBorder(
               color: event?.color ?? Colors.transparent,
-              strokeWidth: 1.4,
-              dotSpacing: 6.5,
+              strokeWidth: 1,
+              dotSpacing: 6,
               child: const SizedBox(width: 25, height: 25),
             )
           : Container(
               width: 25,
               height: 25,
               decoration: BoxDecoration(
+                shape: BoxShape.circle,
                 color: event?.color,
               ),
             ),

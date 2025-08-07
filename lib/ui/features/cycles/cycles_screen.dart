@@ -78,10 +78,12 @@ class _CyclesScreenState extends State<CyclesScreen> {
     return Stack(
       children: [
         _buildNavigationButtons(date),
-        Center(
-          child: Text(
-            date.toEEEEMMMd(),
-            style: context.primaryTextTheme.headlineSmall,
+        Positioned.fill(
+          child: Center(
+            child: Text(
+              date.toEEEEMMMd(),
+              style: context.primaryTextTheme.headlineSmall,
+            ),
           ),
         ),
       ],
@@ -92,7 +94,6 @@ class _CyclesScreenState extends State<CyclesScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [_buildTodayButton(date), _buildMoreButton()],
       ),
@@ -105,12 +106,11 @@ class _CyclesScreenState extends State<CyclesScreen> {
       child: date.isToday
           ? const SizedBox(height: 30)
           : SizedBox(
-              key: const ValueKey('today'),
-              width: 56,
+              key: const Key('today_button'),
               height: 30,
-              child: TextButton(
+              child: OutlinedButton(
                 onPressed: () => _cubit.setFocusedDate(DateTime.now()),
-                child: const Text('Today'),
+                child: Text('Today'.toUpperCase()),
               ),
             ),
     );
