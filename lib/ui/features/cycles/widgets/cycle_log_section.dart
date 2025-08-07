@@ -19,12 +19,13 @@ class _CycleLogSectionState extends State<CycleLogSection> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Cycle log',
-            style: context.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
+            'Cycle logs',
+            style: context.primaryTextTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(height: 12),
+          // Divider(thickness: 0.4, color: context.colorScheme.secondary),
         ],
       ),
     );

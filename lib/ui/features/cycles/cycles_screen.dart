@@ -1,5 +1,6 @@
 import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
+import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:bebi_app/ui/features/cycles/cycles_cubit.dart';
 import 'package:bebi_app/ui/features/cycles/widgets/cycle_calendar.dart';
 import 'package:bebi_app/ui/features/cycles/widgets/cycle_log_section.dart';
@@ -7,6 +8,7 @@ import 'package:bebi_app/ui/shared_widgets/modals/options_bottom_dialog.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -95,7 +97,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
       padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [_buildTodayButton(date), _buildMoreButton()],
+        children: [_buildTodayButton(date), _buildAccountSwitcher()],
       ),
     );
   }
@@ -116,19 +118,65 @@ class _CyclesScreenState extends State<CyclesScreen> {
     );
   }
 
-  Widget _buildMoreButton() {
-    return SizedBox(
-      width: 30,
-      height: 30,
-      child: OutlinedButton(
-        style: OutlinedButton.styleFrom(
-          padding: EdgeInsets.zero,
-          visualDensity: VisualDensity.compact,
+  Widget _buildAccountSwitcher() {
+    return BlocBuilder<CyclesCubit, CyclesState>(
+      buildWhen: (p, c) =>
+          p.showUserProfile != c.showUserProfile ||
+          p.userProfile != c.userProfile ||
+          p.partnerProfile != c.partnerProfile,
+      builder: (context, state) {
+        return InkWell(
+          onTap: _cubit.switchUserProfile,
+          splashFactory: NoSplash.splashFactory,
+          child: Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: Stack(
+              children: [
+                Opacity(
+                  opacity: 0.5,
+                  child: Transform.translate(
+                    offset: const Offset(16, 0),
+                    child: _buildProfileAvatar(
+                      state.showUserProfile
+                          ? state.partnerProfile
+                          : state.userProfile,
+                    ),
+                  ),
+                ),
+                AnimatedSwitcher(
+                  duration: 120.milliseconds,
+                  child: _buildProfileAvatar(
+                    state.showUserProfile
+                        ? state.userProfile
+                        : state.partnerProfile,
+                    key: ValueKey(state.showUserProfile),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildProfileAvatar(UserProfile? profile, {Key? key}) {
+    return Container(
+      key: key,
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: context.colorScheme.outline,
+          width: UiConstants.borderWidth,
         ),
-        child: const Icon(Symbols.more_horiz),
-        onPressed: () {
-          // TODO Enable switching of accounts
-        },
+      ),
+      child: CircleAvatar(
+        backgroundColor: context.colorScheme.secondary.withAlpha(40),
+        backgroundImage: profile != null
+            ? CachedNetworkImageProvider(profile.photoUrl!)
+            : null,
       ),
     );
   }

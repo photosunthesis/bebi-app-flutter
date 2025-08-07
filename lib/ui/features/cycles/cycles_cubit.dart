@@ -1,13 +1,12 @@
 import 'package:bebi_app/data/models/cycle_day_insights.dart';
 import 'package:bebi_app/data/models/cycle_log.dart';
+import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:bebi_app/data/repositories/cycle_logs_repository.dart';
+import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
 import 'package:bebi_app/data/services/cycle_day_insights_service.dart';
 import 'package:bebi_app/data/services/cycle_predictions_service.dart';
-import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/guard.dart';
-// ignore: depend_on_referenced_packages
-import 'package:collection/collection.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -23,6 +22,7 @@ class CyclesCubit extends Cubit<CyclesState> {
     this._cyclePredictionsService,
     this._cycleDayInsightsService,
     this._userProfileRepository,
+    this._userPartnershipsRepository,
     this._firebaseAuth,
   ) : super(CyclesState.initial());
 
@@ -30,6 +30,7 @@ class CyclesCubit extends Cubit<CyclesState> {
   final CyclePredictionsService _cyclePredictionsService;
   final CycleDayInsightsService _cycleDayInsightsService;
   final UserProfileRepository _userProfileRepository;
+  final UserPartnershipsRepository _userPartnershipsRepository;
   final FirebaseAuth _firebaseAuth;
 
   Future<void> initialize({bool loadDataFromCache = true}) async {
@@ -53,6 +54,16 @@ class CyclesCubit extends Cubit<CyclesState> {
           return;
         }
 
+        final partnership = await _userPartnershipsRepository.getByUserId(
+          _firebaseAuth.currentUser!.uid,
+        );
+
+        final partnerProfile = await _userProfileRepository.getByUserId(
+          partnership!.users.firstWhere(
+            (e) => e != _firebaseAuth.currentUser!.uid,
+          ),
+        );
+
         final cycleLogs = await _cycleLogsRepository.getCycleLogsByUserId(
           _firebaseAuth.currentUser!.uid,
           useCache: loadDataFromCache,
@@ -73,6 +84,10 @@ class CyclesCubit extends Cubit<CyclesState> {
           state.copyWith(
             focusedCycleDayInsights: cycleDayInsights,
             loadingCycleDayInsights: false,
+            userProfile: userProfile,
+            partnerProfile: partnerProfile!.isSharingCycleWithPartner
+                ? partnerProfile
+                : null,
           ),
         );
       },
@@ -116,6 +131,19 @@ class CyclesCubit extends Cubit<CyclesState> {
         );
 
         emit(state.copyWith(shouldSetupCycles: false));
+      },
+      onError: (error, _) {
+        emit(state.copyWith(error: error.toString()));
+      },
+    );
+  }
+
+  Future<void> switchUserProfile() async {
+    await guard(
+      () async {
+        emit(state.copyWith(showUserProfile: !state.showUserProfile));
+
+        // TODO Handle switching of data
       },
       onError: (error, _) {
         emit(state.copyWith(error: error.toString()));

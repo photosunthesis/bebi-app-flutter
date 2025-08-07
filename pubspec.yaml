@@ -8,6 +8,7 @@ environment:
   flutter: ">= 3.32.8"
 
 dependencies:
+  cached_network_image: ^3.4.1
   cloud_firestore: ^6.0.0
   cupertino_icons: ^1.0.8
   firebase_ai: ^3.0.0
