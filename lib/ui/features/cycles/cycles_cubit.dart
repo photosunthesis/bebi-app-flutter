@@ -35,7 +35,13 @@ class CyclesCubit extends Cubit<CyclesState> {
   Future<void> initialize({bool loadDataFromCache = true}) async {
     await guard(
       () async {
-        emit(state.copyWith(loading: true, loadingCycleDayInsights: true));
+        emit(
+          state.copyWith(
+            loading: true,
+            loadingCycleDayInsights: true,
+            shouldSetupCycles: false,
+          ),
+        );
 
         final userProfile = await _userProfileRepository.getByUserId(
           _firebaseAuth.currentUser!.uid,

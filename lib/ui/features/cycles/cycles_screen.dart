@@ -12,9 +12,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 class CyclesScreen extends StatefulWidget {
-  const CyclesScreen({
-    required this.shouldReinitialize,
-    super.key});
+  const CyclesScreen({required this.shouldReinitialize, super.key});
 
   final bool shouldReinitialize;
 
@@ -24,6 +22,7 @@ class CyclesScreen extends StatefulWidget {
 
 class _CyclesScreenState extends State<CyclesScreen> {
   late final _cubit = context.read<CyclesCubit>();
+  bool _cycleSetupBottomSheetIsShown = false;
 
   @override
   void initState() {
@@ -34,16 +33,16 @@ class _CyclesScreenState extends State<CyclesScreen> {
   @override
   void didUpdateWidget(CyclesScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // if (oldWidget.currentIndex != widget.currentIndex && !_isAnimating) {
-    //   _startAnimation(oldWidget.currentIndex);
-    // }
+    if (widget.shouldReinitialize) _cubit.initialize();
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<CyclesCubit, CyclesState>(
       listener: (context, state) {
-        if (state.shouldSetupCycles) _showCycleSetupBottomSheet();
+        if (state.shouldSetupCycles && !_cycleSetupBottomSheetIsShown) {
+          _showCycleSetupBottomSheet();
+        }
       },
       child: Scaffold(
         body: ListView(
@@ -135,6 +134,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
   }
 
   Future<void> _showCycleSetupBottomSheet() async {
+    _cycleSetupBottomSheetIsShown = true;
     // Fake delay :D
     await Future.delayed(600.milliseconds, () {});
 
@@ -163,5 +163,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
     } else {
       await _cubit.disableUserCycleTracking();
     }
+
+    _cycleSetupBottomSheetIsShown = false;
   }
 }
