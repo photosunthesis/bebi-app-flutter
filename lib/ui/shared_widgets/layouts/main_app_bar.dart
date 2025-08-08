@@ -10,6 +10,8 @@ abstract class MainAppBar {
     List<Widget> actions = const [],
     bool darkStatusBarIcons = true,
     bool autoImplementLeading = true,
+    Widget? flexibleSpace,
+    double? toolbarHeight,
   }) {
     return AppBar(
       automaticallyImplyLeading: autoImplementLeading,
@@ -29,6 +31,8 @@ abstract class MainAppBar {
           height: UiConstants.borderWidth,
         ),
       ),
+      flexibleSpace: flexibleSpace,
+      toolbarHeight: toolbarHeight,
     );
   }
 }

@@ -39,7 +39,7 @@ class CyclesCubit extends Cubit<CyclesState> {
         emit(
           state.copyWith(
             loading: true,
-            loadingCycleDayInsights: true,
+            loadingAiSummary: true,
             shouldSetupCycles: false,
           ),
         );
@@ -64,6 +64,13 @@ class CyclesCubit extends Cubit<CyclesState> {
           ),
         );
 
+        emit(
+          state.copyWith(
+            userProfile: userProfile,
+            partnerProfile: partnerProfile,
+          ),
+        );
+
         final cycleLogs = await _cycleLogsRepository.getCycleLogsByUserId(
           _firebaseAuth.currentUser!.uid,
           useCache: loadDataFromCache,
@@ -71,31 +78,29 @@ class CyclesCubit extends Cubit<CyclesState> {
 
         final predictions = _cyclePredictionsService.predictUpcomingCycles(
           cycleLogs,
+          state.focusedDate,
         );
 
         final allCycleLogs = [...cycleLogs, ...predictions];
 
         emit(state.copyWith(cycleLogs: allCycleLogs, loading: false));
 
-        final cycleDayInsights = await _cycleDayInsightsService
+        final cycleDayInsights = _cycleDayInsightsService
             .getInsightsFromDateAndEvents(DateTime.now(), allCycleLogs);
 
-        emit(
-          state.copyWith(
-            focusedCycleDayInsights: cycleDayInsights,
-            loadingCycleDayInsights: false,
-            userProfile: userProfile,
-            partnerProfile: partnerProfile!.isSharingCycleWithPartner
-                ? partnerProfile
-                : null,
-          ),
+        emit(state.copyWith(focusedCycleDayInsights: cycleDayInsights));
+
+        final aiInsights = await _cycleDayInsightsService.generateAiInsights(
+          cycleDayInsights!,
         );
+
+        emit(state.copyWith(aiSummary: aiInsights));
       },
       onError: (error, _) {
         emit(state.copyWith(error: error.toString()));
       },
       onComplete: () {
-        emit(state.copyWith(loading: false, loadingCycleDayInsights: false));
+        emit(state.copyWith(loading: false, loadingAiSummary: false));
       },
     );
   }
@@ -103,18 +108,24 @@ class CyclesCubit extends Cubit<CyclesState> {
   Future<void> setFocusedDate(DateTime date) async {
     await guard(
       () async {
-        emit(state.copyWith(loadingCycleDayInsights: true, focusedDate: date));
+        emit(state.copyWith(loadingAiSummary: true, focusedDate: date));
 
-        final updatedCycleDayInsights = await _cycleDayInsightsService
+        final updatedCycleDayInsights = _cycleDayInsightsService
             .getInsightsFromDateAndEvents(date, state.cycleLogs);
 
         emit(state.copyWith(focusedCycleDayInsights: updatedCycleDayInsights));
+
+        final aiInsights = await _cycleDayInsightsService.generateAiInsights(
+          updatedCycleDayInsights!,
+        );
+
+        emit(state.copyWith(aiSummary: aiInsights));
       },
       onError: (error, _) {
         emit(state.copyWith(error: error.toString()));
       },
       onComplete: () {
-        emit(state.copyWith(loadingCycleDayInsights: false));
+        emit(state.copyWith(loadingAiSummary: false));
       },
     );
   }
@@ -141,12 +152,19 @@ class CyclesCubit extends Cubit<CyclesState> {
   Future<void> switchUserProfile() async {
     await guard(
       () async {
+        if (state.partnerProfile?.isSharingCycleWithPartner == false) {
+          return;
+        }
+
         emit(state.copyWith(showUserProfile: !state.showUserProfile));
 
         // TODO Handle switching of data
       },
       onError: (error, _) {
         emit(state.copyWith(error: error.toString()));
+      },
+      onComplete: () {
+        emit(state.copyWith(error: null));
       },
     );
   }

@@ -1,7 +1,7 @@
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/ui/features/cycles/cycles_cubit.dart';
-import 'package:bebi_app/ui/features/cycles/widgets/dotted_border.dart';
+import 'package:bebi_app/ui/features/cycles/widgets/angled_stripes_background.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/color_extensions.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
@@ -107,7 +107,8 @@ class _CycleCalendarState extends State<CycleCalendar> {
             .toList();
 
         return InkWell(
-          splashFactory: NoSplash.splashFactory,
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
           onTap: () async => _handleDayTap(date),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -123,7 +124,6 @@ class _CycleCalendarState extends State<CycleCalendar> {
                 symptomLog: symptomLog,
                 intimacyLog: intimacyLog,
               ),
-              _buildDivider(),
             ],
           ),
         );
@@ -184,17 +184,16 @@ class _CycleCalendarState extends State<CycleCalendar> {
     final event = periodLog ?? ovulationLog;
 
     return Positioned(
-      top: 6,
+      top: 5,
       child: event?.isPrediction ?? false
-          ? DottedBorder(
-              color: event?.color ?? Colors.transparent,
-              strokeWidth: 1,
-              dotSpacing: 6,
-              child: const SizedBox(width: 25, height: 25),
+          ? AngledStripesBackground(
+              color: event?.color.withAlpha(60) ?? Colors.transparent,
+              backgroundColor: event?.color.withAlpha(40) ?? Colors.transparent,
+              shape: const CircleBorder(),
             )
           : Container(
-              width: 25,
-              height: 25,
+              width: 28,
+              height: 28,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: event?.color,
@@ -208,13 +207,14 @@ class _CycleCalendarState extends State<CycleCalendar> {
     CycleLog? intimacyLog,
   ) {
     return Positioned(
-      top: 35,
+      top: 38,
       child: AnimatedContainer(
         duration: 120.milliseconds,
-        width: 7,
-        height: 7,
+        width: 8,
+        height: 8,
         decoration: BoxDecoration(
           color: symptomLog?.color ?? intimacyLog?.color,
+          shape: BoxShape.circle,
         ),
       ),
     );
@@ -229,7 +229,7 @@ class _CycleCalendarState extends State<CycleCalendar> {
     final textColor = event != null && !event.isPrediction
         ? context.colorScheme.surface
         : event?.isPrediction ?? false
-        ? event?.color.darken(0.1)
+        ? event?.color.darken(0.2)
         : context.colorScheme.primary;
 
     return Positioned(

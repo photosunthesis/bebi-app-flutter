@@ -1,5 +1,10 @@
+import 'dart:async';
+
 import 'package:bebi_app/data/models/cycle_day_insights.dart';
 import 'package:bebi_app/data/models/cycle_log.dart';
+import 'package:bebi_app/utils/extension/datetime_extensions.dart';
+// ignore: depend_on_referenced_packages
+import 'package:collection/collection.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:injectable/injectable.dart';
@@ -14,223 +19,208 @@ class CycleDayInsightsService {
   final GenerativeModel _generativeModel;
   final Box<String> _summaryAndInsightsBox;
 
-  Future<CycleDayInsights> getInsightsFromDateAndEvents(
+  static const _maxDaysBetweenPeriodEvents = 14;
+
+  CycleDayInsights? getInsightsFromDateAndEvents(
     DateTime date,
     List<CycleLog> events,
-  ) async {
-    final dateKey = date.toIso8601String().substring(0, 10);
-    final cachedInsights = _summaryAndInsightsBox.get(dateKey);
-    final periodEvents = events.where((e) => e.type == LogType.period).toList();
-    final typicalPeriodLength = _calculateAveragePeriodLength(periodEvents);
-    final typicalCycleLength = _calculateAverageCycleLength(periodEvents);
-    final cyclePeriodDates = _calculatePeriodDates(
-      periodEvents,
-      date,
-      typicalPeriodLength,
+  ) {
+    final sortedEvents = events.sortedBy((e) => e.date);
+    final periodEvents = sortedEvents.where((e) => e.type == LogType.period);
+    final ovulationEvents = sortedEvents.where(
+      (e) => e.type == LogType.ovulation,
     );
-    final cycleFertileDates = _calculateFertileDates(
-      cyclePeriodDates,
-      typicalCycleLength,
+
+    final periodGroups = _groupEventsByProximity(periodEvents.toList());
+    final cyclePeriodGroups = _findCurrentCyclePeriodGroups(date, periodGroups);
+
+    if (cyclePeriodGroups == null) return null;
+
+    final (currentPeriodDates, nextPeriodDates) = cyclePeriodGroups;
+    final cycleStart = currentPeriodDates.first;
+    final nextCycleStart = nextPeriodDates.first;
+
+    final currentFertileWindow = _getCurrentFertileWindow(
+      ovulationEvents.map((e) => e.date).toList(),
+      cycleStart,
+      nextCycleStart,
     );
+
+    final dayOfCycle = date.noTime().difference(cycleStart.noTime()).inDays;
+    final cycleLengthInDays = nextCycleStart
+        .noTime()
+        .difference(cycleStart.noTime())
+        .inDays;
+
     final cyclePhase = _getCyclePhase(
       date,
-      cyclePeriodDates,
-      cycleFertileDates,
+      currentPeriodDates,
+      nextPeriodDates,
+      currentFertileWindow,
     );
-
-    if (cachedInsights != null) {
-      return CycleDayInsights(
-        cyclePhase: cyclePhase,
-        date: date,
-        isPast: date.isBefore(DateTime.now()),
-        typicalPeriodLengthInDays: typicalPeriodLength,
-        typicalCycleLengthInDays: typicalCycleLength,
-        cyclePeriodDates: cyclePeriodDates.map((e) => e.dateLocal).toList(),
-        cycleFertileDates: cycleFertileDates.map((e) => e.dateLocal).toList(),
-        summaryAndInsights: cachedInsights,
-      );
-    }
-
-    final summaryAndInsights = await _generateAiInsights(
-      date: date,
-      cyclePhase: cyclePhase,
-      isPast: date.isBefore(DateTime.now()),
-      typicalPeriodLengthInDays: typicalPeriodLength,
-      typicalCycleLengthInDays: typicalCycleLength,
-      predictedPeriodDates: cyclePeriodDates,
-      predictedFertileDates: cycleFertileDates,
-    );
-
-    await _summaryAndInsightsBox.put(dateKey, summaryAndInsights);
 
     return CycleDayInsights(
       cyclePhase: cyclePhase,
       date: date,
-      isPast: date.isBefore(DateTime.now()),
-      typicalPeriodLengthInDays: typicalPeriodLength,
-      typicalCycleLengthInDays: typicalCycleLength,
-      cyclePeriodDates: cyclePeriodDates.map((e) => e.dateLocal).toList(),
-      cycleFertileDates: cycleFertileDates.map((e) => e.dateLocal).toList(),
-      summaryAndInsights: summaryAndInsights,
+      dayOfCycle: dayOfCycle,
+      cycleLengthInDays: cycleLengthInDays,
+      nextPeriodDates: nextPeriodDates,
+      fertileDays: currentFertileWindow,
     );
   }
 
-  List<CycleLog> _calculatePeriodDates(
-    List<CycleLog> periodEvents,
-    DateTime referenceDate,
-    int typicalPeriodLength,
-  ) {
-    if (periodEvents.isEmpty) return [];
+  List<List<DateTime>> _groupEventsByProximity(List<CycleLog> events) {
+    final groups = <List<CycleLog>>[];
 
-    // This is a simplified logic. A real implementation would be more complex.
-    final closestPeriodEvent = periodEvents.reduce(
-      (a, b) =>
-          a.date.difference(referenceDate).abs() <
-              b.date.difference(referenceDate).abs()
-          ? a
-          : b,
-    );
+    for (final event in events) {
+      final group = groups.lastOrNull;
+      if (group == null ||
+          event.date.difference(group.last.date).inDays >
+              _maxDaysBetweenPeriodEvents) {
+        groups.add([event]);
+      } else {
+        group.add(event);
+      }
+    }
 
-    final startDate = closestPeriodEvent.date;
-    return List.generate(
-      typicalPeriodLength,
-      (index) => closestPeriodEvent.copyWith(
-        date: startDate.add(Duration(days: index)),
-      ),
-    );
+    return groups.map((e) => e.map((e) => e.dateLocal).toList()).toList();
   }
 
-  List<CycleLog> _calculateFertileDates(
-    List<CycleLog> periodDates,
-    int typicalCycleLength,
+  (List<DateTime>, List<DateTime>)? _findCurrentCyclePeriodGroups(
+    DateTime date,
+    List<List<DateTime>> periodGroups,
   ) {
-    if (periodDates.isEmpty) return [];
+    if (periodGroups.length < 2) {
+      return null;
+    }
 
-    final periodStartDate = periodDates.first.date;
-    // Ovulation is roughly in the middle of the cycle.
-    final ovulationDay = periodStartDate.add(
-      Duration(days: typicalCycleLength ~/ 2),
-    );
-    // Fertile window is typically 5 days before ovulation and the day of.
-    final fertileStartDate = ovulationDay.subtract(const Duration(days: 5));
-    return List.generate(
-      6,
-      (index) => periodDates.first.copyWith(
-        date: fertileStartDate.add(Duration(days: index)),
-      ),
-    );
+    for (var i = 0; i < periodGroups.length - 1; i++) {
+      final currentPeriod = periodGroups[i];
+      final nextPeriod = periodGroups[i + 1];
+
+      if (currentPeriod.isEmpty || nextPeriod.isEmpty) {
+        continue;
+      }
+
+      final cycleStart = currentPeriod.first;
+      final nextCycleStart = nextPeriod.first;
+
+      final isAfterOrOnCycleStart =
+          date.isAfter(cycleStart) || date.isSameDay(cycleStart);
+
+      if (isAfterOrOnCycleStart && date.isBefore(nextCycleStart)) {
+        return (currentPeriod, nextPeriod);
+      }
+    }
+
+    return null;
+  }
+
+  List<DateTime> _getCurrentFertileWindow(
+    List<DateTime> ovulationDates,
+    DateTime cycleStart,
+    DateTime nextCycleStart,
+  ) {
+    if (ovulationDates.isEmpty) return [];
+    return ovulationDates
+        .where((e) => e.isBefore(nextCycleStart) && e.isAfter(cycleStart))
+        .toList();
   }
 
   CyclePhase _getCyclePhase(
     DateTime date,
-    List<CycleLog> periodDates,
-    List<CycleLog> fertileDates,
+    List<DateTime> currentOrPastPeriodDates,
+    List<DateTime> futurePeriodDates,
+    List<DateTime> currentFertileWindow,
   ) {
-    if (periodDates.any((e) => e.dateLocal.isAtSameMomentAs(date))) {
+    final isPeriod =
+        currentOrPastPeriodDates.any((d) => d.isSameDay(date)) ||
+        futurePeriodDates.any((d) => d.isSameDay(date));
+    if (isPeriod) {
       return CyclePhase.period;
     }
 
-    if (fertileDates.any((e) => e.dateLocal.isAtSameMomentAs(date))) {
+    if (currentFertileWindow.any((d) => d.isSameDay(date))) {
       return CyclePhase.ovulation;
     }
 
-    if (periodDates.isNotEmpty && date.isBefore(periodDates.first.dateLocal)) {
-      return CyclePhase.luteal;
+    if (currentFertileWindow.isNotEmpty &&
+        date.isAfter(currentOrPastPeriodDates.last) &&
+        date.isBefore(currentFertileWindow.first)) {
+      return CyclePhase.follicular;
     }
 
-    return CyclePhase.follicular;
+    return CyclePhase.luteal;
   }
 
-  int _calculateAveragePeriodLength(List<CycleLog> periodEvents) {
-    if (periodEvents.length < 2) return 5;
+  Future<String> generateAiInsights(CycleDayInsights cycleDayInsights) async {
+    final key = cycleDayInsights.date.toIso8601String().substring(0, 10);
+    final cachedInsights = _summaryAndInsightsBox.get(key);
+    if (cachedInsights != null) return cachedInsights;
 
-    periodEvents.sort((a, b) => a.dateLocal.compareTo(b.dateLocal));
-
-    final periodLengths = <int>[];
-    var currentPeriodLength = 1;
-
-    for (var i = 1; i < periodEvents.length; i++) {
-      final difference = periodEvents[i].dateLocal
-          .difference(periodEvents[i - 1].dateLocal)
-          .inDays;
-      if (difference == 1) {
-        currentPeriodLength++;
-      } else {
-        periodLengths.add(currentPeriodLength);
-        currentPeriodLength = 1;
-      }
-    }
-    periodLengths.add(currentPeriodLength);
-
-    if (periodLengths.isEmpty) return 5;
-
-    return (periodLengths.reduce((a, b) => a + b) / periodLengths.length)
-        .round();
-  }
-
-  int _calculateAverageCycleLength(List<CycleLog> periodEvents) {
-    if (periodEvents.length < 2) return 28;
-
-    periodEvents.sort((a, b) => a.date.compareTo(b.date));
-
-    final periodStartDates = <DateTime>[periodEvents.first.dateLocal];
-    for (var i = 1; i < periodEvents.length; i++) {
-      final difference = periodEvents[i].dateLocal
-          .difference(periodEvents[i - 1].dateLocal)
-          .inDays;
-      if (difference > 1) {
-        periodStartDates.add(periodEvents[i].dateLocal);
-      }
-    }
-
-    if (periodStartDates.length < 2) return 28;
-
-    final cycleLengths = <int>[];
-    for (var i = 1; i < periodStartDates.length; i++) {
-      final cycleLength = periodStartDates[i]
-          .difference(periodStartDates[i - 1])
-          .inDays;
-      cycleLengths.add(cycleLength);
-    }
-
-    if (cycleLengths.isEmpty) return 28;
-
-    return (cycleLengths.reduce((a, b) => a + b) / cycleLengths.length).round();
-  }
-
-  Future<String> _generateAiInsights({
-    required DateTime date,
-    required CyclePhase cyclePhase,
-    required bool isPast,
-    required int typicalPeriodLengthInDays,
-    required int typicalCycleLengthInDays,
-    required List<CycleLog> predictedPeriodDates,
-    required List<CycleLog> predictedFertileDates,
-  }) async {
-    final prompt =
-        '''
-    You are a friendly and chill virtual cycle assistant for adults. Provide 2-3 bullet points of advice and insights for the user's cycle day.
-    Keep the tone light, reassuring, playful, and easy to understand. Don't be shy about mentioning intimacy, sexy time, fertility windows, symptoms, and the real struggles of periods and PMS - we're all adults here and we know the luteal phase can suck ass!
-
-    Here's the user's data:
-    - Date: ${date.toIso8601String()}
-    - Cycle Phase: ${cyclePhase.name}
-    - Day is in the: ${isPast ? 'past' : 'future'}
-    - Typical Period Length: $typicalPeriodLengthInDays days
-    - Typical Cycle Length: $typicalCycleLengthInDays days
-    - Predicted Period Dates: ${predictedPeriodDates.map((e) => e.dateLocal.toIso8601String()).join(', ')}
-    - Predicted Fertile Dates: ${predictedFertileDates.map((e) => e.dateLocal.toIso8601String()).join(', ')}
-
-    Generate a response with 2-3 bullet points of advice. Be relatable about period struggles, PMS symptoms, luteal phase mood swings, cramps, bloating, and all the fun stuff. Feel free to mention sexy time, freaky time, fertility windows, and intimacy when relevant. For example:
-    "- You're in the luteal phase, which honestly can be rough with mood changes and irritability - totally normal! Consider prioritizing self-care and maybe keeping some comfort snacks handy.
-    - Your period is approaching, and it's not fun. Consider preparing with a heating pad, comfortable clothes, and whatever comfort measures work best for you.
-    - You're in your fertile window right now - perfect timing for intimacy if you're trying to conceive, or make sure you're using reliable contraception if pregnancy isn't your goal!"
-    ''';
+    final prompt = _generateInsightsPrompt(cycleDayInsights);
 
     final response = await _generativeModel.generateContent([
       Content.text(prompt),
     ]);
 
-    return response.text ?? 'An error occured while generating insights.';
+    final result =
+        response.text ?? 'An error occured while generating insights.';
+
+    unawaited(_summaryAndInsightsBox.put(key, result));
+
+    return result;
+  }
+
+  String _generateInsightsPrompt(CycleDayInsights insights) {
+    return '''
+    You are a medical professional providing personalized cycle insights directly to the app user. Your role is to deliver medically accurate, relatable advice with a professional, candid tone that addresses adult topics without awkwardness. Your response will be displayed directly in a mobile app interface.
+
+    USER DATA:
+    - Current cycle date: ${insights.date.toEEEEMMMMdyyyy()}
+    - Day of cycle: ${insights.dayOfCycle}
+    - Cycle length: ${insights.cycleLengthInDays}
+    - Cycle Phase: ${insights.cyclePhase.name}
+    - Predicted Period Dates: ${insights.nextPeriodDates.map((e) => e.toEEEEMMMMdyyyy()).join(', ')}
+    - Predicted Fertile Dates: ${insights.fertileDays.map((e) => e.toEEEEMMMMdyyyy()).join(', ')}
+
+    RESPONSE STRUCTURE REQUIREMENTS:
+    1. Start with exactly ONE engaging introductory sentence about their current cycle day
+    2. Follow with exactly THREE bullet points using markdown format
+    3. Each bullet point must be 25-35 words maximum
+    4. No additional text, explanations, or meta-commentary outside this format
+    5. Write as if speaking directly to the user, not about them
+    6. The output must be in markdown syntax for proper display in the mobile app
+    7. Emphasize key information using **bold** or *italic* markdown sparingly and meaningfully
+
+    TONE AND CONTENT GUIDELINES:
+    - Write like a wise and kind doctor, giving advice to a friend
+    - Be medically accurate but conversational and relatable
+    - Address adult topics (sex, fertility, periods, contraception) with candid humor
+    - Use zero euphemisms - be direct but tasteful
+    - Include practical, actionable advice
+    - Acknowledge real struggles (cramps, mood swings, bloating, PMS)
+    - Be empathetic about menstrual experiences
+
+    CRITICAL FERTILITY/OVULATION INSTRUCTIONS:
+    - Prioritize contraception advice over conception advice, so lead with protection reminders first
+    - Only mention conception as a secondary, optional consideration
+    - Do not assume pregnancy is desired
+
+    PHASE-SPECIFIC GUIDANCE:
+    - Follicular: Energy building, skin clearing, mood lifting
+    - Ovulation: Peak fertility = protection priority, libido changes, energy peaks
+    - Luteal: PMS prep, mood changes, comfort needs, bloating, cravings
+    - Period: Pain management, comfort measures, energy conservation
+
+    EXAMPLE FORMAT:
+    [A natural, conversational opening sentence indicating what the current cycle phase is and all the things it may come with, symptoms, and energy levels. - no bullet point] 
+
+    - [First insight - 25-35 words, actionable advice]
+    - [Second insight - 25-35 words, symptom awareness or preparation]
+    - [Third insight - 25-35 words, practical tip or encouragement, or a witty joke]
+
+    Generate insights about what might happen or might have happened on this specific cycle day based on the phase and predictions. Be specific to their cycle timing and phase-appropriate symptoms or experiences.
+    ''';
   }
 }

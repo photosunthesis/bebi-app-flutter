@@ -7,6 +7,8 @@ extension DatetimeExtensions on DateTime {
 
   String toEEEEMMMd() => DateFormat('EEEE, MMM d').format(this);
 
+  String toMMMMd() => DateFormat('MMMM d').format(this);
+
   String toEEEEMMMMdyyyy() => DateFormat('EEEE MMMM d, yyyy').format(this);
 
   String toEEEEMMMMdyyyyhhmma() =>
@@ -31,4 +33,6 @@ extension DatetimeExtensions on DateTime {
   DateTime earlierDate(DateTime other) => isBefore(other) ? this : other;
 
   DateTime laterDate(DateTime other) => isAfter(other) ? this : other;
+
+  DateTime noTime() => DateTime(year, month, day);
 }

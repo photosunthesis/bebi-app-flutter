@@ -83,7 +83,12 @@ class _MainScaffoldState extends State<MainScaffold> {
                   onTap: () => _onTap(MainScaffoldTab.values.indexOf(tab)),
                   child: Padding(
                     padding: const EdgeInsets.all(8),
-                    child: Icon(tab.iconData, color: color, size: 28),
+                    child: Icon(
+                      tab.iconData,
+                      color: color,
+                      size: 28,
+                      fill: isActive ? 1 : 0,
+                    ),
                   ),
                 ),
               ),

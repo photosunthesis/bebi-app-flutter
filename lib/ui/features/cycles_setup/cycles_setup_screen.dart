@@ -197,40 +197,27 @@ class _CyclesSetupScreenState extends State<CyclesSetupScreen> {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(UiConstants.padding),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'We\'ll help you track your cycles with AI-powered insights, though the insights and predictions may not always be accurate. For any health concerns, it\'s best to check with your doctor. Additionally, you can always update your sharing preferences with your partner anytime.',
-              style: context.textTheme.bodySmall?.copyWith(
-                height: 1.4,
-                color: context.colorScheme.secondary,
-              ),
-            ),
-            const SizedBox(height: 12),
-            BlocSelector<CycleSetupCubit, CycleSetupState, bool>(
-              selector: (state) => state is CycleSetupStateLoading,
-              builder: (context, loading) {
-                return ElevatedButton(
-                  onPressed: loading
-                      ? null
-                      : () {
-                          if (_formKey.currentState?.validate() ?? false) {
-                            context.read<CycleSetupCubit>().setUpCycleTracking(
-                              periodStartDate: _lastPeriodDateController.text
-                                  .toDateTime('MM/dd/yyyy')!,
-                              periodDurationInDays: int.parse(
-                                _periodDurationController.text,
-                              ),
-                              shouldShareWithPartner: _shareWithPartner,
-                            );
-                          }
-                        },
-                  child: Text((loading ? 'Saving...' : 'Save').toUpperCase()),
-                );
-              },
-            ),
-          ],
+        child: BlocSelector<CycleSetupCubit, CycleSetupState, bool>(
+          selector: (state) => state is CycleSetupStateLoading,
+          builder: (context, loading) {
+            return ElevatedButton(
+              onPressed: loading
+                  ? null
+                  : () {
+                      if (_formKey.currentState?.validate() ?? false) {
+                        context.read<CycleSetupCubit>().setUpCycleTracking(
+                          periodStartDate: _lastPeriodDateController.text
+                              .toDateTime('MM/dd/yyyy')!,
+                          periodDurationInDays: int.parse(
+                            _periodDurationController.text,
+                          ),
+                          shouldShareWithPartner: _shareWithPartner,
+                        );
+                      }
+                    },
+              child: Text((loading ? 'Saving...' : 'Save').toUpperCase()),
+            );
+          },
         ),
       ),
     );

@@ -3,8 +3,13 @@ import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:bebi_app/ui/features/cycles/cycles_cubit.dart';
 import 'package:bebi_app/ui/features/cycles/widgets/cycle_calendar.dart';
-import 'package:bebi_app/ui/features/cycles/widgets/cycle_log_section.dart';
+import 'package:bebi_app/ui/features/cycles/widgets/cycle_predictions.dart';
+import 'package:bebi_app/ui/features/cycles/widgets/cycle_insights.dart';
+import 'package:bebi_app/ui/features/cycles/widgets/cycle_logs.dart';
+import 'package:bebi_app/ui/shared_widgets/layouts/main_app_bar.dart';
 import 'package:bebi_app/ui/shared_widgets/modals/options_bottom_dialog.dart';
+import 'package:bebi_app/ui/shared_widgets/shake_widget.dart';
+import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
@@ -24,6 +29,8 @@ class CyclesScreen extends StatefulWidget {
 
 class _CyclesScreenState extends State<CyclesScreen> {
   late final _cubit = context.read<CyclesCubit>();
+
+  // Flag to prevent showing bottom sheet multiple times
   bool _cycleSetupBottomSheetIsShown = false;
 
   @override
@@ -45,16 +52,38 @@ class _CyclesScreenState extends State<CyclesScreen> {
         if (state.shouldSetupCycles && !_cycleSetupBottomSheetIsShown) {
           _showCycleSetupBottomSheet();
         }
+        if (state.error != null) {
+          context.showSnackbar(state.error!, type: SnackbarType.secondary);
+        }
       },
       child: Scaffold(
+        appBar: _buildAppBar(),
         body: ListView(
           children: [
-            _buildHeader(),
-            const CycleCalendar(),
-            const SizedBox(height: 12),
-            const CycleLogSection(),
+            const SizedBox(height: 16),
+            const CycleLogs(),
+            const SizedBox(height: 32),
+            const CycleInsights(),
+            const SizedBox(height: 32),
+            const CyclePredictions(),
+            const SizedBox(height: 20),
+            _buildDisclaimer(),
           ],
         ),
+      ),
+    );
+  }
+
+  AppBar _buildAppBar() {
+    return MainAppBar.build(
+      context,
+      toolbarHeight: 138,
+      flexibleSpace: Column(
+        children: [
+          _buildHeader(),
+          const SizedBox(height: 14),
+          const CycleCalendar(),
+        ],
       ),
     );
   }
@@ -64,11 +93,16 @@ class _CyclesScreenState extends State<CyclesScreen> {
       child: BlocSelector<CyclesCubit, CyclesState, DateTime>(
         selector: (state) => state.focusedDate,
         builder: (context, date) => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+          child: Stack(
             children: [
               _buildDateControls(date),
-              Icon(Symbols.arrow_drop_down, color: context.colorScheme.primary),
+              Positioned.fill(
+                top: 34,
+                child: Icon(
+                  Symbols.keyboard_arrow_down,
+                  color: context.colorScheme.primary,
+                ),
+              ),
             ],
           ),
         ),
@@ -77,18 +111,20 @@ class _CyclesScreenState extends State<CyclesScreen> {
   }
 
   Widget _buildDateControls(DateTime date) {
-    return Stack(
-      children: [
-        _buildNavigationButtons(date),
-        Positioned.fill(
-          child: Center(
-            child: Text(
-              date.toEEEEMMMd(),
-              style: context.primaryTextTheme.headlineSmall,
+    return SizedBox(
+      child: Stack(
+        children: [
+          _buildNavigationButtons(date),
+          Positioned.fill(
+            child: Center(
+              child: Text(
+                date.isToday ? 'Today, ${date.toMMMMd()}' : date.toEEEEMMMd(),
+                style: context.primaryTextTheme.headlineSmall,
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -128,31 +164,35 @@ class _CyclesScreenState extends State<CyclesScreen> {
         return InkWell(
           onTap: _cubit.switchUserProfile,
           splashFactory: NoSplash.splashFactory,
-          child: Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: Stack(
-              children: [
-                Opacity(
-                  opacity: 0.5,
-                  child: Transform.translate(
-                    offset: const Offset(16, 0),
-                    child: _buildProfileAvatar(
-                      state.showUserProfile
-                          ? state.partnerProfile
-                          : state.userProfile,
+          child: ShakeOnTap(
+            shouldShake:
+                state.partnerProfile?.isSharingCycleWithPartner == false,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: Stack(
+                children: [
+                  Opacity(
+                    opacity: 0.4,
+                    child: Transform.translate(
+                      offset: const Offset(16, 0),
+                      child: _buildProfileAvatar(
+                        state.showUserProfile
+                            ? state.partnerProfile
+                            : state.userProfile,
+                      ),
                     ),
                   ),
-                ),
-                AnimatedSwitcher(
-                  duration: 120.milliseconds,
-                  child: _buildProfileAvatar(
-                    state.showUserProfile
-                        ? state.userProfile
-                        : state.partnerProfile,
-                    key: ValueKey(state.showUserProfile),
+                  AnimatedSwitcher(
+                    duration: 120.milliseconds,
+                    child: _buildProfileAvatar(
+                      state.showUserProfile
+                          ? state.userProfile
+                          : state.partnerProfile,
+                      key: ValueKey(state.showUserProfile),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );
@@ -163,8 +203,8 @@ class _CyclesScreenState extends State<CyclesScreen> {
   Widget _buildProfileAvatar(UserProfile? profile, {Key? key}) {
     return Container(
       key: key,
-      width: 44,
-      height: 44,
+      width: 40,
+      height: 40,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
@@ -173,7 +213,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
         ),
       ),
       child: CircleAvatar(
-        backgroundColor: context.colorScheme.secondary.withAlpha(40),
+        backgroundColor: context.colorScheme.onTertiary,
         backgroundImage: profile != null
             ? CachedNetworkImageProvider(profile.photoUrl!)
             : null,
@@ -213,5 +253,18 @@ class _CyclesScreenState extends State<CyclesScreen> {
     }
 
     _cycleSetupBottomSheetIsShown = false;
+  }
+
+  Widget _buildDisclaimer() {
+    return Padding(
+      padding: const EdgeInsets.all(UiConstants.padding),
+      child: Text(
+        'This app provides helpful information to support your cycle tracking. For personalized guidance, we recommend consulting with a medical professional. The AI-generated insights and cycle predictions are designed to be informative and supportive, though they may not always be accurate for everyone\'s unique cycle.',
+        style: context.textTheme.bodySmall?.copyWith(
+          height: 1.4,
+          color: context.colorScheme.secondary,
+        ),
+      ),
+    );
   }
 }

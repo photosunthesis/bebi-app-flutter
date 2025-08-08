@@ -38,7 +38,6 @@ abstract class AppTheme {
     tertiary: AppColors.stone700,
     onTertiary: AppColors.stone300,
     surface: AppColors.stone50,
-    surfaceContainerHighest: AppColors.stone900,
     error: AppColors.red,
     inversePrimary: AppColors.green,
     outline: AppColors.stone700,

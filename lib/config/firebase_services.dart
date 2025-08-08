@@ -25,7 +25,7 @@ abstract class FirebaseServices {
 
   @lazySingleton
   GenerativeModel get geminiModel => FirebaseAI.googleAI().generativeModel(
-    model: 'gemini-2.5-flash',
+    model: 'gemini-2.5-flash-lite',
     safetySettings: [
       SafetySetting(
         HarmCategory.sexuallyExplicit,

@@ -130,11 +130,12 @@ abstract class CycleLog with _$CycleLog {
   }
 
   DateTime get dateLocal => date.toLocal();
+
   Color get color => switch (type) {
     LogType.period => AppColors.red,
     LogType.ovulation => AppColors.blue,
-    LogType.symptom => AppColors.orange,
-    LogType.intimacy => AppColors.pink,
+    LogType.symptom => AppColors.purple,
+    LogType.intimacy => AppColors.purple,
   };
 
   Map<String, dynamic> toFirestore() {
