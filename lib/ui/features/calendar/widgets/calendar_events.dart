@@ -148,29 +148,25 @@ class _CalendarEventsState extends State<CalendarEvents> {
   }
 
   Widget _buildEventTitle(String title, Color color) {
-    return Expanded(
-      child: Text(
-        title,
-        style: context.primaryTextTheme.titleLarge?.copyWith(
-          color: context.colorScheme.primary,
-        ),
-        overflow: TextOverflow.ellipsis,
+    return Text(
+      title,
+      style: context.primaryTextTheme.titleLarge?.copyWith(
+        color: context.colorScheme.primary,
       ),
+      overflow: TextOverflow.ellipsis,
     );
   }
 
   Widget _buildEventTime(CalendarEvent event, bool allDay, Color color) {
     return Padding(
       padding: const EdgeInsets.only(top: 2),
-      child: Expanded(
-        child: Text(
-          allDay
-              ? 'All day'
-              : _formatDuration(event.startTimeLocal, event.endTimeLocal),
-          style: context.textTheme.bodyMedium?.copyWith(
-            color: context.colorScheme.secondary,
-            fontWeight: FontWeight.w500,
-          ),
+      child: Text(
+        allDay
+            ? 'All day'
+            : _formatDuration(event.startTimeLocal, event.endTimeLocal),
+        style: context.textTheme.bodyMedium?.copyWith(
+          color: context.colorScheme.secondary,
+          fontWeight: FontWeight.w500,
         ),
       ),
     );
@@ -179,15 +175,13 @@ class _CalendarEventsState extends State<CalendarEvents> {
   Widget _buildEventLocation(String location, Color color) {
     return Padding(
       padding: const EdgeInsets.only(top: 2),
-      child: Expanded(
-        child: Text(
-          location,
-          style: context.textTheme.bodyMedium?.copyWith(
-            color: context.colorScheme.secondary,
-          ),
-          overflow: TextOverflow.ellipsis,
-          maxLines: 1,
+      child: Text(
+        location,
+        style: context.textTheme.bodyMedium?.copyWith(
+          color: context.colorScheme.secondary,
         ),
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
       ),
     );
   }

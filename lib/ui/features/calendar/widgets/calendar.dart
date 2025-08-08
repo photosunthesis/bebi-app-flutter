@@ -29,6 +29,7 @@ class Calendar extends StatelessWidget {
             ),
           ),
           child: TableCalendar<CalendarEvent>(
+            availableGestures: AvailableGestures.horizontalSwipe,
             eventLoader: (day) => state.events,
             headerVisible: false,
             focusedDay: state.focusedDay,
@@ -75,18 +76,28 @@ class Calendar extends StatelessWidget {
     DateTime day,
     DateTime focusedDay,
   ) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(12, 10, 12, 18),
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: context.colorScheme.primary,
-        shape: BoxShape.circle,
+        border: Border(
+          bottom: BorderSide(
+            color: context.colorScheme.outline,
+            width: UiConstants.borderWidth,
+          ),
+        ),
       ),
-      child: Center(
-        child: Text(
-          day.day.toString(),
-          style: context.textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: context.colorScheme.onPrimary,
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(12, 10, 12, 18),
+        decoration: BoxDecoration(
+          color: context.colorScheme.primary,
+          shape: BoxShape.circle,
+        ),
+        child: Center(
+          child: Text(
+            day.day.toString(),
+            style: context.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: context.colorScheme.onPrimary,
+            ),
           ),
         ),
       ),
@@ -98,28 +109,38 @@ class Calendar extends StatelessWidget {
     DateTime day,
     DateTime focusedDay,
   ) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(12, 10, 12, 18),
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: day.isSameDay(focusedDay) ? context.colorScheme.primary : null,
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: context.colorScheme.primary.withAlpha(
-            day.isSameMonth(focusedDay) ? 255 : 80,
+        border: Border(
+          bottom: BorderSide(
+            color: context.colorScheme.outline,
+            width: UiConstants.borderWidth,
           ),
-          width: 0.6,
         ),
       ),
-      child: Center(
-        child: Text(
-          day.day.toString(),
-          style: context.textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: day.isSameDay(focusedDay)
-                ? context.colorScheme.onPrimary
-                : day.isSameMonth(focusedDay)
-                ? context.colorScheme.onSurface
-                : context.colorScheme.onSurface.withAlpha(80),
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(12, 10, 12, 18),
+        decoration: BoxDecoration(
+          color: day.isSameDay(focusedDay) ? context.colorScheme.primary : null,
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: context.colorScheme.primary.withAlpha(
+              day.isSameMonth(focusedDay) ? 255 : 80,
+            ),
+            width: 0.6,
+          ),
+        ),
+        child: Center(
+          child: Text(
+            day.day.toString(),
+            style: context.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: day.isSameDay(focusedDay)
+                  ? context.colorScheme.onPrimary
+                  : day.isSameMonth(focusedDay)
+                  ? context.colorScheme.onSurface
+                  : context.colorScheme.onSurface.withAlpha(80),
+            ),
           ),
         ),
       ),
@@ -131,14 +152,24 @@ class Calendar extends StatelessWidget {
     DateTime day,
     DateTime focusedDay,
   ) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(12, 10, 12, 18),
-      child: Center(
-        child: Text(
-          day.day.toString(),
-          style: context.textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: context.colorScheme.onSurface,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: context.colorScheme.outline,
+            width: UiConstants.borderWidth,
+          ),
+        ),
+      ),
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(12, 10, 12, 18),
+        child: Center(
+          child: Text(
+            day.day.toString(),
+            style: context.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: context.colorScheme.onSurface,
+            ),
           ),
         ),
       ),
@@ -150,14 +181,24 @@ class Calendar extends StatelessWidget {
     DateTime day,
     DateTime focusedDay,
   ) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(12, 10, 12, 18),
-      child: Center(
-        child: Text(
-          day.day.toString(),
-          style: context.textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: context.colorScheme.onSurface.withAlpha(80),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: context.colorScheme.outline,
+            width: UiConstants.borderWidth,
+          ),
+        ),
+      ),
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(12, 10, 12, 18),
+        child: Center(
+          child: Text(
+            day.day.toString(),
+            style: context.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: context.colorScheme.onSurface.withAlpha(80),
+            ),
           ),
         ),
       ),
