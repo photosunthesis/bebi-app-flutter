@@ -32,8 +32,7 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
   final FirebaseAuth _firebaseAuth;
   final FirebaseAnalytics _firebaseAnalytics;
 
-  Future<void> initialize(CalendarEvent? calendarEvent) async {
-    if (calendarEvent == null) return;
+  void initialize(CalendarEvent? calendarEvent) {
     emit(
       state.copyWith(
         calendarEvent: calendarEvent,
