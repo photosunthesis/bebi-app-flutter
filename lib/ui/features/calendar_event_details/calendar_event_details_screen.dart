@@ -3,6 +3,7 @@ import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/data/models/day_of_week.dart';
 import 'package:bebi_app/data/models/repeat_rule.dart';
+import 'package:bebi_app/data/models/save_changes_dialog_options.dart';
 import 'package:bebi_app/ui/features/calendar_event_details/calendar_event_details_cubit.dart';
 import 'package:bebi_app/ui/features/calendar_event_details/widgets/delete_event_bottom_dialog.dart';
 import 'package:bebi_app/ui/shared_widgets/layouts/main_app_bar.dart';
@@ -270,11 +271,11 @@ class _CalendarEventDetailsScreenState
       widget.calendarEvent,
     );
 
-    if (result == DeleteEventResult.deleteThisEvent ||
-        result == DeleteEventResult.deleteFutureEvents) {
+    if (result == SaveChangesDialogOptions.onlyThisEvent ||
+        result == SaveChangesDialogOptions.allFutureEvents) {
       await context.read<CalendarEventDetailsCubit>().deleteCalendarEvent(
         widget.calendarEvent.id,
-        deleteAllEvents: result == DeleteEventResult.deleteFutureEvents,
+        deleteAllEvents: result == SaveChangesDialogOptions.allFutureEvents,
         instanceDate: widget.calendarEvent.date,
       );
 

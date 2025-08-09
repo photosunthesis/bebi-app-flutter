@@ -3,9 +3,11 @@ import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/data/models/day_of_week.dart';
 import 'package:bebi_app/data/models/event_color.dart';
 import 'package:bebi_app/data/models/repeat_rule.dart';
+import 'package:bebi_app/data/models/save_changes_dialog_options.dart';
 import 'package:bebi_app/ui/features/calendar_event_form/calendar_event_form_cubit.dart';
 import 'package:bebi_app/ui/features/calendar_event_form/widgets/calendar_event_form.dart';
 import 'package:bebi_app/ui/shared_widgets/layouts/main_app_bar.dart';
+import 'package:bebi_app/ui/shared_widgets/modals/options_bottom_dialog.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/extension/string_extensions.dart';
@@ -152,7 +154,13 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
     );
   }
 
-  void _onSave() {
+  Future<void> _onSave() async {
+    late SaveChangesDialogOptions saveOption;
+    if (widget.calendarEvent?.isRecurring == true) {
+      saveOption = await _showConfirmSaveDialog();
+      if (saveOption == SaveChangesDialogOptions.cancel) return;
+    }
+
     if (_formKey.currentState?.validate() ?? false) {
       final date = _dateController.text.toEEEEMMMMdyyyyDate()!;
       final startTimeParsed = _startTimeController.text.toHHmmaTime();
@@ -167,7 +175,8 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
             : null,
       );
 
-      _cubit.save(
+      await _cubit.save(
+        saveOption: saveOption,
         title: _titleController.text,
         notes: _notesController.text,
         date: date,
@@ -191,5 +200,27 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
         repeatRule: repeat,
       );
     }
+  }
+
+  Future<SaveChangesDialogOptions> _showConfirmSaveDialog() async {
+    final result = await OptionsBottomDialog.show(
+      context,
+      title: 'Save Changes to Event',
+      description:
+          'Would you like to update just this event or all future events in this series?',
+      options: const [
+        Option(
+          text: 'Save only this event',
+          value: SaveChangesDialogOptions.onlyThisEvent,
+        ),
+        Option(
+          text: 'Save all future events',
+          value: SaveChangesDialogOptions.allFutureEvents,
+        ),
+        Option(text: 'Cancel', value: SaveChangesDialogOptions.cancel),
+      ],
+    );
+
+    return result ?? SaveChangesDialogOptions.cancel;
   }
 }

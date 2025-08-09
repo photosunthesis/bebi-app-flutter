@@ -18,7 +18,7 @@ class Option<T> {
 }
 
 class OptionsBottomDialog<T> extends StatelessWidget {
-  const OptionsBottomDialog({
+  const OptionsBottomDialog._({
     super.key,
     required this.title,
     this.description,
@@ -46,7 +46,7 @@ class OptionsBottomDialog<T> extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
       ),
-      builder: (context) => OptionsBottomDialog(
+      builder: (context) => OptionsBottomDialog._(
         title: title,
         description: description,
         options: options,

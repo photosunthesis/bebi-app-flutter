@@ -1,10 +1,9 @@
 import 'package:bebi_app/data/models/calendar_event.dart';
+import 'package:bebi_app/data/models/save_changes_dialog_options.dart';
 import 'package:bebi_app/ui/shared_widgets/modals/options_bottom_dialog.dart';
 import 'package:flutter/material.dart';
 
-enum DeleteEventResult { deleteThisEvent, deleteFutureEvents, cancel }
-
-Future<DeleteEventResult?> showDeleteEventBottomDialog(
+Future<SaveChangesDialogOptions?> showDeleteEventBottomDialog(
   BuildContext context,
   CalendarEvent calendarEvent,
 ) {
@@ -17,18 +16,18 @@ Future<DeleteEventResult?> showDeleteEventBottomDialog(
     options: [
       const Option(
         text: 'Delete this event',
-        value: DeleteEventResult.deleteThisEvent,
+        value: SaveChangesDialogOptions.onlyThisEvent,
         style: OptionStyle.destructive,
       ),
       if (calendarEvent.isRecurring && !calendarEvent.isLastRecurringEvent)
         const Option(
           text: 'Delete this and future events',
-          value: DeleteEventResult.deleteFutureEvents,
+          value: SaveChangesDialogOptions.allFutureEvents,
           style: OptionStyle.destructive,
         ),
       const Option(
         text: 'Cancel',
-        value: DeleteEventResult.cancel,
+        value: SaveChangesDialogOptions.cancel,
         style: OptionStyle.secondary,
       ),
     ],
