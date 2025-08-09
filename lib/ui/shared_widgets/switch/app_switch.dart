@@ -2,10 +2,16 @@ import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:flutter/cupertino.dart';
 
 class AppSwitch extends StatelessWidget {
-  const AppSwitch({super.key, required this.value, required this.onChanged});
+  const AppSwitch({
+    super.key,
+    required this.value,
+    required this.onChanged,
+    this.activeColor,
+  });
 
   final bool value;
   final ValueChanged<bool> onChanged;
+  final Color? activeColor;
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +20,7 @@ class AppSwitch extends StatelessWidget {
       child: CupertinoSwitch(
         value: value,
         onChanged: onChanged,
-        activeTrackColor: context.colorScheme.primary,
+        activeTrackColor: activeColor ?? context.colorScheme.primary,
       ),
     );
   }

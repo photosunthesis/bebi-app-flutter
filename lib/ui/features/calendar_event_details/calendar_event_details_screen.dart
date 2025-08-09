@@ -25,12 +25,7 @@ class CalendarEventDetailsScreen extends StatefulWidget {
 
 class _CalendarEventDetailsScreenState
     extends State<CalendarEventDetailsScreen> {
-  late CalendarEvent _event = widget.calendarEvent;
-
-  @override
-  void initState() {
-    super.initState();
-  }
+  late final CalendarEvent _event = widget.calendarEvent;
 
   @override
   Widget build(BuildContext context) {
@@ -56,15 +51,11 @@ class _CalendarEventDetailsScreenState
                     child: OutlinedButton(
                       onPressed: !loading
                           ? () async {
-                              final updatedEvent = await context
-                                  .pushNamed<CalendarEvent>(
-                                    AppRoutes.updateCalendarEvent,
-                                    extra: _event,
-                                    pathParameters: {'id': _event.id},
-                                  );
-                              if (updatedEvent != null) {
-                                setState(() => _event = updatedEvent);
-                              }
+                              await context.pushNamed<CalendarEvent>(
+                                AppRoutes.updateCalendarEvent,
+                                extra: _event,
+                                pathParameters: {'id': _event.id},
+                              );
                             }
                           : null,
                       child: Text('Edit'.toUpperCase()),
@@ -86,8 +77,7 @@ class _CalendarEventDetailsScreenState
         _buildDateTimeSection(),
         if (_event.repeatRule.frequency != RepeatFrequency.doNotRepeat)
           _buildRepeatSection(),
-        if (_event.location != null && _event.location!.isNotEmpty)
-          _buildLocationSection(),
+        if (_event.users.length > 1) _buildSharedWithPartnerSection(),
         if (_event.notes != null && _event.notes!.isNotEmpty)
           _buildNotesSection(),
         _buildDeleteButton(),
@@ -173,35 +163,6 @@ class _CalendarEventDetailsScreenState
     );
   }
 
-  Widget _buildLocationSection() {
-    return SliverPadding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      sliver: SliverToBoxAdapter(
-        child: Column(
-          children: [
-            const SizedBox(height: 24),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Icon(
-                  Symbols.location_on,
-                  color: widget.calendarEvent.color.darken(0.1),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    _event.location!,
-                    style: context.textTheme.bodyMedium,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildNotesSection() {
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -220,6 +181,35 @@ class _CalendarEventDetailsScreenState
                 Expanded(
                   child: Text(
                     _event.notes!,
+                    style: context.textTheme.bodyMedium,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSharedWithPartnerSection() {
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      sliver: SliverToBoxAdapter(
+        child: Column(
+          children: [
+            const SizedBox(height: 24),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Icon(
+                  Symbols.people_alt,
+                  color: widget.calendarEvent.color.darken(0.1),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    'Event is shared with partner',
                     style: context.textTheme.bodyMedium,
                   ),
                 ),

@@ -8,6 +8,7 @@ import 'package:bebi_app/ui/shared_widgets/forms/app_text_form_field.dart';
 import 'package:bebi_app/ui/shared_widgets/forms/app_time_form_field.dart';
 import 'package:bebi_app/ui/shared_widgets/switch/app_switch.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
+import 'package:bebi_app/utils/extension/color_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:bebi_app/utils/extension/string_extensions.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +18,6 @@ class CalendarEventForm extends StatefulWidget {
   const CalendarEventForm({
     required this.formKey,
     required this.titleController,
-    required this.locationController,
     required this.dateController,
     required this.startTimeController,
     required this.endTimeController,
@@ -39,7 +39,6 @@ class CalendarEventForm extends StatefulWidget {
 
   final GlobalKey<FormState> formKey;
   final TextEditingController titleController;
-  final TextEditingController locationController;
   final TextEditingController dateController;
   final TextEditingController startTimeController;
   final TextEditingController endTimeController;
@@ -49,8 +48,8 @@ class CalendarEventForm extends StatefulWidget {
   final ValueChanged<bool> onAllDayChanged;
   final bool shareWithPartner;
   final ValueChanged<bool> onShareWithPartnerChanged;
-  final EventColors selectedColor;
-  final ValueChanged<EventColors> onSelectedColorChanged;
+  final EventColor selectedColor;
+  final ValueChanged<EventColor> onSelectedColorChanged;
   final RepeatFrequency repeatFrequency;
   final List<DayOfWeek> daysOfWeekSelected;
   final ValueChanged<List<DayOfWeek>> onDaysOfWeekChanged;
@@ -64,7 +63,7 @@ class CalendarEventForm extends StatefulWidget {
 class _CalendarEventFormState extends State<CalendarEventForm> {
   late DateTime? _repeatEndDateMinimum = widget.dateController.text.isEmpty
       ? null
-      : widget.dateController.text.toEEEEMMMMdyyyyDate();
+      : widget.dateController.text.toEEEMMMdyyyyDate();
 
   @override
   void initState() {
@@ -73,7 +72,7 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
       setState(() {
         _repeatEndDateMinimum = widget.dateController.text.isEmpty
             ? null
-            : widget.dateController.text.toEEEEMMMMdyyyyDate();
+            : widget.dateController.text.toEEEMMMdyyyyDate();
       });
     });
   }
@@ -85,18 +84,12 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
       child: CustomScrollView(
         slivers: [
           SliverPadding(
-            padding: const EdgeInsets.only(
-              top: 16,
-              left: UiConstants.padding,
-              right: UiConstants.padding,
-            ),
-            sliver: SliverToBoxAdapter(child: _buildTitleAndLocationSection()),
+            padding: const EdgeInsets.only(top: 16, left: 10, right: 10),
+            sliver: SliverToBoxAdapter(child: _buildAndColorTitleSection()),
           ),
           SliverPadding(
-            padding: const EdgeInsets.only(
-              top: 18,
-              left: UiConstants.padding,
-              right: UiConstants.padding,
+            padding: const EdgeInsets.symmetric(
+              horizontal: UiConstants.padding,
             ),
             sliver: SliverToBoxAdapter(child: _buildDateTimeSection()),
           ),
@@ -116,69 +109,58 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
     );
   }
 
-  Widget _buildTitleAndLocationSection() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(right: 14, top: 8),
-          child: Icon(
-            Symbols.subheader,
-            color: context.colorScheme.onSurface.withAlpha(180),
+  Widget _buildAndColorTitleSection() {
+    return Expanded(
+      child: Column(
+        children: [
+          AppTextFormField(
+            autofocus: true,
+            inputBorder: InputBorder.none,
+            controller: widget.titleController,
+            hintText: 'New event',
+            textInputAction: TextInputAction.done,
+            inputStyle: context.primaryTextTheme.headlineSmall?.copyWith(
+              color: widget.selectedColor.color.darken(0.2),
+            ),
+            maxLines: 2,
+            minLines: 1,
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Title is required';
+              }
+              return null;
+            },
           ),
-        ),
-        Expanded(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AppTextFormField(
-                controller: widget.titleController,
-                hintText: 'Title',
-                textInputAction: TextInputAction.done,
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Title is required';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 2),
-              AppTextFormField(
-                controller: widget.locationController,
-                hintText: 'Location (optional)',
-                textInputAction: TextInputAction.done,
-                keyboardType: TextInputType.streetAddress,
-                autofillHints: <String>[AutofillHints.fullStreetAddress],
-              ),
-              const SizedBox(height: 4),
-              _buildColorSelector(),
-            ],
-          ),
-        ),
-      ],
+          const SizedBox(height: 4),
+          _buildColorSelector(),
+        ],
+      ),
     );
   }
 
   Widget _buildColorSelector() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: EventColors.values.map((eventColor) {
-        final isSelected = widget.selectedColor == eventColor;
-        return GestureDetector(
-          onTap: () => widget.onSelectedColorChanged(eventColor),
-          child: Container(
-            width: 30,
-            height: 30,
-            decoration: BoxDecoration(
-              color: eventColor.color,
-              shape: BoxShape.circle,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 18),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: EventColor.values.map((eventColor) {
+          final isSelected = widget.selectedColor == eventColor;
+          return GestureDetector(
+            onTap: () => widget.onSelectedColorChanged(eventColor),
+            child: Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                color: eventColor.color,
+                shape: BoxShape.circle,
+              ),
+              child: isSelected
+                  ? const Icon(Symbols.check, color: Colors.white, size: 26)
+                  : null,
             ),
-            child: isSelected
-                ? const Icon(Symbols.check, color: Colors.white, size: 26)
-                : null,
-          ),
-        );
-      }).toList(),
+          );
+        }).toList(),
+      ),
     );
   }
 
@@ -190,7 +172,7 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
           padding: const EdgeInsets.only(right: 14, top: 8),
           child: Icon(
             Symbols.calendar_today,
-            color: context.colorScheme.onSurface.withAlpha(180),
+            color: widget.selectedColor.color.darken(0.1),
           ),
         ),
         Expanded(
@@ -222,7 +204,11 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
       children: [
         const Text('All-day'),
         const Spacer(),
-        AppSwitch(value: widget.allDay, onChanged: widget.onAllDayChanged),
+        AppSwitch(
+          value: widget.allDay,
+          onChanged: widget.onAllDayChanged,
+          activeColor: widget.selectedColor.color,
+        ),
       ],
     );
   }
@@ -293,31 +279,35 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
   }
 
   Widget _buildOtherDetailsSection() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.only(right: 14, top: 8),
-          child: Icon(
-            Symbols.notes,
-            color: context.colorScheme.onSurface.withAlpha(180),
-          ),
-        ),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              _buildShareWithPartnerToggle(),
-              const SizedBox(height: 6),
-              AppTextFormField(
-                controller: widget.notesController,
-                hintText: 'Notes (optional)',
-                minLines: 3,
-                maxLines: 6,
-                textInputAction: TextInputAction.newline,
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 14, top: 8),
+              child: Icon(
+                Symbols.notes,
+                color: widget.selectedColor.color.darken(0.1),
               ),
-            ],
-          ),
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _buildShareWithPartnerToggle(),
+                  const SizedBox(height: 6),
+                  AppTextFormField(
+                    controller: widget.notesController,
+                    hintText: 'Notes (optional)',
+                    minLines: 3,
+                    maxLines: 6,
+                    textInputAction: TextInputAction.newline,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -332,6 +322,7 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
         AppSwitch(
           value: widget.shareWithPartner,
           onChanged: widget.onShareWithPartnerChanged,
+          activeColor: widget.selectedColor.color,
         ),
       ],
     );

@@ -11,6 +11,8 @@ extension DatetimeExtensions on DateTime {
 
   String toEEEEMMMMdyyyy() => DateFormat('EEEE MMMM d, yyyy').format(this);
 
+  String toEEEEMMMdyyyy() => DateFormat('EEE MMM d, yyyy').format(this);
+
   String toEEEEMMMMdyyyyhhmma() =>
       DateFormat('EEEE MMMM d, yyyy h:mm a').format(this);
 

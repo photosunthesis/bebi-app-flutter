@@ -1,8 +1,9 @@
+import 'dart:async';
+
 import 'package:bebi_app/ui/shared_widgets/forms/app_text_form_field.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 
 class AppTextDropdownPicker<T> extends StatefulWidget {
   const AppTextDropdownPicker({
@@ -11,7 +12,6 @@ class AppTextDropdownPicker<T> extends StatefulWidget {
     required this.labelBuilder,
     this.controller,
     this.hintText,
-    this.focusNode,
     this.onChanged,
     this.selectedIndex,
     this.height = 200,
@@ -21,7 +21,6 @@ class AppTextDropdownPicker<T> extends StatefulWidget {
   final String Function(T item) labelBuilder;
   final TextEditingController? controller;
   final String? hintText;
-  final FocusNode? focusNode;
   final void Function(T item)? onChanged;
   final int? selectedIndex;
   final double height;
@@ -33,17 +32,18 @@ class AppTextDropdownPicker<T> extends StatefulWidget {
 
 class _AppTextDropdownPickerState<T> extends State<AppTextDropdownPicker<T>> {
   late TextEditingController _controller;
-  late FocusNode _focusNode;
   late FixedExtentScrollController _scrollController;
   late int _selectedIndex;
   T? _selectedItem;
   bool _isPickerVisible = false;
+  Timer? _blinkTimer;
+  bool _isBlinkingPrimary = false;
+  Timer? _closeTimer;
 
   @override
   void initState() {
     super.initState();
     _controller = widget.controller ?? TextEditingController();
-    _focusNode = widget.focusNode ?? FocusNode();
 
     _selectedIndex = widget.selectedIndex ?? widget.items.length + 1;
     if (widget.selectedIndex != null) {
@@ -54,38 +54,49 @@ class _AppTextDropdownPickerState<T> extends State<AppTextDropdownPicker<T>> {
     _scrollController = FixedExtentScrollController(
       initialItem: _selectedIndex,
     );
-
-    _focusNode.addListener(() {
-      if (_focusNode.hasFocus && !_isPickerVisible) {
-        setState(() {
-          _isPickerVisible = true;
-        });
-      }
-    });
   }
 
   @override
   void dispose() {
-    if (widget.focusNode == null) _focusNode.dispose();
+    _blinkTimer?.cancel();
+    _closeTimer?.cancel();
     if (widget.controller == null) _controller.dispose();
     _scrollController.dispose();
     super.dispose();
   }
 
   void _onItemChanged(int index) {
+    _closeTimer?.cancel();
+    _closeTimer = null;
     setState(() {
       _selectedIndex = index;
       _selectedItem = widget.items[index];
       _updateControllerText();
     });
     widget.onChanged?.call(_selectedItem as T);
+    _closeTimer = Timer.periodic(3.seconds, (timer) {
+      setState(() => _isPickerVisible = false);
+      _stopBlinking();
+    });
   }
 
   void _onPickerDone() {
-    setState(() {
-      _isPickerVisible = false;
+    setState(() => _isPickerVisible = false);
+    _stopBlinking();
+    _closeTimer?.cancel();
+  }
+
+  void _startBlinking() {
+    _blinkTimer?.cancel();
+    _blinkTimer = null;
+    _blinkTimer = Timer.periodic(400.milliseconds, (timer) {
+      setState(() => _isBlinkingPrimary = !_isBlinkingPrimary);
     });
-    _focusNode.unfocus();
+  }
+
+  void _stopBlinking() {
+    _blinkTimer?.cancel();
+    setState(() => _isBlinkingPrimary = false);
   }
 
   void _updateControllerText() {
@@ -111,29 +122,34 @@ class _AppTextDropdownPickerState<T> extends State<AppTextDropdownPicker<T>> {
     return Stack(
       children: [
         AppTextFormField(
+          onTap: () {
+            setState(() => _isPickerVisible = !_isPickerVisible);
+            if (_isPickerVisible) {
+              _startBlinking();
+            } else {
+              _stopBlinking();
+              _onPickerDone();
+            }
+          },
+          inputStyle: context.textTheme.bodyMedium?.copyWith(
+            color: _isPickerVisible && _isBlinkingPrimary
+                ? context.colorScheme.secondary
+                : context.colorScheme.primary,
+          ),
+          textAlign: TextAlign.end,
           controller: _controller,
-          hintText: widget.hintText,
           readOnly: true,
-          focusNode: _focusNode,
         ),
-        if (_isPickerVisible)
-          Positioned(
-            top: 10,
-            right: 8,
-            child: SizedBox(
-              width: 46,
-              height: 28,
-              child: TextButton(
-                onPressed: _onPickerDone,
-                style: TextButton.styleFrom(
-                  textStyle: context.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                child: Text('Done'.toUpperCase()),
-              ),
+        Positioned(
+          top: 14,
+          left: 12,
+          child: Text(
+            widget.hintText ?? 'Select item',
+            style: context.textTheme.bodyMedium?.copyWith(
+              color: context.colorScheme.onSurface.withAlpha(120),
             ),
           ),
+        ),
       ],
     );
   }
@@ -149,37 +165,34 @@ class _AppTextDropdownPickerState<T> extends State<AppTextDropdownPicker<T>> {
     return SizedBox(
       key: const ValueKey('picker'),
       height: widget.height,
-      child: GestureDetector(
-        onTap: _focusNode.requestFocus,
-        child: CupertinoTheme(
-          data: CupertinoThemeData(
-            textTheme: CupertinoTextThemeData(
-              pickerTextStyle: context.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+      child: CupertinoTheme(
+        data: CupertinoThemeData(
+          textTheme: CupertinoTextThemeData(
+            pickerTextStyle: context.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
             ),
           ),
-          child: CupertinoPicker(
-            scrollController: _scrollController,
-            itemExtent: 32,
-            onSelectedItemChanged: _onItemChanged,
-            selectionOverlay: Container(),
-            useMagnifier: true,
-            magnification: 1.2,
-            diameterRatio: 1.2,
-            children: widget.items
-                .map(
-                  (item) => Center(
-                    child: Text(
-                      widget.labelBuilder(item),
-                      style: context.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+        ),
+        child: CupertinoPicker(
+          scrollController: _scrollController,
+          itemExtent: 32,
+          onSelectedItemChanged: _onItemChanged,
+          selectionOverlay: Container(),
+          useMagnifier: true,
+          magnification: 1.2,
+          diameterRatio: 1.2,
+          children: widget.items
+              .map(
+                (item) => Center(
+                  child: Text(
+                    widget.labelBuilder(item),
+                    style: context.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                )
-                .toList(),
-          ),
+                ),
+              )
+              .toList(),
         ),
       ),
     );

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bebi_app/ui/shared_widgets/forms/app_text_form_field.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
@@ -10,7 +12,6 @@ class AppDateFormField extends StatefulWidget {
     super.key,
     this.controller,
     this.hintText,
-    this.focusNode,
     this.minimumDate,
     this.maximumDate,
     this.focusedDay,
@@ -19,7 +20,6 @@ class AppDateFormField extends StatefulWidget {
 
   final TextEditingController? controller;
   final String? hintText;
-  final FocusNode? focusNode;
   final DateTime? minimumDate;
   final DateTime? maximumDate;
   final DateTime? focusedDay;
@@ -30,34 +30,25 @@ class AppDateFormField extends StatefulWidget {
 }
 
 class _AppDateFormFieldState extends State<AppDateFormField> {
-  late TextEditingController _controller;
-  late FocusNode _focusNode;
-  late DateTime _focusedDay;
+  late final _controller = widget.controller ?? TextEditingController();
+  late DateTime _focusedDay = widget.focusedDay ?? DateTime.now();
   DateTime? _selectedDay;
   bool _showCalendar = false;
+  Timer? _blinkTimer;
+  bool _isBlinkingPrimary = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = widget.controller ?? TextEditingController();
-    _focusNode = widget.focusNode ?? FocusNode();
-    _focusedDay = widget.focusedDay ?? DateTime.now();
-
     if (widget.focusedDay != null) {
       _selectedDay = widget.focusedDay;
       _updateControllerText();
     }
-
-    _focusNode.addListener(() {
-      if (_focusNode.hasFocus && !_showCalendar) {
-        setState(() => _showCalendar = true);
-      }
-    });
   }
 
   @override
   void dispose() {
-    if (widget.focusNode == null) _focusNode.dispose();
+    _blinkTimer?.cancel();
     if (widget.controller == null) _controller.dispose();
     super.dispose();
   }
@@ -70,14 +61,22 @@ class _AppDateFormFieldState extends State<AppDateFormField> {
       _updateControllerText();
     });
 
-    _focusNode.unfocus();
+    _stopBlinking();
   }
 
-  void _onDone() {
-    setState(() {
-      _showCalendar = false;
+  void _startBlinking() {
+    _blinkTimer?.cancel();
+    _blinkTimer = Timer.periodic(400.milliseconds, (timer) {
+      setState(() => _isBlinkingPrimary = !_isBlinkingPrimary);
     });
-    _focusNode.unfocus();
+  }
+
+  void _stopBlinking() {
+    _blinkTimer?.cancel();
+    _blinkTimer = null;
+    setState(() {
+      _isBlinkingPrimary = false;
+    });
   }
 
   void _updateControllerText() {
@@ -88,7 +87,7 @@ class _AppDateFormFieldState extends State<AppDateFormField> {
         _selectedDay!.day,
       );
 
-      _controller.text = dateTime.toEEEEMMMMdyyyy();
+      _controller.text = dateTime.toEEEEMMMdyyyy();
     }
   }
 
@@ -108,36 +107,35 @@ class _AppDateFormFieldState extends State<AppDateFormField> {
   Widget _buildTextFormField() {
     return Stack(
       children: [
-        GestureDetector(
+        AppTextFormField(
           onTap: () {
-            if (!_showCalendar) setState(() => _showCalendar = true);
+            setState(() => _showCalendar = !_showCalendar);
+            if (_showCalendar) {
+              _startBlinking();
+            } else {
+              _stopBlinking();
+            }
           },
-          child: AppTextFormField(
-            controller: _controller,
-            hintText: widget.hintText,
-            readOnly: true,
-            focusNode: _focusNode,
-            validator: widget.validator,
+          inputStyle: context.textTheme.bodyMedium?.copyWith(
+            color: _showCalendar && _isBlinkingPrimary
+                ? context.colorScheme.secondary
+                : context.colorScheme.primary,
           ),
+          textAlign: TextAlign.end,
+          controller: _controller,
+          readOnly: true,
+          validator: widget.validator,
         ),
-        if (_showCalendar)
-          Positioned(
-            top: 10,
-            right: 8,
-            child: SizedBox(
-              width: 46,
-              height: 28,
-              child: TextButton(
-                onPressed: _onDone,
-                style: TextButton.styleFrom(
-                  textStyle: context.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                child: Text('Done'.toUpperCase()),
-              ),
+        Positioned(
+          top: 14,
+          left: 12,
+          child: Text(
+            widget.hintText ?? 'Select date',
+            style: context.textTheme.bodyMedium?.copyWith(
+              color: context.colorScheme.onSurface.withAlpha(120),
             ),
           ),
+        ),
       ],
     );
   }

@@ -2,10 +2,14 @@ import 'dart:math';
 
 import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/constants/kaomojis.dart';
+import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
+import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:bebi_app/ui/features/calendar/calendar_cubit.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
+import 'package:bebi_app/utils/extension/color_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -103,26 +107,26 @@ class _CalendarEventsState extends State<CalendarEvents> {
           extra: event,
           pathParameters: {'id': event.id},
         ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildColorBar(event.eventColor.color),
-            const SizedBox(width: 8),
-            Expanded(child: _buildEventDetails(context, event)),
-            const SizedBox(width: 12),
-          ],
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          decoration: BoxDecoration(
+            color: event.color.withAlpha(50),
+            borderRadius: UiConstants.borderRadius,
+            border: Border.all(
+              color: event.color.darken(0.2),
+              width: UiConstants.borderWidth,
+            ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // _buildColorBar(event.color),
+              // const SizedBox(width: 8),
+              Expanded(child: _buildEventDetails(context, event)),
+              // const SizedBox(width: 12),
+            ],
+          ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildColorBar(Color color) {
-    return Container(
-      width: 4,
-      margin: const EdgeInsets.symmetric(vertical: 3),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(2),
       ),
     );
   }
@@ -136,53 +140,113 @@ class _CalendarEventsState extends State<CalendarEvents> {
   }
 
   Widget _buildEventDetails(BuildContext context, CalendarEvent event) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        _buildEventTitle(event.title, event.eventColor.color),
-        _buildEventTime(event, event.allDay, event.eventColor.color),
-        if (event.location != null && event.location!.isNotEmpty)
-          _buildEventLocation(event.location!, event.eventColor.color),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildEventTitle(event.title, event.color),
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    _buildEventTime(event, event.allDay, event.color),
+                    if (event.notes != null && event.notes!.isNotEmpty) ...[
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: _buildEventLocation(event.notes!, event.color),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
+        _buildAccountsSection(event),
       ],
+    );
+  }
+
+  Widget _buildAccountsSection(CalendarEvent event) {
+    return BlocSelector<
+      CalendarCubit,
+      CalendarState,
+      (UserProfile?, UserProfile?)
+    >(
+      selector: (state) => (state.userProfile, state.partnerProfile),
+      builder: (context, accounts) {
+        final sharedWithPartner = event.users.contains(accounts.$2?.userId);
+        return SizedBox(
+          width: 46,
+          child: Stack(
+            children: [
+              if (sharedWithPartner && accounts.$2 != null)
+                Opacity(
+                  opacity: 0.6,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 18),
+                    child: CircleAvatar(
+                      backgroundColor: Colors.transparent,
+                      backgroundImage: CachedNetworkImageProvider(
+                        accounts.$2!.photoUrl!,
+                      ),
+                      radius: 14,
+                    ),
+                  ),
+                ),
+              if (accounts.$1 != null)
+                Padding(
+                  padding: EdgeInsets.only(left: sharedWithPartner ? 0 : 18),
+                  child: CircleAvatar(
+                    backgroundColor: Colors.transparent,
+                    backgroundImage: CachedNetworkImageProvider(
+                      accounts.$1!.photoUrl!,
+                    ),
+                    radius: 14,
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 
   Widget _buildEventTitle(String title, Color color) {
     return Text(
       title,
-      style: context.primaryTextTheme.titleLarge?.copyWith(
-        color: context.colorScheme.primary,
+      style: context.textTheme.titleMedium?.copyWith(
+        color: color.darken(0.3),
+        fontWeight: FontWeight.w500,
       ),
       overflow: TextOverflow.ellipsis,
     );
   }
 
   Widget _buildEventTime(CalendarEvent event, bool allDay, Color color) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 2),
-      child: Text(
-        allDay
-            ? 'All day'
-            : _formatDuration(event.startTimeLocal, event.endTimeLocal),
-        style: context.textTheme.bodyMedium?.copyWith(
-          color: context.colorScheme.secondary,
-          fontWeight: FontWeight.w500,
-        ),
+    return Text(
+      allDay
+          ? 'All-day'.toUpperCase()
+          : _formatDuration(event.startTimeLocal, event.endTimeLocal),
+      style: context.textTheme.bodySmall?.copyWith(
+        color: color.darken(0.1),
+        fontWeight: FontWeight.w500,
       ),
     );
   }
 
   Widget _buildEventLocation(String location, Color color) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 2),
-      child: Text(
-        location,
-        style: context.textTheme.bodyMedium?.copyWith(
-          color: context.colorScheme.secondary,
-        ),
-        overflow: TextOverflow.ellipsis,
-        maxLines: 1,
-      ),
+    return Text(
+      location,
+      style: context.textTheme.bodyMedium?.copyWith(color: color.darken(0.1)),
+      overflow: TextOverflow.ellipsis,
+      maxLines: 1,
     );
   }
 }

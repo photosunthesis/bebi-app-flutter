@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:bebi_app/ui/shared_widgets/forms/app_text_form_field.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
+import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
@@ -9,7 +12,7 @@ class AppMultipleChoiceDropdown<T> extends StatefulWidget {
     required this.onChanged,
     required this.hintText,
     required this.itemLabelBuilder,
-    this.selectedItems = const <Never>[],
+    this.selectedItems = const [],
     this.controller,
     super.key,
   });
@@ -31,10 +34,12 @@ class _AppMultipleChoiceDropdownState<T>
   late final TextEditingController _controller =
       widget.controller ?? TextEditingController();
   bool _pickerIsVisible = false;
+  Timer? _closeTimer;
 
   @override
   void dispose() {
     if (widget.controller == null) _controller.dispose();
+    _closeTimer?.cancel();
     super.dispose();
   }
 
@@ -52,38 +57,25 @@ class _AppMultipleChoiceDropdownState<T>
   Widget _buildTextFormField() {
     return Stack(
       children: [
-        GestureDetector(
+        AppTextFormField(
           onTap: () {
             if (!_pickerIsVisible) setState(() => _pickerIsVisible = true);
           },
-          // AbsorbPointer is required so taps fucking detect
-          // (lost 5hrs tryna make this work jfc)
-          child: AbsorbPointer(
-            child: AppTextFormField(
-              controller: _controller,
-              hintText: widget.hintText,
-              readOnly: true,
+          controller: _controller,
+          inputStyle: context.textTheme.bodyMedium,
+          textAlign: TextAlign.end,
+          readOnly: true,
+        ),
+        Positioned(
+          top: 14,
+          left: 12,
+          child: Text(
+            widget.hintText,
+            style: context.textTheme.bodyMedium?.copyWith(
+              color: context.colorScheme.onSurface.withAlpha(120),
             ),
           ),
         ),
-        if (_pickerIsVisible)
-          Positioned(
-            top: 10,
-            right: 8,
-            child: SizedBox(
-              width: 46,
-              height: 28,
-              child: TextButton(
-                onPressed: () => setState(() => _pickerIsVisible = false),
-                style: TextButton.styleFrom(
-                  textStyle: context.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                child: Text('Done'.toUpperCase()),
-              ),
-            ),
-          ),
       ],
     );
   }
@@ -118,6 +110,8 @@ class _AppMultipleChoiceDropdownState<T>
   }
 
   void _onItemSelect(T item) {
+    _closeTimer?.cancel();
+
     final isSelected = widget.selectedItems.contains(item);
     final newSelectedItems = List<T>.from(widget.selectedItems);
 
@@ -132,5 +126,10 @@ class _AppMultipleChoiceDropdownState<T>
         .join(', ');
 
     widget.onChanged.call(newSelectedItems);
+
+    _closeTimer = Timer(
+      3.seconds,
+      () => setState(() => _pickerIsVisible = false),
+    );
   }
 }

@@ -6,5 +6,7 @@ extension StringExtensions on String {
 
   DateTime? toEEEEMMMMdyyyyDate() => toDateTime('EEEE MMMM d, yyyy');
 
+  DateTime? toEEEMMMdyyyyDate() => toDateTime('EEE MMM d, yyyy');
+
   DateTime? toHHmmaTime() => toDateTime('h:mm a');
 }

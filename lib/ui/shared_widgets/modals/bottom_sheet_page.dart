@@ -12,7 +12,9 @@ class BottomSheetPage<T> extends Page<T> {
     useSafeArea: true,
     isScrollControlled: true,
     modalBarrierColor: context.colorScheme.primary.withAlpha(40),
-    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+    ),
     builder: (context) =>
         (ModalRoute.of(context)?.settings as BottomSheetPage<T>).child,
   );

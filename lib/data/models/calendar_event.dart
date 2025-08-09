@@ -25,10 +25,10 @@ abstract class CalendarEvent with _$CalendarEvent {
     @HiveField(5) DateTime? endTime,
     @HiveField(6) @Default(false) bool allDay,
     @HiveField(7) required RepeatRule repeatRule,
-    @HiveField(8) String? location,
-    @HiveField(9) required EventColors eventColor,
+    @HiveField(8) required EventColor eventColor,
+    @HiveField(9) required List<String> users,
     @HiveField(10) required String createdBy,
-    @HiveField(11) required List<String> users,
+    @HiveField(11) required String updatedBy,
     @HiveField(12) required DateTime createdAt,
     @HiveField(13) required DateTime updatedAt,
   }) = _CalendarEvent;
@@ -48,11 +48,11 @@ abstract class CalendarEvent with _$CalendarEvent {
       repeatRule: RepeatRule.fromMap(
         data['repeat_rule'] as Map<String, dynamic>,
       ),
-      location: data['location'] as String?,
-      eventColor: EventColors.values.firstWhere(
+      eventColor: EventColor.values.firstWhere(
         (e) => e.name == data['event_color'],
       ),
       createdBy: data['created_by'] as String,
+      updatedBy: data['updated_by'] as String,
       users: List<String>.from(data['users'] as List<dynamic>),
       createdAt: (data['created_at'] as Timestamp).toDate(),
       updatedAt: (data['updated_at'] as Timestamp).toDate(),
@@ -85,9 +85,9 @@ abstract class CalendarEvent with _$CalendarEvent {
       'end_time': endTime != null ? Timestamp.fromDate(endTime!) : null,
       'all_day': allDay,
       'repeat_rule': repeatRule.toMap(),
-      'location': location,
       'event_color': eventColor.name,
       'created_by': createdBy,
+      'updated_by': updatedBy,
       'users': users,
       'created_at': Timestamp.fromDate(createdAt),
       'updated_at': Timestamp.fromDate(updatedAt),

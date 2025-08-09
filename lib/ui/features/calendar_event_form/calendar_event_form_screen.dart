@@ -1,3 +1,4 @@
+import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/data/models/day_of_week.dart';
 import 'package:bebi_app/data/models/event_color.dart';
@@ -10,7 +11,6 @@ import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/extension/string_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 
 class CalendarEventFormScreen extends StatefulWidget {
@@ -34,18 +34,19 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
   late final _titleController = TextEditingController(
     text: widget.calendarEvent?.title,
   );
-  late final _locationController = TextEditingController(
-    text: widget.calendarEvent?.location,
-  );
   late final _dateController = TextEditingController(
     text: (widget.calendarEvent?.date ?? widget.selectedDate)!
         .toEEEEMMMMdyyyy(),
   );
   late final _startTimeController = TextEditingController(
-    text: widget.calendarEvent?.startTime.toHHmma(),
+    text:
+        widget.calendarEvent?.startTime.toHHmma() ??
+        widget.selectedDate?.toHHmma(),
   );
   late final _endTimeController = TextEditingController(
-    text: widget.calendarEvent?.endTime?.toHHmma(),
+    text:
+        widget.calendarEvent?.endTime?.toHHmma() ??
+        widget.selectedDate?.add(const Duration(hours: 1)).toHHmma(),
   );
   late final _endRepeatDateController = TextEditingController(
     text: widget.calendarEvent?.repeatRule.endDate?.toEEEEMMMMdyyyy(),
@@ -61,8 +62,8 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
       : const <DayOfWeek>[];
   late bool _allDay = widget.calendarEvent?.allDay ?? false;
   late bool _shareWithPartner = (widget.calendarEvent?.users.length ?? 2) > 1;
-  late EventColors _selectedColor =
-      widget.calendarEvent?.eventColor ?? EventColors.black;
+  late EventColor _selectedColor =
+      widget.calendarEvent?.eventColor ?? EventColor.black;
   late RepeatFrequency _repeatFrequency =
       widget.calendarEvent?.repeatRule.frequency ?? RepeatFrequency.doNotRepeat;
 
@@ -75,7 +76,6 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
   @override
   void dispose() {
     _titleController.dispose();
-    _locationController.dispose();
     _dateController.dispose();
     _startTimeController.dispose();
     _endTimeController.dispose();
@@ -90,17 +90,10 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
       listener: (context, state) {
         if (state.error != null) context.showSnackbar(state.error!);
         if (state.success) {
-          try {
-            // Return true if we're creating a new event,
-            if (widget.calendarEvent == null) return context.pop(true);
-            // Otherwise return the updated event
-            context.pop(state.calendarEvent);
-          } catch (_) {
-            // GoRouter thinks there's nothing left to pop, even though this
-            // route was definitely pushed somewhere in the code. The pop
-            // actually works and returns a value just fine, but throws
-            // an error anyway. So we're just catching and ignoring it...
-          }
+          return context.goNamed(
+            AppRoutes.calendar,
+            queryParameters: {'loadEventsFromServer': 'true'},
+          );
         }
       },
       child: Scaffold(
@@ -109,7 +102,6 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
         body: CalendarEventForm(
           formKey: _formKey,
           titleController: _titleController,
-          locationController: _locationController,
           dateController: _dateController,
           startTimeController: _startTimeController,
           endTimeController: _endTimeController,
@@ -177,7 +169,6 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
 
       _cubit.save(
         title: _titleController.text,
-        location: _locationController.text,
         notes: _notesController.text,
         date: date,
         startTime: DateTime(

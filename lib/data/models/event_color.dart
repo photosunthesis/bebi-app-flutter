@@ -7,7 +7,7 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 part 'event_color.g.dart';
 
 @HiveType(typeId: HiveTypeIds.eventColors)
-enum EventColors {
+enum EventColor {
   @HiveField(0)
   black,
   @HiveField(1)
@@ -24,12 +24,12 @@ enum EventColors {
   red;
 
   Color get color => switch (this) {
-    EventColors.black => AppColors.stone600,
-    EventColors.green => AppColors.green,
-    EventColors.blue => AppColors.blue,
-    EventColors.yellow => AppColors.yellow,
-    EventColors.pink => AppColors.pink,
-    EventColors.orange => AppColors.orange,
-    EventColors.red => AppColors.red,
+    EventColor.black => AppColors.stone600,
+    EventColor.green => AppColors.green,
+    EventColor.blue => AppColors.blue,
+    EventColor.yellow => AppColors.yellow,
+    EventColor.pink => AppColors.pink,
+    EventColor.orange => AppColors.orange,
+    EventColor.red => AppColors.red,
   };
 }

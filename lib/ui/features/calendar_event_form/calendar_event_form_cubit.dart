@@ -40,13 +40,12 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
     required DateTime startTime,
     DateTime? endTime,
     required bool allDay,
-    required EventColors eventColor,
+    required EventColor eventColor,
     required RepeatRule repeatRule,
     required bool shareWithPartner,
     String? notes,
     DateTime? endDate,
     DateTime? endRepeatDate,
-    String? location,
   }) async {
     await guard(
       () async {
@@ -67,11 +66,13 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
           allDay: allDay,
           notes: notes,
           repeatRule: repeatRule,
-          location: location,
           eventColor: eventColor,
           createdBy:
               state.calendarEvent?.createdBy ?? _firebaseAuth.currentUser!.uid,
-          users: partnership?.users ?? <String>[_firebaseAuth.currentUser!.uid],
+          updatedBy: _firebaseAuth.currentUser!.uid,
+          users: shareWithPartner
+              ? partnership!.users
+              : [_firebaseAuth.currentUser!.uid],
           createdAt: state.calendarEvent?.createdAt ?? DateTime.now(),
           updatedAt: DateTime.now(),
         );

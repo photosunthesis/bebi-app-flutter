@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bebi_app/ui/shared_widgets/forms/app_text_form_field.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
@@ -10,7 +12,6 @@ class AppTimeFormField extends StatefulWidget {
     super.key,
     this.controller,
     this.hintText,
-    this.focusNode,
     this.initialTime,
     this.validator,
     this.minimumDate,
@@ -19,7 +20,6 @@ class AppTimeFormField extends StatefulWidget {
 
   final TextEditingController? controller;
   final String? hintText;
-  final FocusNode? focusNode;
   final TimeOfDay? initialTime;
   final String? Function(String?)? validator;
   final DateTime? minimumDate;
@@ -30,41 +30,37 @@ class AppTimeFormField extends StatefulWidget {
 }
 
 class _AppTimeFormFieldState extends State<AppTimeFormField> {
-  late TextEditingController _controller;
-  late FocusNode _focusNode;
+  late final _controller = widget.controller ?? TextEditingController();
   TimeOfDay? _selectedTime;
   bool _showTimePicker = false;
+  Timer? _blinkTimer;
+  Timer? _closeTimer;
+  bool _isBlinkingSecondary = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = widget.controller ?? TextEditingController();
-    _focusNode = widget.focusNode ?? FocusNode();
-
     if (widget.initialTime != null) {
       _selectedTime = widget.initialTime;
       _updateControllerText();
     }
-
-    _focusNode.addListener(() {
-      if (_focusNode.hasFocus && !_showTimePicker) {
-        setState(() => _showTimePicker = true);
-      }
-    });
   }
 
   @override
   void dispose() {
-    if (widget.focusNode == null) _focusNode.dispose();
+    _blinkTimer?.cancel();
+    _closeTimer?.cancel();
     if (widget.controller == null) _controller.dispose();
     super.dispose();
   }
 
   void _onTimeChanged(DateTime time) {
+    _closeTimer?.cancel();
     setState(() {
       _selectedTime = TimeOfDay(hour: time.hour, minute: time.minute);
       _updateControllerText();
     });
+    _closeTimer = Timer(2.seconds, _onDone);
   }
 
   void _onDone() {
@@ -78,7 +74,24 @@ class _AppTimeFormFieldState extends State<AppTimeFormField> {
     } else {
       setState(() => _showTimePicker = false);
     }
-    _focusNode.unfocus();
+    _stopBlinking();
+  }
+
+  void _startBlinking() {
+    _blinkTimer?.cancel();
+    _blinkTimer = Timer.periodic(400.milliseconds, (timer) {
+      setState(() {
+        _isBlinkingSecondary = !_isBlinkingSecondary;
+      });
+    });
+  }
+
+  void _stopBlinking() {
+    _blinkTimer?.cancel();
+    _blinkTimer = null;
+    setState(() {
+      _isBlinkingSecondary = false;
+    });
   }
 
   void _updateControllerText() {
@@ -117,40 +130,36 @@ class _AppTimeFormFieldState extends State<AppTimeFormField> {
   Widget _buildTextFormField() {
     return Stack(
       children: [
-        GestureDetector(
+        AppTextFormField(
           onTap: () {
             if (!_showTimePicker) {
-              setState(() {
-                _showTimePicker = true;
-              });
+              setState(() => _showTimePicker = true);
+              _startBlinking();
+            } else {
+              setState(() => _showTimePicker = false);
+              _onDone();
             }
           },
-          child: AppTextFormField(
-            controller: _controller,
-            hintText: widget.hintText,
-            readOnly: true,
-            focusNode: _focusNode,
-            validator: widget.validator,
+          inputStyle: context.textTheme.bodyMedium?.copyWith(
+            color: _showTimePicker && _isBlinkingSecondary
+                ? context.colorScheme.secondary
+                : context.colorScheme.primary,
           ),
+          textAlign: TextAlign.end,
+          controller: _controller,
+          readOnly: true,
+          validator: widget.validator,
         ),
-        if (_showTimePicker)
-          Positioned(
-            top: 10,
-            right: 8,
-            child: SizedBox(
-              width: 46,
-              height: 28,
-              child: TextButton(
-                onPressed: _onDone,
-                style: TextButton.styleFrom(
-                  textStyle: context.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                child: Text('Done'.toUpperCase()),
-              ),
+        Positioned(
+          top: 14,
+          left: 12,
+          child: Text(
+            widget.hintText ?? 'Select time',
+            style: context.textTheme.bodyMedium?.copyWith(
+              color: context.colorScheme.onSurface.withAlpha(120),
             ),
           ),
+        ),
       ],
     );
   }
