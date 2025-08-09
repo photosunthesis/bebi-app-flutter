@@ -43,6 +43,9 @@ class OptionsBottomDialog<T> extends StatelessWidget {
       isDismissible: isDismissible,
       barrierColor: context.colorScheme.primary.withAlpha(40),
       backgroundColor: Colors.transparent,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+      ),
       builder: (context) => OptionsBottomDialog(
         title: title,
         description: description,

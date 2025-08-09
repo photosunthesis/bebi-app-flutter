@@ -132,7 +132,7 @@ class _CycleLogsState extends State<CycleLogs> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Sexually Activity',
+                        'Sexual Activity',
                         style: context.textTheme.bodyMedium?.copyWith(
                           color: AppColors.purple.darken(0.4),
                         ),

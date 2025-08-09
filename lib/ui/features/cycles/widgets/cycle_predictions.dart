@@ -45,8 +45,9 @@ class _CyclePredictionsState extends State<CyclePredictions> {
           focusedDay: insights?.fertileDays.first ?? DateTime.now(),
           eventColor: AppColors.blue,
           title: 'Fertile window',
-          description:
-              'Your next fertile window starts on **${insights?.fertileDays.first.toEEEEMMMMd() ?? 'N/A'}**.',
+          description: insights?.fertileDays.isNotEmpty == true
+              ? 'Your fertile window begins on **${insights!.fertileDays.first.toEEEEMMMMd()}**.'
+              : 'Not enough data to predict your fertile window.',
           events: insights?.fertileDays ?? [],
         );
       },
@@ -61,8 +62,9 @@ class _CyclePredictionsState extends State<CyclePredictions> {
           focusedDay: insights?.nextPeriodDates.first ?? DateTime.now(),
           eventColor: AppColors.red,
           title: 'Next period',
-          description:
-              'Your next period starts on **${insights?.nextPeriodDates.first.toEEEEMMMMd() ?? 'N/A'}**.',
+          description: insights?.nextPeriodDates.isNotEmpty == true
+              ? 'Your next period is predicted to begin on **${insights!.nextPeriodDates.first.toEEEEMMMMd()}**.'
+              : 'Not enough data to predict your next period.',
           events: insights?.nextPeriodDates ?? [],
         );
       },
@@ -174,10 +176,10 @@ class _CyclePredictionsState extends State<CyclePredictions> {
             Center(
               child: AngledStripesBackground(
                 color: isSelected
-                    ? eventColor.withAlpha(60)
+                    ? eventColor.withAlpha(90)
                     : Colors.transparent,
                 backgroundColor: isSelected
-                    ? eventColor.withAlpha(40)
+                    ? eventColor.withAlpha(60)
                     : Colors.transparent,
               ),
             ),

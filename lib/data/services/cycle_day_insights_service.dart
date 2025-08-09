@@ -46,7 +46,7 @@ class CycleDayInsightsService {
       nextCycleStart,
     );
 
-    final dayOfCycle = date.noTime().difference(cycleStart.noTime()).inDays;
+    final dayOfCycle = date.noTime().difference(cycleStart.noTime()).inDays + 1;
     final cycleLengthInDays = nextCycleStart
         .noTime()
         .difference(cycleStart.noTime())
@@ -191,7 +191,7 @@ class CycleDayInsightsService {
     4. No additional text, explanations, or meta-commentary outside this format
     5. Write as if speaking directly to the user, not about them
     6. The output must be in markdown syntax for proper display in the mobile app
-    7. Emphasize key information using **bold** or *italic* markdown sparingly and meaningfully
+    7. Emphasize key information using **bold** markdown sparingly and meaningfully in bullet points
 
     TONE AND CONTENT GUIDELINES:
     - Write like a wise and kind doctor, giving advice to a friend
@@ -205,7 +205,6 @@ class CycleDayInsightsService {
     CRITICAL FERTILITY/OVULATION INSTRUCTIONS:
     - Prioritize contraception advice over conception advice, so lead with protection reminders first
     - Only mention conception as a secondary, optional consideration
-    - Do not assume pregnancy is desired
 
     PHASE-SPECIFIC GUIDANCE:
     - Follicular: Energy building, skin clearing, mood lifting

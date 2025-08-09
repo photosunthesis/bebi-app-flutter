@@ -35,13 +35,14 @@ class CycleInsights extends StatelessWidget {
                   child: MarkdownBody(
                     data: state.aiSummary ?? _getSkeletonFakeData(),
                     styleSheet: MarkdownStyleSheet(
-                      p: context.textTheme.bodyMedium,
+                      p: context.textTheme.bodyMedium?.copyWith(height: 1.4),
                       strong: context.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
-                        height: 1.6,
+                        height: 1.4,
                       ),
                       em: context.textTheme.bodyMedium?.copyWith(
                         fontStyle: FontStyle.italic,
+                        height: 1.4,
                       ),
                     ),
                   ),
