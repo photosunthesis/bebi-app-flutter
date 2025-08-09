@@ -278,10 +278,7 @@ class _CalendarEventDetailsScreenState
         instanceDate: widget.calendarEvent.date,
       );
 
-      context.goNamed(
-        AppRoutes.calendar,
-        queryParameters: {'loadEventsFromServer': 'true'},
-      );
+      context.goNamed(AppRoutes.calendar, queryParameters: {'refresh': 'true'});
     }
   }
 }

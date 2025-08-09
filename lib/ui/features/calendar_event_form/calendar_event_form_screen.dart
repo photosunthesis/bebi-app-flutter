@@ -90,9 +90,9 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
       listener: (context, state) {
         if (state.error != null) context.showSnackbar(state.error!);
         if (state.success) {
-          return context.goNamed(
+          context.goNamed(
             AppRoutes.calendar,
-            queryParameters: {'loadEventsFromServer': 'true'},
+            queryParameters: {'refresh': 'true'},
           );
         }
       },

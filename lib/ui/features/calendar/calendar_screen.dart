@@ -12,9 +12,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 class CalendarScreen extends StatefulWidget {
-  const CalendarScreen({this.shouldLoadEventsFromServer = false, super.key});
+  const CalendarScreen({this.shouldRefresh = false, super.key});
 
-  final bool shouldLoadEventsFromServer;
+  final bool shouldRefresh;
 
   @override
   State<CalendarScreen> createState() => _CalendarScreenState();
@@ -32,9 +32,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   void didUpdateWidget(covariant CalendarScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.shouldLoadEventsFromServer) {
-      _cubit.loadCalendarEvents(useCache: false);
-    }
+    if (widget.shouldRefresh) _cubit.loadCalendarEvents();
   }
 
   @override

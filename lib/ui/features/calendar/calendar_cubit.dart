@@ -36,14 +36,13 @@ class CalendarCubit extends Cubit<CalendarState> {
 
   static const _defaultTimeWindow = Duration(days: 90);
 
-  Future<void> loadCalendarEvents({bool useCache = true}) async {
+  Future<void> loadCalendarEvents() async {
     await guard(
       () async {
-        if (!useCache) emit(state.copyWith(loading: true));
+        emit(state.copyWith(loading: true));
 
         final events = await _calendarEventsRepository.getByUserId(
           userId: _firebaseAuth.currentUser!.uid,
-          useCache: useCache,
         );
 
         _windowStart = state.focusedDay.subtract(_defaultTimeWindow);

@@ -79,9 +79,8 @@ abstract class AppRouter {
                 builder: (_, state) => BlocProvider(
                   create: (_) => GetIt.I<CalendarCubit>(),
                   child: CalendarScreen(
-                    shouldLoadEventsFromServer:
-                        state.uri.queryParameters['loadEventsFromServer'] ==
-                        'true',
+                    shouldRefresh:
+                        state.uri.queryParameters['refresh'] == 'true',
                   ),
                 ),
               ),
