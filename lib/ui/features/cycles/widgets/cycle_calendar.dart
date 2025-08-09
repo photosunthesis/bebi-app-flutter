@@ -234,11 +234,23 @@ class _CycleCalendarState extends State<CycleCalendar> {
 
     return Positioned(
       top: 8,
-      child: Text(
-        date.day.toString(),
-        style: context.textTheme.titleMedium?.copyWith(
-          color: textColor,
-          fontWeight: FontWeight.w600,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          boxShadow: [
+            if (event != null)
+              BoxShadow(
+                color: context.colorScheme.surface.withAlpha(140),
+                blurRadius: 8,
+                offset: const Offset(0, 0),
+              ),
+          ],
+        ),
+        child: Text(
+          date.day.toString(),
+          style: context.textTheme.titleMedium?.copyWith(
+            color: textColor,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
     );

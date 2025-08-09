@@ -25,28 +25,23 @@ class CycleInsights extends StatelessWidget {
             const SizedBox(height: 18),
             BlocBuilder<CyclesCubit, CyclesState>(
               builder: (context, state) {
-                return AnimatedSwitcher(
-                  duration: 120.milliseconds,
-                  reverseDuration: 0.milliseconds,
-                  child: Skeletonizer(
-                    key: ValueKey(state),
-                    textBoneBorderRadius:
-                        const TextBoneBorderRadius.fromHeightFactor(0.25),
-                    effect: SoldColorEffect(
-                      color: context.colorScheme.secondary.withAlpha(40),
-                    ),
-                    enabled: state.loadingAiSummary,
-                    child: MarkdownBody(
-                      data: state.aiSummary ?? _getSkeletonFakeData(),
-                      styleSheet: MarkdownStyleSheet(
-                        p: context.textTheme.bodyMedium,
-                        strong: context.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          height: 1.6,
-                        ),
-                        em: context.textTheme.bodyMedium?.copyWith(
-                          fontStyle: FontStyle.italic,
-                        ),
+                return Skeletonizer(
+                  textBoneBorderRadius:
+                      const TextBoneBorderRadius.fromHeightFactor(0.3),
+                  effect: SoldColorEffect(
+                    color: context.colorScheme.secondary.withAlpha(40),
+                  ),
+                  enabled: state.loadingAiSummary,
+                  child: MarkdownBody(
+                    data: state.aiSummary ?? _getSkeletonFakeData(),
+                    styleSheet: MarkdownStyleSheet(
+                      p: context.textTheme.bodyMedium,
+                      strong: context.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        height: 1.6,
+                      ),
+                      em: context.textTheme.bodyMedium?.copyWith(
+                        fontStyle: FontStyle.italic,
                       ),
                     ),
                   ),

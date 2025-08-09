@@ -182,13 +182,25 @@ class _CyclePredictionsState extends State<CyclePredictions> {
               ),
             ),
             Center(
-              child: Text(
-                day.day.toString(),
-                style: context.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: isSelected
-                      ? eventColor.darken(0.25)
-                      : context.colorScheme.onSurface,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    if (isSelected)
+                      BoxShadow(
+                        color: context.colorScheme.surface.withAlpha(140),
+                        blurRadius: 8,
+                        offset: const Offset(0, 0),
+                      ),
+                  ],
+                ),
+                child: Text(
+                  day.day.toString(),
+                  style: context.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: isSelected
+                        ? eventColor.darken(0.3)
+                        : context.colorScheme.onSurface,
+                  ),
                 ),
               ),
             ),
