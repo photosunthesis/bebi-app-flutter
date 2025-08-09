@@ -94,7 +94,7 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
         if (state.success) {
           context.goNamed(
             AppRoutes.calendar,
-            queryParameters: {'refresh': 'true'},
+            queryParameters: {'loadEventsFromServer': 'true'},
           );
         }
       },
@@ -212,10 +212,12 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
         Option(
           text: 'Save only this event',
           value: SaveChangesDialogOptions.onlyThisEvent,
+          style: OptionStyle.primary,
         ),
         Option(
           text: 'Save all future events',
           value: SaveChangesDialogOptions.allFutureEvents,
+          style: OptionStyle.primary,
         ),
         Option(text: 'Cancel', value: SaveChangesDialogOptions.cancel),
       ],

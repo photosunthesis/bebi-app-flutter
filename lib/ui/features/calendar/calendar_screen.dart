@@ -9,12 +9,13 @@ import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 class CalendarScreen extends StatefulWidget {
-  const CalendarScreen({this.shouldRefresh = false, super.key});
+  const CalendarScreen({this.routeState, super.key});
 
-  final bool shouldRefresh;
+  final GoRouterState? routeState;
 
   @override
   State<CalendarScreen> createState() => _CalendarScreenState();
@@ -22,6 +23,8 @@ class CalendarScreen extends StatefulWidget {
 
 class _CalendarScreenState extends State<CalendarScreen> {
   late final _cubit = context.read<CalendarCubit>();
+  bool get _shouldReloadEventsFromServer =>
+      widget.routeState?.uri.queryParameters['loadEventsFromServer'] == 'true';
 
   @override
   void initState() {
@@ -32,7 +35,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   void didUpdateWidget(covariant CalendarScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.shouldRefresh) _cubit.loadCalendarEvents();
+    if (_shouldReloadEventsFromServer) {
+      _cubit.loadCalendarEvents(useCache: false);
+    }
   }
 
   @override

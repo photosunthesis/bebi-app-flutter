@@ -112,31 +112,29 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
   }
 
   Widget _buildAndColorTitleSection() {
-    return Expanded(
-      child: Column(
-        children: [
-          AppTextFormField(
-            autofocus: true,
-            inputBorder: InputBorder.none,
-            controller: widget.titleController,
-            hintText: 'New event',
-            textInputAction: TextInputAction.done,
-            inputStyle: context.primaryTextTheme.headlineSmall?.copyWith(
-              color: widget.selectedColor.color.darken(0.2),
-            ),
-            maxLines: 2,
-            minLines: 1,
-            validator: (value) {
-              if (value == null || value.trim().isEmpty) {
-                return 'Title is required';
-              }
-              return null;
-            },
+    return Column(
+      children: [
+        AppTextFormField(
+          autofocus: true,
+          inputBorder: InputBorder.none,
+          controller: widget.titleController,
+          hintText: 'New event',
+          textInputAction: TextInputAction.done,
+          inputStyle: context.primaryTextTheme.headlineSmall?.copyWith(
+            color: widget.selectedColor.color.darken(0.2),
           ),
-          const SizedBox(height: 4),
-          _buildColorSelector(),
-        ],
-      ),
+          maxLines: 2,
+          minLines: 1,
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return 'Title is required';
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 4),
+        _buildColorSelector(),
+      ],
     );
   }
 
@@ -329,13 +327,15 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
                   : 'This event is shared with you',
             ),
             const Spacer(),
-            if (!eventCreatedByCurrentUser)
+            if (eventCreatedByCurrentUser)
               AppSwitch(
                 enabled: eventCreatedByCurrentUser,
                 value: widget.shareWithPartner,
                 onChanged: widget.onShareWithPartnerChanged,
                 activeColor: widget.selectedColor.color,
-              ),
+              )
+            else
+              const SizedBox(height: 39),
           ],
         );
       },

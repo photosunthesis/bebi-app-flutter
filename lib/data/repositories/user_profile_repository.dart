@@ -42,6 +42,15 @@ class UserProfileRepository {
     return userProfile;
   }
 
+  Future<List<UserProfile>> getProfilesByIds(List<String> userIds) async {
+    final querySnapshot = await _firestore
+        .collection(_collection)
+        .where(FieldPath.documentId, whereIn: userIds)
+        .get();
+
+    return querySnapshot.docs.map(UserProfile.fromFirestore).toList();
+  }
+
   Future<UserProfile?> getByUserCode(
     String code, {
     bool useCache = true,

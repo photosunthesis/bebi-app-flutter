@@ -78,10 +78,7 @@ abstract class AppRouter {
                 name: AppRoutes.calendar,
                 builder: (_, state) => BlocProvider(
                   create: (_) => GetIt.I<CalendarCubit>(),
-                  child: CalendarScreen(
-                    shouldRefresh:
-                        state.uri.queryParameters['refresh'] == 'true',
-                  ),
+                  child: CalendarScreen(routeState: state),
                 ),
               ),
             ],

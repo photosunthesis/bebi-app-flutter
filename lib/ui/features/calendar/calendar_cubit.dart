@@ -1,8 +1,5 @@
 import 'package:bebi_app/data/models/calendar_event.dart';
-import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:bebi_app/data/repositories/calendar_events_repository.dart';
-import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
-import 'package:bebi_app/data/repositories/user_profile_repository.dart';
 import 'package:bebi_app/data/services/recurring_calendar_events_service.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
@@ -20,15 +17,11 @@ class CalendarCubit extends Cubit<CalendarState> {
   CalendarCubit(
     this._calendarEventsRepository,
     this._recurringCalendarEventsService,
-    this._userPartnershipsRepository,
-    this._userProfileRepository,
     this._firebaseAuth,
   ) : super(CalendarState.initial());
 
   final CalendarEventsRepository _calendarEventsRepository;
   final RecurringCalendarEventsService _recurringCalendarEventsService;
-  final UserPartnershipsRepository _userPartnershipsRepository;
-  final UserProfileRepository _userProfileRepository;
   final FirebaseAuth _firebaseAuth;
 
   DateTime? _windowStart;
@@ -36,13 +29,14 @@ class CalendarCubit extends Cubit<CalendarState> {
 
   static const _defaultTimeWindow = Duration(days: 90);
 
-  Future<void> loadCalendarEvents() async {
+  Future<void> loadCalendarEvents({bool useCache = true}) async {
     await guard(
       () async {
         emit(state.copyWith(loading: true));
 
         final events = await _calendarEventsRepository.getByUserId(
           userId: _firebaseAuth.currentUser!.uid,
+          useCache: useCache,
         );
 
         _windowStart = state.focusedDay.subtract(_defaultTimeWindow);
@@ -57,24 +51,8 @@ class CalendarCubit extends Cubit<CalendarState> {
 
         final allEvents = [...events, ...recurringEvents];
 
-        final partnership = await _userPartnershipsRepository.getByUserId(
-          _firebaseAuth.currentUser!.uid,
-        );
-
-        final userProfile = await _userProfileRepository.getByUserId(
-          _firebaseAuth.currentUser!.uid,
-        );
-
-        final partnerProfile = await _userProfileRepository.getByUserId(
-          partnership!.users.firstWhere(
-            (e) => e != _firebaseAuth.currentUser!.uid,
-          ),
-        );
-
         emit(
           state.copyWith(
-            userProfile: userProfile,
-            partnerProfile: partnerProfile,
             events: allEvents,
             focusedDayEvents: allEvents
                 .where((e) => e.date.isSameDay(state.focusedDay))

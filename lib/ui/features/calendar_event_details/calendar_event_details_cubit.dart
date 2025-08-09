@@ -2,7 +2,10 @@ import 'dart:async';
 
 import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/data/models/repeat_rule.dart';
+import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:bebi_app/data/repositories/calendar_events_repository.dart';
+import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
+import 'package:bebi_app/data/repositories/user_profile_repository.dart';
 import 'package:bebi_app/data/services/recurring_calendar_events_service.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
@@ -21,14 +24,45 @@ class CalendarEventDetailsCubit extends Cubit<CalendarEventDetailsState> {
   CalendarEventDetailsCubit(
     this._calendarEventsRepository,
     this._recurringCalendarEventsService,
+    this._partnershipsRepository,
+    this._profileRepository,
     this._firebaseAnalytics,
     this._firebaseAuth,
-  ) : super(const CalendarEventDetailsState.data());
+  ) : super(const CalendarEventDetailsState.loading());
 
   final CalendarEventsRepository _calendarEventsRepository;
   final RecurringCalendarEventsService _recurringCalendarEventsService;
+  final UserPartnershipsRepository _partnershipsRepository;
+  final UserProfileRepository _profileRepository;
   final FirebaseAnalytics _firebaseAnalytics;
   final FirebaseAuth _firebaseAuth;
+
+  Future<void> initialize() async {
+    await guard(
+      () async {
+        final partnership = await _partnershipsRepository.getByUserId(
+          _firebaseAuth.currentUser!.uid,
+        );
+
+        final profiles = await _profileRepository.getProfilesByIds(
+          partnership!.users,
+        );
+
+        final userProfile = profiles.firstWhere(
+          (e) => e.userId == _firebaseAuth.currentUser!.uid,
+        );
+
+        final partnerProfile = profiles.firstWhere(
+          (e) => e.userId != _firebaseAuth.currentUser!.uid,
+        );
+
+        emit(CalendarEventDetailsState.data(userProfile, partnerProfile));
+      },
+      onError: (error, _) {
+        emit(CalendarEventDetailsState.error(error.toString()));
+      },
+    );
+  }
 
   Future<void> deleteCalendarEvent(
     String calendarEventId, {

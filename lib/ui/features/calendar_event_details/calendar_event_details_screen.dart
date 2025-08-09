@@ -29,6 +29,12 @@ class _CalendarEventDetailsScreenState
   late final CalendarEvent _event = widget.calendarEvent;
 
   @override
+  void initState() {
+    super.initState();
+    context.read<CalendarEventDetailsCubit>().initialize();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(appBar: _buildAppBar(), body: _buildBody());
   }
@@ -78,7 +84,7 @@ class _CalendarEventDetailsScreenState
         _buildDateTimeSection(),
         if (_event.repeatRule.frequency != RepeatFrequency.doNotRepeat)
           _buildRepeatSection(),
-        if (_event.users.length > 1) _buildSharedWithPartnerSection(),
+        if (_event.users.length > 1) _buildPartnerSection(),
         if (_event.notes != null && _event.notes!.isNotEmpty)
           _buildNotesSection(),
         _buildDeleteButton(),
@@ -90,12 +96,10 @@ class _CalendarEventDetailsScreenState
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       sliver: SliverToBoxAdapter(
-        child: Expanded(
-          child: Text(
-            _event.title,
-            style: context.primaryTextTheme.headlineSmall?.copyWith(
-              color: _event.color.darken(0.2),
-            ),
+        child: Text(
+          _event.title,
+          style: context.primaryTextTheme.headlineSmall?.copyWith(
+            color: _event.color.darken(0.2),
           ),
         ),
       ),
@@ -193,7 +197,7 @@ class _CalendarEventDetailsScreenState
     );
   }
 
-  Widget _buildSharedWithPartnerSection() {
+  Widget _buildPartnerSection() {
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       sliver: SliverToBoxAdapter(
@@ -209,10 +213,25 @@ class _CalendarEventDetailsScreenState
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: Text(
-                    'Event is shared with partner',
-                    style: context.textTheme.bodyMedium,
-                  ),
+                  child:
+                      BlocSelector<
+                        CalendarEventDetailsCubit,
+                        CalendarEventDetailsState,
+                        CalendarEventDetailsStateData?
+                      >(
+                        selector: (state) =>
+                            state is CalendarEventDetailsStateData
+                            ? state
+                            : null,
+                        builder: (context, state) {
+                          return Text(
+                            _event.createdBy == state?.userProfile.userId
+                                ? 'You share this event with ${state?.partnerProfile.displayName ?? 'your partner'}.'
+                                : 'Event is shared with you by ${state?.partnerProfile.displayName ?? 'your partner'}.',
+                            style: context.textTheme.bodyMedium,
+                          );
+                        },
+                      ),
                 ),
               ],
             ),
@@ -279,7 +298,10 @@ class _CalendarEventDetailsScreenState
         instanceDate: widget.calendarEvent.date,
       );
 
-      context.goNamed(AppRoutes.calendar, queryParameters: {'refresh': 'true'});
+      context.goNamed(
+        AppRoutes.calendar,
+        queryParameters: {'loadEventsFromServer': 'true'},
+      );
     }
   }
 }

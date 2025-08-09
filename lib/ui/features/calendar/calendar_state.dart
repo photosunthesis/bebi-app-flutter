@@ -7,8 +7,6 @@ abstract class CalendarState with _$CalendarState {
     @Default([]) List<CalendarEvent> events,
     @Default([]) List<CalendarEvent> focusedDayEvents,
     @Default(false) bool loading,
-    UserProfile? userProfile,
-    UserProfile? partnerProfile,
     String? error,
   }) = _CalendarState;
 
