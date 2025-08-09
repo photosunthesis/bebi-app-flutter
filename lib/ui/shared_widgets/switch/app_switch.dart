@@ -6,11 +6,13 @@ class AppSwitch extends StatelessWidget {
     super.key,
     required this.value,
     required this.onChanged,
+    this.enabled = true,
     this.activeColor,
   });
 
   final bool value;
   final ValueChanged<bool> onChanged;
+  final bool enabled;
   final Color? activeColor;
 
   @override
@@ -19,7 +21,7 @@ class AppSwitch extends StatelessWidget {
       scale: 0.9,
       child: CupertinoSwitch(
         value: value,
-        onChanged: onChanged,
+        onChanged: enabled ? onChanged : null,
         activeTrackColor: activeColor ?? context.colorScheme.primary,
       ),
     );

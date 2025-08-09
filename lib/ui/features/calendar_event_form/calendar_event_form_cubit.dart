@@ -22,7 +22,7 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
     this._userPartnershipsRepository,
     this._firebaseAuth,
     this._firebaseAnalytics,
-  ) : super(const CalendarEventFormState());
+  ) : super(const CalendarEventFormState(currentUserId: ''));
 
   final CalendarEventsRepository _calendarEventsRepository;
   final UserPartnershipsRepository _userPartnershipsRepository;
@@ -31,7 +31,12 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
 
   Future<void> initialize(CalendarEvent? calendarEvent) async {
     if (calendarEvent == null) return;
-    emit(state.copyWith(calendarEvent: calendarEvent));
+    emit(
+      state.copyWith(
+        calendarEvent: calendarEvent,
+        currentUserId: _firebaseAuth.currentUser!.uid,
+      ),
+    );
   }
 
   Future<void> save({

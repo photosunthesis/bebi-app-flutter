@@ -2,6 +2,7 @@ import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/data/models/day_of_week.dart';
 import 'package:bebi_app/data/models/event_color.dart';
 import 'package:bebi_app/data/models/repeat_rule.dart';
+import 'package:bebi_app/ui/features/calendar_event_form/calendar_event_form_cubit.dart';
 import 'package:bebi_app/ui/features/calendar_event_form/widgets/repeat_picker.dart';
 import 'package:bebi_app/ui/shared_widgets/forms/app_date_form_field.dart';
 import 'package:bebi_app/ui/shared_widgets/forms/app_text_form_field.dart';
@@ -12,6 +13,7 @@ import 'package:bebi_app/utils/extension/color_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:bebi_app/utils/extension/string_extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 
 class CalendarEventForm extends StatefulWidget {
@@ -314,17 +316,29 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
   }
 
   Widget _buildShareWithPartnerToggle() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        const Text('Share with partner'),
-        const Spacer(),
-        AppSwitch(
-          value: widget.shareWithPartner,
-          onChanged: widget.onShareWithPartnerChanged,
-          activeColor: widget.selectedColor.color,
-        ),
-      ],
+    return BlocBuilder<CalendarEventFormCubit, CalendarEventFormState>(
+      builder: (context, state) {
+        final eventCreatedByCurrentUser =
+            state.calendarEvent?.createdBy == state.currentUserId;
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              eventCreatedByCurrentUser
+                  ? 'Share with partner'
+                  : 'This event is shared with you',
+            ),
+            const Spacer(),
+            if (!eventCreatedByCurrentUser)
+              AppSwitch(
+                enabled: eventCreatedByCurrentUser,
+                value: widget.shareWithPartner,
+                onChanged: widget.onShareWithPartnerChanged,
+                activeColor: widget.selectedColor.color,
+              ),
+          ],
+        );
+      },
     );
   }
 }
