@@ -13,7 +13,7 @@ import 'package:injectable/injectable.dart';
 part 'profile_setup_state.dart';
 part 'profile_setup_cubit.freezed.dart';
 
-@Injectable()
+@injectable
 class ProfileSetupCubit extends Cubit<ProfileSetupState> {
   ProfileSetupCubit(
     this._userProfileRepository,

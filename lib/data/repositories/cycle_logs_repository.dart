@@ -6,7 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:injectable/injectable.dart';
 
-@Injectable()
+@injectable
 class CycleLogsRepository {
   const CycleLogsRepository(
     this._firebaseFirestore,

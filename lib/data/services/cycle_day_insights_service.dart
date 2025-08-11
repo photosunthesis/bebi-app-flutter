@@ -9,7 +9,7 @@ import 'package:firebase_ai/firebase_ai.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:injectable/injectable.dart';
 
-@Injectable()
+@injectable
 class CycleDayInsightsService {
   const CycleDayInsightsService(
     this._generativeModel,

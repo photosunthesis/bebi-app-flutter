@@ -18,7 +18,7 @@ import 'package:injectable/injectable.dart';
 part 'calendar_event_form_state.dart';
 part 'calendar_event_form_cubit.freezed.dart';
 
-@Injectable()
+@injectable
 class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
   CalendarEventFormCubit(
     this._calendarEventsRepository,

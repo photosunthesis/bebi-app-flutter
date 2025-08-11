@@ -11,7 +11,7 @@ import 'package:injectable/injectable.dart';
 part 'sign_in_state.dart';
 part 'sign_in_cubit.freezed.dart';
 
-@Injectable()
+@injectable
 class SignInCubit extends Cubit<SignInState> {
   SignInCubit(this._firebaseAuth, this._firebaseAnalytics)
     : super(const SignInInitial());

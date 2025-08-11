@@ -12,7 +12,7 @@ import 'package:injectable/injectable.dart';
 part 'cycle_setup_cubit.freezed.dart';
 part 'cycle_setup_state.dart';
 
-@Injectable()
+@injectable
 class CycleSetupCubit extends Cubit<CycleSetupState> {
   CycleSetupCubit(
     this._userProfileRepository,

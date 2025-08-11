@@ -10,7 +10,7 @@ import 'package:injectable/injectable.dart';
 part 'add_partner_state.dart';
 part 'add_partner_cubit.freezed.dart';
 
-@Injectable()
+@injectable
 class AddPartnerCubit extends Cubit<AddPartnerState> {
   AddPartnerCubit(
     this._userPartnershipsRepository,

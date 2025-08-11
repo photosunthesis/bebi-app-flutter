@@ -6,7 +6,7 @@ import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:collection/collection.dart';
 import 'package:injectable/injectable.dart';
 
-@Injectable()
+@injectable
 class CyclePredictionsService {
   const CyclePredictionsService();
 

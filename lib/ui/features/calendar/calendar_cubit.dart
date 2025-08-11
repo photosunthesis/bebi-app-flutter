@@ -12,7 +12,7 @@ import 'package:injectable/injectable.dart';
 part 'calendar_state.dart';
 part 'calendar_cubit.freezed.dart';
 
-@Injectable()
+@injectable
 class CalendarCubit extends Cubit<CalendarState> {
   CalendarCubit(
     this._calendarEventsRepository,

@@ -4,7 +4,7 @@ import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:injectable/injectable.dart';
 
-@Injectable()
+@injectable
 class RecurringCalendarEventsService {
   RecurringCalendarEventsService();
 
@@ -78,7 +78,7 @@ class RecurringCalendarEventsService {
   }) {
     final events = <CalendarEvent>[];
     final seenDates = <DateTime>{};
-    
+
     var currentDate = getNextOccurrence(baseEvent.date, baseEvent.repeatRule);
     var occurrenceCount = 1;
 
@@ -90,7 +90,7 @@ class RecurringCalendarEventsService {
           occurrenceCount,
         )) {
       final dateKey = _startOfDay(currentDate);
-      
+
       if (_isDateInWindow(currentDate, windowStart, windowEnd) &&
           !_isExcludedDate(currentDate, baseEvent.repeatRule) &&
           !seenDates.contains(dateKey)) {

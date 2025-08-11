@@ -18,7 +18,7 @@ import 'package:injectable/injectable.dart';
 part 'cycles_cubit.freezed.dart';
 part 'cycles_state.dart';
 
-@Injectable()
+@injectable
 class CyclesCubit extends Cubit<CyclesState> {
   CyclesCubit(
     this._cycleLogsRepository,
@@ -98,14 +98,19 @@ class CyclesCubit extends Cubit<CyclesState> {
         emit(
           state.copyWith(
             showCurrentUserCycleData: !state.showCurrentUserCycleData,
+            loading: true,
+            loadingAiSummary: true,
           ),
         );
 
         await _loadCycleData(useCache: true);
+
         _logUserProfileSwitched();
       },
       onError: (error, _) => emit(state.copyWith(error: error.toString())),
-      onComplete: () => emit(state.copyWith(error: null)),
+      onComplete: () => emit(
+        state.copyWith(error: null, loading: false, loadingAiSummary: false),
+      ),
     );
   }
 

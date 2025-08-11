@@ -18,7 +18,7 @@ import 'package:injectable/injectable.dart';
 part 'home_state.dart';
 part 'home_cubit.freezed.dart';
 
-@Injectable()
+@injectable
 class HomeCubit extends Cubit<HomeState> {
   HomeCubit(
     this._userProfileRepository,
