@@ -162,16 +162,28 @@ class _CyclesSetupScreenState extends State<CyclesSetupScreen> {
   Widget _buildSharingOption() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
-      child: Row(
+      child: Column(
         children: [
-          Text(
-            'Share cycle data with partner',
-            style: context.textTheme.bodyMedium,
+          Row(
+            children: [
+              Text(
+                'Share cycle data with partner',
+                style: context.textTheme.bodyMedium,
+              ),
+              const Spacer(),
+              AppSwitch(
+                value: _shareWithPartner,
+                onChanged: (value) => setState(() => _shareWithPartner = value),
+              ),
+            ],
           ),
-          const Spacer(),
-          AppSwitch(
-            value: _shareWithPartner,
-            onChanged: (value) => setState(() => _shareWithPartner = value),
+          const SizedBox(height: 4),
+          Text(
+            'Turn this on to allow your partner to view and add cycle logs and symptoms for you. You can turn this setting off anytime in your account.',
+            style: context.textTheme.bodySmall?.copyWith(
+              color: context.colorScheme.secondary,
+              height: 1.4,
+            ),
           ),
         ],
       ),
