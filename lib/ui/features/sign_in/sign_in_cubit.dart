@@ -28,14 +28,13 @@ class SignInCubit extends Cubit<SignInState> {
           password: password,
         );
         emit(const SignInSuccess());
-        if (!kDebugMode) {
-          unawaited(
-            _firebaseAnalytics.logLogin(
-              loginMethod: 'email',
-              parameters: {'email': email},
-            ),
-          );
-        }
+
+        unawaited(
+          _firebaseAnalytics.logLogin(
+            loginMethod: 'email',
+            parameters: {'email': email},
+          ),
+        );
       },
       onError: (error, _) {
         final errorMessage = switch (error) {

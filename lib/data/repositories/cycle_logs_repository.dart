@@ -20,15 +20,15 @@ class CycleLogsRepository {
 
   static const _collection = 'cycle_logs';
 
+  String? get _userId => _firebaseAuth.currentUser?.uid;
+
   @PostConstruct(preResolve: true)
   Future<void> loadCycleLogsFromServer() async {
-    final userId = _firebaseAuth.currentUser?.uid;
-
-    if (userId == null) return;
+    if (_userId == null) return;
 
     final querySnapshot = await _firebaseFirestore
         .collection(_collection)
-        .where('users', arrayContains: userId)
+        .where('users', arrayContains: _userId)
         .get();
 
     final firestoreLogs = querySnapshot.docs
@@ -41,6 +41,23 @@ class CycleLogsRepository {
     }
   }
 
+  Future<List<CycleLog>> getByDateRange({
+    required DateTime start,
+    required DateTime end,
+  }) async {
+    final querySnapshot = await _firebaseFirestore
+        .collection(_collection)
+        .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
+        .where('date', isLessThanOrEqualTo: Timestamp.fromDate(end))
+        .get();
+
+    final firestoreLogs = querySnapshot.docs
+        .map(CycleLog.fromFirestore)
+        .toList();
+
+    return firestoreLogs;
+  }
+
   Future<CycleLog> createOrUpdate(CycleLog cycleLog) async {
     final docRef = cycleLog.id.isEmpty
         ? _firebaseFirestore.collection(_collection).doc()
@@ -49,6 +66,7 @@ class CycleLogsRepository {
     await docRef.set(
       cycleLog
           .copyWith(
+            date: cycleLog.date.toUtc(),
             updatedAt: DateTime.now().toUtc(),
             createdAt: cycleLog.createdAt.toUtc(),
           )

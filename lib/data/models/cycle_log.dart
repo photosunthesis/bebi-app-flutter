@@ -48,7 +48,7 @@ abstract class CycleLog with _$CycleLog {
   }
 
   factory CycleLog.period({
-    required String id,
+    String id = '',
     required DateTime date,
     required FlowIntensity flow,
     required String createdBy,
@@ -69,7 +69,7 @@ abstract class CycleLog with _$CycleLog {
   }
 
   factory CycleLog.ovulation({
-    required String id,
+    String id = '',
     required DateTime date,
     required String createdBy,
     required List<String> users,
@@ -88,7 +88,7 @@ abstract class CycleLog with _$CycleLog {
   }
 
   factory CycleLog.symptom({
-    required String id,
+    String id = '',
     required DateTime date,
     required String createdBy,
     required List<String> symptoms,
@@ -109,7 +109,7 @@ abstract class CycleLog with _$CycleLog {
   }
 
   factory CycleLog.intimacy({
-    required String id,
+    String id = '',
     required DateTime date,
     required IntimacyType intimacyType,
     required String createdBy,

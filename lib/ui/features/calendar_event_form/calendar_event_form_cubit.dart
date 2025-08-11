@@ -104,11 +104,7 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
             name: isExistingEvent
                 ? 'update_calendar_event'
                 : 'create_calendar_event',
-            parameters: {
-              'user_id': _firebaseAuth.currentUser!.uid,
-              'created_at': DateTime.now().toUtc().toIso8601String(),
-              'updated_at': DateTime.now().toUtc().toIso8601String(),
-            },
+            parameters: {'user_id': _firebaseAuth.currentUser!.uid},
           ),
         );
 

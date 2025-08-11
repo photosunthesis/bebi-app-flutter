@@ -8,6 +8,7 @@ import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
 import 'package:bebi_app/data/services/cycle_day_insights_service.dart';
 import 'package:bebi_app/data/services/cycle_predictions_service.dart';
+import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/guard.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -195,7 +196,9 @@ class CyclesCubit extends Cubit<CyclesState> {
       _firebaseAnalytics.logEvent(
         name: _cycleInsightsGeneratedEvent,
         parameters: _buildAnalyticsParameters(
-          additionalParams: {'focused_date': focusedDate.toIso8601String()},
+          additionalParams: {
+            'focused_date': focusedDate.toEEEEMMMMdyyyyhhmma(),
+          },
         ),
       ),
     );
