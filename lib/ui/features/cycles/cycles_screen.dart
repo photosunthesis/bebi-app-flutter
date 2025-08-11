@@ -7,7 +7,6 @@ import 'package:bebi_app/ui/features/cycles/widgets/cycle_insights.dart';
 import 'package:bebi_app/ui/features/cycles/widgets/cycle_logs.dart';
 import 'package:bebi_app/ui/features/cycles/widgets/cycle_predictions.dart';
 import 'package:bebi_app/ui/shared_widgets/layouts/main_app_bar.dart';
-import 'package:bebi_app/ui/shared_widgets/shake_widget.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
@@ -46,7 +45,11 @@ class _CyclesScreenState extends State<CyclesScreen> {
     return BlocListener<CyclesCubit, CyclesState>(
       listener: (context, state) {
         if (state.error != null) {
-          context.showSnackbar(state.error!, type: SnackbarType.secondary);
+          context.showSnackbar(
+            state.error!,
+            type: SnackbarType.primary,
+            duration: 6.seconds,
+          );
         }
       },
 
@@ -66,7 +69,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                 _buildDisclaimer(),
               ],
             ),
-            _buildNoCycleDataDisclaimer(),
+            _buildCyclesSetupPrompt(),
           ],
         ),
       ),
@@ -160,37 +163,34 @@ class _CyclesScreenState extends State<CyclesScreen> {
           p.userProfile != c.userProfile ||
           p.partnerProfile != c.partnerProfile,
       builder: (context, state) {
-        return ShakeOnTap(
-          shouldShake: state.partnerProfile?.isSharingCycleWithPartner == false,
-          child: InkWell(
-            onTap: _cubit.switchUserProfile,
-            splashFactory: NoSplash.splashFactory,
-            child: Padding(
-              padding: const EdgeInsets.only(right: 12),
-              child: Stack(
-                children: [
-                  Opacity(
-                    opacity: 0.4,
-                    child: Transform.translate(
-                      offset: const Offset(16, 0),
-                      child: _buildProfileAvatar(
-                        state.showCurrentUserCycleData
-                            ? state.partnerProfile
-                            : state.userProfile,
-                      ),
-                    ),
-                  ),
-                  AnimatedSwitcher(
-                    duration: 120.milliseconds,
+        return InkWell(
+          onTap: _cubit.switchUserProfile,
+          splashFactory: NoSplash.splashFactory,
+          child: Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: Stack(
+              children: [
+                Opacity(
+                  opacity: 0.4,
+                  child: Transform.translate(
+                    offset: const Offset(16, 0),
                     child: _buildProfileAvatar(
                       state.showCurrentUserCycleData
-                          ? state.userProfile
-                          : state.partnerProfile,
-                      key: ValueKey(state.showCurrentUserCycleData),
+                          ? state.partnerProfile
+                          : state.userProfile,
                     ),
                   ),
-                ],
-              ),
+                ),
+                AnimatedSwitcher(
+                  duration: 120.milliseconds,
+                  child: _buildProfileAvatar(
+                    state.showCurrentUserCycleData
+                        ? state.userProfile
+                        : state.partnerProfile,
+                    key: ValueKey(state.showCurrentUserCycleData),
+                  ),
+                ),
+              ],
             ),
           ),
         );
@@ -232,19 +232,20 @@ class _CyclesScreenState extends State<CyclesScreen> {
     );
   }
 
-  Widget _buildNoCycleDataDisclaimer() {
+  Widget _buildCyclesSetupPrompt() {
     return BlocSelector<CyclesCubit, CyclesState, bool>(
-      selector: (state) =>
-          state.userProfile?.hasCycle == false &&
-          state.showCurrentUserCycleData,
-      builder: (context, showNoCycleDataDisclaimer) {
+      selector: (state) {
+        if (!state.showCurrentUserCycleData) return true;
+        return state.userProfile?.hasCycle ?? false;
+      },
+      builder: (context, hidePrompt) {
         return AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          child: !showNoCycleDataDisclaimer
+          duration: 120.milliseconds,
+          child: hidePrompt
               ? const SizedBox.shrink()
               : Container(
                   key: const ValueKey('no_cycle_data'),
-                  color: context.colorScheme.surface.withAlpha(220),
+                  color: context.colorScheme.surface.withAlpha(200),
                   width: double.infinity,
                   height: double.infinity,
                   padding: const EdgeInsets.all(32),
@@ -252,15 +253,39 @@ class _CyclesScreenState extends State<CyclesScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        'Welcome to Cycle Tracking',
-                        style: context.primaryTextTheme.titleLarge,
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                              color: context.colorScheme.surface.withAlpha(200),
+                              blurRadius: 12,
+                              offset: const Offset(0, 0),
+                              spreadRadius: 1,
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          'Welcome to Cycle Tracking',
+                          style: context.primaryTextTheme.titleLarge,
+                        ),
                       ),
                       const SizedBox(height: 12),
-                      Text(
-                        'Start tracking your cycle by tapping the button below, or view your partner\'s data using the profile icons above.',
-                        style: context.textTheme.bodyMedium?.copyWith(
-                          height: 1.4,
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                              color: context.colorScheme.surface.withAlpha(200),
+                              blurRadius: 12,
+                              offset: const Offset(0, 0),
+                              spreadRadius: 8,
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          'Start tracking your cycle by tapping the button below, or view your partner\'s data using the profile icons above.',
+                          style: context.textTheme.bodyMedium?.copyWith(
+                            height: 1.4,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 18),
@@ -269,6 +294,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                             context.pushNamed(AppRoutes.cyclesSetup),
                         child: Text('Set up cycle tracking'.toUpperCase()),
                       ),
+                      const SizedBox(height: 32),
                     ],
                   ),
                 ),

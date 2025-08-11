@@ -8,6 +8,7 @@ import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
 import 'package:bebi_app/data/services/cycle_day_insights_service.dart';
 import 'package:bebi_app/data/services/cycle_predictions_service.dart';
+import 'package:bebi_app/utils/exceptions/simple_exception.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/guard.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -94,7 +95,11 @@ class CyclesCubit extends Cubit<CyclesState> {
   Future<void> switchUserProfile() async {
     await guard(
       () async {
-        if (state.partnerProfile?.isSharingCycleWithPartner != true) return;
+        if (state.partnerProfile?.isSharingCycleWithPartner != true) {
+          throw const SimpleException(
+            'Looks like your partner hasn\'t enabled cycle sharing yet. You can ask them to turn it on in their profile settings.',
+          );
+        }
 
         emit(
           state.copyWith(
