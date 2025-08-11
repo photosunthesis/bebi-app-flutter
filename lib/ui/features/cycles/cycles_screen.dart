@@ -236,7 +236,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
     return BlocSelector<CyclesCubit, CyclesState, bool>(
       selector: (state) {
         if (!state.showCurrentUserCycleData) return true;
-        return state.userProfile?.hasCycle ?? false;
+        return state.userProfile?.hasCycle ?? true;
       },
       builder: (context, hidePrompt) {
         return AnimatedSwitcher(
