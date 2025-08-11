@@ -57,6 +57,7 @@ class CycleSetupCubit extends Cubit<CycleSetupState> {
             date: periodStartDate.add(index.days),
             flow: FlowIntensity.light,
             createdBy: _firebaseAuth.currentUser!.uid,
+            ownedBy: _firebaseAuth.currentUser!.uid,
             users: shouldShareWithPartner
                 ? partnership!.users
                 : [_firebaseAuth.currentUser!.uid],

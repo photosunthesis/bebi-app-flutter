@@ -168,6 +168,7 @@ class CyclePredictionsService {
         id: '${cycleId}_ovulation_$i',
         date: date,
         createdBy: 'system',
+        ownedBy: 'system',
         users: [],
         isPrediction: true,
       );
@@ -190,6 +191,7 @@ class CyclePredictionsService {
         date: date,
         flow: i < 2 ? FlowIntensity.medium : FlowIntensity.light,
         createdBy: 'system',
+        ownedBy: 'system',
         users: [],
         isPrediction: true,
       );
