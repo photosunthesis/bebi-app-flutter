@@ -11,6 +11,7 @@ FutureOr<T?> guard<T>(
   FutureOr<T> Function() body, {
   void Function(Object error, StackTrace stackTrace)? onError,
   void Function()? onComplete,
+  bool Function(Object? error)? logWhen,
   bool disableLogging = false,
 }) async {
   try {
@@ -19,7 +20,9 @@ FutureOr<T?> guard<T>(
     if ((kDebugMode && _isTest) || disableLogging) {
       debugPrint('Error caught by guard: $e\n$s');
     } else {
-      unawaited(GetIt.I<FirebaseCrashlytics>().recordError(e, s));
+      if (logWhen?.call(e) ?? true) {
+        unawaited(GetIt.I<FirebaseCrashlytics>().recordError(e, s));
+      }
     }
     onError?.call(e, s);
     return null;
