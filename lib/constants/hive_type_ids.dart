@@ -10,12 +10,3 @@ abstract class HiveTypeIds {
   static const cycleLogFlowIntensity = 8;
   static const cycleLogIntimacyType = 9;
 }
-
-abstract class HiveBoxNames {
-  // Generate keys here: http://bit.ly/random-strings-generator
-  static const calendarEvent = 'V8HVPbuK31jr';
-  static const userPartnership = 'k2hkPKUOpun8';
-  static const userProfile = 'SJ9lxdTrMTzt';
-  static const cycleLog = 'odyFO8RVi9LD';
-  static const aiSummaryAndInsights = 'dDALrqpo741m';
-}

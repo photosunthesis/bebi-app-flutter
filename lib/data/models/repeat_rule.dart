@@ -1,4 +1,4 @@
-import 'package:bebi_app/constants/hive_constants.dart';
+import 'package:bebi_app/constants/hive_type_ids.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';

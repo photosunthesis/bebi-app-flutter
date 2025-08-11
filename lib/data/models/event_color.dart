@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:bebi_app/app/theme/app_colors.dart';
-import 'package:bebi_app/constants/hive_constants.dart';
+import 'package:bebi_app/constants/hive_type_ids.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
 part 'event_color.g.dart';

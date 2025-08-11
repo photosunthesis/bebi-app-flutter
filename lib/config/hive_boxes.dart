@@ -1,4 +1,3 @@
-import 'package:bebi_app/constants/hive_constants.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/data/models/user_partnership.dart';
@@ -10,21 +9,21 @@ import 'package:injectable/injectable.dart';
 abstract class HiveBoxes {
   @preResolve
   Future<Box<CalendarEvent>> get calendarEventBox async =>
-      Hive.openBox<CalendarEvent>(HiveBoxNames.calendarEvent);
+      Hive.openBox<CalendarEvent>('calendar_events_box');
 
   @preResolve
   Future<Box<CycleLog>> get cycleLogBox async =>
-      Hive.openBox<CycleLog>(HiveBoxNames.cycleLog);
+      Hive.openBox<CycleLog>('cycle_logs_box');
 
   @preResolve
   Future<Box<UserProfile>> get userProfileBox async =>
-      Hive.openBox<UserProfile>(HiveBoxNames.userProfile);
+      Hive.openBox<UserProfile>('user_profiles_box');
 
   @preResolve
   Future<Box<UserPartnership>> get userPartnershipBox async =>
-      Hive.openBox<UserPartnership>(HiveBoxNames.userPartnership);
+      Hive.openBox<UserPartnership>('user_partnerships_box');
 
   @preResolve
   Future<Box<String>> get aiSummaryAndInsightsBox async =>
-      Hive.openBox<String>(HiveBoxNames.aiSummaryAndInsights);
+      Hive.openBox<String>('ai_summary_and_insights_box');
 }

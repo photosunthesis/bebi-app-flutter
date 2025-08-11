@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:bebi_app/constants/hive_constants.dart';
+import 'package:bebi_app/constants/hive_type_ids.dart';
 import 'package:bebi_app/data/models/event_color.dart';
 import 'package:bebi_app/data/models/repeat_rule.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
