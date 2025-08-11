@@ -37,7 +37,7 @@ class _CycleLogsState extends State<CycleLogs> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          'Bleeding'.toUpperCase(),
+          'Period'.toUpperCase(),
           style: context.textTheme.bodySmall?.copyWith(
             fontWeight: FontWeight.w500,
             color: context.colorScheme.secondary,
@@ -60,7 +60,7 @@ class _CycleLogsState extends State<CycleLogs> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Period',
+                  'Menstrual Flow',
                   style: context.textTheme.bodyMedium?.copyWith(
                     color: AppColors.red.darken(0.4),
                   ),

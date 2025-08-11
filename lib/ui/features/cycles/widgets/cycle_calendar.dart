@@ -52,7 +52,7 @@ class _CycleCalendarState extends State<CycleCalendar> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<CyclesCubit, CyclesState>(
+    return BlocConsumer<CyclesCubit, CyclesState>(
       listenWhen: (previous, current) => current.focusedDate.isToday,
       listener: (context, state) {
         // Only respond to "back to today" button presses to avoid unnecessary
@@ -70,9 +70,16 @@ class _CycleCalendarState extends State<CycleCalendar> {
           );
         }
       },
-      child: SizedBox(
+      buildWhen: (p, c) =>
+          p.showCurrentUserCycleData != c.showCurrentUserCycleData,
+      builder: (context, state) => SizedBox(
         height: 85,
         child: PageView.builder(
+          physics:
+              state.userProfile?.hasCycle != true &&
+                  state.showCurrentUserCycleData
+              ? const NeverScrollableScrollPhysics()
+              : null,
           controller: _pageController,
           onPageChanged: (index) {
             if (index < _dates.length) {

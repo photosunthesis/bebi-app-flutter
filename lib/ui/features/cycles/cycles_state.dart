@@ -5,9 +5,8 @@ abstract class CyclesState with _$CyclesState {
   const factory CyclesState({
     required DateTime focusedDate,
     required List<CycleLog> cycleLogs,
-    required bool shouldSetupCycles,
     required bool loading,
-    required bool showUserProfile,
+    required bool showCurrentUserCycleData,
     required bool loadingAiSummary,
     String? aiSummary,
     CycleDayInsights? focusedCycleDayInsights,
@@ -21,7 +20,6 @@ abstract class CyclesState with _$CyclesState {
     cycleLogs: [],
     loading: false,
     loadingAiSummary: false,
-    shouldSetupCycles: false,
-    showUserProfile: true,
+    showCurrentUserCycleData: true,
   );
 }

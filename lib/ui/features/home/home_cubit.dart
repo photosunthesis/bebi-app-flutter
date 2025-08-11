@@ -95,6 +95,15 @@ class HomeCubit extends Cubit<HomeState> {
           _aiSummaryAndInsightsBox.clear(),
         ]);
 
+        if (!kDebugMode) {
+          unawaited(
+            _analytics.logEvent(
+              name: 'user_signed_out',
+              parameters: {'userId': _firebaseAuth.currentUser!.uid},
+            ),
+          );
+        }
+
         emit(const HomeInitial());
       },
       onError: (error, _) {

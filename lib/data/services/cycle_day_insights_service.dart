@@ -153,26 +153,47 @@ class CycleDayInsightsService {
     return CyclePhase.luteal;
   }
 
-  Future<String> generateAiInsights(CycleDayInsights cycleDayInsights) async {
-    final key = cycleDayInsights.date.toIso8601String().substring(0, 10);
+  Future<String> generateAiInsights(
+    CycleDayInsights cycleDayInsights, {
+    required bool isCurrentUser,
+  }) async {
+    final date = cycleDayInsights.date.toIso8601String().substring(0, 10);
+    final key = '${date}_${isCurrentUser ? 'self' : 'partner'}';
     final cachedInsights = _summaryAndInsightsBox.get(key);
     if (cachedInsights != null) return cachedInsights;
 
-    final prompt = _generateInsightsPrompt(cycleDayInsights);
+    final prompt = _generateInsightsPrompt(cycleDayInsights, isCurrentUser);
 
     final response = await _generativeModel.generateContent([
       Content.text(prompt),
     ]);
 
     final result =
-        response.text ?? 'An error occured while generating insights.';
+        response.text ?? 'An error occurred while generating insights.';
 
     unawaited(_summaryAndInsightsBox.put(key, result));
 
     return result;
   }
 
-  String _generateInsightsPrompt(CycleDayInsights insights) {
+  String _generateInsightsPrompt(
+    CycleDayInsights insights,
+    bool isCurrentUser,
+  ) {
+    final userContext = isCurrentUser
+        ? '''
+    This is about the user's own cycle.
+    - Use "you" when referring to the person whose cycle this is.
+    - Use "your" for possessive references.
+    - Use "yourself" for reflexive references.
+    '''
+        : '''
+    This is about the user's partner's cycle.
+    - Use "your partner" when referring to the person whose cycle this is.
+    - Use "your partner's" for possessive references.
+    - Use "your partner" for reflexive references (e.g., "a treat for your partner").
+    ''';
+
     return '''
     You are a medical professional providing personalized cycle insights directly to the app user. Your role is to deliver medically accurate, relatable advice with a professional, candid tone that addresses adult topics without awkwardness. Your response will be displayed directly in a mobile app interface.
 
@@ -185,11 +206,11 @@ class CycleDayInsightsService {
     - Predicted Fertile Dates: ${insights.fertileDays.map((e) => e.toEEEEMMMMdyyyy()).join(', ')}
 
     RESPONSE STRUCTURE REQUIREMENTS:
-    1. Start with exactly ONE engaging introductory sentence about their current cycle day
+    1. Start with exactly ONE engaging introductory sentence about the current cycle day
     2. Follow with exactly THREE bullet points using markdown format
     3. Each bullet point must be 25-35 words maximum
     4. No additional text, explanations, or meta-commentary outside this format
-    5. Write as if speaking directly to the user, not about them
+    5. Write as if speaking directly to the user
     6. The output must be in markdown syntax for proper display in the mobile app
     7. Emphasize key information using **bold** markdown sparingly and meaningfully in bullet points
 
@@ -212,6 +233,9 @@ class CycleDayInsightsService {
     - Luteal: PMS prep, mood changes, comfort needs, bloating, cravings
     - Period: Pain management, comfort measures, energy conservation
 
+    CONTEXT FOR YOUR RESPONSE:
+    $userContext
+
     EXAMPLE FORMAT:
     [A natural, conversational opening sentence indicating what the current cycle phase is and all the things it may come with, symptoms, and energy levels. - no bullet point] 
 
@@ -219,7 +243,7 @@ class CycleDayInsightsService {
     - [Second insight - 25-35 words, symptom awareness or preparation]
     - [Third insight - 25-35 words, practical tip or encouragement, or a witty joke]
 
-    Generate insights about what might happen or might have happened on this specific cycle day based on the phase and predictions. Be specific to their cycle timing and phase-appropriate symptoms or experiences.
+    Generate insights about what might happen or might have happened on this specific cycle day based on the phase and predictions. Be specific to the cycle timing and phase-appropriate symptoms or experiences.
     ''';
   }
 }

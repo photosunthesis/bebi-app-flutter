@@ -3,11 +3,10 @@ import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:bebi_app/ui/features/cycles/cycles_cubit.dart';
 import 'package:bebi_app/ui/features/cycles/widgets/cycle_calendar.dart';
-import 'package:bebi_app/ui/features/cycles/widgets/cycle_predictions.dart';
 import 'package:bebi_app/ui/features/cycles/widgets/cycle_insights.dart';
 import 'package:bebi_app/ui/features/cycles/widgets/cycle_logs.dart';
+import 'package:bebi_app/ui/features/cycles/widgets/cycle_predictions.dart';
 import 'package:bebi_app/ui/shared_widgets/layouts/main_app_bar.dart';
-import 'package:bebi_app/ui/shared_widgets/modals/options_bottom_dialog.dart';
 import 'package:bebi_app/ui/shared_widgets/shake_widget.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
@@ -30,9 +29,6 @@ class CyclesScreen extends StatefulWidget {
 class _CyclesScreenState extends State<CyclesScreen> {
   late final _cubit = context.read<CyclesCubit>();
 
-  // Flag to prevent showing bottom sheet multiple times
-  bool _cycleSetupBottomSheetIsShown = false;
-
   @override
   void initState() {
     super.initState();
@@ -49,25 +45,28 @@ class _CyclesScreenState extends State<CyclesScreen> {
   Widget build(BuildContext context) {
     return BlocListener<CyclesCubit, CyclesState>(
       listener: (context, state) {
-        if (state.shouldSetupCycles && !_cycleSetupBottomSheetIsShown) {
-          _showCycleSetupBottomSheet();
-        }
         if (state.error != null) {
           context.showSnackbar(state.error!, type: SnackbarType.secondary);
         }
       },
+
       child: Scaffold(
         appBar: _buildAppBar(),
-        body: ListView(
+        body: Stack(
           children: [
-            const SizedBox(height: 16),
-            const CycleLogs(),
-            const SizedBox(height: 32),
-            const CycleInsights(),
-            const SizedBox(height: 32),
-            const CyclePredictions(),
-            const SizedBox(height: 20),
-            _buildDisclaimer(),
+            ListView(
+              children: [
+                const SizedBox(height: 16),
+                const CycleLogs(),
+                const SizedBox(height: 32),
+                const CycleInsights(),
+                const SizedBox(height: 32),
+                const CyclePredictions(),
+                const SizedBox(height: 20),
+                _buildDisclaimer(),
+              ],
+            ),
+            _buildNoCycleDataDisclaimer(),
           ],
         ),
       ),
@@ -157,16 +156,15 @@ class _CyclesScreenState extends State<CyclesScreen> {
   Widget _buildAccountSwitcher() {
     return BlocBuilder<CyclesCubit, CyclesState>(
       buildWhen: (p, c) =>
-          p.showUserProfile != c.showUserProfile ||
+          p.showCurrentUserCycleData != c.showCurrentUserCycleData ||
           p.userProfile != c.userProfile ||
           p.partnerProfile != c.partnerProfile,
       builder: (context, state) {
-        return InkWell(
-          onTap: _cubit.switchUserProfile,
-          splashFactory: NoSplash.splashFactory,
-          child: ShakeOnTap(
-            shouldShake:
-                state.partnerProfile?.isSharingCycleWithPartner == false,
+        return ShakeOnTap(
+          shouldShake: state.partnerProfile?.isSharingCycleWithPartner == false,
+          child: InkWell(
+            onTap: _cubit.switchUserProfile,
+            splashFactory: NoSplash.splashFactory,
             child: Padding(
               padding: const EdgeInsets.only(right: 12),
               child: Stack(
@@ -176,7 +174,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                     child: Transform.translate(
                       offset: const Offset(16, 0),
                       child: _buildProfileAvatar(
-                        state.showUserProfile
+                        state.showCurrentUserCycleData
                             ? state.partnerProfile
                             : state.userProfile,
                       ),
@@ -185,10 +183,10 @@ class _CyclesScreenState extends State<CyclesScreen> {
                   AnimatedSwitcher(
                     duration: 120.milliseconds,
                     child: _buildProfileAvatar(
-                      state.showUserProfile
+                      state.showCurrentUserCycleData
                           ? state.userProfile
                           : state.partnerProfile,
-                      key: ValueKey(state.showUserProfile),
+                      key: ValueKey(state.showCurrentUserCycleData),
                     ),
                   ),
                 ],
@@ -221,40 +219,6 @@ class _CyclesScreenState extends State<CyclesScreen> {
     );
   }
 
-  Future<void> _showCycleSetupBottomSheet() async {
-    _cycleSetupBottomSheetIsShown = true;
-    // Fake delay :D
-    await Future.delayed(600.milliseconds, () {});
-
-    final shouldSetup = await OptionsBottomDialog.show(
-      context,
-      title: 'Cycle tracking',
-      isDismissible: false,
-      description:
-          'Track your menstrual cycle and get period and fertility predictions. Receive personalized insights from Google Gemini based on your cycle data. Choose to keep your information private or share with your partner.',
-      options: [
-        const Option(
-          text: 'Set up cycle tracking',
-          value: true,
-          style: OptionStyle.primary,
-        ),
-        const Option(
-          text: 'Don\'t track my cycle',
-          value: false,
-          style: OptionStyle.secondary,
-        ),
-      ],
-    );
-
-    if (shouldSetup == true) {
-      await context.pushNamed(AppRoutes.cyclesSetup);
-    } else {
-      await _cubit.disableUserCycleTracking();
-    }
-
-    _cycleSetupBottomSheetIsShown = false;
-  }
-
   Widget _buildDisclaimer() {
     return Padding(
       padding: const EdgeInsets.all(UiConstants.padding),
@@ -265,6 +229,51 @@ class _CyclesScreenState extends State<CyclesScreen> {
           color: context.colorScheme.secondary,
         ),
       ),
+    );
+  }
+
+  Widget _buildNoCycleDataDisclaimer() {
+    return BlocSelector<CyclesCubit, CyclesState, bool>(
+      selector: (state) =>
+          state.userProfile?.hasCycle == false &&
+          state.showCurrentUserCycleData,
+      builder: (context, showNoCycleDataDisclaimer) {
+        return AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: !showNoCycleDataDisclaimer
+              ? const SizedBox.shrink()
+              : Container(
+                  key: const ValueKey('no_cycle_data'),
+                  color: context.colorScheme.surface.withAlpha(220),
+                  width: double.infinity,
+                  height: double.infinity,
+                  padding: const EdgeInsets.all(32),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Welcome to Cycle Tracking',
+                        style: context.primaryTextTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Start tracking your cycle by tapping the button below, or view your partner\'s data using the profile icons above.',
+                        style: context.textTheme.bodyMedium?.copyWith(
+                          height: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      ElevatedButton(
+                        onPressed: () =>
+                            context.pushNamed(AppRoutes.cyclesSetup),
+                        child: Text('Set up cycle tracking'.toUpperCase()),
+                      ),
+                    ],
+                  ),
+                ),
+        );
+      },
     );
   }
 }
