@@ -9,12 +9,12 @@ import 'package:injectable/injectable.dart';
 @injectable
 class CycleLogsRepository {
   const CycleLogsRepository(
-    this._firebaseFirestore,
+    this._firestore,
     this._firebaseAuth,
     this._cycleLogBox,
   );
 
-  final FirebaseFirestore _firebaseFirestore;
+  final FirebaseFirestore _firestore;
   final FirebaseAuth _firebaseAuth;
   final Box<CycleLog> _cycleLogBox;
 
@@ -26,7 +26,7 @@ class CycleLogsRepository {
   Future<void> loadCycleLogsFromServer() async {
     if (_userId == null) return;
 
-    final querySnapshot = await _firebaseFirestore
+    final querySnapshot = await _firestore
         .collection(_collection)
         .where('users', arrayContains: _userId)
         .get();
@@ -45,7 +45,7 @@ class CycleLogsRepository {
     required DateTime start,
     required DateTime end,
   }) async {
-    final querySnapshot = await _firebaseFirestore
+    final querySnapshot = await _firestore
         .collection(_collection)
         .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
         .where('date', isLessThanOrEqualTo: Timestamp.fromDate(end))
@@ -60,8 +60,8 @@ class CycleLogsRepository {
 
   Future<CycleLog> createOrUpdate(CycleLog cycleLog) async {
     final docRef = cycleLog.id.isEmpty
-        ? _firebaseFirestore.collection(_collection).doc()
-        : _firebaseFirestore.collection(_collection).doc(cycleLog.id);
+        ? _firestore.collection(_collection).doc()
+        : _firestore.collection(_collection).doc(cycleLog.id);
 
     await docRef.set(
       cycleLog
@@ -80,11 +80,11 @@ class CycleLogsRepository {
   }
 
   Future<List<CycleLog>> createMany(List<CycleLog> cycleLogs) async {
-    final batch = _firebaseFirestore.batch();
+    final batch = _firestore.batch();
     final newLogs = <CycleLog>[];
 
     for (final cycleLog in cycleLogs) {
-      final docRef = _firebaseFirestore.collection(_collection).doc();
+      final docRef = _firestore.collection(_collection).doc();
       final newLog = cycleLog.copyWith(
         id: docRef.id,
         createdAt: DateTime.now().toUtc(),
@@ -104,7 +104,7 @@ class CycleLogsRepository {
   }
 
   Future<void> delete(CycleLog cycleLog) async {
-    await _firebaseFirestore.collection(_collection).doc(cycleLog.id).delete();
+    await _firestore.collection(_collection).doc(cycleLog.id).delete();
     unawaited(_cycleLogBox.delete(cycleLog.id));
   }
 
@@ -120,7 +120,7 @@ class CycleLogsRepository {
       if (cachedLogs.isNotEmpty) return cachedLogs;
     }
 
-    final querySnapshot = await _firebaseFirestore
+    final querySnapshot = await _firestore
         .collection(_collection)
         .where('users', arrayContains: userId)
         .get();
