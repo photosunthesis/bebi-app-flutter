@@ -5,34 +5,17 @@ import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 // ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:injectable/injectable.dart';
 
 @injectable
 class CalendarEventsRepository {
-  const CalendarEventsRepository(
-    this._firestore,
-    this._firebaseAuth,
-    this._calendarEventBox,
-  );
+  const CalendarEventsRepository(this._firestore, this._calendarEventBox);
 
   final FirebaseFirestore _firestore;
-  final FirebaseAuth _firebaseAuth;
   final Box<CalendarEvent> _calendarEventBox;
 
   static const _collection = 'calendar_events';
-
-  @PostConstruct(preResolve: true)
-  Future<void> loadEventsFromServer() async {
-    final userId = _firebaseAuth.currentUser?.uid;
-    if (userId == null) return;
-    final events = await _firestore
-        .collection(_collection)
-        .where('users', arrayContains: userId)
-        .get();
-    await _cacheEvents(events.docs.map(CalendarEvent.fromFirestore).toList());
-  }
 
   Future<List<CalendarEvent>> getByUserId({
     required String userId,

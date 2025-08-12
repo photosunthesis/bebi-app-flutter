@@ -2,44 +2,17 @@ import 'dart:async';
 
 import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:injectable/injectable.dart';
 
 @injectable
 class CycleLogsRepository {
-  const CycleLogsRepository(
-    this._firestore,
-    this._firebaseAuth,
-    this._cycleLogBox,
-  );
+  const CycleLogsRepository(this._firestore, this._cycleLogBox);
 
   final FirebaseFirestore _firestore;
-  final FirebaseAuth _firebaseAuth;
   final Box<CycleLog> _cycleLogBox;
 
   static const _collection = 'cycle_logs';
-
-  String? get _userId => _firebaseAuth.currentUser?.uid;
-
-  @PostConstruct(preResolve: true)
-  Future<void> loadCycleLogsFromServer() async {
-    if (_userId == null) return;
-
-    final querySnapshot = await _firestore
-        .collection(_collection)
-        .where('users', arrayContains: _userId)
-        .get();
-
-    final firestoreLogs = querySnapshot.docs
-        .map(CycleLog.fromFirestore)
-        .toList();
-
-    if (firestoreLogs.isNotEmpty) {
-      final newLogsMap = {for (final log in firestoreLogs) log.id: log};
-      await _cycleLogBox.putAll(newLogsMap);
-    }
-  }
 
   Future<List<CycleLog>> getByDateRange({
     required DateTime start,

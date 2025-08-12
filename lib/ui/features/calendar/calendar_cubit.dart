@@ -71,7 +71,10 @@ class CalendarCubit extends Cubit<CalendarState> {
 
   Future<void> fetchLatestEventsFromServer() async {
     await guard(() async {
-      await _calendarEventsRepository.loadEventsFromServer();
+      await _calendarEventsRepository.getByUserId(
+        userId: _firebaseAuth.currentUser!.uid,
+        useCache: false,
+      );
     });
   }
 
