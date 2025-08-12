@@ -115,7 +115,20 @@ class _CalendarEventsState extends State<CalendarEvents> {
               width: UiConstants.borderWidth,
             ),
           ),
-          child: _buildEventDetails(context, event),
+          child: Row(
+            children: [
+              Container(
+                width: 3,
+                height: double.infinity,
+                decoration: BoxDecoration(
+                  color: event.color,
+                  borderRadius: BorderRadius.circular(1),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(child: _buildEventDetails(context, event)),
+            ],
+          ),
         ),
       ),
     );
