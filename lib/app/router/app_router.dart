@@ -13,6 +13,8 @@ import 'package:bebi_app/ui/features/cycles_setup/cycle_setup_cubit.dart';
 import 'package:bebi_app/ui/features/cycles_setup/cycles_setup_screen.dart';
 import 'package:bebi_app/ui/features/home/home_cubit.dart';
 import 'package:bebi_app/ui/features/home/home_screen.dart';
+import 'package:bebi_app/ui/features/log_menstrual_flow/log_menstrual_flow_cubit.dart';
+import 'package:bebi_app/ui/features/log_menstrual_flow/log_menstrual_flow_screen.dart';
 import 'package:bebi_app/ui/features/profile_setup/profile_setup_cubit.dart';
 import 'package:bebi_app/ui/features/profile_setup/profile_setup_screen.dart';
 import 'package:bebi_app/ui/features/sign_in/sign_in_cubit.dart';
@@ -99,12 +101,9 @@ abstract class AppRouter {
               GoRoute(
                 path: '/cycles',
                 name: AppRoutes.cycles,
-                builder: (_, state) => BlocProvider(
+                builder: (_, _) => BlocProvider(
                   create: (_) => GetIt.I<CyclesCubit>(),
-                  child: CyclesScreen(
-                    shouldReinitialize:
-                        state.uri.queryParameters['reinitialize'] == 'true',
-                  ),
+                  child: const CyclesScreen(),
                 ),
               ),
             ],
@@ -124,10 +123,24 @@ abstract class AppRouter {
         ],
       ),
       GoRoute(
+        path: '/cycles/log-menstrual-cycle',
+        name: AppRoutes.logMenstrualCycle,
+        pageBuilder: (_, state) => BottomSheetPage(
+          child: BlocProvider(
+            create: (_) => GetIt.I<LogMenstrualFlowCubit>(),
+            child: LogMenstrualFlowScreen(
+              logForPartner:
+                  state.uri.queryParameters['logForPartner'] == 'true',
+              date: DateTime.parse(state.uri.queryParameters['date']!),
+            ),
+          ),
+        ),
+      ),
+      GoRoute(
         path: '/calendar/create',
         name: AppRoutes.createCalendarEvent,
         pageBuilder: (_, state) => BottomSheetPage(
-          BlocProvider(
+          child: BlocProvider(
             create: (_) => GetIt.I<CalendarEventFormCubit>(),
             child: CalendarEventFormScreen(
               selectedDate: DateTime.tryParse(
@@ -151,7 +164,7 @@ abstract class AppRouter {
         path: '/calendar/:id/edit',
         name: AppRoutes.updateCalendarEvent,
         pageBuilder: (_, state) => BottomSheetPage(
-          BlocProvider(
+          child: BlocProvider(
             create: (_) => GetIt.I<CalendarEventFormCubit>(),
             child: CalendarEventFormScreen(
               calendarEvent: state.extra as CalendarEvent,
@@ -176,7 +189,7 @@ abstract class AppRouter {
         ),
       ),
     ],
-    observers: <NavigatorObserver>[
+    observers: [
       if (!kDebugMode) FirebaseAnalyticsObserver(analytics: GetIt.I()),
     ],
     redirect: (context, state) {

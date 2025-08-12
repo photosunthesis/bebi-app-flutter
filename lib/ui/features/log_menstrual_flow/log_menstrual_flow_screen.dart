@@ -1,0 +1,172 @@
+import 'package:bebi_app/app/router/app_router.dart';
+import 'package:bebi_app/app/theme/app_colors.dart';
+import 'package:bebi_app/constants/ui_constants.dart';
+import 'package:bebi_app/data/models/cycle_log.dart';
+import 'package:bebi_app/ui/features/log_menstrual_flow/log_menstrual_flow_cubit.dart';
+import 'package:bebi_app/utils/extension/build_context_extensions.dart';
+import 'package:bebi_app/utils/extension/color_extensions.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:material_symbols_icons/symbols.dart';
+
+class LogMenstrualFlowScreen extends StatefulWidget {
+  const LogMenstrualFlowScreen({
+    required this.date,
+    required this.logForPartner,
+    super.key,
+  });
+
+  final DateTime date;
+  final bool logForPartner;
+
+  @override
+  State<LogMenstrualFlowScreen> createState() => _LogMenstrualFlowScreenState();
+}
+
+class _LogMenstrualFlowScreenState extends State<LogMenstrualFlowScreen> {
+  var _selectedFlowIntensity = FlowIntensity.light;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocSelector<LogMenstrualFlowCubit, LogMenstrualFlowState, bool>(
+      selector: (state) => state is LogMenstrualFlowLoading,
+      builder: (context, loading) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 2, bottom: 8),
+              child: Center(
+                child: Container(
+                  width: 40,
+                  height: 2,
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  decoration: BoxDecoration(
+                    color: context.colorScheme.outline.withAlpha(80),
+                    borderRadius: UiConstants.borderRadius,
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: UiConstants.padding,
+              ),
+              child: Text(
+                'Log your menstrual flow',
+                style: context.primaryTextTheme.titleLarge,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: UiConstants.padding,
+              ),
+              child: Text(
+                'Select today\'s flow intensity from the options below and log it in your cycle history.',
+                style: context.textTheme.bodyMedium?.copyWith(height: 1.6),
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildSelection(loading),
+            _buildConfirmButton(loading),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildSelection(bool loading) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: AppColors.red.withAlpha(50),
+              borderRadius: UiConstants.borderRadius,
+              border: Border.all(
+                color: AppColors.red.darken(0.4),
+                width: UiConstants.borderWidth,
+              ),
+            ),
+            child: Column(
+              children: FlowIntensity.values.expand((intensity) {
+                final isLast = intensity == FlowIntensity.values.last;
+                return [
+                  InkWell(
+                    onTap: loading
+                        ? null
+                        : () => setState(
+                            () => _selectedFlowIntensity = intensity,
+                          ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            intensity.label,
+                            style: context.textTheme.bodyMedium?.copyWith(
+                              color: AppColors.red.darken(0.4),
+                            ),
+                          ),
+                          if (_selectedFlowIntensity == intensity)
+                            Icon(
+                              Symbols.check,
+                              size: 18,
+                              color: AppColors.red.darken(0.4),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (!isLast)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Divider(
+                        color: AppColors.red.darken(0.4),
+                        height: UiConstants.borderWidth,
+                      ),
+                    ),
+                ];
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildConfirmButton(bool loading) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(UiConstants.padding),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: context.colorScheme.primary,
+            foregroundColor: context.colorScheme.onPrimary,
+            minimumSize: const Size(double.infinity, 44),
+          ),
+          onPressed: loading
+              ? null
+              : () async {
+                  await context.read<LogMenstrualFlowCubit>().logFlow(
+                    date: widget.date,
+                    flowIntensity: _selectedFlowIntensity,
+                    logForPartner: widget.logForPartner,
+                  );
+
+                  context.pop(true);
+                },
+          child: Text(
+            loading ? 'Logging...' : 'Log menstrual flow'.toUpperCase(),
+          ),
+        ),
+      ),
+    );
+  }
+}
