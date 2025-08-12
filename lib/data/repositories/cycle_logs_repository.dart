@@ -14,12 +14,14 @@ class CycleLogsRepository {
 
   static const _collection = 'cycle_logs';
 
-  Future<List<CycleLog>> getByDateRange({
+  Future<List<CycleLog>> getByUserIdAndDateRange({
+    required String userId,
     required DateTime start,
     required DateTime end,
   }) async {
     final querySnapshot = await _firestore
         .collection(_collection)
+        .where('owned_by', isEqualTo: userId)
         .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
         .where('date', isLessThanOrEqualTo: Timestamp.fromDate(end))
         .get();
@@ -87,7 +89,7 @@ class CycleLogsRepository {
   }) async {
     if (useCache) {
       final cachedLogs = _cycleLogBox.values
-          .where((log) => log.users.contains(userId))
+          .where((log) => log.ownedBy == userId)
           .toList();
 
       if (cachedLogs.isNotEmpty) return cachedLogs;
@@ -95,7 +97,7 @@ class CycleLogsRepository {
 
     final querySnapshot = await _firestore
         .collection(_collection)
-        .where('users', arrayContains: userId)
+        .where('owned_by', isEqualTo: userId)
         .get();
 
     final firestoreLogs = querySnapshot.docs

@@ -17,9 +17,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 class CyclesScreen extends StatefulWidget {
-  const CyclesScreen({required this.shouldReinitialize, super.key});
-
-  final bool shouldReinitialize;
+  const CyclesScreen({super.key});
 
   @override
   State<CyclesScreen> createState() => _CyclesScreenState();
@@ -32,12 +30,6 @@ class _CyclesScreenState extends State<CyclesScreen> {
   void initState() {
     super.initState();
     _cubit.initialize();
-  }
-
-  @override
-  void didUpdateWidget(CyclesScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.shouldReinitialize) _cubit.initialize();
   }
 
   @override
@@ -290,8 +282,12 @@ class _CyclesScreenState extends State<CyclesScreen> {
                       ),
                       const SizedBox(height: 18),
                       ElevatedButton(
-                        onPressed: () =>
-                            context.pushNamed(AppRoutes.cyclesSetup),
+                        onPressed: () async {
+                          final shouldReinitialize = await context.pushNamed(
+                            AppRoutes.cyclesSetup,
+                          );
+                          if (shouldReinitialize == true) _cubit.reinitialize();
+                        },
                         child: Text('Set up cycle tracking'.toUpperCase()),
                       ),
                       const SizedBox(height: 32),

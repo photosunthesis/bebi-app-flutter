@@ -86,6 +86,13 @@ class HomeCubit extends Cubit<HomeState> {
       () async {
         emit(const HomeLoading());
 
+        unawaited(
+          _analytics.logEvent(
+            name: 'user_signed_out',
+            parameters: {'userId': _firebaseAuth.currentUser!.uid},
+          ),
+        );
+
         await Future.wait([
           _firebaseAuth.signOut(),
           _calendarEventBox.clear(),
@@ -94,15 +101,6 @@ class HomeCubit extends Cubit<HomeState> {
           _userPartnershipBox.clear(),
           _aiSummaryAndInsightsBox.clear(),
         ]);
-
-        if (!kDebugMode) {
-          unawaited(
-            _analytics.logEvent(
-              name: 'user_signed_out',
-              parameters: {'userId': _firebaseAuth.currentUser!.uid},
-            ),
-          );
-        }
 
         emit(const HomeInitial());
       },

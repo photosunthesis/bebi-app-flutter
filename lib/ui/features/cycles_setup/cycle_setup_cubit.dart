@@ -69,9 +69,8 @@ class CycleSetupCubit extends Cubit<CycleSetupState> {
 
         emit(const CycleSetupState.success());
       },
-      onError: (error, _) {
-        emit(CycleSetupState.error(error.toString()));
-      },
+      onError: (error, _) => emit(CycleSetupState.error(error.toString())),
+      onComplete: () => emit(const CycleSetupState.initial()),
     );
   }
 }

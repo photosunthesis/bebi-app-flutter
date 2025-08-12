@@ -46,15 +46,26 @@ class CyclesCubit extends Cubit<CyclesState> {
 
   String get _currentUserId => _firebaseAuth.currentUser!.uid;
 
+  void reinitialize() {
+    emit(CyclesState.initial());
+    initialize(loadDataFromCache: false);
+  }
+
   Future<void> initialize({bool loadDataFromCache = true}) async {
     await guard(
       () async {
         emit(state.copyWith(loading: true, loadingAiSummary: true));
 
-        final userProfile = await _fetchUserProfile(_currentUserId);
-        if (!userProfile.didSetUpCycles) await _disableUserCycleTracking();
+        final userProfile = await _fetchUserProfile(
+          _currentUserId,
+          useCache: loadDataFromCache,
+        );
 
-        final partnerProfile = await _fetchPartnerProfile();
+        if (!userProfile.didSetUpCycles) {
+          await _disableUserCycleTracking(loadDataFromCache);
+        }
+
+        final partnerProfile = await _fetchPartnerProfile(loadDataFromCache);
 
         // If user profile was updated by _disableUserCycleTracking, use the state's profile.
         // Otherwise, use the newly fetched profile.
@@ -70,7 +81,7 @@ class CyclesCubit extends Cubit<CyclesState> {
           ),
         );
 
-        if (state.userProfile?.hasCycle != true) return;
+        if (!effectiveUserProfile.hasCycle) return;
 
         await _loadCycleData(useCache: loadDataFromCache);
       },
@@ -135,7 +146,7 @@ class CyclesCubit extends Cubit<CyclesState> {
     final allCycleLogs = [...cycleLogs, ...predictions];
     emit(state.copyWith(cycleLogs: allCycleLogs, loading: false));
 
-    await _generateAndUpdateInsights(DateTime.now());
+    await _generateAndUpdateInsights(state.focusedDate);
     _logCycleInsightsGenerated(state.focusedDate);
   }
 
@@ -155,18 +166,26 @@ class CyclesCubit extends Cubit<CyclesState> {
     emit(state.copyWith(aiSummary: aiInsights));
   }
 
-  Future<UserProfile> _fetchUserProfile(String userId) async {
-    final userProfile = await _userProfileRepository.getByUserId(userId);
+  Future<UserProfile> _fetchUserProfile(
+    String userId, {
+    bool useCache = true,
+  }) async {
+    final userProfile = await _userProfileRepository.getByUserId(
+      userId,
+      useCache: useCache,
+    );
     if (userProfile == null) {
       throw Exception('User profile not found for user: $userId');
     }
     return userProfile;
   }
 
-  Future<UserProfile> _fetchPartnerProfile() async {
+  Future<UserProfile> _fetchPartnerProfile(bool useCache) async {
     final partnership = await _userPartnershipsRepository.getByUserId(
       _currentUserId,
+      useCache: useCache,
     );
+
     if (partnership == null) {
       throw Exception('Partnership not found for user: $_currentUserId');
     }
@@ -175,11 +194,14 @@ class CyclesCubit extends Cubit<CyclesState> {
       (userId) => userId != _currentUserId,
     );
 
-    return await _fetchUserProfile(partnerId);
+    return await _fetchUserProfile(partnerId, useCache: useCache);
   }
 
-  Future<void> _disableUserCycleTracking() async {
-    final userProfile = await _fetchUserProfile(_currentUserId);
+  Future<void> _disableUserCycleTracking(bool useCache) async {
+    final userProfile = await _fetchUserProfile(
+      _currentUserId,
+      useCache: useCache,
+    );
 
     final updatedUser = userProfile.copyWith(
       hasCycle: false,

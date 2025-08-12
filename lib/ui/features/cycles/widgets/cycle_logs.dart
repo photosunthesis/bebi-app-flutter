@@ -1,3 +1,4 @@
+import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/app/theme/app_colors.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
@@ -45,7 +46,7 @@ class _CycleLogsState extends State<CycleLogs> {
         ),
         const SizedBox(height: 6),
         InkWell(
-          onTap: () {},
+          onTap: () => context.pushNamed(AppRoutes.logMenstrualCycle),
           child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(

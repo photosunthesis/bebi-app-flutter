@@ -37,10 +37,7 @@ class _CyclesSetupScreenState extends State<CyclesSetupScreen> {
     return BlocConsumer<CycleSetupCubit, CycleSetupState>(
       listener: (context, state) => switch (state) {
         CycleSetupStateError(:final error) => context.showSnackbar(error),
-        CycleSetupStateSuccess() => context.goNamed(
-          AppRoutes.cycles,
-          queryParameters: {'reinitialize': 'true'},
-        ),
+        CycleSetupStateSuccess() => context.pop(true),
         _ => null,
       },
       builder: (context, state) => Form(
