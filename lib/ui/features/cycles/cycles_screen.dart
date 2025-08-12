@@ -49,17 +49,21 @@ class _CyclesScreenState extends State<CyclesScreen> {
         appBar: _buildAppBar(),
         body: Stack(
           children: [
-            ListView(
-              children: [
-                const SizedBox(height: 16),
-                const CycleLogs(),
-                const SizedBox(height: 32),
-                const CycleInsights(),
-                const SizedBox(height: 32),
-                const CyclePredictions(),
-                const SizedBox(height: 20),
-                _buildDisclaimer(),
-              ],
+            RefreshIndicator(
+              onRefresh: () async =>
+                  _cubit.initialize(loadDataFromCache: false),
+              child: ListView(
+                children: [
+                  const SizedBox(height: 16),
+                  const CycleLogs(),
+                  const SizedBox(height: 32),
+                  const CycleInsights(),
+                  const SizedBox(height: 32),
+                  const CyclePredictions(),
+                  const SizedBox(height: 20),
+                  _buildDisclaimer(),
+                ],
+              ),
             ),
             _buildCyclesSetupPrompt(),
           ],
@@ -286,7 +290,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                           final shouldReinitialize = await context.pushNamed(
                             AppRoutes.cyclesSetup,
                           );
-                          if (shouldReinitialize == true) _cubit.reinitialize();
+                          if (shouldReinitialize == true) _cubit.refreshData();
                         },
                         child: Text('Set up cycle tracking'.toUpperCase()),
                       ),

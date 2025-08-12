@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/ui/shared_widgets/forms/app_text_form_field.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
@@ -49,7 +50,17 @@ class _AppMultipleChoiceDropdownState<T>
       mainAxisSize: MainAxisSize.min,
       children: [
         _buildTextFormField(),
-        if (_pickerIsVisible) _buildSelection(),
+        if (_pickerIsVisible)
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: UiConstants.borderRadius,
+              border: Border.all(
+                color: context.colorScheme.outline,
+                width: UiConstants.borderWidth,
+              ),
+            ),
+            child: _buildSelection(),
+          ),
       ],
     );
   }
@@ -88,10 +99,17 @@ class _AppMultipleChoiceDropdownState<T>
           final label = widget.itemLabelBuilder.call(item);
           return InkWell(
             onTap: () => _onItemSelect(item),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                vertical: 8.0,
-                horizontal: 16.0,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: widget.items.last == item
+                      ? BorderSide.none
+                      : BorderSide(
+                          color: context.colorScheme.outline,
+                          width: UiConstants.borderWidth,
+                        ),
+                ),
               ),
               child: Row(
                 children: [

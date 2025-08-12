@@ -1,9 +1,11 @@
 import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/app/theme/app_colors.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
+import 'package:bebi_app/ui/features/cycles/cycles_cubit.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/color_extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 class CycleLogs extends StatefulWidget {
@@ -14,6 +16,8 @@ class CycleLogs extends StatefulWidget {
 }
 
 class _CycleLogsState extends State<CycleLogs> {
+  late final _cubit = context.read<CyclesCubit>();
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -45,31 +49,50 @@ class _CycleLogsState extends State<CycleLogs> {
           ),
         ),
         const SizedBox(height: 6),
-        InkWell(
-          onTap: () => context.pushNamed(AppRoutes.logMenstrualCycle),
-          child: Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.red.withAlpha(60),
-              borderRadius: UiConstants.borderRadius,
-              border: Border.all(
-                color: AppColors.red.darken(0.4),
-                width: UiConstants.borderWidth,
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Menstrual Flow',
-                  style: context.textTheme.bodyMedium?.copyWith(
+        BlocBuilder<CyclesCubit, CyclesState>(
+          builder: (context, state) {
+            return InkWell(
+              onTap: () async {
+                final shouldRefresh = await context.pushNamed(
+                  AppRoutes.logMenstrualCycle,
+                  queryParameters: {
+                    'logForPartner': (!state.showCurrentUserCycleData)
+                        .toString(),
+                    'date': state.focusedDate.toIso8601String(),
+                  },
+                );
+
+                if (shouldRefresh == true) _cubit.refreshData();
+              },
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.red.withAlpha(60),
+                  borderRadius: UiConstants.borderRadius,
+                  border: Border.all(
                     color: AppColors.red.darken(0.4),
+                    width: UiConstants.borderWidth,
                   ),
                 ),
-                Icon(Symbols.add_2, size: 16, color: AppColors.red.darken(0.4)),
-              ],
-            ),
-          ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Menstrual Flow',
+                      style: context.textTheme.bodyMedium?.copyWith(
+                        color: AppColors.red.darken(0.4),
+                      ),
+                    ),
+                    Icon(
+                      Symbols.add_2,
+                      size: 16,
+                      color: AppColors.red.darken(0.4),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ],
     );

@@ -46,7 +46,7 @@ class CyclesCubit extends Cubit<CyclesState> {
 
   String get _currentUserId => _firebaseAuth.currentUser!.uid;
 
-  void reinitialize() {
+  void refreshData() {
     emit(CyclesState.initial());
     initialize(loadDataFromCache: false);
   }
@@ -96,7 +96,6 @@ class CyclesCubit extends Cubit<CyclesState> {
       () async {
         emit(state.copyWith(loadingAiSummary: true, focusedDate: date));
         await _generateAndUpdateInsights(date);
-        _logCycleInsightsGenerated(date);
       },
       onError: (error, _) => emit(state.copyWith(error: error.toString())),
       onComplete: () => emit(state.copyWith(loadingAiSummary: false)),
@@ -114,13 +113,13 @@ class CyclesCubit extends Cubit<CyclesState> {
 
         emit(
           state.copyWith(
-            showCurrentUserCycleData: !state.showCurrentUserCycleData,
             loading: true,
             loadingAiSummary: true,
+            showCurrentUserCycleData: !state.showCurrentUserCycleData,
           ),
         );
 
-        await _loadCycleData(useCache: true);
+        await _loadCycleData();
 
         _logUserProfileSwitched();
       },
@@ -132,9 +131,11 @@ class CyclesCubit extends Cubit<CyclesState> {
     );
   }
 
-  Future<void> _loadCycleData({required bool useCache}) async {
+  Future<void> _loadCycleData({bool useCache = true}) async {
     final cycleLogs = await _cycleLogsRepository.getCycleLogsByUserId(
-      _currentUserId,
+      state.showCurrentUserCycleData
+          ? _currentUserId
+          : state.partnerProfile!.userId,
       useCache: useCache,
     );
 
@@ -143,11 +144,9 @@ class CyclesCubit extends Cubit<CyclesState> {
       state.focusedDate,
     );
 
-    final allCycleLogs = [...cycleLogs, ...predictions];
-    emit(state.copyWith(cycleLogs: allCycleLogs, loading: false));
+    emit(state.copyWith(cycleLogs: [...cycleLogs, ...predictions]));
 
     await _generateAndUpdateInsights(state.focusedDate);
-    _logCycleInsightsGenerated(state.focusedDate);
   }
 
   Future<void> _generateAndUpdateInsights(DateTime date) async {
@@ -164,6 +163,8 @@ class CyclesCubit extends Cubit<CyclesState> {
     );
 
     emit(state.copyWith(aiSummary: aiInsights));
+
+    _logCycleInsightsGenerated(state.focusedDate);
   }
 
   Future<UserProfile> _fetchUserProfile(

@@ -52,7 +52,7 @@ class _CycleCalendarState extends State<CycleCalendar> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<CyclesCubit, CyclesState>(
+    return BlocListener<CyclesCubit, CyclesState>(
       listenWhen: (previous, current) => current.focusedDate.isToday,
       listener: (context, state) {
         // Only respond to "back to today" button presses to avoid unnecessary
@@ -62,6 +62,7 @@ class _CycleCalendarState extends State<CycleCalendar> {
         final targetIndex = _dates.indexWhere(
           (d) => d.isSameDay(state.focusedDate),
         );
+
         if (targetIndex != -1) {
           _pageController.animateToPage(
             targetIndex,
@@ -70,16 +71,9 @@ class _CycleCalendarState extends State<CycleCalendar> {
           );
         }
       },
-      buildWhen: (p, c) =>
-          p.showCurrentUserCycleData != c.showCurrentUserCycleData,
-      builder: (context, state) => SizedBox(
+      child: SizedBox(
         height: 85,
         child: PageView.builder(
-          physics:
-              state.userProfile?.hasCycle != true &&
-                  state.showCurrentUserCycleData
-              ? const NeverScrollableScrollPhysics()
-              : null,
           controller: _pageController,
           onPageChanged: (index) {
             if (index < _dates.length) {
@@ -244,7 +238,7 @@ class _CycleCalendarState extends State<CycleCalendar> {
       child: DecoratedBox(
         decoration: BoxDecoration(
           boxShadow: [
-            if (event != null)
+            if (event?.isPrediction == true)
               BoxShadow(
                 color: context.colorScheme.surface.withAlpha(140),
                 blurRadius: 8,

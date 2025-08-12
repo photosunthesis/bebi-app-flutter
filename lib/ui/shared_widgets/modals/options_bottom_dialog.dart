@@ -41,7 +41,7 @@ class OptionsBottomDialog<T> extends StatelessWidget {
       context: context,
       showDragHandle: false,
       isDismissible: isDismissible,
-      barrierColor: context.colorScheme.primary.withAlpha(40),
+      barrierColor: context.colorScheme.primary.withAlpha(80),
       backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(12)),

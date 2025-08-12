@@ -2,16 +2,17 @@ import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:flutter/material.dart';
 
 class BottomSheetPage<T> extends Page<T> {
-  const BottomSheetPage(this.child);
+  const BottomSheetPage({required this.child, this.isScrollControlled = true});
 
   final Widget child;
+  final bool isScrollControlled;
 
   @override
   Route<T> createRoute(BuildContext context) => ModalBottomSheetRoute<T>(
     settings: this,
     useSafeArea: true,
-    isScrollControlled: true,
-    modalBarrierColor: context.colorScheme.primary.withAlpha(40),
+    isScrollControlled: isScrollControlled,
+    modalBarrierColor: context.colorScheme.primary.withAlpha(80),
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
     ),
