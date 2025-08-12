@@ -25,3 +25,5 @@ linter:
     omit_local_variable_types: true
     prefer_function_declarations_over_variables: true
     unawaited_futures: true
+    use_super_parameters: true
+    avoid_unnecessary_containers: true
