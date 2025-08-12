@@ -3,6 +3,7 @@ import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/ui/features/calendar/calendar_cubit.dart';
 import 'package:bebi_app/ui/features/calendar/widgets/calendar.dart';
 import 'package:bebi_app/ui/features/calendar/widgets/calendar_events.dart';
+import 'package:bebi_app/ui/shared_widgets/layouts/main_app_bar.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
@@ -42,20 +43,38 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<CalendarCubit, CalendarState>(
+    return BlocConsumer<CalendarCubit, CalendarState>(
       listener: (context, state) {
         if (state.error != null) context.showSnackbar(state.error!);
       },
-      child: Scaffold(
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildTitle(),
-            const SizedBox(height: 12),
-            const Calendar(),
-            const CalendarEvents(),
-          ],
+      builder: (context, state) => Scaffold(
+        appBar: _buildAppBar(),
+        body: RefreshIndicator(
+          onRefresh: () async => _cubit.loadCalendarEvents(useCache: false),
+          child: CustomScrollView(
+            slivers: [
+              const SliverPersistentHeader(
+                delegate: CalendarSliverDelegate(),
+                pinned: true,
+              ),
+              state.focusedDayEvents.isNotEmpty
+                  ? CalendarEvents.buildList(state.focusedDayEvents)
+                  : CalendarEvents.buildEmptyPlaceholder(context),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  AppBar _buildAppBar() {
+    return MainAppBar.build(
+      context,
+      flexibleSpace: _buildTitle(),
+      toolbarHeight: 40,
+      bottom: const PreferredSize(
+        preferredSize: Size.fromHeight(0),
+        child: SizedBox.shrink(),
       ),
     );
   }

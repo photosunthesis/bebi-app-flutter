@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/ui/shared_widgets/forms/app_text_form_field.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
@@ -151,117 +152,133 @@ class _AppDateFormFieldState extends State<AppDateFormField> {
     return SizedBox(
       key: const ValueKey('calendar'),
       height: 240,
-      child: TableCalendar(
-        shouldFillViewport: true,
-        enabledDayPredicate: (day) {
-          if (widget.minimumDate != null) {
-            // Check if day is before minimumDate
-            if (day.isBefore(widget.minimumDate!) &&
-                !day.isSameDay(widget.minimumDate!)) {
-              return false;
-            }
-          }
-
-          if (widget.maximumDate != null) {
-            // Check if day is after maximumDate
-            if (day.isAfter(widget.maximumDate!) &&
-                !day.isSameDay(widget.maximumDate!)) {
-              return false;
-            }
-          }
-
-          // If we've passed all checks, the day is selectable
-          return true;
-        },
-        headerVisible: false,
-        focusedDay: _focusedDay,
-        currentDay: DateTime.now(),
-        firstDay: widget.minimumDate ?? DateTime.now().subtract(365.days),
-        lastDay: widget.maximumDate ?? DateTime.now().add(365.days),
-        selectedDayPredicate: (day) => _selectedDay?.isSameDay(day) ?? false,
-        daysOfWeekHeight: 32,
-        calendarFormat: CalendarFormat.month,
-        availableCalendarFormats: const {CalendarFormat.month: 'Month'},
-        calendarBuilders: CalendarBuilders(
-          selectedBuilder: _selectedDayBuilder,
-          todayBuilder: _todayBuilder,
-          dowBuilder: _buildDayOfWeek,
-          defaultBuilder: _defaultDayBuilder,
-        ),
-        onDaySelected: _onDateSelected,
-        onPageChanged: (focusedDay) {
-          setState(() {
-            _focusedDay = DateTime.now().isSameMonth(focusedDay)
-                ? DateTime.now()
-                : focusedDay;
-          });
-        },
-      ),
-    );
-  }
-
-  Widget _selectedDayBuilder(
-    BuildContext context,
-    DateTime day,
-    DateTime focusedDay,
-  ) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8),
-      decoration: BoxDecoration(
-        color: context.colorScheme.primary,
-        shape: BoxShape.circle,
-      ),
-      child: Center(
-        child: Text(
-          day.day.toString(),
-          style: context.textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: context.colorScheme.onPrimary,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(UiConstants.borderRadiusValue),
+          border: Border.all(
+            color: context.colorScheme.outline,
+            width: UiConstants.borderWidth,
           ),
         ),
+        child: TableCalendar(
+          shouldFillViewport: true,
+          enabledDayPredicate: (day) {
+            if (widget.minimumDate != null) {
+              // Check if day is before minimumDate
+              if (day.isBefore(widget.minimumDate!) &&
+                  !day.isSameDay(widget.minimumDate!)) {
+                return false;
+              }
+            }
+
+            if (widget.maximumDate != null) {
+              // Check if day is after maximumDate
+              if (day.isAfter(widget.maximumDate!) &&
+                  !day.isSameDay(widget.maximumDate!)) {
+                return false;
+              }
+            }
+
+            // If we've passed all checks, the day is selectable
+            return true;
+          },
+          headerVisible: false,
+          focusedDay: _focusedDay,
+          currentDay: DateTime.now(),
+          firstDay: widget.minimumDate ?? DateTime.now().subtract(365.days),
+          lastDay: widget.maximumDate ?? DateTime.now().add(365.days),
+          selectedDayPredicate: (day) => _selectedDay?.isSameDay(day) ?? false,
+          daysOfWeekHeight: 32,
+          calendarFormat: CalendarFormat.month,
+          availableCalendarFormats: const {CalendarFormat.month: 'Month'},
+          calendarBuilders: CalendarBuilders(
+            selectedBuilder: (context, day, focusedDay) =>
+                _buildDayCell(context, day, focusedDay, isSelected: true),
+            todayBuilder: (context, day, focusedDay) =>
+                _buildDayCell(context, day, focusedDay, isToday: true),
+            dowBuilder: _buildDayOfWeek,
+            defaultBuilder: (context, day, focusedDay) =>
+                _buildDayCell(context, day, focusedDay),
+            disabledBuilder: (context, day, focusedDay) =>
+                _buildDayCell(context, day, focusedDay, isDisabled: true),
+            outsideBuilder: (context, day, focusedDay) =>
+                _buildDayCell(context, day, focusedDay, isDisabled: true),
+          ),
+          daysOfWeekStyle: DaysOfWeekStyle(
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: context.colorScheme.outline,
+                  width: UiConstants.borderWidth,
+                ),
+              ),
+            ),
+          ),
+          onDaySelected: _onDateSelected,
+          onPageChanged: (focusedDay) {
+            setState(() {
+              _focusedDay = DateTime.now().isSameMonth(focusedDay)
+                  ? DateTime.now()
+                  : focusedDay;
+            });
+          },
+        ),
       ),
     );
   }
 
-  Widget _todayBuilder(
+  Widget _buildDayCell(
     BuildContext context,
     DateTime day,
-    DateTime focusedDay,
-  ) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8),
-      decoration: BoxDecoration(
+    DateTime focusedDay, {
+    bool isSelected = false,
+    bool isToday = false,
+    bool isDisabled = false,
+  }) {
+    BoxDecoration? decoration;
+    Color textColor;
+
+    if (isSelected) {
+      decoration = BoxDecoration(
+        color: context.colorScheme.primary,
+        shape: BoxShape.circle,
+      );
+      textColor = context.colorScheme.onPrimary;
+    } else if (isToday) {
+      decoration = BoxDecoration(
         color: day.isSameDay(focusedDay) ? context.colorScheme.primary : null,
         border: Border.all(color: context.colorScheme.primary, width: 0.6),
         shape: BoxShape.circle,
-      ),
-      child: Center(
-        child: Text(
-          day.day.toString(),
-          style: context.textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: day.isSameDay(focusedDay)
-                ? context.colorScheme.onPrimary
-                : context.colorScheme.onSurface,
+      );
+      textColor = day.isSameDay(focusedDay)
+          ? context.colorScheme.onPrimary
+          : context.colorScheme.onSurface;
+    } else {
+      textColor = context.colorScheme.onSurface;
+    }
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: context.colorScheme.outline,
+            width: UiConstants.borderWidth,
           ),
         ),
       ),
-    );
-  }
-
-  Widget _defaultDayBuilder(
-    BuildContext context,
-    DateTime day,
-    DateTime focusedDay,
-  ) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8),
-      child: Center(
-        child: Text(
-          day.day.toString(),
-          style: context.textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: context.colorScheme.onSurface,
+      child: Container(
+        margin: const EdgeInsets.all(5),
+        decoration: decoration,
+        child: Center(
+          child: Opacity(
+            opacity: isDisabled ? 0.2 : 1,
+            child: Text(
+              day.day.toString(),
+              style: context.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: textColor,
+              ),
+            ),
           ),
         ),
       ),
@@ -272,9 +289,8 @@ class _AppDateFormFieldState extends State<AppDateFormField> {
     return Center(
       child: Text(
         day.weekDayInitial,
-        style: context.textTheme.bodyMedium?.copyWith(
-          fontWeight: FontWeight.w600,
-          color: context.colorScheme.onSurface,
+        style: context.textTheme.bodySmall?.copyWith(
+          color: context.colorScheme.secondary,
         ),
       ),
     );

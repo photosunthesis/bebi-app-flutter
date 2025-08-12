@@ -8,8 +8,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-class Calendar extends StatelessWidget {
-  const Calendar({super.key});
+class CalendarSliverDelegate extends SliverPersistentHeaderDelegate {
+  const CalendarSliverDelegate();
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) => const _Calendar();
+
+  @override
+  double get maxExtent => 344;
+
+  @override
+  double get minExtent => 344;
+
+  @override
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) =>
+      false;
+}
+
+class _Calendar extends StatelessWidget {
+  const _Calendar();
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +38,7 @@ class Calendar extends StatelessWidget {
       builder: (context, state) {
         return DecoratedBox(
           decoration: BoxDecoration(
+            color: context.colorScheme.surface,
             border: Border(
               top: BorderSide(
                 color: context.colorScheme.outline,
@@ -47,11 +69,15 @@ class Calendar extends StatelessWidget {
             },
             daysOfWeekStyle: _dayOfWeekStyle(context),
             calendarBuilders: CalendarBuilders(
-              selectedBuilder: _selectedDayBuilder,
-              todayBuilder: _todayBuilder,
+              selectedBuilder: (context, day, focusedDay) =>
+                  _buildDayCell(context, day, focusedDay, isSelected: true),
+              todayBuilder: (context, day, focusedDay) =>
+                  _buildDayCell(context, day, focusedDay, isToday: true),
               dowBuilder: _buildDayOfWeek,
-              defaultBuilder: _defaultDayBuilder,
-              outsideBuilder: _outsideBuilder,
+              defaultBuilder: (context, day, focusedDay) =>
+                  _buildDayCell(context, day, focusedDay),
+              outsideBuilder: (context, day, focusedDay) =>
+                  _buildDayCell(context, day, focusedDay, isOutside: true),
               markerBuilder: (context, day, events) =>
                   _markerBuilder(context, day, events, state.focusedDay),
             ),
@@ -71,116 +97,42 @@ class Calendar extends StatelessWidget {
     );
   }
 
-  Widget _selectedDayBuilder(
+  Widget _buildDayCell(
     BuildContext context,
     DateTime day,
-    DateTime focusedDay,
-  ) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: context.colorScheme.outline,
-            width: UiConstants.borderWidth,
-          ),
-        ),
-      ),
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(12, 10, 12, 18),
-        decoration: BoxDecoration(
-          color: context.colorScheme.primary,
-          shape: BoxShape.circle,
-        ),
-        child: Center(
-          child: Text(
-            day.day.toString(),
-            style: context.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: context.colorScheme.onPrimary,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+    DateTime focusedDay, {
+    bool isSelected = false,
+    bool isToday = false,
+    bool isOutside = false,
+  }) {
+    final isSameMonth = day.isSameMonth(focusedDay);
 
-  Widget _todayBuilder(
-    BuildContext context,
-    DateTime day,
-    DateTime focusedDay,
-  ) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: context.colorScheme.outline,
-            width: UiConstants.borderWidth,
-          ),
-        ),
-      ),
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(12, 10, 12, 18),
-        decoration: BoxDecoration(
-          color: day.isSameDay(focusedDay) ? context.colorScheme.primary : null,
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: context.colorScheme.primary.withAlpha(
-              day.isSameMonth(focusedDay) ? 255 : 80,
-            ),
-            width: 0.6,
-          ),
-        ),
-        child: Center(
-          child: Text(
-            day.day.toString(),
-            style: context.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: day.isSameDay(focusedDay)
-                  ? context.colorScheme.onPrimary
-                  : day.isSameMonth(focusedDay)
-                  ? context.colorScheme.onSurface
-                  : context.colorScheme.onSurface.withAlpha(80),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+    Color textColor;
+    BoxDecoration? decoration;
 
-  Widget _defaultDayBuilder(
-    BuildContext context,
-    DateTime day,
-    DateTime focusedDay,
-  ) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: context.colorScheme.outline,
-            width: UiConstants.borderWidth,
-          ),
+    if (isSelected) {
+      textColor = context.colorScheme.onPrimary;
+      decoration = BoxDecoration(
+        color: context.colorScheme.primary,
+        shape: BoxShape.circle,
+      );
+    } else if (isToday) {
+      textColor = isSameMonth
+          ? context.colorScheme.onSurface
+          : context.colorScheme.onSurface.withAlpha(80);
+      decoration = BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: context.colorScheme.primary.withAlpha(isSameMonth ? 255 : 80),
+          width: 0.6,
         ),
-      ),
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(12, 10, 12, 18),
-        child: Center(
-          child: Text(
-            day.day.toString(),
-            style: context.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: context.colorScheme.onSurface,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+      );
+    } else if (isOutside) {
+      textColor = context.colorScheme.onSurface.withAlpha(80);
+    } else {
+      textColor = context.colorScheme.onSurface;
+    }
 
-  Widget _outsideBuilder(
-    BuildContext context,
-    DateTime day,
-    DateTime focusedDay,
-  ) {
     return DecoratedBox(
       decoration: BoxDecoration(
         border: Border(
@@ -192,12 +144,13 @@ class Calendar extends StatelessWidget {
       ),
       child: Container(
         margin: const EdgeInsets.fromLTRB(12, 10, 12, 18),
+        decoration: decoration,
         child: Center(
           child: Text(
             day.day.toString(),
             style: context.textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w600,
-              color: context.colorScheme.onSurface.withAlpha(80),
+              color: textColor,
             ),
           ),
         ),

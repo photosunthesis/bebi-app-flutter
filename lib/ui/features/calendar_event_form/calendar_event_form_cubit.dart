@@ -42,7 +42,7 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
   }
 
   Future<void> save({
-    required SaveChangesDialogOptions saveOption,
+    SaveChangesDialogOptions? saveOption,
     required String title,
     required DateTime date,
     required DateTime startTime,
@@ -70,8 +70,12 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
         final isRecurringEvent = state.calendarEvent?.isRecurring ?? false;
 
         if (isExistingEvent && isRecurringEvent && instanceDate != null) {
+          assert(
+            saveOption != null,
+            'saveOption must not be null when handling recurring events',
+          );
           await _handleRecurringSave(
-            saveOption: saveOption,
+            saveOption: saveOption!,
             title: title,
             date: date,
             startTime: startTime,

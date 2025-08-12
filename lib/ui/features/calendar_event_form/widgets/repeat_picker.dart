@@ -74,9 +74,13 @@ class _RepeatPickerState extends State<RepeatPicker> {
             labelBuilder: (item) => item.label,
             onChanged: (freq) {
               widget.onRepeatFrequencyChanged(freq);
-              setState(
-                () => _showDaysOfWeekPicker = freq == RepeatFrequency.weekly,
-              );
+
+              if (freq == RepeatFrequency.weekly) {
+                setState(() => _showDaysOfWeekPicker = true);
+                _daysOfWeekController.text = widget.daysOfWeekSelected
+                    .map((e) => e.toTitle().substring(0, 3))
+                    .join(', ');
+              }
             },
           ),
           if (_showDaysOfWeekPicker)

@@ -59,9 +59,11 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
   late List<DayOfWeek> _daysOfWeekSelected =
       widget.calendarEvent?.repeatRule.daysOfWeek != null
       ? widget.calendarEvent!.repeatRule.daysOfWeek!
-            .map(DayOfWeek.fromIndex)
+            .map((index) => DayOfWeek.values[index])
             .toList()
-      : const <DayOfWeek>[];
+      : widget.selectedDate != null
+      ? [DayOfWeek.values[widget.selectedDate!.toLocal().weekday]]
+      : const [];
   late bool _allDay = widget.calendarEvent?.allDay ?? false;
   late bool _shareWithPartner = (widget.calendarEvent?.users.length ?? 2) > 1;
   late EventColor _selectedColor =
@@ -72,7 +74,9 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
   @override
   void initState() {
     super.initState();
-    _cubit.initialize(widget.calendarEvent);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _cubit.initialize(widget.calendarEvent);
+    });
   }
 
   @override
@@ -155,17 +159,18 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
   }
 
   Future<void> _onSave() async {
-    late SaveChangesDialogOptions saveOption;
+    SaveChangesDialogOptions? saveOption;
+
     if (widget.calendarEvent?.isRecurring == true) {
       saveOption = await _showConfirmSaveDialog();
       if (saveOption == SaveChangesDialogOptions.cancel) return;
     }
 
     if (_formKey.currentState?.validate() ?? false) {
-      final date = _dateController.text.toEEEEMMMMdyyyyDate()!;
+      final date = _dateController.text.toEEEMMMdyyyyDate()!;
       final startTimeParsed = _startTimeController.text.toHHmmaTime();
       final endTimeParsed = _endTimeController.text.toHHmmaTime();
-      final endRepeatDate = _endRepeatDateController.text.toEEEEMMMMdyyyyDate();
+      final endRepeatDate = _endRepeatDateController.text.toEEEMMMdyyyyDate();
 
       final repeat = RepeatRule(
         frequency: _repeatFrequency,

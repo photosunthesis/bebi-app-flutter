@@ -156,7 +156,7 @@ class _CalendarEventDetailsScreenState
                 const SizedBox(width: 40),
                 Text(
                   _event.repeatRule.frequency == RepeatFrequency.weekly
-                      ? 'Repeats ${_event.repeatRule.frequency.name} (${_event.repeatRule.daysOfWeek?.map((e) => DayOfWeek.fromIndex(e).toTitle().substring(0, 3)).join(', ')})'
+                      ? 'Repeats ${_event.repeatRule.frequency.name} (${_event.repeatRule.daysOfWeek?.map((e) => DayOfWeek.values[e].toTitle().substring(0, 3)).join(', ')})'
                       : 'Repeats ${_event.repeatRule.frequency.name}',
                   style: context.textTheme.bodyMedium,
                 ),

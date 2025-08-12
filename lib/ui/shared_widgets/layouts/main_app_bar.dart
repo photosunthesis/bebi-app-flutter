@@ -11,6 +11,7 @@ abstract class MainAppBar {
     bool darkStatusBarIcons = true,
     bool autoImplementLeading = true,
     Widget? flexibleSpace,
+    PreferredSize? bottom,
     double? toolbarHeight,
   }) {
     return AppBar(
@@ -24,13 +25,15 @@ abstract class MainAppBar {
       actions: [...actions, const SizedBox(width: 8)],
       centerTitle: true,
       titleSpacing: 0,
-      bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(1.0),
-        child: Container(
-          color: context.colorScheme.outline,
-          height: UiConstants.borderWidth,
-        ),
-      ),
+      bottom:
+          bottom ??
+          PreferredSize(
+            preferredSize: const Size.fromHeight(1.0),
+            child: Container(
+              color: context.colorScheme.outline,
+              height: UiConstants.borderWidth,
+            ),
+          ),
       flexibleSpace: flexibleSpace,
       toolbarHeight: toolbarHeight,
     );

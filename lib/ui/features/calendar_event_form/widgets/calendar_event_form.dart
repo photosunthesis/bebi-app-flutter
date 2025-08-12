@@ -71,10 +71,12 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
   void initState() {
     super.initState();
     widget.dateController.addListener(() {
-      setState(() {
-        _repeatEndDateMinimum = widget.dateController.text.isEmpty
-            ? null
-            : widget.dateController.text.toEEEMMMdyyyyDate();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {
+          _repeatEndDateMinimum = widget.dateController.text.isEmpty
+              ? null
+              : widget.dateController.text.toEEEMMMdyyyyDate();
+        });
       });
     });
   }
@@ -317,7 +319,8 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
     return BlocBuilder<CalendarEventFormCubit, CalendarEventFormState>(
       builder: (context, state) {
         final eventCreatedByCurrentUser =
-            state.calendarEvent?.createdBy == state.currentUserId;
+            state.calendarEvent?.createdBy == state.currentUserId ||
+            state.calendarEvent == null;
         return Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [

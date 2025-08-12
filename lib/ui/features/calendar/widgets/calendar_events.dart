@@ -4,137 +4,101 @@ import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/constants/kaomojis.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
-import 'package:bebi_app/ui/features/calendar/calendar_cubit.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/color_extensions.dart';
-import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-class CalendarEvents extends StatefulWidget {
-  const CalendarEvents({super.key});
+abstract class CalendarEvents {
+  static final _kaomoji =
+      Kaomojis.happySet[Random().nextInt(Kaomojis.happySet.length)];
 
-  @override
-  State<CalendarEvents> createState() => _CalendarEventsState();
+  static SliverList buildList(List<CalendarEvent> events) {
+    return SliverList.builder(
+      itemCount: events.length,
+      itemBuilder: (context, index) => Padding(
+        padding: EdgeInsets.only(bottom: 8, top: index == 0 ? 10 : 4),
+        child: _EventCard(event: events[index]),
+      ),
+    );
+  }
+
+  static SliverFillRemaining buildEmptyPlaceholder(BuildContext context) {
+    return SliverFillRemaining(
+      hasScrollBody: false,
+      fillOverscroll: true,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              _kaomoji,
+              style: context.textTheme.titleLarge?.copyWith(
+                color: context.colorScheme.secondary.withAlpha(80),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'No events',
+              style: context.textTheme.bodyLarge?.copyWith(
+                color: context.colorScheme.secondary.withAlpha(80),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
-class _CalendarEventsState extends State<CalendarEvents> {
-  final _kaomoji =
-      Kaomojis.happySet[Random().nextInt(Kaomojis.happySet.length)];
+class _EventCard extends StatelessWidget {
+  const _EventCard({required this.event});
+
+  final CalendarEvent event;
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: BlocSelector<CalendarCubit, CalendarState, List<CalendarEvent>>(
-        selector: (state) => state.focusedDayEvents,
-        builder: (context, events) {
-          return AnimatedSwitcher(
-            duration: 120.milliseconds,
-            reverseDuration: 0.milliseconds,
-            transitionBuilder: (child, animation) {
-              return SizeTransition(
-                sizeFactor: CurvedAnimation(
-                  parent: animation,
-                  curve: Curves.easeOutQuint,
-                ),
-                axisAlignment: -1.0,
-                child: FadeTransition(
-                  opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
-                    CurvedAnimation(
-                      parent: animation,
-                      curve: const Interval(
-                        0.0,
-                        0.6,
-                        curve: Curves.easeInQuint,
-                      ),
-                    ),
-                  ),
-                  child: child,
-                ),
-              );
-            },
-            child: events.isEmpty
-                ? _buildNoEventsPlaceholder()
-                : _buildEventsList(events),
-          );
-        },
+    return InkWell(
+      onTap: () async => context.pushNamed(
+        AppRoutes.viewCalendarEvent,
+        extra: event,
+        pathParameters: {'id': event.id},
       ),
-    );
-  }
-
-  Widget _buildEventsList(List<CalendarEvent> events) {
-    return ListView.builder(
-      key: ValueKey(events),
-      itemCount: events.length,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      itemBuilder: (context, index) => Padding(
-        padding: EdgeInsets.only(bottom: 8, top: index == 0 ? 10 : 4),
-        child: _buildEventCard(context, events[index]),
-      ),
-    );
-  }
-
-  Widget _buildNoEventsPlaceholder() {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            _kaomoji,
-            style: context.textTheme.titleLarge?.copyWith(
-              color: context.colorScheme.secondary.withAlpha(80),
-            ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        margin: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: event.color.withAlpha(50),
+          borderRadius: UiConstants.borderRadius,
+          border: Border.all(
+            color: event.color.darken(0.2),
+            width: UiConstants.borderWidth,
           ),
-          const SizedBox(height: 8),
-          Text(
-            'No events',
-            style: context.textTheme.bodyLarge?.copyWith(
-              color: context.colorScheme.secondary.withAlpha(80),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEventCard(BuildContext context, CalendarEvent event) {
-    return IntrinsicHeight(
-      child: InkWell(
-        onTap: () async => context.pushNamed(
-          AppRoutes.viewCalendarEvent,
-          extra: event,
-          pathParameters: {'id': event.id},
         ),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-          decoration: BoxDecoration(
-            color: event.color.withAlpha(50),
-            borderRadius: UiConstants.borderRadius,
-            border: Border.all(
-              color: event.color.darken(0.2),
-              width: UiConstants.borderWidth,
-            ),
-          ),
-          child: Row(
-            children: [
-              Container(
+        child: Stack(
+          children: [
+            Positioned(
+              left: 0,
+              top: 0,
+              bottom: 0,
+              child: Container(
                 width: 3,
-                height: double.infinity,
                 decoration: BoxDecoration(
                   color: event.color,
                   borderRadius: BorderRadius.circular(1),
                 ),
               ),
-              const SizedBox(width: 8),
-              Expanded(child: _buildEventDetails(context, event)),
-            ],
-          ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 3 + 8),
+              child: _buildEventDetails(context),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  String _formatDuration(DateTime start, DateTime? end) {
+  String _formatDuration(BuildContext context, DateTime start, DateTime? end) {
     final startTime = TimeOfDay.fromDateTime(start);
     final endTime = end != null ? TimeOfDay.fromDateTime(end) : null;
     final startStr = startTime.format(context);
@@ -142,56 +106,54 @@ class _CalendarEventsState extends State<CalendarEvents> {
     return endStr.isNotEmpty ? '$startStr → $endStr' : startStr;
   }
 
-  Widget _buildEventDetails(BuildContext context, CalendarEvent event) {
+  Widget _buildEventDetails(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildTitle(event.title, event.color),
+        _buildTitle(context),
         const SizedBox(height: 4),
-        _buildTime(event, event.allDay, event.color),
+        _buildTime(context),
         if (event.notes != null && event.notes!.isNotEmpty) ...[
           const SizedBox(height: 3),
-          _buildNotes(event.notes!, event.color),
+          _buildNotes(context),
         ],
       ],
     );
   }
 
-  Widget _buildTitle(String title, Color color) {
+  Widget _buildTitle(BuildContext context) {
     return Text(
-      title,
+      event.title,
       style: context.primaryTextTheme.titleLarge?.copyWith(
-        color: color.darken(0.3),
+        color: event.color.darken(0.3),
         fontWeight: FontWeight.w500,
       ),
       overflow: TextOverflow.ellipsis,
     );
   }
 
-  Widget _buildTime(CalendarEvent event, bool allDay, Color color) {
+  Widget _buildTime(BuildContext context) {
     return Text(
-      allDay
+      event.allDay
           ? 'All-day'.toUpperCase()
-          : _formatDuration(event.startTimeLocal, event.endTimeLocal),
+          : _formatDuration(context, event.startTimeLocal, event.endTimeLocal),
       style: context.textTheme.bodySmall?.copyWith(
-        color: color.darken(0.1),
+        color: event.color.darken(0.1),
         fontWeight: FontWeight.w500,
       ),
     );
   }
 
-  Widget _buildNotes(String location, Color color) {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.only(right: 24),
-        child: Text(
-          location,
-          style: context.textTheme.bodyMedium?.copyWith(
-            color: color.darken(0.1),
-          ),
-          overflow: TextOverflow.ellipsis,
-          maxLines: 1,
+  Widget _buildNotes(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 24),
+      child: Text(
+        event.notes!,
+        style: context.textTheme.bodyMedium?.copyWith(
+          color: event.color.darken(0.1),
         ),
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
       ),
     );
   }
