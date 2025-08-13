@@ -8,8 +8,8 @@ class AngledStripesBackground extends StatelessWidget {
     this.backgroundColor = Colors.white,
     this.stripeWidth = 1.6,
     this.angle = -45.0,
-     this.width = 26,
-     this.height = 26,
+    this.width = 26,
+    this.height = 26,
     this.shape = const CircleBorder(),
   });
 

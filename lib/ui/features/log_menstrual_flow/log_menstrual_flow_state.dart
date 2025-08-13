@@ -5,5 +5,6 @@ sealed class LogMenstrualFlowState with _$LogMenstrualFlowState {
   const factory LogMenstrualFlowState.loading() = LogMenstrualFlowLoading;
   const factory LogMenstrualFlowState.data() = LogMenstrualFlowData;
   const factory LogMenstrualFlowState.success() = LogMenstrualFlowSuccess;
-  const factory LogMenstrualFlowState.error(String error) = LogMenstrualFlowError;
+  const factory LogMenstrualFlowState.error(String error) =
+      LogMenstrualFlowError;
 }
