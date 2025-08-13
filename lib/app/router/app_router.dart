@@ -27,7 +27,6 @@ import 'package:bebi_app/ui/features/sign_in/sign_in_screen.dart';
 import 'package:bebi_app/ui/shared_widgets/layouts/main_scaffold.dart';
 import 'package:bebi_app/ui/shared_widgets/modals/bottom_sheet_page.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_analytics/observer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
