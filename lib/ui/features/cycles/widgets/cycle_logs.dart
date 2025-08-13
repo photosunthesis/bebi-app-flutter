@@ -65,6 +65,7 @@ class _CycleLogsState extends State<CycleLogs> {
                   queryParameters: {
                     'logForPartner': '!${state.showCurrentUserCycleData}',
                     'date': state.focusedDate.toIso8601String(),
+                    if (periodLog != null) 'cycleLogId': periodLog.id,
                     if (periodLog != null)
                       'flowIntensity': periodLog.flow!.name,
                   },
@@ -192,6 +193,7 @@ class _CycleLogsState extends State<CycleLogs> {
               queryParameters: {
                 'logForPartner': '!${state.showCurrentUserCycleData}',
                 'date': state.focusedDate.toIso8601String(),
+                if (symptomLog != null) 'cycleLogId': symptomLog.id,
                 if (symptomLog != null)
                   'symptoms': symptomLog.symptoms?.join(',') ?? '',
               },

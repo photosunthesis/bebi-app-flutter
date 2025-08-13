@@ -15,12 +15,14 @@ class LogSymptomsScreen extends StatefulWidget {
     required this.date,
     required this.logForPartner,
     this.symptoms = const [],
+    this.cycleLogId,
     super.key,
   });
 
   final DateTime date;
   final bool logForPartner;
   final List<String> symptoms;
+  final String? cycleLogId;
 
   @override
   State<LogSymptomsScreen> createState() => _LogSymptomsScreenState();
@@ -172,6 +174,7 @@ class _LogSymptomsScreenState extends State<LogSymptomsScreen> {
           onPressed: loading
               ? null
               : () async => await context.read<LogSymptomsCubit>().logSymptoms(
+                  cycleLogId: widget.cycleLogId,
                   date: widget.date,
                   logForPartner: widget.logForPartner,
                   symptoms: _symptoms,

@@ -35,6 +35,7 @@ class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState> {
   String? get _currentUserId => _firebaseAuth.currentUser?.uid;
 
   Future<void> logFlow({
+    required String? cycleLogId,
     required DateTime date,
     required FlowIntensity flowIntensity,
     required bool logForPartner,
@@ -56,6 +57,7 @@ class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState> {
         );
 
         final cycleLog = CycleLog.period(
+          id: cycleLogId ?? '',
           date: date,
           flow: flowIntensity,
           createdBy: _currentUserId!,
@@ -72,7 +74,7 @@ class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState> {
           end: date.add(1.days),
         );
 
-        if (previousLogs.isEmpty) {
+        if (previousLogs.isEmpty || cycleLogId != null) {
           // Auto-log the next few days of menstrual flow to reduce daily manual entries
           final cycleLogs = List.generate(
             5, // TODO Make this dynamic
@@ -96,6 +98,24 @@ class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState> {
             },
           ),
         );
+      },
+      onError: (error, _) {
+        emit(LogMenstrualFlowState.error(error.toString()));
+      },
+      onComplete: () {
+        emit(const LogMenstrualFlowState.data());
+      },
+    );
+  }
+
+  Future<void> delete(String cycleLogId) async {
+    await guard(
+      () async {
+        emit(const LogMenstrualFlowState.loading());
+
+        await _cycleLogsRepository.deleteById(cycleLogId);
+
+        emit(const LogMenstrualFlowState.success());
       },
       onError: (error, _) {
         emit(LogMenstrualFlowState.error(error.toString()));

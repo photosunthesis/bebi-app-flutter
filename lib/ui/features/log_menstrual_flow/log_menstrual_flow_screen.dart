@@ -14,12 +14,14 @@ class LogMenstrualFlowScreen extends StatefulWidget {
   const LogMenstrualFlowScreen({
     required this.date,
     required this.logForPartner,
+    this.cycleLogId,
     this.flowIntensity,
     super.key,
   });
 
   final DateTime date;
   final bool logForPartner;
+  final String? cycleLogId;
   final FlowIntensity? flowIntensity;
 
   @override
@@ -82,7 +84,13 @@ class _LogMenstrualFlowScreenState extends State<LogMenstrualFlowScreen> {
             ),
             const SizedBox(height: 16),
             _buildSelection(loading),
+            const SizedBox(height: 16),
             _buildConfirmButton(loading),
+            if (widget.cycleLogId != null) ...[
+              const SizedBox(height: 4),
+              _buildDeleteButton(loading),
+            ],
+            const SafeArea(child: SizedBox.shrink()),
           ],
         );
       },
@@ -152,24 +160,48 @@ class _LogMenstrualFlowScreenState extends State<LogMenstrualFlowScreen> {
   }
 
   Widget _buildConfirmButton(bool loading) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(UiConstants.padding),
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: context.colorScheme.primary,
-            foregroundColor: context.colorScheme.onPrimary,
-            minimumSize: const Size(double.infinity, 44),
-          ),
-          onPressed: loading
-              ? null
-              : () async => await context.read<LogMenstrualFlowCubit>().logFlow(
-                  date: widget.date,
-                  flowIntensity: _flowIntensity,
-                  logForPartner: widget.logForPartner,
-                ),
-          child: Text(
-            loading ? 'Logging...' : 'Log menstrual flow'.toUpperCase(),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: context.colorScheme.primary,
+          foregroundColor: context.colorScheme.onPrimary,
+          minimumSize: const Size(double.infinity, 44),
+        ),
+        onPressed: loading
+            ? null
+            : () async => await context.read<LogMenstrualFlowCubit>().logFlow(
+                cycleLogId: widget.cycleLogId,
+                date: widget.date,
+                flowIntensity: _flowIntensity,
+                logForPartner: widget.logForPartner,
+              ),
+        child: Text(
+          loading ? 'Logging...' : 'Log menstrual flow'.toUpperCase(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDeleteButton(bool loading) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
+      child: OutlinedButton(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: context.colorScheme.primary,
+          minimumSize: const Size(double.infinity, 44),
+        ),
+        onPressed: loading
+            ? null
+            : () async => await context.read<LogMenstrualFlowCubit>().delete(
+                widget.cycleLogId!,
+              ),
+        child: Text(
+          (loading ? 'Deleting...' : 'Delete log').toUpperCase(),
+          style: context.textTheme.titleSmall?.copyWith(
+            color: context.colorScheme.error,
+            fontWeight: FontWeight.w500,
+            fontSize: 12,
           ),
         ),
       ),

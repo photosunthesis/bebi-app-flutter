@@ -132,6 +132,7 @@ abstract class AppRouter {
           child: BlocProvider(
             create: (_) => GetIt.I<LogMenstrualFlowCubit>(),
             child: LogMenstrualFlowScreen(
+              cycleLogId: state.uri.queryParameters['cycleLogId'],
               logForPartner:
                   state.uri.queryParameters['logForPartner'] == 'true',
               date: DateTime.parse(state.uri.queryParameters['date']!),
@@ -152,6 +153,7 @@ abstract class AppRouter {
           child: BlocProvider(
             create: (context) => GetIt.I<LogSymptomsCubit>(),
             child: LogSymptomsScreen(
+              cycleLogId: state.uri.queryParameters['cycleLogId'],
               date: DateTime.parse(state.uri.queryParameters['date']!),
               logForPartner:
                   state.uri.queryParameters['logForPartner'] == 'true',

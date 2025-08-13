@@ -4,6 +4,7 @@ import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/data/repositories/cycle_logs_repository.dart';
 import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
+import 'package:bebi_app/utils/exceptions/simple_exception.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/guard.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -34,6 +35,7 @@ class LogSymptomsCubit extends Cubit<LogSymptomsState> {
   String? get _currentUserId => _firebaseAuth.currentUser?.uid;
 
   Future<void> logSymptoms({
+    String? cycleLogId,
     required DateTime date,
     required List<String> symptoms,
     required bool logForPartner,
@@ -41,6 +43,10 @@ class LogSymptomsCubit extends Cubit<LogSymptomsState> {
     await guard(
       () async {
         emit(const LogSymptomsState.loading());
+
+        if (cycleLogId == null && symptoms.isEmpty) {
+          throw const SimpleException('Please select at least one symptom.');
+        }
 
         final userProfile = await _userProfileRepository.getByUserId(
           _currentUserId!,
@@ -54,17 +60,22 @@ class LogSymptomsCubit extends Cubit<LogSymptomsState> {
           partnership!.users.firstWhere((user) => user != _currentUserId!),
         );
 
-        await _cycleLogsRepository.createOrUpdate(
-          CycleLog.symptom(
-            date: date,
-            symptoms: symptoms,
-            createdBy: _currentUserId!,
-            ownedBy: logForPartner ? partnerProfile!.userId : _currentUserId!,
-            users: userProfile!.isSharingCycleWithPartner == true
-                ? partnership.users
-                : [_currentUserId!],
-          ),
-        );
+        if (symptoms.isEmpty) {
+          await _cycleLogsRepository.deleteById(cycleLogId!);
+        } else {
+          await _cycleLogsRepository.createOrUpdate(
+            CycleLog.symptom(
+              id: cycleLogId ?? '',
+              date: date,
+              symptoms: symptoms,
+              createdBy: _currentUserId!,
+              ownedBy: logForPartner ? partnerProfile!.userId : _currentUserId!,
+              users: userProfile!.isSharingCycleWithPartner == true
+                  ? partnership.users
+                  : [_currentUserId!],
+            ),
+          );
+        }
 
         emit(const LogSymptomsState.success());
 
@@ -78,6 +89,7 @@ class LogSymptomsCubit extends Cubit<LogSymptomsState> {
           ),
         );
       },
+      logWhen: (error) => error is! SimpleException,
       onError: (error, _) {
         emit(LogSymptomsState.error(error.toString()));
       },

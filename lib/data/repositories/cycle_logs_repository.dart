@@ -14,6 +14,21 @@ class CycleLogsRepository {
 
   static const _collection = 'cycle_logs';
 
+  Future<CycleLog?> getById(String id) async {
+    final cycleLog = _cycleLogBox.get(id);
+    if (cycleLog != null) return cycleLog;
+
+    final docSnapshot = await _firestore.collection(_collection).doc(id).get();
+
+    if (docSnapshot.exists) {
+      final cycleLog = CycleLog.fromFirestore(docSnapshot);
+      unawaited(_cycleLogBox.put(cycleLog.id, cycleLog));
+      return cycleLog;
+    }
+
+    return null;
+  }
+
   Future<List<CycleLog>> getByUserIdAndDateRange({
     required String userId,
     required DateTime start,
@@ -46,7 +61,6 @@ class CycleLogsRepository {
             createdAt: cycleLog.createdAt.toUtc(),
           )
           .toFirestore(),
-      SetOptions(merge: cycleLog.id.isNotEmpty),
     );
 
     final newCycleLog = cycleLog.copyWith(id: docRef.id);
@@ -78,9 +92,9 @@ class CycleLogsRepository {
     return newLogs;
   }
 
-  Future<void> delete(CycleLog cycleLog) async {
-    await _firestore.collection(_collection).doc(cycleLog.id).delete();
-    unawaited(_cycleLogBox.delete(cycleLog.id));
+  Future<void> deleteById(String id) async {
+    await _firestore.collection(_collection).doc(id).delete();
+    unawaited(_cycleLogBox.delete(id));
   }
 
   Future<List<CycleLog>> getCycleLogsByUserId(
