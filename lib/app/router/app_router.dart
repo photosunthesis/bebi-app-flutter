@@ -43,7 +43,7 @@ part 'app_routes.dart';
 @module
 abstract class AppRouter {
   @singleton
-  GoRouter get instance => GoRouter(
+  GoRouter instance(FirebaseAnalytics firebaseAnalytics) => GoRouter(
     routes: [
       GoRoute(
         path: '/sign-in',
@@ -233,7 +233,7 @@ abstract class AppRouter {
       ),
     ],
     observers: [
-      if (!kDebugMode) FirebaseAnalyticsObserver(analytics: GetIt.I()),
+      if (!kDebugMode) FirebaseAnalyticsObserver(analytics: firebaseAnalytics),
     ],
     redirect: (context, state) {
       final signedIn = GetIt.I<FirebaseAuth>().currentUser is User;
