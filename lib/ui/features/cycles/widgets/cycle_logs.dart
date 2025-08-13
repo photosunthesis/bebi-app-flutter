@@ -51,7 +51,7 @@ class _CycleLogsState extends State<CycleLogs> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Period'.toUpperCase(),
+              'Bleeding'.toUpperCase(),
               style: context.textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.w500,
                 color: context.colorScheme.secondary,
@@ -87,14 +87,12 @@ class _CycleLogsState extends State<CycleLogs> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Menstrual Flow',
+                      'Menstrual flow',
                       style: context.textTheme.bodyMedium?.copyWith(
                         color: AppColors.red.darken(0.4),
                       ),
                     ),
-                    if (state.focusedDateLogs.any(
-                      (e) => e.type == LogType.period,
-                    ))
+                    if (periodLog != null)
                       Text(
                         state.focusedDateLogs
                             .firstWhere((e) => e.type == LogType.period)
@@ -159,7 +157,7 @@ class _CycleLogsState extends State<CycleLogs> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Sexual Activity',
+                      'Intimate ativities',
                       style: context.textTheme.bodyMedium?.copyWith(
                         color: AppColors.purple.darken(0.4),
                       ),
