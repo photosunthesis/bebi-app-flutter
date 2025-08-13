@@ -65,9 +65,10 @@ class _CycleLogsState extends State<CycleLogs> {
                   queryParameters: {
                     'logForPartner': '!${state.showCurrentUserCycleData}',
                     'date': state.focusedDate.toIso8601String(),
-                    if (periodLog != null) 'cycleLogId': periodLog.id,
-                    if (periodLog != null)
+                    if (periodLog != null) ...{
+                      'cycleLogId': periodLog.id,
                       'flowIntensity': periodLog.flow!.name,
+                    },
                   },
                 );
 
@@ -143,7 +144,16 @@ class _CycleLogsState extends State<CycleLogs> {
           ),
           child: Column(
             children: [
-              _buildSymptomSection(),
+              _buildLogSection(
+                logType: LogType.symptom,
+                title: 'Symptoms',
+                routeName: AppRoutes.logSymptoms,
+                getDisplayText: (log) => _getSymptomDisplayText(log),
+                getRouteParams: (log) => {
+                  'cycleLogId': log.id,
+                  'symptoms': log.symptoms!.join(','),
+                },
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Divider(
@@ -151,24 +161,15 @@ class _CycleLogsState extends State<CycleLogs> {
                   height: UiConstants.borderWidth,
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Intimate ativities',
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        color: AppColors.purple.darken(0.4),
-                      ),
-                    ),
-                    Icon(
-                      Symbols.add_2,
-                      size: 16,
-                      color: AppColors.purple.darken(0.4),
-                    ),
-                  ],
-                ),
+              _buildLogSection(
+                logType: LogType.intimacy,
+                title: 'Intimate activities',
+                routeName: AppRoutes.logIntimacy,
+                getDisplayText: (log) => '${log.intimacyType!.label} sex',
+                getRouteParams: (log) => {
+                  'cycleLogId': log.id,
+                  'intimacyType': log.intimacyType!.name,
+                },
               ),
             ],
           ),
@@ -177,45 +178,35 @@ class _CycleLogsState extends State<CycleLogs> {
     );
   }
 
-  Widget _buildSymptomSection() {
+  Widget _buildLogSection({
+    required LogType logType,
+    required String title,
+    required String routeName,
+    required String Function(CycleLog) getDisplayText,
+    required Map<String, String> Function(CycleLog) getRouteParams,
+  }) {
     return BlocBuilder<CyclesCubit, CyclesState>(
       builder: (context, state) {
-        final symptomLog = state.focusedDateLogs.firstWhereOrNull(
-          (e) => e.type == LogType.symptom,
+        final log = state.focusedDateLogs.firstWhereOrNull(
+          (e) => e.type == logType,
         );
 
         return InkWell(
-          onTap: () async {
-            final shouldRefresh = await context.pushNamed(
-              AppRoutes.logSymptoms,
-              queryParameters: {
-                'logForPartner': '!${state.showCurrentUserCycleData}',
-                'date': state.focusedDate.toIso8601String(),
-                if (symptomLog != null) 'cycleLogId': symptomLog.id,
-                if (symptomLog != null)
-                  'symptoms': symptomLog.symptoms?.join(',') ?? '',
-              },
-            );
-
-            if (shouldRefresh == true) _cubit.refreshData();
-          },
+          onTap: () => _handleLogTap(state, routeName, log, getRouteParams),
           child: Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Symptoms',
+                  title,
                   style: context.textTheme.bodyMedium?.copyWith(
                     color: AppColors.purple.darken(0.4),
                   ),
                 ),
-                if (symptomLog != null)
+                if (log != null)
                   Text(
-                    symptomLog.symptoms != null &&
-                            symptomLog.symptoms!.length > 2
-                        ? '${symptomLog.symptoms!.first}, ${symptomLog.symptoms!.length - 1} more'
-                        : symptomLog.symptoms?.join(', ') ?? '',
+                    getDisplayText(log),
                     style: context.textTheme.bodyMedium?.copyWith(
                       color: AppColors.purple.darken(0.15),
                       fontWeight: FontWeight.w600,
@@ -233,5 +224,30 @@ class _CycleLogsState extends State<CycleLogs> {
         );
       },
     );
+  }
+
+  String _getSymptomDisplayText(CycleLog log) {
+    if (log.symptoms != null && log.symptoms!.length > 2) {
+      return '${log.symptoms!.first}, ${log.symptoms!.length - 1} more';
+    }
+    return log.symptoms?.join(', ') ?? '';
+  }
+
+  Future<void> _handleLogTap(
+    CyclesState state,
+    String routeName,
+    CycleLog? log,
+    Map<String, String> Function(CycleLog) getRouteParams,
+  ) async {
+    final shouldRefresh = await context.pushNamed(
+      routeName,
+      queryParameters: {
+        'logForPartner': '!${state.showCurrentUserCycleData}',
+        'date': state.focusedDate.toIso8601String(),
+        if (log != null) ...getRouteParams(log),
+      },
+    );
+
+    if (shouldRefresh == true) _cubit.refreshData();
   }
 }

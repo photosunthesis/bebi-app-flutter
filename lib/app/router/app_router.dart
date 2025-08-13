@@ -14,6 +14,8 @@ import 'package:bebi_app/ui/features/cycles_setup/cycle_setup_cubit.dart';
 import 'package:bebi_app/ui/features/cycles_setup/cycles_setup_screen.dart';
 import 'package:bebi_app/ui/features/home/home_cubit.dart';
 import 'package:bebi_app/ui/features/home/home_screen.dart';
+import 'package:bebi_app/ui/features/log_intimacy/log_intimacy_cubit.dart';
+import 'package:bebi_app/ui/features/log_intimacy/log_intimacy_screen.dart';
 import 'package:bebi_app/ui/features/log_menstrual_flow/log_menstrual_flow_cubit.dart';
 import 'package:bebi_app/ui/features/log_menstrual_flow/log_menstrual_flow_screen.dart';
 import 'package:bebi_app/ui/features/log_symptoms/log_symptoms_cubit.dart';
@@ -158,6 +160,21 @@ abstract class AppRouter {
               logForPartner:
                   state.uri.queryParameters['logForPartner'] == 'true',
               symptoms: state.uri.queryParameters['symptoms']?.split(',') ?? [],
+            ),
+          ),
+        ),
+      ),
+      GoRoute(
+        path: '/cycles/log-intimacy',
+        name: AppRoutes.logIntimacy,
+        pageBuilder: (_, state) => BottomSheetPage(
+          child: BlocProvider(
+            create: (context) => GetIt.I<LogIntimacyCubit>(),
+            child: LogIntimacyScreen(
+              cycleLogId: state.uri.queryParameters['cycleLogId'],
+              date: DateTime.parse(state.uri.queryParameters['date']!),
+              logForPartner:
+                  state.uri.queryParameters['logForPartner'] == 'true',
             ),
           ),
         ),

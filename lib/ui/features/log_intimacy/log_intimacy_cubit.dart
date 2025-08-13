@@ -13,18 +13,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 
-part 'log_symptoms_cubit.freezed.dart';
-part 'log_symptoms_state.dart';
+part 'log_intimacy_cubit.freezed.dart';
+part 'log_intimacy_state.dart';
 
 @injectable
-class LogSymptomsCubit extends Cubit<LogSymptomsState> {
-  LogSymptomsCubit(
+class LogIntimacyCubit extends Cubit<LogIntimacyState> {
+  LogIntimacyCubit(
     this._cycleLogsRepository,
     this._userProfileRepository,
     this._userPartnershipsRepository,
     this._firebaseAuth,
     this._firebaseAnalytics,
-  ) : super(const LogSymptomsState.data());
+  ) : super(const LogIntimacyState.data());
 
   final CycleLogsRepository _cycleLogsRepository;
   final UserProfileRepository _userProfileRepository;
@@ -34,19 +34,15 @@ class LogSymptomsCubit extends Cubit<LogSymptomsState> {
 
   String get _currentUserId => _firebaseAuth.currentUser!.uid;
 
-  Future<void> logSymptoms({
+  Future<void> logIntimacy({
     String? cycleLogId,
     required DateTime date,
-    required List<String> symptoms,
+    required IntimacyType intimacyType,
     required bool logForPartner,
   }) async {
     await guard(
       () async {
-        emit(const LogSymptomsState.loading());
-
-        if (cycleLogId == null && symptoms.isEmpty) {
-          throw const SimpleException('Please select at least one symptom.');
-        }
+        emit(const LogIntimacyState.loading());
 
         final userProfile = await _userProfileRepository.getByUserId(
           _currentUserId,
@@ -60,28 +56,24 @@ class LogSymptomsCubit extends Cubit<LogSymptomsState> {
           partnership!.users.firstWhere((user) => user != _currentUserId),
         );
 
-        if (symptoms.isEmpty) {
-          await _cycleLogsRepository.deleteById(cycleLogId!);
-        } else {
-          await _cycleLogsRepository.createOrUpdate(
-            CycleLog.symptom(
-              id: cycleLogId ?? '',
-              date: date,
-              symptoms: symptoms,
-              createdBy: _currentUserId,
-              ownedBy: logForPartner ? partnerProfile!.userId : _currentUserId,
-              users: userProfile!.isSharingCycleWithPartner == true
-                  ? partnership.users
-                  : [_currentUserId],
-            ),
-          );
-        }
+        await _cycleLogsRepository.createOrUpdate(
+          CycleLog.intimacy(
+            id: cycleLogId ?? '',
+            date: date,
+            intimacyType: intimacyType,
+            createdBy: _currentUserId,
+            ownedBy: logForPartner ? partnerProfile!.userId : _currentUserId,
+            users: userProfile!.isSharingCycleWithPartner == true
+                ? partnership.users
+                : [_currentUserId],
+          ),
+        );
 
-        emit(const LogSymptomsState.success());
+        emit(const LogIntimacyState.success());
 
         unawaited(
           _firebaseAnalytics.logEvent(
-            name: 'log_symptoms',
+            name: 'log_intimacy',
             parameters: {
               'user_id': _currentUserId,
               'date': date.toEEEEMMMMdyyyyhhmma(),
@@ -91,10 +83,28 @@ class LogSymptomsCubit extends Cubit<LogSymptomsState> {
       },
       logWhen: (error) => error is! SimpleException,
       onError: (error, _) {
-        emit(LogSymptomsState.error(error.toString()));
+        emit(LogIntimacyState.error(error.toString()));
       },
       onComplete: () {
-        emit(const LogSymptomsState.data());
+        emit(const LogIntimacyState.data());
+      },
+    );
+  }
+
+  Future<void> delete(String cycleLogId) async {
+    await guard(
+      () async {
+        emit(const LogIntimacyState.loading());
+
+        await _cycleLogsRepository.deleteById(cycleLogId);
+
+        emit(const LogIntimacyState.success());
+      },
+      onError: (error, _) {
+        emit(LogIntimacyState.error(error.toString()));
+      },
+      onComplete: () {
+        emit(const LogIntimacyState.data());
       },
     );
   }
