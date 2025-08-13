@@ -3,6 +3,7 @@ import 'package:bebi_app/app/theme/app_colors.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/ui/features/log_menstrual_flow/log_menstrual_flow_cubit.dart';
+import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/color_extensions.dart';
 import 'package:flutter/material.dart';
@@ -13,24 +14,35 @@ class LogMenstrualFlowScreen extends StatefulWidget {
   const LogMenstrualFlowScreen({
     required this.date,
     required this.logForPartner,
+    this.flowIntensity,
     super.key,
   });
 
   final DateTime date;
   final bool logForPartner;
+  final FlowIntensity? flowIntensity;
 
   @override
   State<LogMenstrualFlowScreen> createState() => _LogMenstrualFlowScreenState();
 }
 
 class _LogMenstrualFlowScreenState extends State<LogMenstrualFlowScreen> {
-  var _selectedFlowIntensity = FlowIntensity.light;
+  late FlowIntensity _flowIntensity =
+      widget.flowIntensity ?? FlowIntensity.light;
 
   @override
   Widget build(BuildContext context) {
-    return BlocSelector<LogMenstrualFlowCubit, LogMenstrualFlowState, bool>(
-      selector: (state) => state is LogMenstrualFlowLoading,
-      builder: (context, loading) {
+    return BlocConsumer<LogMenstrualFlowCubit, LogMenstrualFlowState>(
+      listener: (context, state) => switch (state) {
+        LogMenstrualFlowSuccess() => context.pop(true),
+        LogMenstrualFlowError(:final error) => context.showSnackbar(
+          error,
+          type: SnackbarType.error,
+        ),
+        _ => null,
+      },
+      builder: (context, state) {
+        final loading = state is LogMenstrualFlowLoading;
         return Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,9 +112,7 @@ class _LogMenstrualFlowScreenState extends State<LogMenstrualFlowScreen> {
                   InkWell(
                     onTap: loading
                         ? null
-                        : () => setState(
-                            () => _selectedFlowIntensity = intensity,
-                          ),
+                        : () => setState(() => _flowIntensity = intensity),
                     child: Padding(
                       padding: const EdgeInsets.all(12),
                       child: Row(
@@ -114,7 +124,7 @@ class _LogMenstrualFlowScreenState extends State<LogMenstrualFlowScreen> {
                               color: AppColors.red.darken(0.4),
                             ),
                           ),
-                          if (_selectedFlowIntensity == intensity)
+                          if (_flowIntensity == intensity)
                             Icon(
                               Symbols.check,
                               size: 18,
@@ -153,15 +163,11 @@ class _LogMenstrualFlowScreenState extends State<LogMenstrualFlowScreen> {
           ),
           onPressed: loading
               ? null
-              : () async {
-                  await context.read<LogMenstrualFlowCubit>().logFlow(
-                    date: widget.date,
-                    flowIntensity: _selectedFlowIntensity,
-                    logForPartner: widget.logForPartner,
-                  );
-
-                  context.pop(true);
-                },
+              : () async => await context.read<LogMenstrualFlowCubit>().logFlow(
+                  date: widget.date,
+                  flowIntensity: _flowIntensity,
+                  logForPartner: widget.logForPartner,
+                ),
           child: Text(
             loading ? 'Logging...' : 'Log menstrual flow'.toUpperCase(),
           ),

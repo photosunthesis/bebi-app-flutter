@@ -186,15 +186,15 @@ class _CycleCalendarState extends State<CycleCalendar> {
 
     return Positioned(
       top: 5,
-      child: event?.isPrediction ?? false
+      child: event?.isPrediction ?? true
           ? AngledStripesBackground(
               color: event?.color.withAlpha(60) ?? Colors.transparent,
               backgroundColor: event?.color.withAlpha(40) ?? Colors.transparent,
               shape: const CircleBorder(),
             )
           : Container(
-              width: 28,
-              height: 28,
+              width: 26,
+              height: 26,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: event?.color,
@@ -208,7 +208,7 @@ class _CycleCalendarState extends State<CycleCalendar> {
     CycleLog? intimacyLog,
   ) {
     return Positioned(
-      top: 38,
+      top: 36,
       child: AnimatedContainer(
         duration: 120.milliseconds,
         width: 8,

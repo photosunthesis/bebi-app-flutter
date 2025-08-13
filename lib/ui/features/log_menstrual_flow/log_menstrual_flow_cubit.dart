@@ -51,7 +51,7 @@ class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState> {
           _currentUserId!,
         );
 
-        final parterProfile = await _userProfileRepository.getByUserId(
+        final partnerProfile = await _userProfileRepository.getByUserId(
           partnership!.users.firstWhere((user) => user != _currentUserId!),
         );
 
@@ -59,7 +59,7 @@ class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState> {
           date: date,
           flow: flowIntensity,
           createdBy: _currentUserId!,
-          ownedBy: logForPartner ? parterProfile!.userId : _currentUserId!,
+          ownedBy: logForPartner ? partnerProfile!.userId : _currentUserId!,
           users: userProfile!.isSharingCycleWithPartner == true
               ? partnership.users
               : [_currentUserId!],
