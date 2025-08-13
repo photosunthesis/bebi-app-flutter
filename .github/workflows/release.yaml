@@ -20,7 +20,7 @@ jobs:
   build-android:
     name: Build APK
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.build_android == 'true' }}
+    if: ${{ github.event.inputs.build_android == 'true' || github.event_name != 'workflow_dispatch' }}
     permissions:
       contents: write
       packages: write
@@ -76,7 +76,7 @@ jobs:
   build-ios:
     name: Build IPA
     runs-on: macos-latest
-    if: ${{ github.event.inputs.build_ios == 'true' }}
+    if: ${{ github.event.inputs.build_ios == 'true' || github.event_name != 'workflow_dispatch' }}
     permissions:
       contents: write
       packages: write
