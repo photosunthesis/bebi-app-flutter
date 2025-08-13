@@ -2,6 +2,8 @@ part of 'cycles_cubit.dart';
 
 @freezed
 abstract class CyclesState with _$CyclesState {
+  const CyclesState._();
+
   const factory CyclesState({
     required DateTime focusedDate,
     required List<CycleLog> cycleLogs,
@@ -22,4 +24,7 @@ abstract class CyclesState with _$CyclesState {
     loadingAiSummary: false,
     showCurrentUserCycleData: true,
   );
+
+  List<CycleLog> get focusedDateLogs =>
+      cycleLogs.where((e) => e.date.isSameDay(focusedDate)).toList();
 }

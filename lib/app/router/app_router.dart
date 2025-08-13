@@ -1,4 +1,5 @@
 import 'package:bebi_app/data/models/calendar_event.dart';
+import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/ui/features/add_partner/add_partner_cubit.dart';
 import 'package:bebi_app/ui/features/add_partner/add_partner_screen.dart';
 import 'package:bebi_app/ui/features/calendar/calendar_cubit.dart';
@@ -15,6 +16,8 @@ import 'package:bebi_app/ui/features/home/home_cubit.dart';
 import 'package:bebi_app/ui/features/home/home_screen.dart';
 import 'package:bebi_app/ui/features/log_menstrual_flow/log_menstrual_flow_cubit.dart';
 import 'package:bebi_app/ui/features/log_menstrual_flow/log_menstrual_flow_screen.dart';
+import 'package:bebi_app/ui/features/log_symptoms/log_symptoms_cubit.dart';
+import 'package:bebi_app/ui/features/log_symptoms/log_symptoms_screen.dart';
 import 'package:bebi_app/ui/features/profile_setup/profile_setup_cubit.dart';
 import 'package:bebi_app/ui/features/profile_setup/profile_setup_screen.dart';
 import 'package:bebi_app/ui/features/sign_in/sign_in_cubit.dart';
@@ -60,7 +63,7 @@ abstract class AppRouter {
         builder: (context, state, shell) => shell,
         navigatorContainerBuilder: (context, navigationShell, children) =>
             MainScaffold(navigationShell: navigationShell, children: children),
-        branches: <StatefulShellBranch>[
+        branches: [
           StatefulShellBranch(
             routes: [
               GoRoute(
@@ -132,6 +135,27 @@ abstract class AppRouter {
               logForPartner:
                   state.uri.queryParameters['logForPartner'] == 'true',
               date: DateTime.parse(state.uri.queryParameters['date']!),
+              flowIntensity: state.uri.queryParameters['flowIntensity'] != null
+                  ? FlowIntensity.values.firstWhere(
+                      (e) =>
+                          e.name == state.uri.queryParameters['flowIntensity'],
+                    )
+                  : null,
+            ),
+          ),
+        ),
+      ),
+      GoRoute(
+        path: '/cycles/log-symptoms',
+        name: AppRoutes.logSymptoms,
+        pageBuilder: (_, state) => BottomSheetPage(
+          child: BlocProvider(
+            create: (context) => GetIt.I<LogSymptomsCubit>(),
+            child: LogSymptomsScreen(
+              date: DateTime.parse(state.uri.queryParameters['date']!),
+              logForPartner:
+                  state.uri.queryParameters['logForPartner'] == 'true',
+              symptoms: state.uri.queryParameters['symptoms']?.split(',') ?? [],
             ),
           ),
         ),

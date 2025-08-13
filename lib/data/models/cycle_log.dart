@@ -36,7 +36,9 @@ abstract class CycleLog with _$CycleLog {
       date: data['date'].toDate(),
       type: LogType.values[data['type']],
       flow: data['flow'] != null ? FlowIntensity.values[data['flow']] : null,
-      symptoms: data['symptoms'],
+      symptoms: data['symptoms'] != null
+          ? List<String>.from(data['symptoms'] as List<dynamic>)
+          : null,
       intimacyType: data['intimacy_type'] != null
           ? IntimacyType.values[data['intimacy_type']]
           : null,
@@ -56,11 +58,11 @@ abstract class CycleLog with _$CycleLog {
     required String ownedBy,
     required String createdBy,
     required List<String> users,
-    required bool isPrediction,
+    bool isPrediction = false,
   }) {
     return CycleLog(
       id: id,
-      date: date,
+      date: date.toUtc(),
       type: LogType.period,
       ownedBy: ownedBy,
       createdBy: createdBy,
@@ -78,11 +80,11 @@ abstract class CycleLog with _$CycleLog {
     required String ownedBy,
     required String createdBy,
     required List<String> users,
-    required bool isPrediction,
+    bool isPrediction = false,
   }) {
     return CycleLog(
       id: id,
-      date: date,
+      date: date.toUtc(),
       type: LogType.ovulation,
       ownedBy: ownedBy,
       createdBy: createdBy,
@@ -100,11 +102,11 @@ abstract class CycleLog with _$CycleLog {
     required String createdBy,
     required List<String> symptoms,
     required List<String> users,
-    required bool isPrediction,
+    bool isPrediction = false,
   }) {
     return CycleLog(
       id: id,
-      date: date,
+      date: date.toUtc(),
       type: LogType.symptom,
       ownedBy: ownedBy,
       createdBy: createdBy,
@@ -123,11 +125,11 @@ abstract class CycleLog with _$CycleLog {
     required String ownedBy,
     required String createdBy,
     required List<String> users,
-    required bool isPrediction,
+    bool isPrediction = false,
   }) {
     return CycleLog(
       id: id,
-      date: date,
+      date: date.toUtc(),
       type: LogType.intimacy,
       ownedBy: ownedBy,
       createdBy: createdBy,
