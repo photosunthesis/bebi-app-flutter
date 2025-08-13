@@ -22,7 +22,13 @@ class App extends StatelessWidget {
           systemNavigationBarIconBrightness: Brightness.dark,
           statusBarIconBrightness: Brightness.dark,
         ),
-        child: KeyboardDismissOnTap(dismissOnCapturedTaps: true, child: child!),
+        child: KeyboardDismissOnTap(
+          dismissOnCapturedTaps: true,
+          // TODO For accessibility, the app should allow text scaling. For now we
+          // keep it like this, but this will be implemented in the future...
+          // someday... maybe...
+          child: MediaQuery.withNoTextScaling(child: child!),
+        ),
       ),
     );
   }
