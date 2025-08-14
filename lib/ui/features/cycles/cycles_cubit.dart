@@ -131,6 +131,23 @@ class CyclesCubit extends Cubit<CyclesState> {
     );
   }
 
+  void trackInsightViewed() {
+    unawaited(
+      _firebaseAnalytics.logEvent(
+        name: 'cycle_insight_viewed',
+        parameters: _buildAnalyticsParameters(
+          additionalParams: {
+            'focused_date': state.focusedDate.toIso8601String(),
+            'cycle_phase': state.focusedCycleDayInsights?.cyclePhase.name ?? 'unknown',
+            'day_of_cycle': state.focusedCycleDayInsights?.dayOfCycle ?? 0,
+            'has_ai_summary': state.aiSummary != null,
+            'viewing_partner_data': !state.showCurrentUserCycleData,
+          },
+        ),
+      ),
+    );
+  }
+
   Future<void> _loadCycleData({bool useCache = true}) async {
     final cycleLogs = await _cycleLogsRepository.getCycleLogsByUserId(
       state.showCurrentUserCycleData

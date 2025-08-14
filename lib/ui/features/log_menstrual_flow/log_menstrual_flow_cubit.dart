@@ -4,7 +4,6 @@ import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/data/repositories/cycle_logs_repository.dart';
 import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
-import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:bebi_app/utils/guard.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -90,11 +89,16 @@ class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState> {
 
         unawaited(
           _firebaseAnalytics.logEvent(
-            name: 'log_menstrual_cycle',
+            name: 'menstrual_flow_logged',
             parameters: {
               'user_id': _currentUserId!,
-              'date': date.toEEEEMMMMdyyyyhhmma(),
+              'event_date': date.toIso8601String(),
               'flow_intensity': flowIntensity.name,
+              'log_for_partner': logForPartner,
+              'is_update': cycleLogId != null,
+              'auto_generated_days': previousLogs.isEmpty && cycleLogId == null
+                  ? 5
+                  : 1,
             },
           ),
         );
@@ -116,6 +120,16 @@ class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState> {
         await _cycleLogsRepository.deleteById(cycleLogId);
 
         emit(const LogMenstrualFlowState.success());
+
+        unawaited(
+          _firebaseAnalytics.logEvent(
+            name: 'menstrual_flow_deleted',
+            parameters: {
+              'user_id': _currentUserId!,
+              'cycle_log_id': cycleLogId,
+            },
+          ),
+        );
       },
       onError: (error, _) {
         emit(LogMenstrualFlowState.error(error.toString()));

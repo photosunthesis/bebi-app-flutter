@@ -39,6 +39,17 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
         currentUserId: _firebaseAuth.currentUser!.uid,
       ),
     );
+    
+    unawaited(
+      _firebaseAnalytics.logEvent(
+        name: 'calendar_event_form_opened',
+        parameters: {
+          'user_id': _firebaseAuth.currentUser!.uid,
+          'is_editing': calendarEvent != null,
+          'is_recurring_event': calendarEvent?.isRecurring ?? false,
+        },
+      ),
+    );
   }
 
   Future<void> save({
@@ -106,9 +117,17 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
         unawaited(
           _firebaseAnalytics.logEvent(
             name: isExistingEvent
-                ? 'update_calendar_event'
-                : 'create_calendar_event',
-            parameters: {'user_id': _firebaseAuth.currentUser!.uid},
+                ? 'calendar_event_updated'
+                : 'calendar_event_created',
+            parameters: {
+              'user_id': _firebaseAuth.currentUser!.uid,
+              'event_type': allDay ? 'all_day' : 'timed',
+              'has_repeat': repeatRule.frequency != RepeatFrequency.doNotRepeat,
+              'repeat_frequency': repeatRule.frequency.name,
+              'shared_with_partner': shareWithPartner,
+              'has_notes': notes?.isNotEmpty == true,
+              'event_color': eventColor.name,
+            },
           ),
         );
 

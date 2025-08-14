@@ -5,7 +5,6 @@ import 'package:bebi_app/data/repositories/cycle_logs_repository.dart';
 import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
 import 'package:bebi_app/utils/exceptions/simple_exception.dart';
-import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/guard.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -81,10 +80,15 @@ class LogSymptomsCubit extends Cubit<LogSymptomsState> {
 
         unawaited(
           _firebaseAnalytics.logEvent(
-            name: 'log_symptoms',
+            name: symptoms.isEmpty ? 'symptoms_deleted' : 'symptoms_logged',
             parameters: {
               'user_id': _currentUserId,
-              'date': date.toEEEEMMMMdyyyyhhmma(),
+              'event_date': date.toIso8601String(),
+              'symptoms_count': symptoms.length,
+              'symptoms': symptoms.join(','),
+              'log_for_partner': logForPartner,
+              'is_update': cycleLogId != null,
+              'is_deletion': symptoms.isEmpty,
             },
           ),
         );

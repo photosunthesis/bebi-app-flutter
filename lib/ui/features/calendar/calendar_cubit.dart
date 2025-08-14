@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/data/repositories/calendar_events_repository.dart';
 import 'package:bebi_app/data/services/recurring_calendar_events_service.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:bebi_app/utils/guard.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -18,11 +21,13 @@ class CalendarCubit extends Cubit<CalendarState> {
     this._calendarEventsRepository,
     this._recurringCalendarEventsService,
     this._firebaseAuth,
+    this._firebaseAnalytics,
   ) : super(CalendarState.initial());
 
   final CalendarEventsRepository _calendarEventsRepository;
   final RecurringCalendarEventsService _recurringCalendarEventsService;
   final FirebaseAuth _firebaseAuth;
+  final FirebaseAnalytics _firebaseAnalytics;
 
   DateTime? _windowStart;
   DateTime? _windowEnd;
@@ -51,12 +56,27 @@ class CalendarCubit extends Cubit<CalendarState> {
 
         final allEvents = [...events, ...recurringEvents];
 
+        final focusedDayEvents = allEvents
+            .where((e) => e.date.isSameDay(state.focusedDay))
+            .toList();
+
         emit(
           state.copyWith(
             events: allEvents,
-            focusedDayEvents: allEvents
-                .where((e) => e.date.isSameDay(state.focusedDay))
-                .toList(),
+            focusedDayEvents: focusedDayEvents,
+          ),
+        );
+
+        unawaited(
+          _firebaseAnalytics.logEvent(
+            name: 'calendar_events_loaded',
+            parameters: {
+              'user_id': _firebaseAuth.currentUser!.uid,
+              'total_events': allEvents.length,
+              'focused_day_events': focusedDayEvents.length,
+              'used_cache': useCache,
+              'window_days': _defaultTimeWindow.inDays,
+            },
           ),
         );
       },
@@ -88,11 +108,26 @@ class CalendarCubit extends Cubit<CalendarState> {
 
     if (needsExpansion) return await _expandTimeRange(date);
 
+    final dayEvents = state.events
+        .where((e) => e.date.isSameDay(date))
+        .toList();
+
     emit(
       state.copyWith(
-        focusedDayEvents: state.events
-            .where((e) => e.date.isSameDay(date))
-            .toList(),
+        focusedDayEvents: dayEvents,
+      ),
+    );
+
+    unawaited(
+      _firebaseAnalytics.logEvent(
+        name: 'calendar_date_selected',
+        parameters: {
+          'user_id': _firebaseAuth.currentUser!.uid,
+          'selected_date': date.toIso8601String(),
+          'events_count': dayEvents.length,
+          'is_today': date.isSameDay(DateTime.now()),
+          'days_from_today': date.difference(DateTime.now()).inDays,
+        },
       ),
     );
   }

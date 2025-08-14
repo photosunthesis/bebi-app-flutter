@@ -32,7 +32,10 @@ class SignInCubit extends Cubit<SignInState> {
         unawaited(
           _firebaseAnalytics.logLogin(
             loginMethod: 'email',
-            parameters: {'email': email},
+            parameters: {
+              'email': email,
+              'user_id': _firebaseAuth.currentUser!.uid,
+            },
           ),
         );
       },
@@ -44,6 +47,17 @@ class SignInCubit extends Cubit<SignInState> {
         };
 
         emit(SignInFailure(errorMessage));
+        
+        unawaited(
+          _firebaseAnalytics.logEvent(
+            name: 'sign_in_failed',
+            parameters: {
+              'email': email,
+              'error_type': error is FirebaseAuthException ? error.code : 'unknown',
+              'login_method': 'email',
+            },
+          ),
+        );
       },
     );
   }

@@ -5,7 +5,6 @@ import 'package:bebi_app/data/repositories/cycle_logs_repository.dart';
 import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
 import 'package:bebi_app/utils/exceptions/simple_exception.dart';
-import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/guard.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -73,10 +72,13 @@ class LogIntimacyCubit extends Cubit<LogIntimacyState> {
 
         unawaited(
           _firebaseAnalytics.logEvent(
-            name: 'log_intimacy',
+            name: 'intimacy_logged',
             parameters: {
               'user_id': _currentUserId,
-              'date': date.toEEEEMMMMdyyyyhhmma(),
+              'event_date': date.toIso8601String(),
+              'intimacy_type': intimacyType.name,
+              'log_for_partner': logForPartner,
+              'is_update': cycleLogId != null,
             },
           ),
         );

@@ -70,10 +70,27 @@ class HomeCubit extends Cubit<HomeState> {
 
         if (userPartnership == null) {
           emit(const HomeShouldAddPartner());
+          unawaited(
+            _analytics.logEvent(
+              name: 'user_redirected_to_add_partner',
+              parameters: {'user_id': _firebaseAuth.currentUser!.uid},
+            ),
+          );
           return;
         }
 
         emit(HomeLoaded(currentUser: userProfile));
+
+        unawaited(
+          _analytics.logEvent(
+            name: 'home_screen_loaded',
+            parameters: {
+              'user_id': _firebaseAuth.currentUser!.uid,
+              'has_partner': true,
+              'has_cycle': userProfile.hasCycle,
+            },
+          ),
+        );
       },
       onError: (error, _) {
         emit(HomeError(error.toString()));

@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/data/repositories/cycle_logs_repository.dart';
 import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:bebi_app/utils/guard.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -19,12 +22,14 @@ class CycleSetupCubit extends Cubit<CycleSetupState> {
     this._cycleLogsRepository,
     this._userPartnershipsRepository,
     this._firebaseAuth,
+    this._firebaseAnalytics,
   ) : super(const CycleSetupState.initial());
 
   final UserProfileRepository _userProfileRepository;
   final CycleLogsRepository _cycleLogsRepository;
   final UserPartnershipsRepository _userPartnershipsRepository;
   final FirebaseAuth _firebaseAuth;
+  final FirebaseAnalytics _firebaseAnalytics;
 
   Future<void> setUpCycleTracking({
     required DateTime periodStartDate,
@@ -68,6 +73,17 @@ class CycleSetupCubit extends Cubit<CycleSetupState> {
         await _cycleLogsRepository.createMany(cycleLogs);
 
         emit(const CycleSetupState.success());
+
+        unawaited(
+          _firebaseAnalytics.logEvent(
+            name: 'cycle_setup_completed',
+            parameters: {
+              'user_id': _firebaseAuth.currentUser!.uid,
+              'period_duration_days': periodDurationInDays,
+              'sharing_with_partner': shouldShareWithPartner,
+            },
+          ),
+        );
       },
       onError: (error, _) => emit(CycleSetupState.error(error.toString())),
       onComplete: () => emit(const CycleSetupState.initial()),
