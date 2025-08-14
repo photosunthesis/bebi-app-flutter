@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.0] - 2025-08-14
+
+### Added
+
+- Implemented detailed usage analytics
+
 ## [0.1.0] - 2025-08-13
 
 ### Added
