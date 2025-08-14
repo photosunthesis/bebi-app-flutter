@@ -75,7 +75,7 @@ jobs:
 
   build-ios:
     name: Build IPA
-    runs-on: macos-14
+    runs-on: macos-15
     if: ${{ github.event.inputs.build_ios == 'true' || github.event_name != 'workflow_dispatch' }}
     permissions:
       contents: write
