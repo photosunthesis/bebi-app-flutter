@@ -29,16 +29,18 @@ jobs:
         run: |
           flutter pub run build_runner build --delete-conflicting-outputs
 
-      - name: Configure firebase
+      - name: Create firebase options stub
         run: |
-          npm install -g firebase-tools
-          dart pub global activate flutterfire_cli
-          flutterfire configure \
-            --project=bebi-app \
-            --platforms=android \
-            --token=${{ secrets.FIREBASE_CI_TOKEN }} \
-            --out=lib/config/firebase_options.dart \
-            --yes
+          mkdir -p lib/config
+          cat > lib/config/firebase_options.dart << 'EOF'
+          import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
+
+          class DefaultFirebaseOptions {
+            static FirebaseOptions get currentPlatform {
+              throw UnimplementedError('Firebase stub for static analysis only - not for runtime use');
+            }
+          }
+          EOF
 
       - name: Analyze
         run: flutter analyze --no-pub
