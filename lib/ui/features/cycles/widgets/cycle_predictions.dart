@@ -7,6 +7,7 @@ import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/color_extensions.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
+import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
@@ -27,7 +28,10 @@ class _CyclePredictionsState extends State<CyclePredictions> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Predictions', style: context.primaryTextTheme.titleLarge),
+          Text(
+            context.l10n.predictionsTitle,
+            style: context.primaryTextTheme.titleLarge,
+          ),
           const SizedBox(height: 18),
           _buildFertileWindowPredictions(),
           const SizedBox(height: 24),
@@ -44,10 +48,12 @@ class _CyclePredictionsState extends State<CyclePredictions> {
         return _buildCalendar(
           focusedDay: insights?.fertileDays.first ?? DateTime.now(),
           eventColor: AppColors.blue,
-          title: 'Fertile window',
+          title: context.l10n.fertilWindowTitle,
           description: insights?.fertileDays.isNotEmpty == true
-              ? 'Your fertile window begins on **${insights!.fertileDays.first.toEEEEMMMMd()}**.'
-              : 'Not enough data to predict your fertile window.',
+              ? context.l10n.fertilWindowDescription(
+                  insights!.fertileDays.first.toEEEEMMMMd(),
+                )
+              : context.l10n.notEnoughDataFertileWindow,
           events: insights?.fertileDays ?? [],
         );
       },
@@ -61,10 +67,12 @@ class _CyclePredictionsState extends State<CyclePredictions> {
         return _buildCalendar(
           focusedDay: insights?.nextPeriodDates.first ?? DateTime.now(),
           eventColor: AppColors.red,
-          title: 'Next period',
+          title: context.l10n.nextPeriodTitle,
           description: insights?.nextPeriodDates.isNotEmpty == true
-              ? 'Your next period is predicted to begin on **${insights!.nextPeriodDates.first.toEEEEMMMMd()}**.'
-              : 'Not enough data to predict your next period.',
+              ? context.l10n.nextPeriodDescription(
+                  insights!.nextPeriodDates.first.toEEEEMMMMd(),
+                )
+              : context.l10n.notEnoughDataNextPeriod,
           events: insights?.nextPeriodDates ?? [],
         );
       },

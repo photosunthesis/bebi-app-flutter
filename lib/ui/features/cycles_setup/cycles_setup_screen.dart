@@ -9,6 +9,7 @@ import 'package:bebi_app/ui/shared_widgets/switch/app_switch.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/string_extensions.dart';
 import 'package:bebi_app/utils/formatter/date_input_formatter.dart';
+import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -78,16 +79,15 @@ class _CyclesSetupScreenState extends State<CyclesSetupScreen> {
     Future.microtask(() async {
       final shouldPop = await OptionsBottomDialog.show(
         context,
-        title: 'Leave without saving?',
-        description:
-            'Your cycle tracking setup is incomplete. You can come back and finish setting it up anytime.',
-        options: const [
+        title: context.l10n.leaveWithoutSavingTitle,
+        description: context.l10n.leaveWithoutSavingMessage,
+        options: [
           Option(
-            text: 'Continue setting up',
+            text: context.l10n.continueSetupButton,
             value: false,
             style: OptionStyle.primary,
           ),
-          Option(text: 'Leave for now', value: true),
+          Option(text: context.l10n.leaveForNowButton, value: true),
         ],
       );
 
@@ -100,24 +100,24 @@ class _CyclesSetupScreenState extends State<CyclesSetupScreen> {
       padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
       child: AppTextFormField(
         controller: _lastPeriodDateController,
-        labelText: 'When did your last period start?',
-        hintText: 'MM/DD/YYYY',
+        labelText: context.l10n.lastPeriodLabel,
+         hintText: 'MM/DD/YYYY',
         keyboardType: TextInputType.number,
         textInputAction: TextInputAction.next,
         inputFormatters: const [DateInputFormatter()],
         validator: (value) {
           if (value == null || value.isEmpty) {
-            return 'Please enter your last period date.';
+            return context.l10n.lastPeriodRequired;
           }
 
           final date = value.toDateTime('MM/dd/yyyy');
 
           if (date == null) {
-            return 'Please enter a valid date in MM/DD/YYYY format.';
+            return context.l10n.lastPeriodInvalid;
           }
 
           if (date.isAfter(DateTime.now())) {
-            return 'Last period date cannot be in the future.';
+            return context.l10n.lastPeriodFuture;
           }
 
           return null;
@@ -131,23 +131,23 @@ class _CyclesSetupScreenState extends State<CyclesSetupScreen> {
       padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
       child: AppTextFormField(
         controller: _periodDurationController,
-        labelText: 'How many days does your period usually last?',
-        hintText: 'e.g. 6 days',
+        labelText: context.l10n.periodDurationLabel,
+         hintText: context.l10n.periodDurationHint,
         keyboardType: TextInputType.number,
         textInputAction: TextInputAction.done,
         validator: (value) {
           if (value == null || value.isEmpty) {
-            return 'Please enter the duration of your period in days.';
+            return context.l10n.periodDurationRequired;
           }
 
           final duration = int.tryParse(value);
 
           if (duration == null) {
-            return 'Please enter a valid number.';
+            return context.l10n.periodDurationInvalid;
           }
 
           if (duration <= 0 || duration > 10) {
-            return 'Period duration should be between 1-10 days.';
+            return context.l10n.periodDurationRange;
           }
 
           return null;
@@ -164,7 +164,7 @@ class _CyclesSetupScreenState extends State<CyclesSetupScreen> {
           Row(
             children: [
               Text(
-                'Share cycle data with partner',
+                context.l10n.shareWithPartnerLabel,
                 style: context.textTheme.bodyMedium,
               ),
               const Spacer(),
@@ -176,7 +176,7 @@ class _CyclesSetupScreenState extends State<CyclesSetupScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Turn this on to allow your partner to view and add cycle logs and symptoms for you. You can turn this setting off anytime in your account.',
+            context.l10n.shareWithPartnerDescription,
             style: context.textTheme.bodySmall?.copyWith(
               color: context.colorScheme.secondary,
               height: 1.4,
@@ -196,7 +196,7 @@ class _CyclesSetupScreenState extends State<CyclesSetupScreen> {
         0,
       ),
       child: Text(
-        'Cycle Tracking Setup',
+        context.l10n.cycleSetupTitle,
         style: context.primaryTextTheme.headlineSmall,
       ),
     );
@@ -224,7 +224,7 @@ class _CyclesSetupScreenState extends State<CyclesSetupScreen> {
                         );
                       }
                     },
-              child: Text((loading ? 'Saving...' : 'Save').toUpperCase()),
+              child: Text((loading ? context.l10n.savingButton : context.l10n.saveButton).toUpperCase()),
             );
           },
         ),

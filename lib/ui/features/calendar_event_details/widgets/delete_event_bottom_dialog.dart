@@ -1,6 +1,7 @@
 import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/data/models/save_changes_dialog_options.dart';
 import 'package:bebi_app/ui/shared_widgets/modals/options_bottom_dialog.dart';
+import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:flutter/material.dart';
 
 Future<SaveChangesDialogOptions?> showDeleteEventBottomDialog(
@@ -9,24 +10,24 @@ Future<SaveChangesDialogOptions?> showDeleteEventBottomDialog(
 ) {
   return OptionsBottomDialog.show(
     context,
-    title: 'Delete event?',
+    title: context.l10n.deleteEventTitle,
     description: calendarEvent.isRecurring
-        ? 'Do you want to delete just this event or include all future events? This cannot be undone.'
-        : 'Do you want to delete this event? This action cannot be undone.',
+        ? context.l10n.deleteRecurringEventMessage
+        : context.l10n.deleteEventMessage,
     options: [
-      const Option(
-        text: 'Delete this event',
+      Option(
+        text: context.l10n.deleteThisEvent,
         value: SaveChangesDialogOptions.onlyThisEvent,
         style: OptionStyle.destructive,
       ),
       if (calendarEvent.isRecurring && !calendarEvent.isLastRecurringEvent)
-        const Option(
-          text: 'Delete this and future events',
+        Option(
+          text: context.l10n.deleteThisAndFutureEvents,
           value: SaveChangesDialogOptions.allFutureEvents,
           style: OptionStyle.destructive,
         ),
-      const Option(
-        text: 'Cancel',
+      Option(
+        text: context.l10n.cancelButton,
         value: SaveChangesDialogOptions.cancel,
         style: OptionStyle.secondary,
       ),

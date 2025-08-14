@@ -7,6 +7,7 @@ import 'package:bebi_app/data/repositories/user_profile_repository.dart';
 import 'package:bebi_app/utils/analytics_utils.dart';
 import 'package:bebi_app/utils/exceptions/simple_exception.dart';
 import 'package:bebi_app/utils/guard.dart';
+import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -42,7 +43,7 @@ class LogSymptomsCubit extends Cubit<LogSymptomsState> {
         emit(const LogSymptomsState.loading());
 
         if (cycleLogId == null && symptoms.isEmpty) {
-          throw const SimpleException('Please select at least one symptom.');
+          throw SimpleException(l10n.selectSymptomRequired);
         }
 
         final userProfile = await _userProfileRepository.getByUserId(

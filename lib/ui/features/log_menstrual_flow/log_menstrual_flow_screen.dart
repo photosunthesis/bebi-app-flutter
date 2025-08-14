@@ -6,6 +6,7 @@ import 'package:bebi_app/ui/features/log_menstrual_flow/log_menstrual_flow_cubit
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/color_extensions.dart';
+import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -68,7 +69,7 @@ class _LogMenstrualFlowScreenState extends State<LogMenstrualFlowScreen> {
                 horizontal: UiConstants.padding,
               ),
               child: Text(
-                'Log your menstrual flow',
+                context.l10n.logMenstrualFlowTitle,
                 style: context.primaryTextTheme.titleLarge,
               ),
             ),
@@ -78,7 +79,7 @@ class _LogMenstrualFlowScreenState extends State<LogMenstrualFlowScreen> {
                 horizontal: UiConstants.padding,
               ),
               child: Text(
-                'Select today\'s flow intensity from the options below and log it in your cycle history.',
+                context.l10n.logMenstrualFlowSubtitle,
                 style: context.textTheme.bodyMedium?.copyWith(height: 1.6),
               ),
             ),
@@ -127,7 +128,11 @@ class _LogMenstrualFlowScreenState extends State<LogMenstrualFlowScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            intensity.label,
+                            switch (intensity) {
+                              FlowIntensity.light => context.l10n.lightFlow,
+                              FlowIntensity.medium => context.l10n.mediumFlow,
+                              FlowIntensity.heavy => context.l10n.heavyFlow,
+                            },
                             style: context.textTheme.bodyMedium?.copyWith(
                               color: AppColors.red.darken(0.4),
                             ),
@@ -177,7 +182,9 @@ class _LogMenstrualFlowScreenState extends State<LogMenstrualFlowScreen> {
                 logForPartner: widget.logForPartner,
               ),
         child: Text(
-          loading ? 'Logging...' : 'Log menstrual flow'.toUpperCase(),
+          loading
+              ? context.l10n.loggingMenstrualFlowButton
+              : context.l10n.logMenstrualFlowButton.toUpperCase(),
         ),
       ),
     );
@@ -197,7 +204,10 @@ class _LogMenstrualFlowScreenState extends State<LogMenstrualFlowScreen> {
                 widget.cycleLogId!,
               ),
         child: Text(
-          (loading ? 'Deleting...' : 'Delete log').toUpperCase(),
+          (loading
+                  ? context.l10n.deletingMenstrualFlowButton
+                  : context.l10n.deleteMenstrualFlowButton)
+              .toUpperCase(),
           style: context.textTheme.titleSmall?.copyWith(
             color: context.colorScheme.error,
             fontWeight: FontWeight.w500,

@@ -10,6 +10,7 @@ import 'package:bebi_app/ui/shared_widgets/layouts/main_app_bar.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/color_extensions.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
+import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -65,7 +66,7 @@ class _CalendarEventDetailsScreenState
                               );
                             }
                           : null,
-                      child: Text('Edit'.toUpperCase()),
+                      child: Text(context.l10n.editButton.toUpperCase()),
                     ),
                   );
                 },
@@ -132,7 +133,7 @@ class _CalendarEventDetailsScreenState
                 const SizedBox(width: 40),
                 Text(
                   _event.allDay
-                      ? 'All day'
+                      ? context.l10n.allDayText
                       : '${_event.startTimeLocal.toHHmma()} → ${_event.endTimeLocal!.toHHmma()}',
                   style: context.textTheme.bodyMedium,
                 ),
@@ -156,8 +157,20 @@ class _CalendarEventDetailsScreenState
                 const SizedBox(width: 40),
                 Text(
                   _event.repeatRule.frequency == RepeatFrequency.weekly
-                      ? 'Repeats ${_event.repeatRule.frequency.name} (${_event.repeatRule.daysOfWeek?.map((e) => DayOfWeek.values[e].toTitle().substring(0, 3)).join(', ')})'
-                      : 'Repeats ${_event.repeatRule.frequency.name}',
+                      ? context.l10n.repeatsFrequencyWithDays(
+                          _event.repeatRule.frequency.name,
+                          _event.repeatRule.daysOfWeek
+                                  ?.map(
+                                    (e) => DayOfWeek.values[e]
+                                        .toTitle()
+                                        .substring(0, 3),
+                                  )
+                                  .join(', ') ??
+                              '',
+                        )
+                      : context.l10n.repeatsFrequency(
+                          _event.repeatRule.frequency.name,
+                        ),
                   style: context.textTheme.bodyMedium,
                 ),
               ],
@@ -226,8 +239,14 @@ class _CalendarEventDetailsScreenState
                         builder: (context, state) {
                           return Text(
                             _event.createdBy == state?.userProfile.userId
-                                ? 'You share this event with ${state?.partnerProfile.displayName ?? 'your partner'}.'
-                                : 'Event is shared with you by ${state?.partnerProfile.displayName ?? 'your partner'}.',
+                                ? context.l10n.eventSharedWith(
+                                    state?.partnerProfile.displayName ??
+                                        'your partner',
+                                  )
+                                : context.l10n.eventSharedBy(
+                                    state?.partnerProfile.displayName ??
+                                        'your partner',
+                                  ),
                             style: context.textTheme.bodyMedium,
                           );
                         },
@@ -272,7 +291,9 @@ class _CalendarEventDetailsScreenState
                           ),
                         ),
                         onPressed: loading ? null : _onDelete,
-                        child: Text('Delete event'.toUpperCase()),
+                        child: Text(
+                          context.l10n.deleteEventButton.toUpperCase(),
+                        ),
                       );
                     },
                   ),

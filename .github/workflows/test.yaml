@@ -25,9 +25,10 @@ jobs:
       - name: Download dependencies
         run: flutter pub get
 
-      - name: Run build runner
+      - name: Generate build runner files and localizations
         run: |
           flutter pub run build_runner build --delete-conflicting-outputs
+          flutter gen-l10n
 
       - name: Create firebase options stub
         run: |

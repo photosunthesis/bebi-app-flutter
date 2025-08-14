@@ -5,6 +5,7 @@ import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
 import 'package:bebi_app/utils/analytics_utils.dart';
 import 'package:bebi_app/utils/guard.dart';
+import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -62,9 +63,7 @@ class AddPartnerCubit extends Cubit<AddPartnerState> {
               .getByUserId(_firebaseAuth.currentUser!.uid);
 
           if (existingPartnership == null) {
-            throw ArgumentError(
-              'You don\'t have a partner yet. Please enter their code or share yours with them.',
-            );
+            throw ArgumentError(l10n.partnerNotFoundForIntimateActivities);
           }
 
           return emit(state.copyWith(success: true));
@@ -82,7 +81,7 @@ class AddPartnerCubit extends Cubit<AddPartnerState> {
               'attempted_code': partnerCode,
             },
           );
-          throw ArgumentError('Partner code not found.');
+          throw ArgumentError(l10n.partnerCodeNotFound);
         }
 
         await _userPartnershipsRepository.create(

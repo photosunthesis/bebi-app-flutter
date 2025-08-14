@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bebi_app/utils/analytics_utils.dart';
 import 'package:bebi_app/utils/guard.dart';
+import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -38,8 +39,8 @@ class SignInCubit extends Cubit<SignInState> {
       onError: (error, _) {
         final errorMessage = switch (error) {
           FirebaseAuthException(:final String? message) =>
-            message ?? 'There was an issue with the sign-in process.',
-          _ => 'An unexpected error occurred. Please try again later.',
+            message ?? l10n.signInError,
+          _ => l10n.unexpectedError,
         };
 
         emit(SignInFailure(errorMessage));

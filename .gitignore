@@ -62,4 +62,4 @@ app.*.map.json
 **/firebase_app_id_file.json
 firebase.json
 ios/build/**
-lib/app/localization/*.dart
+lib/localizations/*.dart

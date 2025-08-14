@@ -12,6 +12,7 @@ import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/color_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:bebi_app/utils/extension/string_extensions.dart';
+import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
@@ -120,7 +121,7 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
           autofocus: true,
           inputBorder: InputBorder.none,
           controller: widget.titleController,
-          hintText: 'New event',
+          hintText: context.l10n.newEventHint,
           textInputAction: TextInputAction.done,
           inputStyle: context.primaryTextTheme.headlineSmall?.copyWith(
             color: widget.selectedColor.color.darken(0.2),
@@ -129,7 +130,7 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
           minLines: 1,
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return 'Title is required';
+              return context.l10n.titleRequired;
             }
             return null;
           },
@@ -204,7 +205,7 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Text('All-day'),
+        Text(context.l10n.allDayText, style: context.textTheme.bodyMedium),
         const Spacer(),
         AppSwitch(
           value: widget.allDay,
@@ -221,11 +222,11 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
       children: [
         AppDateFormField(
           controller: widget.dateController,
-          hintText: 'Date',
+          hintText: context.l10n.dateHint,
           focusedDay: widget.selectedDate,
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return 'Date is required';
+              return context.l10n.dateRequired;
             }
             return null;
           },
@@ -240,10 +241,10 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
                     const SizedBox(height: 4),
                     AppTimeFormField(
                       controller: widget.startTimeController,
-                      hintText: 'Start time',
+                      hintText: context.l10n.startTimeHint,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Start time is required';
+                          return context.l10n.startTimeRequired;
                         }
                         return null;
                       },
@@ -251,10 +252,10 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
                     const SizedBox(height: 4),
                     AppTimeFormField(
                       controller: widget.endTimeController,
-                      hintText: 'End time',
+                      hintText: context.l10n.endTimeHint,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'End time is required';
+                          return context.l10n.endTimeRequired;
                         }
 
                         final startTime = widget.startTimeController.text
@@ -265,7 +266,7 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
                           if (endTime == null ||
                               endTime.isBefore(startTime) ||
                               endTime.isAtSameMomentAs(startTime)) {
-                            return 'End time must be after start time';
+                            return context.l10n.endTimeAfterStartTime;
                           }
                         }
 
@@ -301,7 +302,7 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
                   const SizedBox(height: 6),
                   AppTextFormField(
                     controller: widget.notesController,
-                    hintText: 'Notes (optional)',
+                    hintText: context.l10n.notesHint,
                     minLines: 3,
                     maxLines: 6,
                     textInputAction: TextInputAction.newline,
@@ -326,8 +327,8 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
           children: [
             Text(
               eventCreatedByCurrentUser
-                  ? 'Share with partner'
-                  : 'This event is shared with you',
+                  ? context.l10n.shareWithPartner
+                  : context.l10n.eventSharedWithYou,
             ),
             const Spacer(),
             if (eventCreatedByCurrentUser)

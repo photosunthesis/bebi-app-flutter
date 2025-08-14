@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bebi_app/ui/shared_widgets/forms/app_text_form_field.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
+import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:flutter/cupertino.dart';
 
 class AppTextDropdownPicker<T> extends StatefulWidget {
@@ -144,7 +145,7 @@ class _AppTextDropdownPickerState<T> extends State<AppTextDropdownPicker<T>> {
           top: 14,
           left: 12,
           child: Text(
-            widget.hintText ?? 'Select item',
+            widget.hintText ?? l10n.selectItem,
             style: context.textTheme.bodyMedium?.copyWith(
               color: context.colorScheme.onSurface.withAlpha(120),
             ),

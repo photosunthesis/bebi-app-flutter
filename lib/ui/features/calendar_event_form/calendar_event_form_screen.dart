@@ -11,6 +11,7 @@ import 'package:bebi_app/ui/shared_widgets/modals/options_bottom_dialog.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/extension/string_extensions.dart';
+import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
@@ -149,7 +150,12 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
               padding: const EdgeInsets.fromLTRB(0, 12, 10, 12),
               child: OutlinedButton(
                 onPressed: loading ? null : _onSave,
-                child: Text((loading ? 'Saving' : 'Save').toUpperCase()),
+                child: Text(
+                  (loading
+                          ? context.l10n.savingButton
+                          : context.l10n.saveButton)
+                      .toUpperCase(),
+                ),
               ),
             );
           },
@@ -210,21 +216,23 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
   Future<SaveChangesDialogOptions> _showConfirmSaveDialog() async {
     final result = await OptionsBottomDialog.show(
       context,
-      title: 'Save Changes to Event',
-      description:
-          'Would you like to update just this event or all future events in this series?',
-      options: const [
+      title: context.l10n.saveChangesToEventTitle,
+      description: context.l10n.saveChangesToEventMessage,
+      options: [
         Option(
-          text: 'Save only this event',
+          text: context.l10n.saveOnlyThisEvent,
           value: SaveChangesDialogOptions.onlyThisEvent,
           style: OptionStyle.primary,
         ),
         Option(
-          text: 'Save all future events',
+          text: context.l10n.saveAllFutureEvents,
           value: SaveChangesDialogOptions.allFutureEvents,
           style: OptionStyle.primary,
         ),
-        Option(text: 'Cancel', value: SaveChangesDialogOptions.cancel),
+        Option(
+          text: context.l10n.cancelButton,
+          value: SaveChangesDialogOptions.cancel,
+        ),
       ],
     );
 

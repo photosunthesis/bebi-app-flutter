@@ -8,6 +8,7 @@ import 'package:bebi_app/utils/analytics_utils.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:bebi_app/utils/formatter/user_code_formatter.dart';
+import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -92,12 +93,12 @@ class _AddPartnerScreenState extends State<AddPartnerScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Connect with a partner',
+            context.l10n.addPartnerTitle,
             style: context.primaryTextTheme.headlineSmall,
           ),
           const SizedBox(height: 12),
           Text(
-            'Share your code with a partner or enter theirs below. It\'s how you\'ll connect and start sharing moments together.',
+            context.l10n.addPartnerSubtitle,
             style: context.textTheme.bodyLarge?.copyWith(
               height: 1.4,
               fontWeight: FontWeight.normal,
@@ -110,12 +111,12 @@ class _AddPartnerScreenState extends State<AddPartnerScreen> {
 
   Widget _buildUserCodeSection() {
     return _buildCodeContainer(
-      title: 'Share your code',
+      title: context.l10n.shareCodeTitle,
       child: Stack(
         children: [
           AppTextFormField(
             controller: _userCodeController,
-            hintText: 'XXX-XXX',
+            hintText: context.l10n.codeHint,
             readOnly: true,
           ),
           Positioned(
@@ -135,7 +136,7 @@ class _AddPartnerScreenState extends State<AddPartnerScreen> {
                 );
 
                 context.showSnackbar(
-                  'Code "${_userCodeController.text}" copied to clipboard.',
+                  context.l10n.codeCopied(_userCodeController.text),
                   type: SnackbarType.secondary,
                 );
 
@@ -145,7 +146,7 @@ class _AddPartnerScreenState extends State<AddPartnerScreen> {
                   itemId: _userCodeController.text.replaceAll('-', ''),
                 );
               },
-              child: Text('Copy'.toUpperCase()),
+              child: Text(context.l10n.copyButton.toUpperCase()),
             ),
           ),
         ],
@@ -155,17 +156,17 @@ class _AddPartnerScreenState extends State<AddPartnerScreen> {
 
   Widget _buildPartnerCodeSection() {
     return _buildCodeContainer(
-      title: 'Enter their code',
+      title: context.l10n.enterCodeTitle,
       child: AppTextFormField(
         controller: _partnerCodeController,
-        hintText: 'XXX-XXX',
+        hintText: context.l10n.codeHint,
         keyboardType: TextInputType.text,
         textInputAction: TextInputAction.done,
         inputFormatters: const [UserCodeFormatter()],
         autofillHints: const [AutofillHints.oneTimeCode],
         validator: (value) {
           if (value == null || value.isEmpty) return null;
-          if (value.length != 7) return 'Code must be 6 characters long.';
+          if (value.length != 7) return context.l10n.codeLength;
           return null;
         },
       ),
@@ -180,7 +181,7 @@ class _AddPartnerScreenState extends State<AddPartnerScreen> {
         children: [
           _buildUserCodeSection(),
           Text(
-            'or',
+            context.l10n.orText,
             style: context.textTheme.bodyMedium,
             textAlign: TextAlign.center,
           ),
@@ -230,7 +231,9 @@ class _AddPartnerScreenState extends State<AddPartnerScreen> {
                       },
 
                 child: Text(
-                  (loading ? 'Connecting...' : 'Finish connecting')
+                  (loading
+                          ? context.l10n.connectingButton
+                          : context.l10n.finishConnectingButton)
                       .toUpperCase(),
                 ),
               ),

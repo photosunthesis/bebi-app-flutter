@@ -7,6 +7,7 @@ import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/color_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
+import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -67,7 +68,7 @@ class _LogSymptomsScreenState extends State<LogSymptomsScreen> {
                 horizontal: UiConstants.padding,
               ),
               child: Text(
-                'Log symptoms',
+                context.l10n.logSymptomsTitle,
                 style: context.primaryTextTheme.titleLarge,
               ),
             ),
@@ -77,7 +78,7 @@ class _LogSymptomsScreenState extends State<LogSymptomsScreen> {
                 horizontal: UiConstants.padding,
               ),
               child: Text(
-                'Tap to select the symptoms you experienced today.',
+                context.l10n.logSymptomsSubtitle,
                 style: context.textTheme.bodyMedium?.copyWith(height: 1.6),
               ),
             ),
@@ -179,7 +180,11 @@ class _LogSymptomsScreenState extends State<LogSymptomsScreen> {
                   logForPartner: widget.logForPartner,
                   symptoms: _symptoms,
                 ),
-          child: Text(loading ? 'Logging...' : 'Log symptoms'.toUpperCase()),
+          child: Text(
+            loading 
+                ? context.l10n.loggingSymptomsButton.toUpperCase()
+                : context.l10n.logSymptomsButton.toUpperCase(),
+          ),
         ),
       ),
     );

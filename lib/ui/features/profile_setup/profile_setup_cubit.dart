@@ -6,6 +6,7 @@ import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
 import 'package:bebi_app/utils/analytics_utils.dart';
 import 'package:bebi_app/utils/guard.dart';
+import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -100,12 +101,7 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
         );
       },
       onError: (error, _) {
-        emit(
-          state.copyWith(
-            error:
-                'There was an issue with the server. Please try again later.',
-          ),
-        );
+        emit(state.copyWith(error: l10n.serverError));
       },
       onComplete: () {
         emit(state.copyWith(loading: false, error: null));

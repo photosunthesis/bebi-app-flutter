@@ -5,6 +5,7 @@ import 'package:bebi_app/ui/features/sign_in/sign_in_cubit.dart';
 import 'package:bebi_app/ui/shared_widgets/forms/app_text_form_field.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
+import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -69,7 +70,7 @@ class _SignInScreenState extends State<SignInScreen> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
           child: Text(
-            'Welcome back!',
+            context.l10n.signInWelcomeTitle,
             style: context.primaryTextTheme.headlineSmall,
           ),
         ),
@@ -77,7 +78,7 @@ class _SignInScreenState extends State<SignInScreen> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
           child: Text(
-            'Sign in to continue sharing experiences and moments with your partner.',
+            context.l10n.signInWelcomeSubtitle,
             style: context.textTheme.bodyLarge?.copyWith(
               height: 1.4,
               fontWeight: FontWeight.normal,
@@ -100,14 +101,14 @@ class _SignInScreenState extends State<SignInScreen> {
             child: AppTextFormField(
               enabled: !loading,
               controller: _emailController,
-              labelText: 'Email',
-              hintText: 'you@example.com',
+              labelText: context.l10n.emailLabel,
+              hintText: context.l10n.emailHint,
               keyboardType: TextInputType.emailAddress,
               autofillHints: const <String>[AutofillHints.email],
               textInputAction: TextInputAction.next,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter your email';
+                  return context.l10n.emailRequired;
                 }
                 return null;
               },
@@ -121,15 +122,15 @@ class _SignInScreenState extends State<SignInScreen> {
             child: AppTextFormField(
               enabled: !loading,
               controller: _passwordController,
-              labelText: 'Password',
-              hintText: 'Your secret password',
+              labelText: context.l10n.passwordLabel,
+              hintText: context.l10n.passwordHint,
               obscureText: true,
               keyboardType: TextInputType.visiblePassword,
               autofillHints: const <String>[AutofillHints.password],
               textInputAction: TextInputAction.done,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter your password';
+                  return context.l10n.passwordRequired;
                 }
                 return null;
               },
@@ -165,7 +166,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         }
                       },
                 child: Text(
-                  (loading ? 'Signing in...' : 'Sign in').toUpperCase(),
+                  (loading ? context.l10n.signingInButton : context.l10n.signInButton).toUpperCase(),
                 ),
               ),
             ],
@@ -183,14 +184,14 @@ class _SignInScreenState extends State<SignInScreen> {
         text: TextSpan(
           style: context.textTheme.bodySmall,
           children: [
-            const TextSpan(text: 'Forgot password? '),
+            TextSpan(text: context.l10n.forgotPasswordText),
             TextSpan(
-              text: 'Tap here to reset.',
+              text: context.l10n.forgotPasswordLink,
               recognizer: TapGestureRecognizer()
                 ..onTap = () {
                   // TODO Handle reset password
                   context.showSnackbar(
-                    'Reset password feature is not implemented yet.',
+                    context.l10n.resetPasswordNotImplemented,
                   );
                 },
               style: context.textTheme.bodySmall?.copyWith(

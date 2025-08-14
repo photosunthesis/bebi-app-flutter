@@ -5,6 +5,7 @@ import 'package:bebi_app/ui/shared_widgets/forms/app_text_form_field.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
+import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -131,7 +132,7 @@ class _AppDateFormFieldState extends State<AppDateFormField> {
           top: 14,
           left: 12,
           child: Text(
-            widget.hintText ?? 'Select date',
+            widget.hintText ?? l10n.selectDate,
             style: context.textTheme.bodyMedium?.copyWith(
               color: context.colorScheme.onSurface.withAlpha(120),
             ),

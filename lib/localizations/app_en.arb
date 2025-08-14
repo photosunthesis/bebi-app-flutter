@@ -1,0 +1,244 @@
+{
+  "@@locale": "en",
+  "appTitle": "Bebi",
+  "homeScreenTitle": "Home Screen",
+  "signInWelcomeTitle": "Welcome back!",
+  "signInWelcomeSubtitle": "Sign in to continue sharing experiences and moments with your partner.",
+  "emailLabel": "Email",
+  "emailHint": "you@example.com",
+  "emailRequired": "Please enter your email",
+  "passwordLabel": "Password",
+  "passwordHint": "Your secret password",
+  "passwordRequired": "Please enter your password",
+  "signInButton": "Sign in",
+  "signingInButton": "Signing in...",
+  "forgotPasswordText": "Forgot password? ",
+  "forgotPasswordLink": "Tap here to reset.",
+  "resetPasswordNotImplemented": "Reset password feature is not implemented yet.",
+  "profileSetupTitle": "Set up your profile",
+  "profileSetupSubtitle": "Add a photo and name to personalize your profile. These details will be visible on your account.",
+  "displayNameLabel": "Display name",
+  "displayNameHint": "Your nickname",
+  "displayNameRequired": "Please enter your preferred name.",
+  "displayNameInvalid": "Only letters, numbers, and spaces are allowed.",
+  "displayNameTooLong": "Name can't be longer than 32 characters.",
+  "birthdateLabel": "Birthdate",
+  "birthdateHint": "MM/DD/YYYY",
+  "birthdateRequired": "Please enter your birthdate.",
+  "birthdateInvalid": "Please enter a valid date in MM/DD/YYYY format.",
+  "birthdateFuture": "Birthdate cannot be in the future.",
+  "updateProfileButton": "Update profile",
+  "updatingProfileButton": "Updating profile...",
+  "addPartnerTitle": "Connect with a partner",
+  "addPartnerSubtitle": "Share your code with a partner or enter theirs below. It's how you'll connect and start sharing moments together.",
+  "shareCodeTitle": "Share your code",
+  "codeHint": "XXX-XXX",
+  "codeCopied": "Code \"{code}\" copied to clipboard.",
+  "@codeCopied": {
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "description": "The partner code that was copied"
+      }
+    }
+  },
+  "copyButton": "Copy",
+  "enterCodeTitle": "Enter their code",
+  "orText": "or",
+  "codeLength": "Code must be 6 characters long.",
+  "connectingButton": "Connecting...",
+  "finishConnectingButton": "Finish connecting",
+  "partnerNotFound": "You don't have a partner yet. Please enter their code or share yours with them.",
+  "partnerCodeNotFound": "Partner code not found.",
+  "cycleSetupTitle": "Cycle Tracking Setup",
+  "continueSetupButton": "Continue setting up",
+  "leaveForNowButton": "Leave for now",
+  "lastPeriodLabel": "When did your last period start?",
+  "lastPeriodRequired": "Please enter your last period date.",
+  "lastPeriodInvalid": "Please enter a valid date in MM/DD/YYYY format.",
+  "lastPeriodFuture": "Last period date cannot be in the future.",
+  "periodDurationLabel": "How many days does your period usually last?",
+  "periodDurationHint": "e.g. 6 days",
+  "periodDurationRequired": "Please enter the duration of your period in days.",
+  "periodDurationInvalid": "Please enter a valid number.",
+  "periodDurationRange": "Period duration should be between 1-10 days.",
+  "shareWithPartnerLabel": "Share cycle data with partner",
+  "saveButton": "Save",
+  "logSymptomsTitle": "Log symptoms",
+  "logSymptomsSubtitle": "Tap to select the symptoms you experienced today.",
+  "logSymptomsButton": "Log symptoms",
+  "loggingSymptomsButton": "Logging...",
+  "selectSymptomRequired": "Please select at least one symptom.",
+  "newEventHint": "New event",
+  "titleRequired": "Title is required",
+  "allDayLabel": "All-day",
+  "dateHint": "Date",
+  "dateRequired": "Date is required",
+  "startTimeHint": "Start time",
+  "startTimeRequired": "Start time is required",
+  "endTimeHint": "End time",
+  "endTimeRequired": "End time is required",
+  "endTimeAfterStart": "End time must be after start time",
+  "notesHint": "Notes (optional)",
+  "shareWithPartnerEvent": "Share with partner",
+  "shareWithPartnerDescription": "Turn this on to allow your partner to view and add cycle logs and symptoms for you. You can turn this setting off anytime in your account.",
+  "eventSharedWithYou": "This event is shared with you",
+  "repeatHint": "Repeat",
+  "daysOfWeekHint": "Days of week",
+  "endRepeatDateHint": "End repeat date",
+  "editButton": "Edit",
+  "allDay": "All day",
+  "repeatsFrequency": "Repeats {frequency}",
+  "@repeatsFrequency": {
+    "placeholders": {
+      "frequency": {
+        "type": "String",
+        "description": "The repeat frequency"
+      }
+    }
+  },
+  "repeatsFrequencyWithDays": "Repeats {frequency} ({days})",
+  "@repeatsFrequencyWithDays": {
+    "placeholders": {
+      "frequency": {
+        "type": "String",
+        "description": "The repeat frequency"
+      },
+      "days": {
+        "type": "String",
+        "description": "The days of the week"
+      }
+    }
+  },
+  "eventSharedWith": "You share this event with {partnerName}.",
+  "@eventSharedWith": {
+    "placeholders": {
+      "partnerName": {
+        "type": "String",
+        "description": "The partner's display name"
+      }
+    }
+  },
+  "eventSharedBy": "Event is shared with you by {partnerName}.",
+  "@eventSharedBy": {
+    "placeholders": {
+      "partnerName": {
+        "type": "String",
+        "description": "The partner's display name"
+      }
+    }
+  },
+  "deleteEventButton": "Delete event",
+  "deleteEventTitle": "Delete event?",
+  "deleteEventMessage": "Do you want to delete this event? This action cannot be undone.",
+  "deleteRecurringEventMessage": "Do you want to delete just this event or include all future events? This cannot be undone.",
+  "deleteThisEvent": "Delete this event",
+  "deleteThisAndFutureEvents": "Delete this and future events",
+  "cancelButton": "Cancel",
+  "saveChangesTitle": "Save Changes to Event",
+  "saveChangesMessage": "Would you like to update just this event or all future events in this series?",
+  "saveOnlyThisEvent": "Save only this event",
+  "saveAllFutureEvents": "Save all future events",
+  "fertilWindowTitle": "Fertile window",
+  "nextPeriodTitle": "Next period",
+  "symptomsTitle": "Symptoms",
+  "intimateActivitiesTitle": "Intimate activities",
+  "partnerNotFoundForIntimateActivities": "You don't have a partner yet. Please enter their code or share yours with them.",
+  "todayButton": "Today",
+  "noEventsText": "No events",
+  "allDayText": "All-day",
+  "monthFormat": "Month",
+  "weekFormat": "Week",
+  "endTimeAfterStartTime": "End time must be after start time",
+  "shareWithPartner": "Share with partner",
+  "saveChangesToEventTitle": "Save Changes to Event",
+  "saveChangesToEventMessage": "This event is part of a series. Do you want to save changes to only this event, or to this and all future events in the series?",
+  "cycleInsightsTitle": "Cycle Insights",
+  "logsTitle": "Logs",
+  "bleedingTitle": "Bleeding",
+  "menstrualFlowTitle": "Menstrual flow",
+  "otherLogsTitle": "Other logs",
+  "predictionsTitle": "Predictions",
+  "welcomeToCycleTrackingTitle": "Welcome to Cycle Tracking",
+  "welcomeToCycleTrackingMessage": "Start tracking your cycle by tapping the button below, or view your partner's data using the profile icons above.",
+  "setupCycleTrackingButton": "Set up cycle tracking",
+  "cycleTrackingDisclaimer": "This app provides helpful information to support your cycle tracking. For personalized guidance, we recommend consulting with a medical professional. The AI-generated insights and cycle predictions are designed to be informative and supportive, though they may not always be accurate for everyone's unique cycle.",
+  "fertilWindowDescription": "Your fertile window begins on **{date}**.",
+  "@fertilWindowDescription": {
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "description": "The formatted date when fertile window begins"
+      }
+    }
+  },
+  "nextPeriodDescription": "Your next period is predicted to begin on **{date}**.",
+  "@nextPeriodDescription": {
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "description": "The formatted date when next period begins"
+      }
+    }
+  },
+  "notEnoughDataFertileWindow": "Not enough data to predict your fertile window.",
+  "notEnoughDataNextPeriod": "Not enough data to predict your next period.",
+  "moreSymptoms": "{first}, {count} more",
+  "@moreSymptoms": {
+    "placeholders": {
+      "first": {
+        "type": "String",
+        "description": "The first symptom"
+      },
+      "count": {
+        "type": "int",
+        "description": "Number of additional symptoms"
+      }
+    }
+  },
+  "intimacySex": "{type} sex",
+  "@intimacySex": {
+    "placeholders": {
+      "type": {
+        "type": "String",
+        "description": "The intimacy type"
+      }
+    }
+  },
+  "todayWithDate": "Today, {date}",
+  "@todayWithDate": {
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "description": "The formatted date"
+      }
+    }
+  },
+  "leaveWithoutSavingTitle": "Leave without saving?",
+  "leaveWithoutSavingMessage": "Your cycle tracking setup is incomplete. You can come back and finish setting it up anytime.",
+  "savingButton": "Saving...",
+  "signOutButton": "Sign out",
+  "logIntimacyTitle": "Log intimate activity",
+  "logIntimacySubtitle": "Select today's intimacy type from the options below and log it in your cycle history.",
+  "logIntimateActivityButton": "Log intimate activity",
+  "loggingIntimateActivityButton": "Logging...",
+  "deleteIntimateActivityButton": "Delete log",
+  "deletingIntimateActivityButton": "Deleting...",
+  "protectedIntimacy": "Protected",
+  "unprotectedIntimacy": "Unprotected",
+  "logMenstrualFlowTitle": "Log your menstrual flow",
+  "logMenstrualFlowSubtitle": "Select today's flow intensity from the options below and log it in your cycle history.",
+  "logMenstrualFlowButton": "Log menstrual flow",
+  "loggingMenstrualFlowButton": "Logging...",
+  "deleteMenstrualFlowButton": "Delete log",
+  "deletingMenstrualFlowButton": "Deleting...",
+  "lightFlow": "Light",
+  "mediumFlow": "Medium",
+  "heavyFlow": "Heavy",
+  "serverError": "There was an issue with the server. Please try again later.",
+  "signInError": "There was an issue with the sign-in process.",
+  "unexpectedError": "An unexpected error occurred. Please try again later.",
+  "selectDate": "Select date",
+  "selectItem": "Select item",
+  "selectTime": "Select time"
+}

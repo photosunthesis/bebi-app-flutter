@@ -6,6 +6,7 @@ import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/color_extensions.dart';
+import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:flutter/material.dart';
 
 abstract class CalendarEvents {
@@ -38,7 +39,7 @@ abstract class CalendarEvents {
             ),
             const SizedBox(height: 8),
             Text(
-              'No events',
+              context.l10n.noEventsText,
               style: context.textTheme.bodyLarge?.copyWith(
                 color: context.colorScheme.secondary.withAlpha(80),
               ),
@@ -135,7 +136,7 @@ class _EventCard extends StatelessWidget {
   Widget _buildTime(BuildContext context) {
     return Text(
       event.allDay
-          ? 'All-day'.toUpperCase()
+          ? context.l10n.allDayText.toUpperCase()
           : _formatDuration(context, event.startTimeLocal, event.endTimeLocal),
       style: context.textTheme.bodySmall?.copyWith(
         color: event.color.darken(0.1),

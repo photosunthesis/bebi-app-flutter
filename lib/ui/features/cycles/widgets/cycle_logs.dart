@@ -5,6 +5,7 @@ import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/ui/features/cycles/cycles_cubit.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/color_extensions.dart';
+import 'package:bebi_app/utils/localizations_utils.dart';
 // ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +30,10 @@ class _CycleLogsState extends State<CycleLogs> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('Logs', style: context.primaryTextTheme.titleLarge),
+          Text(
+            context.l10n.logsTitle,
+            style: context.primaryTextTheme.titleLarge,
+          ),
           const SizedBox(height: 18),
           _buildPeriodSection(),
           const SizedBox(height: 16),
@@ -51,7 +55,7 @@ class _CycleLogsState extends State<CycleLogs> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Bleeding'.toUpperCase(),
+              context.l10n.bleedingTitle.toUpperCase(),
               style: context.textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.w500,
                 color: context.colorScheme.secondary,
@@ -88,7 +92,7 @@ class _CycleLogsState extends State<CycleLogs> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Menstrual flow',
+                      context.l10n.menstrualFlowTitle,
                       style: context.textTheme.bodyMedium?.copyWith(
                         color: AppColors.red.darken(0.4),
                       ),
@@ -126,7 +130,7 @@ class _CycleLogsState extends State<CycleLogs> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          'Other logs'.toUpperCase(),
+          context.l10n.otherLogsTitle.toUpperCase(),
           style: context.textTheme.bodySmall?.copyWith(
             fontWeight: FontWeight.w500,
             color: context.colorScheme.secondary,
@@ -146,7 +150,7 @@ class _CycleLogsState extends State<CycleLogs> {
             children: [
               _buildLogSection(
                 logType: LogType.symptom,
-                title: 'Symptoms',
+                title: context.l10n.symptomsTitle,
                 routeName: AppRoutes.logSymptoms,
                 getDisplayText: (log) => _getSymptomDisplayText(log),
                 getRouteParams: (log) => {
@@ -163,9 +167,10 @@ class _CycleLogsState extends State<CycleLogs> {
               ),
               _buildLogSection(
                 logType: LogType.intimacy,
-                title: 'Intimate activities',
+                title: context.l10n.intimateActivitiesTitle,
                 routeName: AppRoutes.logIntimacy,
-                getDisplayText: (log) => '${log.intimacyType!.label} sex',
+                getDisplayText: (log) =>
+                    context.l10n.intimacySex(log.intimacyType!.label),
                 getRouteParams: (log) => {
                   'cycleLogId': log.id,
                   'intimacyType': log.intimacyType!.name,
@@ -228,7 +233,10 @@ class _CycleLogsState extends State<CycleLogs> {
 
   String _getSymptomDisplayText(CycleLog log) {
     if (log.symptoms != null && log.symptoms!.length > 2) {
-      return '${log.symptoms!.first}, ${log.symptoms!.length - 1} more';
+      return context.l10n.moreSymptoms(
+        log.symptoms!.first,
+        log.symptoms!.length - 1,
+      );
     }
     return log.symptoms?.join(', ') ?? '';
   }

@@ -4,6 +4,7 @@ import 'package:bebi_app/ui/features/calendar/calendar_cubit.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
+import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -64,8 +65,8 @@ class _Calendar extends StatelessWidget {
             // TODO Add feature to switch to week view
             calendarFormat: CalendarFormat.month,
             availableCalendarFormats: {
-              CalendarFormat.month: 'Month',
-              CalendarFormat.week: 'Week',
+              CalendarFormat.month: context.l10n.monthFormat,
+              CalendarFormat.week: context.l10n.weekFormat,
             },
             daysOfWeekStyle: _dayOfWeekStyle(context),
             calendarBuilders: CalendarBuilders(

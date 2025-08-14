@@ -7,6 +7,7 @@ import 'package:bebi_app/ui/features/log_menstrual_flow/log_menstrual_flow_cubit
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/color_extensions.dart';
+import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -69,7 +70,7 @@ class _LogIntimacyScreenState extends State<LogIntimacyScreen> {
                 horizontal: UiConstants.padding,
               ),
               child: Text(
-                'Log your menstrual flow',
+                context.l10n.logIntimacyTitle,
                 style: context.primaryTextTheme.titleLarge,
               ),
             ),
@@ -79,7 +80,7 @@ class _LogIntimacyScreenState extends State<LogIntimacyScreen> {
                 horizontal: UiConstants.padding,
               ),
               child: Text(
-                'Select today\'s flow type from the options below and log it in your cycle history.',
+                context.l10n.logIntimacySubtitle,
                 style: context.textTheme.bodyMedium?.copyWith(height: 1.6),
               ),
             ),
@@ -128,7 +129,9 @@ class _LogIntimacyScreenState extends State<LogIntimacyScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            type.label,
+                            type == IntimacyType.protected
+                                ? context.l10n.protectedIntimacy
+                                : context.l10n.unprotectedIntimacy,
                             style: context.textTheme.bodyMedium?.copyWith(
                               color: AppColors.purple.darken(0.4),
                             ),
@@ -178,7 +181,10 @@ class _LogIntimacyScreenState extends State<LogIntimacyScreen> {
                 logForPartner: widget.logForPartner,
               ),
         child: Text(
-          loading ? 'Logging...' : 'Log intimate activity'.toUpperCase(),
+          (loading
+                  ? context.l10n.loggingIntimateActivityButton
+                  : context.l10n.logIntimateActivityButton)
+              .toUpperCase(),
         ),
       ),
     );
@@ -198,7 +204,10 @@ class _LogIntimacyScreenState extends State<LogIntimacyScreen> {
                 widget.cycleLogId!,
               ),
         child: Text(
-          (loading ? 'Deleting...' : 'Delete log').toUpperCase(),
+          (loading
+                  ? context.l10n.deletingIntimateActivityButton
+                  : context.l10n.deleteIntimateActivityButton)
+              .toUpperCase(),
           style: context.textTheme.titleSmall?.copyWith(
             color: context.colorScheme.error,
             fontWeight: FontWeight.w500,

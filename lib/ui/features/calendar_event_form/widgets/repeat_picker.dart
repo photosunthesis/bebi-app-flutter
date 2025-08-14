@@ -4,6 +4,7 @@ import 'package:bebi_app/ui/shared_widgets/forms/app_date_form_field.dart';
 import 'package:bebi_app/ui/shared_widgets/forms/app_multiple_choice_dropdown.dart';
 import 'package:bebi_app/ui/shared_widgets/forms/app_text_dropdown_picker.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
+import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:flutter/cupertino.dart';
 
 class RepeatPicker extends StatefulWidget {
@@ -67,7 +68,7 @@ class _RepeatPickerState extends State<RepeatPicker> {
         mainAxisSize: MainAxisSize.min,
         children: [
           AppTextDropdownPicker(
-            hintText: 'Repeat',
+            hintText: context.l10n.repeatHint,
             height: 100,
             selectedIndex: frequencies.indexOf(widget.repeatFrequency),
             items: frequencies,
@@ -88,7 +89,7 @@ class _RepeatPickerState extends State<RepeatPicker> {
               padding: const EdgeInsets.only(top: 4),
               child: AppMultipleChoiceDropdown<DayOfWeek>(
                 controller: _daysOfWeekController,
-                hintText: 'Days of week',
+                hintText: context.l10n.daysOfWeekHint,
                 items: DayOfWeek.values,
                 selectedItems: widget.daysOfWeekSelected,
                 onChanged: widget.onDaysOfWeekChanged,
@@ -100,7 +101,7 @@ class _RepeatPickerState extends State<RepeatPicker> {
               padding: const EdgeInsets.only(top: 4),
               child: AppDateFormField(
                 controller: widget.endDateController,
-                hintText: 'End repeat date',
+                hintText: context.l10n.endRepeatDateHint,
                 minimumDate: widget.minimumDate,
               ),
             ),

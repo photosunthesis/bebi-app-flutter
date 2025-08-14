@@ -1,6 +1,7 @@
 import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/ui/features/home/home_cubit.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
+import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -34,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Home Screen'),
+              Text(context.l10n.homeScreenTitle),
               const SizedBox(height: 12),
               OutlinedButton(
                 onPressed: () async {

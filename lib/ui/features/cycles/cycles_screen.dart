@@ -11,6 +11,7 @@ import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
+import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -146,7 +147,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
               height: 30,
               child: OutlinedButton(
                 onPressed: () => _cubit.setFocusedDate(DateTime.now()),
-                child: Text('Today'.toUpperCase()),
+                child: Text(context.l10n.todayButton.toUpperCase()),
               ),
             ),
     );
@@ -219,7 +220,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
     return Padding(
       padding: const EdgeInsets.all(UiConstants.padding),
       child: Text(
-        'This app provides helpful information to support your cycle tracking. For personalized guidance, we recommend consulting with a medical professional. The AI-generated insights and cycle predictions are designed to be informative and supportive, though they may not always be accurate for everyone\'s unique cycle.',
+        context.l10n.cycleTrackingDisclaimer,
         style: context.textTheme.bodySmall?.copyWith(
           height: 1.4,
           color: context.colorScheme.secondary,
@@ -261,7 +262,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                           ],
                         ),
                         child: Text(
-                          'Welcome to Cycle Tracking',
+                          context.l10n.welcomeToCycleTrackingTitle,
                           style: context.primaryTextTheme.titleLarge,
                         ),
                       ),
@@ -278,7 +279,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                           ],
                         ),
                         child: Text(
-                          'Start tracking your cycle by tapping the button below, or view your partner\'s data using the profile icons above.',
+                          context.l10n.welcomeToCycleTrackingMessage,
                           style: context.textTheme.bodyMedium?.copyWith(
                             height: 1.4,
                           ),
@@ -292,7 +293,9 @@ class _CyclesScreenState extends State<CyclesScreen> {
                           );
                           if (shouldReinitialize == true) _cubit.refreshData();
                         },
-                        child: Text('Set up cycle tracking'.toUpperCase()),
+                        child: Text(
+                          context.l10n.setupCycleTrackingButton.toUpperCase(),
+                        ),
                       ),
                       const SizedBox(height: 32),
                     ],

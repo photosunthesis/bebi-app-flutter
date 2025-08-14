@@ -10,6 +10,7 @@ import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:bebi_app/utils/extension/string_extensions.dart';
 import 'package:bebi_app/utils/formatter/date_input_formatter.dart';
+import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -141,13 +142,13 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Set up your profile',
+            context.l10n.profileSetupTitle,
             style: context.primaryTextTheme.headlineSmall,
           ),
           const SizedBox(height: 16),
           SizedBox(
             child: Text(
-              'Add a photo and name to personalize your profile. These details will be visible on your account.',
+              context.l10n.profileSetupSubtitle,
               style: context.textTheme.bodyLarge?.copyWith(
                 height: 1.4,
                 fontWeight: FontWeight.normal,
@@ -164,22 +165,22 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
       child: AppTextFormField(
         controller: _displayNameController,
-        labelText: 'Display name',
-        hintText: 'Your nickname',
+        labelText: context.l10n.displayNameLabel,
+        hintText: context.l10n.displayNameHint,
         keyboardType: TextInputType.text,
         textInputAction: TextInputAction.next,
         autofillHints: const <String>[AutofillHints.nickname],
         validator: (value) {
           if (value == null || value.isEmpty) {
-            return 'Please enter your preferred name.';
+            return context.l10n.displayNameRequired;
           }
 
           if (!RegExp(r'^[a-zA-Z0-9 ]+$').hasMatch(value)) {
-            return 'Only letters, numbers, and spaces are allowed.';
+            return context.l10n.displayNameInvalid;
           }
 
           if (value.length > 32) {
-            return 'Name can\'t be longer than 32 characters.';
+            return context.l10n.displayNameTooLong;
           }
 
           return null;
@@ -193,25 +194,25 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
       child: AppTextFormField(
         controller: _birthdayController,
-        labelText: 'Birthdate',
-        hintText: 'MM/DD/YYYY',
+        labelText: context.l10n.birthdateLabel,
+        hintText: context.l10n.birthdateHint,
         keyboardType: TextInputType.number,
         textInputAction: TextInputAction.done,
         autofillHints: const [AutofillHints.birthday],
         inputFormatters: const [DateInputFormatter()],
         validator: (value) {
           if (value == null || value.isEmpty) {
-            return 'Please enter your birthdate.';
+            return context.l10n.birthdateRequired;
           }
 
           final date = value.toDateTime('MM/dd/yyyy');
 
           if (date == null) {
-            return 'Please enter a valid date in MM/DD/YYYY format.';
+            return context.l10n.birthdateInvalid;
           }
 
           if (date.isAfter(DateTime.now())) {
-            return 'Birthdate cannot be in the future.';
+            return context.l10n.birthdateFuture;
           }
 
           return null;
@@ -241,7 +242,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                       },
 
                 child: Text(
-                  (loading ? 'Updating profile...' : 'Update profile')
+                  (loading ? context.l10n.updatingProfileButton : context.l10n.updateProfileButton)
                       .toUpperCase(),
                 ),
               ),

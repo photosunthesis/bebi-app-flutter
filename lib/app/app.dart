@@ -1,4 +1,5 @@
 import 'package:bebi_app/app/theme/app_colors.dart';
+import 'package:bebi_app/localizations/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_keyboard_visibility_temp_fork/flutter_keyboard_visibility_temp_fork.dart';
@@ -15,6 +16,9 @@ class App extends StatelessWidget {
       theme: GetIt.I<ThemeData>(),
       routerConfig: GetIt.I<GoRouter>(),
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('en', 'US'),
       builder: (_, child) => AnnotatedRegion(
         value: SystemUiOverlayStyle(
           systemNavigationBarColor: AppColors.stone50.withAlpha(1),
