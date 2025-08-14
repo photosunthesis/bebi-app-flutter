@@ -40,46 +40,49 @@ class _AddPartnerScreenState extends State<AddPartnerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<AddPartnerCubit, AddPartnerState>(
-      listener: (context, state) {
-        if (state.currentUserCode.isNotEmpty) {
-          final code = state.currentUserCode;
-          final firstPart = code.substring(0, code.length ~/ 2);
-          final secondPart = code.substring(code.length ~/ 2);
-          _userCodeController.text = '$firstPart-$secondPart';
-        }
+    return PopScope(
+      canPop: false,
+      child: BlocListener<AddPartnerCubit, AddPartnerState>(
+        listener: (context, state) {
+          if (state.currentUserCode.isNotEmpty) {
+            final code = state.currentUserCode;
+            final firstPart = code.substring(0, code.length ~/ 2);
+            final secondPart = code.substring(code.length ~/ 2);
+            _userCodeController.text = '$firstPart-$secondPart';
+          }
 
-        if (state.error != null) {
-          context.showSnackbar(state.error!, duration: 6.seconds);
-        }
+          if (state.error != null) {
+            context.showSnackbar(state.error!, duration: 6.seconds);
+          }
 
-        if (state.success) context.goNamed(AppRoutes.home);
-      },
-      child: Scaffold(
-        resizeToAvoidBottomInset: true,
-        body: Form(
-          key: _formKey,
-          child: CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: Column(
-                  children: [
-                    const SafeArea(
-                      child: SizedBox(height: UiConstants.padding),
-                    ),
-                    _buildHeader(),
-                    const SizedBox(height: 18),
-                  ],
+          if (state.success) context.goNamed(AppRoutes.home);
+        },
+        child: Scaffold(
+          resizeToAvoidBottomInset: true,
+          body: Form(
+            key: _formKey,
+            child: CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Column(
+                    children: [
+                      const SafeArea(
+                        child: SizedBox(height: UiConstants.padding),
+                      ),
+                      _buildHeader(),
+                      const SizedBox(height: 18),
+                    ],
+                  ),
                 ),
-              ),
-              SliverFillRemaining(
-                hasScrollBody: false,
-                child: _buildCodeSections(),
-              ),
-            ],
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: _buildCodeSections(),
+                ),
+              ],
+            ),
           ),
+          bottomNavigationBar: _buildBottomBar(),
         ),
-        bottomNavigationBar: _buildBottomBar(),
       ),
     );
   }

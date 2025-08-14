@@ -37,6 +37,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         if (state.error != null) context.showSnackbar(state.error!);
       },
       child: Form(
+        canPop: false,
         key: _formKey,
         child: Scaffold(
           resizeToAvoidBottomInset: true,
