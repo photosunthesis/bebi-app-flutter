@@ -23,6 +23,7 @@ migrate_working_dir/
 # is commented out by default.
 .vscode/
 .trae/
+.puro.json
 
 # Flutter/Dart/Pub related
 **/doc/api/
