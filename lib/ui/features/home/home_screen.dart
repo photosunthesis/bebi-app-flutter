@@ -27,7 +27,8 @@ class _HomeScreenState extends State<HomeScreen> {
       listener: (context, state) => switch (state) {
         HomeShouldSetUpProfile() => context.goNamed(AppRoutes.profileSetup),
         HomeShouldAddPartner() => context.goNamed(AppRoutes.addPartner),
-        HomeError(:final String message) => context.showSnackbar(message),
+        HomeShouldConfirmEmail() => context.goNamed(AppRoutes.confirmEmail),
+        HomeError(:final message) => context.showSnackbar(message),
         _ => null,
       },
       child: Scaffold(
@@ -42,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   await _cubit.signOut();
                   context.goNamed(AppRoutes.signIn);
                 },
-                child: Text('Sign out'.toUpperCase()),
+                child: Text(context.l10n.signOutButton.toUpperCase()),
               ),
             ],
           ),

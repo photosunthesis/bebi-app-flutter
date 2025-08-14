@@ -8,6 +8,8 @@ import 'package:bebi_app/ui/features/calendar_event_details/calendar_event_detai
 import 'package:bebi_app/ui/features/calendar_event_details/calendar_event_details_screen.dart';
 import 'package:bebi_app/ui/features/calendar_event_form/calendar_event_form_cubit.dart';
 import 'package:bebi_app/ui/features/calendar_event_form/calendar_event_form_screen.dart';
+import 'package:bebi_app/ui/features/confirm_email/confirm_email_cubit.dart';
+import 'package:bebi_app/ui/features/confirm_email/confirm_email_screen.dart';
 import 'package:bebi_app/ui/features/cycles/cycles_cubit.dart';
 import 'package:bebi_app/ui/features/cycles/cycles_screen.dart';
 import 'package:bebi_app/ui/features/cycles_setup/cycle_setup_cubit.dart';
@@ -50,6 +52,14 @@ abstract class AppRouter {
         builder: (_, _) => BlocProvider(
           create: (_) => GetIt.I<SignInCubit>(),
           child: const SignInScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/confirm-email',
+        name: AppRoutes.confirmEmail,
+        builder: (_, _) => BlocProvider(
+          create: (_) => GetIt.I<ConfirmEmailCubit>(),
+          child: const ConfirmEmailScreen(),
         ),
       ),
       GoRoute(

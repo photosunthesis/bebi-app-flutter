@@ -2,7 +2,6 @@ import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/ui/features/add_partner/add_partner_cubit.dart';
 import 'package:bebi_app/ui/shared_widgets/forms/app_text_form_field.dart';
-import 'package:bebi_app/ui/shared_widgets/shadow/shadow_container.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/analytics_utils.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
@@ -213,29 +212,24 @@ class _AddPartnerScreenState extends State<AddPartnerScreen> {
         child: BlocSelector<AddPartnerCubit, AddPartnerState, bool>(
           selector: (state) => state.loading,
           builder: (context, loading) {
-            return ShadowContainer(
-              child: ElevatedButton(
-                onPressed: loading
-                    ? null
-                    : () {
-                        if (_formKey.currentState?.validate() ?? false) {
-                          _cubit.submit(
-                            partnerCode: _partnerCodeController.text.isEmpty
-                                ? null
-                                : _partnerCodeController.text.replaceAll(
-                                    '-',
-                                    '',
-                                  ),
-                          );
-                        }
-                      },
+            return ElevatedButton(
+              onPressed: loading
+                  ? null
+                  : () {
+                      if (_formKey.currentState?.validate() ?? false) {
+                        _cubit.submit(
+                          partnerCode: _partnerCodeController.text.isEmpty
+                              ? null
+                              : _partnerCodeController.text.replaceAll('-', ''),
+                        );
+                      }
+                    },
 
-                child: Text(
-                  (loading
-                          ? context.l10n.connectingButton
-                          : context.l10n.finishConnectingButton)
-                      .toUpperCase(),
-                ),
+              child: Text(
+                (loading
+                        ? context.l10n.connectingButton
+                        : context.l10n.finishConnectingButton)
+                    .toUpperCase(),
               ),
             );
           },

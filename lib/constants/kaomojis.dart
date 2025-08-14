@@ -1,5 +1,5 @@
 abstract class Kaomojis {
-  static const happySet = <String>[
+  static const happySet = [
     '(¯▿¯)',
     '＼(￣▽￣)／',
     '( ˙▿˙ )',

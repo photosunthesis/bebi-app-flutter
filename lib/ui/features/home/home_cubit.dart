@@ -43,17 +43,26 @@ class HomeCubit extends Cubit<HomeState> {
   Future<void> initialize() async {
     await guard(
       () async {
-        emit(const HomeLoading());
+        emit(const HomeState.loading());
 
         final userProfile = await _userProfileRepository.getByUserId(
           _firebaseAuth.currentUser!.uid,
         );
 
         if (userProfile == null) {
-          emit(const HomeShouldSetUpProfile());
+          emit(const HomeState.shouldSetUpProfile());
           logEvent(
             name: 'user_redirected_to_profile_setup',
             parameters: {'userId': _firebaseAuth.currentUser!.uid},
+          );
+          return;
+        }
+
+        if (_firebaseAuth.currentUser?.emailVerified != true) {
+          emit(const HomeState.shouldConfirmEmail());
+          logEvent(
+            name: 'user_redirected_to_confirm_email',
+            parameters: {'user_id': _firebaseAuth.currentUser!.uid},
           );
           return;
         }
@@ -63,7 +72,7 @@ class HomeCubit extends Cubit<HomeState> {
         );
 
         if (userPartnership == null) {
-          emit(const HomeShouldAddPartner());
+          emit(const HomeState.shouldAddPartner());
           logEvent(
             name: 'user_redirected_to_add_partner',
             parameters: {'user_id': _firebaseAuth.currentUser!.uid},
@@ -71,7 +80,7 @@ class HomeCubit extends Cubit<HomeState> {
           return;
         }
 
-        emit(HomeLoaded(currentUser: userProfile));
+        emit(HomeState.loaded(currentUser: userProfile));
 
         logEvent(
           name: 'home_screen_loaded',
@@ -83,7 +92,7 @@ class HomeCubit extends Cubit<HomeState> {
         );
       },
       onError: (error, _) {
-        emit(HomeError(error.toString()));
+        emit(HomeState.error(error.toString()));
       },
     );
   }
@@ -91,7 +100,7 @@ class HomeCubit extends Cubit<HomeState> {
   Future<void> signOut() async {
     await guard(
       () async {
-        emit(const HomeLoading());
+        emit(const HomeState.loading());
 
         logEvent(
           name: 'user_signed_out',
@@ -107,10 +116,10 @@ class HomeCubit extends Cubit<HomeState> {
           _aiSummaryAndInsightsBox.clear(),
         ]);
 
-        emit(const HomeInitial());
+        emit(const HomeState.initial());
       },
       onError: (error, _) {
-        emit(HomeError(error.toString()));
+        emit(HomeState.error(error.toString()));
       },
     );
   }

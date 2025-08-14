@@ -240,5 +240,13 @@
   "unexpectedError": "An unexpected error occurred. Please try again later.",
   "selectDate": "Select date",
   "selectItem": "Select item",
-  "selectTime": "Select time"
+  "selectTime": "Select time",
+  "checkEmailTitle": "Please check your email.",
+  "checkEmailSubtitle": "Please verify your email address by clicking the link we sent to your inbox.",
+  "resendEmailButton": "Resend Email",
+  "resendingEmailButton": "Resending...",
+  "resendEmailError": "You can only send resend once every 3 minutes.",
+  "checkEmailMessage": "We sent a verification link to {email}. Tap it to verify your email and start using the app.",
+  "checkEmailMessagePrefix": "We sent a verification link to ",
+  "checkEmailMessageSuffix": ". Tap it to verify your email and start using the app."
 }

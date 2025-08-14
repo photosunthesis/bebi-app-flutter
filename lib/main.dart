@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:bebi_app/app/app.dart';
+import 'package:bebi_app/config/dependencies_config.dart';
 import 'package:bebi_app/config/firebase_options.dart';
-import 'package:bebi_app/config/injectable.dart';
 import 'package:bebi_app/hive_registrar.g.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';

@@ -18,9 +18,9 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
 
   @override
   void dispose() {
@@ -34,7 +34,7 @@ class _SignInScreenState extends State<SignInScreen> {
     return BlocListener<SignInCubit, SignInState>(
       listener: (context, state) => switch (state) {
         SignInSuccess() => context.goNamed(AppRoutes.home),
-        SignInFailure(:final String error) => context.showSnackbar(error),
+        SignInFailure(:final error) => context.showSnackbar(error),
         _ => null,
       },
       child: Form(

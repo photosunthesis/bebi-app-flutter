@@ -7,6 +7,7 @@ part of 'app_router.dart';
 abstract class AppRoutes {
   static const home = 'home';
   static const signIn = 'sign-in';
+  static const confirmEmail = 'confirm-email';
   static const profileSetup = 'profile-setup';
   static const relationshipOnboarding = 'relationship-onboarding';
   static const relationshipSetup = 'relationship-setup';

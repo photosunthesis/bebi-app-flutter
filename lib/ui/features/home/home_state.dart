@@ -8,5 +8,6 @@ sealed class HomeState with _$HomeState {
   const factory HomeState.loaded({required UserProfile currentUser}) =
       HomeLoaded;
   const factory HomeState.shouldSetUpProfile() = HomeShouldSetUpProfile;
+  const factory HomeState.shouldConfirmEmail() = HomeShouldConfirmEmail;
   const factory HomeState.shouldAddPartner() = HomeShouldAddPartner;
 }

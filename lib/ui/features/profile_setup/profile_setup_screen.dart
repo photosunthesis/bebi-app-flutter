@@ -228,25 +228,23 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         child: BlocSelector<ProfileSetupCubit, ProfileSetupState, bool>(
           selector: (state) => state.loading,
           builder: (context, loading) {
-            return ShadowContainer(
-              child: ElevatedButton(
-                onPressed: loading
-                    ? null
-                    : () {
-                        if (_formKey.currentState?.validate() ?? false) {
-                          _cubit.updateUserProfile(
-                            _displayNameController.text,
-                            _birthdayController.text.toDateTime('MM/dd/yyyy')!,
-                          );
-                        }
-                      },
+            return ElevatedButton(
+              onPressed: loading
+                  ? null
+                  : () {
+                      if (_formKey.currentState?.validate() ?? false) {
+                        _cubit.updateUserProfile(
+                          _displayNameController.text,
+                          _birthdayController.text.toDateTime('MM/dd/yyyy')!,
+                        );
+                      }
+                    },
 
-                child: Text(
-                  (loading
-                          ? context.l10n.updatingProfileButton
-                          : context.l10n.updateProfileButton)
-                      .toUpperCase(),
-                ),
+              child: Text(
+                (loading
+                        ? context.l10n.updatingProfileButton
+                        : context.l10n.updateProfileButton)
+                    .toUpperCase(),
               ),
             );
           },
