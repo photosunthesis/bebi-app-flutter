@@ -1,10 +1,8 @@
-import 'dart:async';
-
 import 'package:bebi_app/constants/ui_constants.dart';
+import 'package:bebi_app/utils/analytics_utils.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:bebi_app/utils/extension/string_extensions.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -97,19 +95,16 @@ class _AppTextFormFieldState extends State<AppTextFormField> {
       setState(() => _errorText = error);
 
       if (error != null) {
-        unawaited(
-          GetIt.I<FirebaseAnalytics>().logEvent(
-            name: 'form_validation_error',
-            parameters: {
-              'user_id':
-                  GetIt.I<FirebaseAuth>().currentUser?.uid ?? 'anonymous',
-              'field_label':
-                  (widget.labelText ?? widget.hintText)?.toSnakeCase() ??
-                  'unknown_field',
-              'error_message': error,
-              'field_type': widget.keyboardType?.toString() ?? 'text',
-            },
-          ),
+        logEvent(
+          name: 'form_validation_error',
+          parameters: {
+            'user_id': GetIt.I<FirebaseAuth>().currentUser?.uid ?? 'anonymous',
+            'field_label':
+                (widget.labelText ?? widget.hintText)?.toSnakeCase() ??
+                'unknown_field',
+            'error_message': error,
+            'field_type': widget.keyboardType?.toString() ?? 'text',
+          },
         );
       }
     });

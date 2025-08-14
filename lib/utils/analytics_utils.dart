@@ -31,3 +31,21 @@ void setUserProperty({required String name, required String value}) {
     GetIt.I<FirebaseAnalytics>().setUserProperty(name: name, value: value),
   );
 }
+
+void logShare({
+  required String method,
+  required String contentType,
+  required String itemId,
+  Map<String, Object>? parameters,
+}) {
+  if (isTest || kDebugMode) return;
+
+  unawaited(
+    GetIt.I<FirebaseAnalytics>().logShare(
+      method: method,
+      contentType: contentType,
+      itemId: itemId,
+      parameters: parameters,
+    ),
+  );
+}
