@@ -45,6 +45,15 @@ class HomeCubit extends Cubit<HomeState> {
       () async {
         emit(const HomeState.loading());
 
+        if (_firebaseAuth.currentUser?.emailVerified != true) {
+          emit(const HomeState.shouldConfirmEmail());
+          logEvent(
+            name: 'user_redirected_to_confirm_email',
+            parameters: {'user_id': _firebaseAuth.currentUser!.uid},
+          );
+          return;
+        }
+
         final userProfile = await _userProfileRepository.getByUserId(
           _firebaseAuth.currentUser!.uid,
         );
@@ -54,15 +63,6 @@ class HomeCubit extends Cubit<HomeState> {
           logEvent(
             name: 'user_redirected_to_profile_setup',
             parameters: {'userId': _firebaseAuth.currentUser!.uid},
-          );
-          return;
-        }
-
-        if (_firebaseAuth.currentUser?.emailVerified != true) {
-          emit(const HomeState.shouldConfirmEmail());
-          logEvent(
-            name: 'user_redirected_to_confirm_email',
-            parameters: {'user_id': _firebaseAuth.currentUser!.uid},
           );
           return;
         }
