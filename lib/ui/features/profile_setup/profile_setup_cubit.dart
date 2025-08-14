@@ -70,18 +70,22 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
                 state.profilePicture!,
               );
 
-        await _userProfileRepository.createOrUpdate(
-          UserProfile(
-            userId: _firebaseAuth.currentUser!.uid,
-            createdBy: _firebaseAuth.currentUser!.uid,
-            code: await _generateUserCode(),
-            birthDate: birthDate,
-            displayName: displayName,
-            photoUrl: photoUrl,
-            createdAt: DateTime.now(),
-            updatedAt: DateTime.now(),
+        await Future.wait([
+          _firebaseAuth.currentUser!.updateDisplayName(displayName),
+          _firebaseAuth.currentUser!.updatePhotoURL(photoUrl),
+          _userProfileRepository.createOrUpdate(
+            UserProfile(
+              userId: _firebaseAuth.currentUser!.uid,
+              createdBy: _firebaseAuth.currentUser!.uid,
+              code: await _generateUserCode(),
+              birthDate: birthDate,
+              displayName: displayName,
+              photoUrl: photoUrl,
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
+            ),
           ),
-        );
+        ]);
 
         emit(state.copyWith(success: true));
 
