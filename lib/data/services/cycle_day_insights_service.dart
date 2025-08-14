@@ -156,13 +156,18 @@ class CycleDayInsightsService {
   Future<String> generateAiInsights(
     CycleDayInsights cycleDayInsights, {
     required bool isCurrentUser,
+    required String locale,
   }) async {
     final date = cycleDayInsights.date.toIso8601String().substring(0, 10);
     final key = '${date}_${isCurrentUser ? 'self' : 'partner'}';
     final cachedInsights = _summaryAndInsightsBox.get(key);
     if (cachedInsights != null) return cachedInsights;
 
-    final prompt = _generateInsightsPrompt(cycleDayInsights, isCurrentUser);
+    final prompt = _generateInsightsPrompt(
+      cycleDayInsights,
+      isCurrentUser,
+      locale,
+    );
 
     final response = await _generativeModel.generateContent([
       Content.text(prompt),
@@ -179,6 +184,7 @@ class CycleDayInsightsService {
   String _generateInsightsPrompt(
     CycleDayInsights insights,
     bool isCurrentUser,
+    String locale,
   ) {
     final userContext = isCurrentUser
         ? '''
@@ -204,6 +210,11 @@ class CycleDayInsightsService {
     - Cycle Phase: ${insights.cyclePhase.name}
     - Predicted Period Dates: ${insights.nextPeriodDates.map((e) => e.toEEEEMMMMdyyyy()).join(', ')}
     - Predicted Fertile Dates: ${insights.fertileDays.map((e) => e.toEEEEMMMMdyyyy()).join(', ')}
+    - 
+    
+    LANGUAGE: 
+    - The response should be in the specified locale with culturally appropriate references
+    - Locale: "${locale.toUpperCase()}"
 
     RESPONSE STRUCTURE REQUIREMENTS:
     1. Start with exactly ONE informative opening sentence about the current cycle phase or day (no greetings like "hello", "hi", "good day")

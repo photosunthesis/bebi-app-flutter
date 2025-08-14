@@ -24,9 +24,7 @@ class CycleInsights extends StatelessWidget {
           children: [
             Text(
               context.l10n.cycleInsightsTitle,
-              style: context.primaryTextTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+              style: context.primaryTextTheme.titleLarge,
             ),
             const SizedBox(height: 18),
             BlocBuilder<CyclesCubit, CyclesState>(

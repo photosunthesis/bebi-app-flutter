@@ -12,6 +12,7 @@ import 'package:bebi_app/utils/analytics_utils.dart';
 import 'package:bebi_app/utils/exceptions/simple_exception.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/guard.dart';
+import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -174,6 +175,7 @@ class CyclesCubit extends Cubit<CyclesState> {
     final aiInsights = await _cycleDayInsightsService.generateAiInsights(
       cycleDayInsights,
       isCurrentUser: state.showCurrentUserCycleData,
+      locale: l10n.localeName,
     );
 
     emit(state.copyWith(aiSummary: aiInsights));
