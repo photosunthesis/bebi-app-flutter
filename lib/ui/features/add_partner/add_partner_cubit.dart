@@ -3,15 +3,15 @@ import 'dart:async';
 import 'package:bebi_app/data/models/user_partnership.dart';
 import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
+import 'package:bebi_app/utils/analytics_utils.dart';
 import 'package:bebi_app/utils/guard.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 
-part 'add_partner_state.dart';
 part 'add_partner_cubit.freezed.dart';
+part 'add_partner_state.dart';
 
 @injectable
 class AddPartnerCubit extends Cubit<AddPartnerState> {
@@ -19,13 +19,11 @@ class AddPartnerCubit extends Cubit<AddPartnerState> {
     this._userPartnershipsRepository,
     this._userProfileRepository,
     this._firebaseAuth,
-    this._firebaseAnalytics,
   ) : super(const AddPartnerState(currentUserCode: ''));
 
   final UserPartnershipsRepository _userPartnershipsRepository;
   final UserProfileRepository _userProfileRepository;
   final FirebaseAuth _firebaseAuth;
-  final FirebaseAnalytics _firebaseAnalytics;
 
   Future<void> initialize() async {
     await guard(
@@ -35,15 +33,13 @@ class AddPartnerCubit extends Cubit<AddPartnerState> {
           _firebaseAuth.currentUser!.uid,
         );
         emit(state.copyWith(currentUserCode: userProfile!.code));
-        
-        unawaited(
-          _firebaseAnalytics.logEvent(
-            name: 'add_partner_screen_opened',
-            parameters: {
-              'user_id': _firebaseAuth.currentUser!.uid,
-              'user_code': userProfile.code,
-            },
-          ),
+
+        logEvent(
+          name: 'add_partner_screen_opened',
+          parameters: {
+            'user_id': _firebaseAuth.currentUser!.uid,
+            'user_code': userProfile.code,
+          },
         );
       },
       onError: (e, _) {
@@ -79,14 +75,12 @@ class AddPartnerCubit extends Cubit<AddPartnerState> {
         );
 
         if (partnerProfile == null) {
-          unawaited(
-            _firebaseAnalytics.logEvent(
-              name: 'partner_code_invalid',
-              parameters: {
-                'user_id': _firebaseAuth.currentUser!.uid,
-                'attempted_code': partnerCode,
-              },
-            ),
+          logEvent(
+            name: 'partner_code_invalid',
+            parameters: {
+              'user_id': _firebaseAuth.currentUser!.uid,
+              'attempted_code': partnerCode,
+            },
           );
           throw ArgumentError('Partner code not found.');
         }
@@ -106,16 +100,17 @@ class AddPartnerCubit extends Cubit<AddPartnerState> {
 
         emit(state.copyWith(success: true));
 
-        unawaited(
-          _firebaseAnalytics.logEvent(
-            name: 'partner_added_successfully',
-            parameters: {
-              'user_id': _firebaseAuth.currentUser!.uid,
-              'partner_id': partnerProfile.userId,
-              'connection_method': 'partner_code',
-            },
-          ),
+        logEvent(
+          name: 'partner_added_successfully',
+          parameters: {
+            'user_id': _firebaseAuth.currentUser!.uid,
+            'partner_id': partnerProfile.userId,
+            'connection_method': 'partner_code',
+          },
         );
+
+        setUserProperty(name: 'has_partner', value: 'true');
+        setUserProperty(name: 'partner_id', value: partnerProfile.userId);
       },
       onError: (e, _) {
         emit(state.copyWith(error: e.toString()));

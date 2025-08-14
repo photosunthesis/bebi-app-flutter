@@ -7,10 +7,10 @@ import 'package:bebi_app/data/repositories/calendar_events_repository.dart';
 import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
 import 'package:bebi_app/data/services/recurring_calendar_events_service.dart';
+import 'package:bebi_app/utils/analytics_utils.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:bebi_app/utils/guard.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -26,7 +26,6 @@ class CalendarEventDetailsCubit extends Cubit<CalendarEventDetailsState> {
     this._recurringCalendarEventsService,
     this._partnershipsRepository,
     this._profileRepository,
-    this._firebaseAnalytics,
     this._firebaseAuth,
   ) : super(const CalendarEventDetailsState.loading());
 
@@ -34,7 +33,6 @@ class CalendarEventDetailsCubit extends Cubit<CalendarEventDetailsState> {
   final RecurringCalendarEventsService _recurringCalendarEventsService;
   final UserPartnershipsRepository _partnershipsRepository;
   final UserProfileRepository _profileRepository;
-  final FirebaseAnalytics _firebaseAnalytics;
   final FirebaseAuth _firebaseAuth;
 
   Future<void> initialize() async {
@@ -85,17 +83,15 @@ class CalendarEventDetailsCubit extends Cubit<CalendarEventDetailsState> {
 
         emit(const CalendarEventDetailsState.deleteSuccess());
 
-        unawaited(
-          _firebaseAnalytics.logEvent(
-            name: 'calendar_event_deleted',
-            parameters: {
-              'user_id': _firebaseAuth.currentUser!.uid,
-              'event_id': calendarEventId,
-              'delete_type': deleteAllEvents ? 'all_events' : 'single_event',
-              'is_recurring_event': baseEvent.isRecurring,
-              'event_date': instanceDate.toIso8601String(),
-            },
-          ),
+        logEvent(
+          name: 'calendar_event_deleted',
+          parameters: {
+            'user_id': _firebaseAuth.currentUser!.uid,
+            'event_id': calendarEventId,
+            'delete_type': deleteAllEvents ? 'all_events' : 'single_event',
+            'is_recurring_event': baseEvent.isRecurring,
+            'event_date': instanceDate.toIso8601String(),
+          },
         );
       },
       onError: (error, _) {

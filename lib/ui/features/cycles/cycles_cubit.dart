@@ -8,10 +8,10 @@ import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
 import 'package:bebi_app/data/services/cycle_day_insights_service.dart';
 import 'package:bebi_app/data/services/cycle_predictions_service.dart';
+import 'package:bebi_app/utils/analytics_utils.dart';
 import 'package:bebi_app/utils/exceptions/simple_exception.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/guard.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -29,7 +29,6 @@ class CyclesCubit extends Cubit<CyclesState> {
     this._userProfileRepository,
     this._userPartnershipsRepository,
     this._firebaseAuth,
-    this._firebaseAnalytics,
   ) : super(CyclesState.initial());
 
   final CycleLogsRepository _cycleLogsRepository;
@@ -38,7 +37,6 @@ class CyclesCubit extends Cubit<CyclesState> {
   final UserProfileRepository _userProfileRepository;
   final UserPartnershipsRepository _userPartnershipsRepository;
   final FirebaseAuth _firebaseAuth;
-  final FirebaseAnalytics _firebaseAnalytics;
 
   static const _cycleInsightsGeneratedEvent = 'cycle_insights_generated';
   static const _userProfileSwitchedEvent = 'user_profile_switched';
@@ -132,18 +130,17 @@ class CyclesCubit extends Cubit<CyclesState> {
   }
 
   void trackInsightViewed() {
-    unawaited(
-      _firebaseAnalytics.logEvent(
-        name: 'cycle_insight_viewed',
-        parameters: _buildAnalyticsParameters(
-          additionalParams: {
-            'focused_date': state.focusedDate.toIso8601String(),
-            'cycle_phase': state.focusedCycleDayInsights?.cyclePhase.name ?? 'unknown',
-            'day_of_cycle': state.focusedCycleDayInsights?.dayOfCycle ?? 0,
-            'has_ai_summary': state.aiSummary != null,
-            'viewing_partner_data': !state.showCurrentUserCycleData,
-          },
-        ),
+    logEvent(
+      name: 'cycle_insight_viewed',
+      parameters: _buildAnalyticsParameters(
+        additionalParams: {
+          'focused_date': state.focusedDate.toIso8601String(),
+          'cycle_phase':
+              state.focusedCycleDayInsights?.cyclePhase.name ?? 'unknown',
+          'day_of_cycle': state.focusedCycleDayInsights?.dayOfCycle ?? 0,
+          'has_ai_summary': state.aiSummary != null,
+          'viewing_partner_data': !state.showCurrentUserCycleData,
+        },
       ),
     );
   }
@@ -229,33 +226,22 @@ class CyclesCubit extends Cubit<CyclesState> {
     await _userProfileRepository.createOrUpdate(updatedUser);
     emit(state.copyWith(userProfile: updatedUser));
 
-    unawaited(
-      _firebaseAnalytics.setUserProperty(
-        name: _hasCycleProperty,
-        value: 'false',
-      ),
-    );
+    setUserProperty(name: _hasCycleProperty, value: 'false');
   }
 
   void _logCycleInsightsGenerated(DateTime focusedDate) {
-    unawaited(
-      _firebaseAnalytics.logEvent(
-        name: _cycleInsightsGeneratedEvent,
-        parameters: _buildAnalyticsParameters(
-          additionalParams: {
-            'focused_date': focusedDate.toEEEEMMMMdyyyyhhmma(),
-          },
-        ),
+    logEvent(
+      name: _cycleInsightsGeneratedEvent,
+      parameters: _buildAnalyticsParameters(
+        additionalParams: {'focused_date': focusedDate.toEEEEMMMMdyyyyhhmma()},
       ),
     );
   }
 
   void _logUserProfileSwitched() {
-    unawaited(
-      _firebaseAnalytics.logEvent(
-        name: _userProfileSwitchedEvent,
-        parameters: _buildAnalyticsParameters(),
-      ),
+    logEvent(
+      name: _userProfileSwitchedEvent,
+      parameters: _buildAnalyticsParameters(),
     );
   }
 

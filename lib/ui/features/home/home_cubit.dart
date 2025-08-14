@@ -6,8 +6,8 @@ import 'package:bebi_app/data/models/user_partnership.dart';
 import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
+import 'package:bebi_app/utils/analytics_utils.dart';
 import 'package:bebi_app/utils/guard.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,15 +15,14 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:injectable/injectable.dart';
 
-part 'home_state.dart';
 part 'home_cubit.freezed.dart';
+part 'home_state.dart';
 
 @injectable
 class HomeCubit extends Cubit<HomeState> {
   HomeCubit(
     this._userProfileRepository,
     this._userPartnershipsRepository,
-    this._analytics,
     this._firebaseAuth,
     this._calendarEventBox,
     this._cycleLogBox,
@@ -34,7 +33,6 @@ class HomeCubit extends Cubit<HomeState> {
 
   final UserProfileRepository _userProfileRepository;
   final UserPartnershipsRepository _userPartnershipsRepository;
-  final FirebaseAnalytics _analytics;
   final FirebaseAuth _firebaseAuth;
   final Box<CalendarEvent> _calendarEventBox;
   final Box<CycleLog> _cycleLogBox;
@@ -53,14 +51,10 @@ class HomeCubit extends Cubit<HomeState> {
 
         if (userProfile == null) {
           emit(const HomeShouldSetUpProfile());
-          if (!kDebugMode) {
-            unawaited(
-              _analytics.logEvent(
-                name: 'user_redirected_to_profile_setup',
-                parameters: {'userId': _firebaseAuth.currentUser!.uid},
-              ),
-            );
-          }
+          logEvent(
+            name: 'user_redirected_to_profile_setup',
+            parameters: {'userId': _firebaseAuth.currentUser!.uid},
+          );
           return;
         }
 
@@ -70,26 +64,22 @@ class HomeCubit extends Cubit<HomeState> {
 
         if (userPartnership == null) {
           emit(const HomeShouldAddPartner());
-          unawaited(
-            _analytics.logEvent(
-              name: 'user_redirected_to_add_partner',
-              parameters: {'user_id': _firebaseAuth.currentUser!.uid},
-            ),
+          logEvent(
+            name: 'user_redirected_to_add_partner',
+            parameters: {'user_id': _firebaseAuth.currentUser!.uid},
           );
           return;
         }
 
         emit(HomeLoaded(currentUser: userProfile));
 
-        unawaited(
-          _analytics.logEvent(
-            name: 'home_screen_loaded',
-            parameters: {
-              'user_id': _firebaseAuth.currentUser!.uid,
-              'has_partner': true,
-              'has_cycle': userProfile.hasCycle,
-            },
-          ),
+        logEvent(
+          name: 'home_screen_loaded',
+          parameters: {
+            'user_id': _firebaseAuth.currentUser!.uid,
+            'has_partner': true,
+            'has_cycle': userProfile.hasCycle,
+          },
         );
       },
       onError: (error, _) {
@@ -103,11 +93,9 @@ class HomeCubit extends Cubit<HomeState> {
       () async {
         emit(const HomeLoading());
 
-        unawaited(
-          _analytics.logEvent(
-            name: 'user_signed_out',
-            parameters: {'userId': _firebaseAuth.currentUser!.uid},
-          ),
+        logEvent(
+          name: 'user_signed_out',
+          parameters: {'userId': _firebaseAuth.currentUser!.uid},
         );
 
         await Future.wait([

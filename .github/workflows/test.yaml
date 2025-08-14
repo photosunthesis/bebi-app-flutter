@@ -37,7 +37,9 @@ jobs:
 
           class DefaultFirebaseOptions {
             static FirebaseOptions get currentPlatform {
-              throw UnimplementedError('Firebase stub for static analysis only - not for runtime use');
+              throw UnimplementedError(
+                'Firebase stub for static analysis only - not for runtime use',
+              );
             }
           }
           EOF

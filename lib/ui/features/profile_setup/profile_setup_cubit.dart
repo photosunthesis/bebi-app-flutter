@@ -4,8 +4,8 @@ import 'dart:math';
 
 import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
+import 'package:bebi_app/utils/analytics_utils.dart';
 import 'package:bebi_app/utils/guard.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -21,13 +21,11 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
     this._userProfileRepository,
     this._firebaseAuth,
     this._imagePicker,
-    this._firebaseAnalytics,
   ) : super(const ProfileSetupState());
 
   final UserProfileRepository _userProfileRepository;
   final FirebaseAuth _firebaseAuth;
   final ImagePicker _imagePicker;
-  final FirebaseAnalytics _firebaseAnalytics;
 
   Future<void> setProfilePicture() async {
     final pickedFile = await _imagePicker.pickImage(
@@ -40,29 +38,23 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
 
     if (pickedFile != null) {
       emit(state.copyWith(profilePicture: File(pickedFile.path)));
-      
-      unawaited(
-        _firebaseAnalytics.logEvent(
-          name: 'profile_picture_selected',
-          parameters: {
-            'user_id': _firebaseAuth.currentUser!.uid,
-            'image_source': 'gallery',
-          },
-        ),
+
+      logEvent(
+        name: 'profile_picture_selected',
+        parameters: {
+          'user_id': _firebaseAuth.currentUser!.uid,
+          'image_source': 'gallery',
+        },
       );
     }
   }
 
   void removeProfilePicture() {
     emit(state.copyWith(profilePicture: null));
-    
-    unawaited(
-      _firebaseAnalytics.logEvent(
-        name: 'profile_picture_removed',
-        parameters: {
-          'user_id': _firebaseAuth.currentUser!.uid,
-        },
-      ),
+
+    logEvent(
+      name: 'profile_picture_removed',
+      parameters: {'user_id': _firebaseAuth.currentUser!.uid},
     );
   }
 
@@ -93,16 +85,14 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
 
         emit(state.copyWith(success: true));
 
-        unawaited(
-          _firebaseAnalytics.logEvent(
-            name: 'profile_setup_completed',
-            parameters: {
-              'user_id': _firebaseAuth.currentUser!.uid,
-              'has_profile_picture': photoUrl != null,
-              'display_name_length': displayName.length,
-              'age_years': DateTime.now().difference(birthDate).inDays ~/ 365,
-            },
-          ),
+        logEvent(
+          name: 'profile_setup_completed',
+          parameters: {
+            'user_id': _firebaseAuth.currentUser!.uid,
+            'has_profile_picture': photoUrl != null,
+            'display_name_length': displayName.length,
+            'age_years': DateTime.now().difference(birthDate).inDays ~/ 365,
+          },
         );
       },
       onError: (error, _) {

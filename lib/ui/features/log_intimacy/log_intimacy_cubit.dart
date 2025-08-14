@@ -4,9 +4,9 @@ import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/data/repositories/cycle_logs_repository.dart';
 import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
+import 'package:bebi_app/utils/analytics_utils.dart';
 import 'package:bebi_app/utils/exceptions/simple_exception.dart';
 import 'package:bebi_app/utils/guard.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -22,14 +22,12 @@ class LogIntimacyCubit extends Cubit<LogIntimacyState> {
     this._userProfileRepository,
     this._userPartnershipsRepository,
     this._firebaseAuth,
-    this._firebaseAnalytics,
   ) : super(const LogIntimacyState.data());
 
   final CycleLogsRepository _cycleLogsRepository;
   final UserProfileRepository _userProfileRepository;
   final UserPartnershipsRepository _userPartnershipsRepository;
   final FirebaseAuth _firebaseAuth;
-  final FirebaseAnalytics _firebaseAnalytics;
 
   String get _currentUserId => _firebaseAuth.currentUser!.uid;
 
@@ -70,17 +68,15 @@ class LogIntimacyCubit extends Cubit<LogIntimacyState> {
 
         emit(const LogIntimacyState.success());
 
-        unawaited(
-          _firebaseAnalytics.logEvent(
-            name: 'intimacy_logged',
-            parameters: {
-              'user_id': _currentUserId,
-              'event_date': date.toIso8601String(),
-              'intimacy_type': intimacyType.name,
-              'log_for_partner': logForPartner,
-              'is_update': cycleLogId != null,
-            },
-          ),
+        logEvent(
+          name: 'intimacy_logged',
+          parameters: {
+            'user_id': _currentUserId,
+            'event_date': date.toIso8601String(),
+            'intimacy_type': intimacyType.name,
+            'log_for_partner': logForPartner,
+            'is_update': cycleLogId != null,
+          },
         );
       },
       logWhen: (error) => error is! SimpleException,

@@ -1,7 +1,7 @@
 import 'dart:async';
 
+import 'package:bebi_app/utils/analytics_utils.dart';
 import 'package:bebi_app/utils/guard.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,11 +13,9 @@ part 'sign_in_cubit.freezed.dart';
 
 @injectable
 class SignInCubit extends Cubit<SignInState> {
-  SignInCubit(this._firebaseAuth, this._firebaseAnalytics)
-    : super(const SignInInitial());
+  SignInCubit(this._firebaseAuth) : super(const SignInInitial());
 
   final FirebaseAuth _firebaseAuth;
-  final FirebaseAnalytics _firebaseAnalytics;
 
   Future<void> signInWithEmailAndPassword(String email, String password) async {
     await guard(
@@ -29,14 +27,12 @@ class SignInCubit extends Cubit<SignInState> {
         );
         emit(const SignInSuccess());
 
-        unawaited(
-          _firebaseAnalytics.logLogin(
-            loginMethod: 'email',
-            parameters: {
-              'email': email,
-              'user_id': _firebaseAuth.currentUser!.uid,
-            },
-          ),
+        logLogin(
+          loginMethod: 'email',
+          parameters: {
+            'email': email,
+            'user_id': _firebaseAuth.currentUser!.uid,
+          },
         );
       },
       onError: (error, _) {
@@ -47,16 +43,16 @@ class SignInCubit extends Cubit<SignInState> {
         };
 
         emit(SignInFailure(errorMessage));
-        
-        unawaited(
-          _firebaseAnalytics.logEvent(
-            name: 'sign_in_failed',
-            parameters: {
-              'email': email,
-              'error_type': error is FirebaseAuthException ? error.code : 'unknown',
-              'login_method': 'email',
-            },
-          ),
+
+        logEvent(
+          name: 'sign_in_failed',
+          parameters: {
+            'email': email,
+            'error_type': error is FirebaseAuthException
+                ? error.code
+                : 'unknown',
+            'login_method': 'email',
+          },
         );
       },
     );

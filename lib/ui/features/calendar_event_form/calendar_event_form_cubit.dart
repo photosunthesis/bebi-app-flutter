@@ -6,17 +6,17 @@ import 'package:bebi_app/data/models/repeat_rule.dart';
 import 'package:bebi_app/data/models/save_changes_dialog_options.dart';
 import 'package:bebi_app/data/repositories/calendar_events_repository.dart';
 import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
+import 'package:bebi_app/utils/analytics_utils.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:bebi_app/utils/guard.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 
-part 'calendar_event_form_state.dart';
 part 'calendar_event_form_cubit.freezed.dart';
+part 'calendar_event_form_state.dart';
 
 @injectable
 class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
@@ -24,13 +24,11 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
     this._calendarEventsRepository,
     this._userPartnershipsRepository,
     this._firebaseAuth,
-    this._firebaseAnalytics,
   ) : super(const CalendarEventFormState(currentUserId: ''));
 
   final CalendarEventsRepository _calendarEventsRepository;
   final UserPartnershipsRepository _userPartnershipsRepository;
   final FirebaseAuth _firebaseAuth;
-  final FirebaseAnalytics _firebaseAnalytics;
 
   void initialize(CalendarEvent? calendarEvent) {
     emit(
@@ -39,16 +37,14 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
         currentUserId: _firebaseAuth.currentUser!.uid,
       ),
     );
-    
-    unawaited(
-      _firebaseAnalytics.logEvent(
-        name: 'calendar_event_form_opened',
-        parameters: {
-          'user_id': _firebaseAuth.currentUser!.uid,
-          'is_editing': calendarEvent != null,
-          'is_recurring_event': calendarEvent?.isRecurring ?? false,
-        },
-      ),
+
+    logEvent(
+      name: 'calendar_event_form_opened',
+      parameters: {
+        'user_id': _firebaseAuth.currentUser!.uid,
+        'is_editing': calendarEvent != null,
+        'is_recurring_event': calendarEvent?.isRecurring ?? false,
+      },
     );
   }
 
@@ -114,21 +110,19 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
           );
         }
 
-        unawaited(
-          _firebaseAnalytics.logEvent(
-            name: isExistingEvent
-                ? 'calendar_event_updated'
-                : 'calendar_event_created',
-            parameters: {
-              'user_id': _firebaseAuth.currentUser!.uid,
-              'event_type': allDay ? 'all_day' : 'timed',
-              'has_repeat': repeatRule.frequency != RepeatFrequency.doNotRepeat,
-              'repeat_frequency': repeatRule.frequency.name,
-              'shared_with_partner': shareWithPartner,
-              'has_notes': notes?.isNotEmpty == true,
-              'event_color': eventColor.name,
-            },
-          ),
+        logEvent(
+          name: isExistingEvent
+              ? 'calendar_event_updated'
+              : 'calendar_event_created',
+          parameters: {
+            'user_id': _firebaseAuth.currentUser!.uid,
+            'event_type': allDay ? 'all_day' : 'timed',
+            'has_repeat': repeatRule.frequency != RepeatFrequency.doNotRepeat,
+            'repeat_frequency': repeatRule.frequency.name,
+            'shared_with_partner': shareWithPartner,
+            'has_notes': notes?.isNotEmpty == true,
+            'event_color': eventColor.name,
+          },
         );
 
         emit(state.copyWith(success: true));
