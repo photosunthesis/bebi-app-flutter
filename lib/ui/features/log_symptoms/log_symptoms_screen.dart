@@ -181,7 +181,7 @@ class _LogSymptomsScreenState extends State<LogSymptomsScreen> {
                   symptoms: _symptoms,
                 ),
           child: Text(
-            loading 
+            loading
                 ? context.l10n.loggingSymptomsButton.toUpperCase()
                 : context.l10n.logSymptomsButton.toUpperCase(),
           ),

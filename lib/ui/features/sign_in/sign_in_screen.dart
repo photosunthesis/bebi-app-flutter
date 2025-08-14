@@ -166,7 +166,10 @@ class _SignInScreenState extends State<SignInScreen> {
                         }
                       },
                 child: Text(
-                  (loading ? context.l10n.signingInButton : context.l10n.signInButton).toUpperCase(),
+                  (loading
+                          ? context.l10n.signingInButton
+                          : context.l10n.signInButton)
+                      .toUpperCase(),
                 ),
               ),
             ],

@@ -242,7 +242,9 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                       },
 
                 child: Text(
-                  (loading ? context.l10n.updatingProfileButton : context.l10n.updateProfileButton)
+                  (loading
+                          ? context.l10n.updatingProfileButton
+                          : context.l10n.updateProfileButton)
                       .toUpperCase(),
                 ),
               ),

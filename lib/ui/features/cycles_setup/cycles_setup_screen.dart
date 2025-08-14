@@ -101,7 +101,7 @@ class _CyclesSetupScreenState extends State<CyclesSetupScreen> {
       child: AppTextFormField(
         controller: _lastPeriodDateController,
         labelText: context.l10n.lastPeriodLabel,
-         hintText: 'MM/DD/YYYY',
+        hintText: 'MM/DD/YYYY',
         keyboardType: TextInputType.number,
         textInputAction: TextInputAction.next,
         inputFormatters: const [DateInputFormatter()],
@@ -132,7 +132,7 @@ class _CyclesSetupScreenState extends State<CyclesSetupScreen> {
       child: AppTextFormField(
         controller: _periodDurationController,
         labelText: context.l10n.periodDurationLabel,
-         hintText: context.l10n.periodDurationHint,
+        hintText: context.l10n.periodDurationHint,
         keyboardType: TextInputType.number,
         textInputAction: TextInputAction.done,
         validator: (value) {
@@ -224,7 +224,10 @@ class _CyclesSetupScreenState extends State<CyclesSetupScreen> {
                         );
                       }
                     },
-              child: Text((loading ? context.l10n.savingButton : context.l10n.saveButton).toUpperCase()),
+              child: Text(
+                (loading ? context.l10n.savingButton : context.l10n.saveButton)
+                    .toUpperCase(),
+              ),
             );
           },
         ),
