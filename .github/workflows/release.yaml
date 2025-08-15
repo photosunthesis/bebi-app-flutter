@@ -35,7 +35,7 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: 3.32.8 # Must be the same with the one in pubspec.yaml
+          flutter-version: 3.35.1 # Must be the same with the one in pubspec.yaml
 
       - name: Configure environment
         run: echo "${{ secrets.ENVIRONMENT }}" | base64 --decode > .env
@@ -91,7 +91,7 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: 3.32.8 # Must be the same with the one in pubspec.yaml
+          flutter-version: 3.35.1 # Must be the same with the one in pubspec.yaml
 
       - name: Download dependencies
         run: flutter pub get
