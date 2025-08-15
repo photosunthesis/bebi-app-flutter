@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/constants/kaomojis.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
@@ -19,8 +17,7 @@ class ConfirmEmailScreen extends StatefulWidget {
 
 class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
   late final _cubit = context.read<ConfirmEmailCubit>();
-  static final _kaomoji =
-      Kaomojis.happySet[Random().nextInt(Kaomojis.happySet.length)];
+  static final _kaomoji = Kaomojis.getRandomFromHappySet();
 
   @override
   void initState() {

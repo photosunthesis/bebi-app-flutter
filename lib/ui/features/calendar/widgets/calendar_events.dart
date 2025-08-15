@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/constants/kaomojis.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
@@ -10,8 +8,7 @@ import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:flutter/material.dart';
 
 abstract class CalendarEvents {
-  static final _kaomoji =
-      Kaomojis.happySet[Random().nextInt(Kaomojis.happySet.length)];
+  static final _kaomoji = Kaomojis.getRandomFromHappySet();
 
   static SliverList buildList(List<CalendarEvent> events) {
     return SliverList.builder(

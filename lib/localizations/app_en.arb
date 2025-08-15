@@ -273,5 +273,21 @@
   "discardChangesButton": "Discard changes",
   "newUpdateAvailableTitle": "New update available",
   "updateAvailableDescription": "A new version (v{version}) is now available. Tap the button below to go to the release page to get the update.",
-  "getUpdateButton": "Get update"
+  "getUpdateButton": "Get update",
+  "homeGreeting": "Good {timeOfDay}, {userName}",
+  "@homeGreeting": {
+    "placeholders": {
+      "timeOfDay": {
+        "type": "String",
+        "description": "Time of day (morning, afternoon, evening)"
+      },
+      "userName": {
+        "type": "String",
+        "description": "The user's display name"
+      }
+    }
+  },
+  "morning": "morning",
+  "afternoon": "afternoon",
+  "evening": "evening"
 }

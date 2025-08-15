@@ -32,7 +32,7 @@ class HomeCubit extends Cubit<HomeState> {
     this._userPartnershipBox,
     this._aiSummaryAndInsightsBox,
     this._appUpdateService,
-  ) : super(const HomeInitial());
+  ) : super(const HomeState.loading());
 
   final UserProfileRepository _userProfileRepository;
   final UserPartnershipsRepository _userPartnershipsRepository;
@@ -99,7 +99,7 @@ class HomeCubit extends Cubit<HomeState> {
           return;
         }
 
-        emit(HomeState.loaded(currentUser: userProfile));
+        emit(HomeState.data(currentUser: userProfile));
 
         logEvent(
           name: 'home_screen_loaded',
@@ -134,8 +134,6 @@ class HomeCubit extends Cubit<HomeState> {
           _userPartnershipBox.clear(),
           _aiSummaryAndInsightsBox.clear(),
         ]);
-
-        emit(const HomeState.initial());
       },
       onError: (error, _) {
         emit(HomeState.error(error.toString()));

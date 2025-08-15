@@ -32,4 +32,25 @@ extension StringExtensions on String {
         .replaceAll(RegExp(r'^_+|_+$'), '')
         .toLowerCase();
   }
+
+  String toTitleCase() {
+    final trimmed = trim();
+    if (trimmed.isEmpty) return trimmed;
+
+    return trimmed
+        .replaceAllMapped(
+          RegExp(r'([a-z0-9])([A-Z])'),
+          (m) => '${m[1]} ${m[2]}',
+        )
+        .replaceAll(RegExp(r'[_-]+'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .split(' ')
+        .where((word) => word.isNotEmpty)
+        .map(
+          (word) => word.isEmpty
+              ? word
+              : '${word[0].toUpperCase()}${word.length > 1 ? word.substring(1).toLowerCase() : ''}',
+        )
+        .join(' ');
+  }
 }
