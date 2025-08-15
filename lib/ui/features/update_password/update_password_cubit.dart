@@ -1,3 +1,4 @@
+import 'package:bebi_app/utils/analytics_utils.dart';
 import 'package:bebi_app/utils/guard.dart';
 import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -29,6 +30,15 @@ class UpdatePasswordCubit extends Cubit<UpdatePasswordState> {
       await user.reauthenticateWithCredential(credential);
       await user.updatePassword(newPassword);
       emit(const UpdatePasswordState.success());
+
+      logEvent(
+        name: 'update_password',
+        parameters: {
+          'user_id': _firebaseAuth.currentUser!.uid,
+          'email': _firebaseAuth.currentUser!.email!,
+          'timestamp': DateTime.now().toIso8601String(),
+        },
+      );
     },
     onError: (error, _) {
       emit(
