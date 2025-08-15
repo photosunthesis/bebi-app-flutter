@@ -79,9 +79,10 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
               buildWhen: (p, c) =>
                   c is ConfirmEmailStateData || p is ConfirmEmailStateData,
               builder: (context, state) {
-                final email = _censorEmail(
-                  (state as ConfirmEmailStateData).email,
-                );
+                final email = _censorEmail(switch (state) {
+                  ConfirmEmailStateData(:final email) => email,
+                  _ => '',
+                });
 
                 return RichText(
                   text: TextSpan(

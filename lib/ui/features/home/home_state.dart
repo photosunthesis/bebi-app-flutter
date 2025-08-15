@@ -10,4 +10,6 @@ sealed class HomeState with _$HomeState {
   const factory HomeState.shouldSetUpProfile() = HomeShouldSetUpProfile;
   const factory HomeState.shouldConfirmEmail() = HomeShouldConfirmEmail;
   const factory HomeState.shouldAddPartner() = HomeShouldAddPartner;
+  const factory HomeState.shouldUpdateApp(AppUpdateInfo info) =
+      HomeShouldUpdateApp;
 }

@@ -9,12 +9,14 @@ class Option<T> {
   const Option({
     required this.text,
     required this.value,
+    this.onTap,
     this.style = OptionStyle.secondary,
   });
 
   final String text;
   final T value;
   final OptionStyle style;
+  final VoidCallback? onTap;
 }
 
 class OptionsBottomDialog<T> extends StatelessWidget {
@@ -36,11 +38,13 @@ class OptionsBottomDialog<T> extends StatelessWidget {
     String? description,
     bool useRootNavigator = true,
     bool isDismissible = true,
+    bool enableDrag = true,
   }) {
     return showModalBottomSheet<T>(
       context: context,
       showDragHandle: false,
       isDismissible: isDismissible,
+      enableDrag: enableDrag,
       barrierColor: context.colorScheme.primary.withAlpha(80),
       backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
@@ -126,7 +130,13 @@ class OptionsBottomDialog<T> extends StatelessWidget {
         style: buttonStyle.copyWith(
           minimumSize: const WidgetStatePropertyAll(Size(double.infinity, 44)),
         ),
-        onPressed: () => context.pop(option.value),
+        onPressed: () {
+          if (option.onTap != null) {
+            option.onTap!();
+          } else {
+            context.pop(option.value);
+          }
+        },
         child: Text(option.text.toUpperCase()),
       ),
     );

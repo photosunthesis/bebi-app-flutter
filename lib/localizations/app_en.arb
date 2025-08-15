@@ -270,5 +270,8 @@
   "leaveWithoutSavingPasswordTitle": "Leave without saving?",
   "leaveWithoutSavingPasswordMessage": "Your password changes have not been saved. Are you sure you want to leave this page?",
   "continueEditingButton": "Continue editing",
-  "discardChangesButton": "Discard changes"
+  "discardChangesButton": "Discard changes",
+  "newUpdateAvailableTitle": "New update available",
+  "updateAvailableDescription": "A new version (v{version}) is now available. Tap the button below to go to the release page to get the update.",
+  "getUpdateButton": "Get update"
 }

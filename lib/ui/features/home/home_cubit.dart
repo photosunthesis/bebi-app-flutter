@@ -1,11 +1,13 @@
 import 'dart:async';
 
+import 'package:bebi_app/data/models/app_update_info.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/data/models/user_partnership.dart';
 import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
+import 'package:bebi_app/data/services/app_update_service.dart';
 import 'package:bebi_app/utils/analytics_utils.dart';
 import 'package:bebi_app/utils/guard.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -29,6 +31,7 @@ class HomeCubit extends Cubit<HomeState> {
     this._userProfileBox,
     this._userPartnershipBox,
     this._aiSummaryAndInsightsBox,
+    this._appUpdateService,
   ) : super(const HomeInitial());
 
   final UserProfileRepository _userProfileRepository;
@@ -39,6 +42,7 @@ class HomeCubit extends Cubit<HomeState> {
   final Box<UserProfile> _userProfileBox;
   final Box<UserPartnership> _userPartnershipBox;
   final Box<String> _aiSummaryAndInsightsBox;
+  final AppUpdateService _appUpdateService;
 
   Future<void> initialize() async {
     await guard(
@@ -76,6 +80,21 @@ class HomeCubit extends Cubit<HomeState> {
           logEvent(
             name: 'user_redirected_to_add_partner',
             parameters: {'user_id': _firebaseAuth.currentUser!.uid},
+          );
+          return;
+        }
+
+        final updateInfo = await _appUpdateService.checkForUpdate();
+
+        if (updateInfo?.hasUpdate == true) {
+          emit(HomeState.shouldUpdateApp(updateInfo!));
+          logEvent(
+            name: 'user_redirected_to_update_app',
+            parameters: {
+              'user_id': _firebaseAuth.currentUser!.uid,
+              'old_version': updateInfo.oldVersion,
+              'new_version': updateInfo.newVersion,
+            },
           );
           return;
         }
