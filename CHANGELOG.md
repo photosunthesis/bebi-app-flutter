@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.2] - 2025-08-16
+
+## Fixed
+
+- Fixed an issue where the home screen wasn't redirecting the user to the appropriate set ups.
+
 ## [0.2.1] - 2025-08-15
 
 ### Added
