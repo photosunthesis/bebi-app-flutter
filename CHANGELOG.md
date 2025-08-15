@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.1] - 2025-08-15
+
+### Added
+
+- Simple Home UI screen with sign out and update password buttons
+
+### Changed
+
+- Upgraded to Flutter 3.35
+
 ## [0.2.0] - 2025-08-15
 
 ### Added
