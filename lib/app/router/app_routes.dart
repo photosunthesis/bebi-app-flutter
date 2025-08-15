@@ -23,4 +23,5 @@ abstract class AppRoutes {
   static const cyclesSetup = 'cycles-setup';
   static const location = 'location';
   static const addPartner = 'add-partner';
+  static const updatePassword = 'update-password';
 }

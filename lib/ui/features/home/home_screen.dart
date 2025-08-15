@@ -38,12 +38,24 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Text(context.l10n.homeScreenTitle),
               const SizedBox(height: 12),
-              OutlinedButton(
-                onPressed: () async {
-                  await _cubit.signOut();
-                  context.goNamed(AppRoutes.signIn);
-                },
-                child: Text(context.l10n.signOutButton.toUpperCase()),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  OutlinedButton(
+                    onPressed: () async {
+                      await _cubit.signOut();
+                      context.goNamed(AppRoutes.signIn);
+                    },
+                    child: Text(context.l10n.signOutButton.toUpperCase()),
+                  ),
+                  const SizedBox(width: 12),
+                  OutlinedButton(
+                    onPressed: () {
+                      context.pushNamed(AppRoutes.updatePassword);
+                    },
+                    child: Text(context.l10n.updatePasswordButton.toUpperCase()),
+                  ),
+                ],
               ),
             ],
           ),

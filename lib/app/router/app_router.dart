@@ -26,6 +26,8 @@ import 'package:bebi_app/ui/features/profile_setup/profile_setup_cubit.dart';
 import 'package:bebi_app/ui/features/profile_setup/profile_setup_screen.dart';
 import 'package:bebi_app/ui/features/sign_in/sign_in_cubit.dart';
 import 'package:bebi_app/ui/features/sign_in/sign_in_screen.dart';
+import 'package:bebi_app/ui/features/update_password/update_password_cubit.dart';
+import 'package:bebi_app/ui/features/update_password/update_password_screen.dart';
 import 'package:bebi_app/ui/shared_widgets/layouts/main_scaffold.dart';
 import 'package:bebi_app/ui/shared_widgets/modals/bottom_sheet_page.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -68,6 +70,14 @@ abstract class AppRouter {
         builder: (_, _) => BlocProvider(
           create: (_) => GetIt.I<ProfileSetupCubit>(),
           child: const ProfileSetupScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/update-password',
+        name: AppRoutes.updatePassword,
+        builder: (_, _) => BlocProvider(
+          create: (_) => GetIt.I<UpdatePasswordCubit>(),
+          child: const UpdatePasswordScreen(),
         ),
       ),
       StatefulShellRoute(
