@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.4] - 2025-08-17
+
+### Fixed
+
+- Fixed issue with cycle data not being displayed properly
+
 ## [0.2.3] - 2025-08-17
 
 ### Added
