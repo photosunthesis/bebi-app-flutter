@@ -43,7 +43,8 @@ class _CyclePredictionsState extends State<CyclePredictions> {
 
   Widget _buildFertileWindowPredictions() {
     return BlocSelector<CyclesCubit, CyclesState, CycleDayInsights?>(
-      selector: (state) => state.focusedCycleDayInsights,
+      selector: (state) =>
+          state is CyclesLoadedState ? state.focusedDateInsights : null,
       builder: (context, insights) {
         return _buildCalendar(
           focusedDay: insights?.fertileDays.first ?? DateTime.now(),
@@ -62,7 +63,8 @@ class _CyclePredictionsState extends State<CyclePredictions> {
 
   Widget _buildPeriodPredictions() {
     return BlocSelector<CyclesCubit, CyclesState, CycleDayInsights?>(
-      selector: (state) => state.focusedCycleDayInsights,
+      selector: (state) =>
+          state is CyclesLoadedState ? state.focusedDateInsights : null,
       builder: (context, insights) {
         return _buildCalendar(
           focusedDay: insights?.nextPeriodDates.first ?? DateTime.now(),

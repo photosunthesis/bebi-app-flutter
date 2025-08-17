@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:bebi_app/data/models/cycle_day_insights.dart';
 import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
+import 'package:bebi_app/utils/extension/int_extensions.dart';
+import 'package:bebi_app/utils/localizations_utils.dart';
 // ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
 import 'package:firebase_ai/firebase_ai.dart';
@@ -16,7 +18,7 @@ class CycleDayInsightsService {
   final GenerativeModel _generativeModel;
   final Box<String> _aiInsightsBox;
 
-  CycleDayInsights? getInsightsFromDateAndEvents(
+  CycleDayInsights getInsightsFromDateAndEvents(
     DateTime date,
     List<CycleLog> events,
   ) {
@@ -26,12 +28,18 @@ class CycleDayInsightsService {
       (e) => e.type == LogType.ovulation,
     );
 
-    final periodGroups = _groupEventsByProximity(periodEvents.toList());
-    final cyclePeriodGroups = _findCurrentCyclePeriodGroups(date, periodGroups);
+    if (periodEvents.isEmpty) {
+      throw ArgumentError(l10n.noPeriodDataError);
+    }
 
-    if (cyclePeriodGroups == null) return null;
+    final periodGroups = _groupPeriodEventsByProximity(periodEvents.toList());
+    final (currentPeriodDates, nextPeriodDates) =
+        _findCurrentAndNextPeriodGroups(date, periodGroups);
 
-    final (currentPeriodDates, nextPeriodDates) = cyclePeriodGroups;
+    if (currentPeriodDates.isEmpty) {
+      throw ArgumentError(l10n.unableToDetermineCycleError);
+    }
+
     final cycleStart = currentPeriodDates.first;
     final nextCycleStart = nextPeriodDates.first;
 
@@ -64,7 +72,7 @@ class CycleDayInsightsService {
     );
   }
 
-  List<List<DateTime>> _groupEventsByProximity(List<CycleLog> events) {
+  List<List<CycleLog>> _groupPeriodEventsByProximity(List<CycleLog> events) {
     final groups = <List<CycleLog>>[];
 
     for (final event in events) {
@@ -77,45 +85,76 @@ class CycleDayInsightsService {
       }
     }
 
-    return groups.map((e) => e.map((e) => e.dateLocal).toList()).toList();
+    return groups;
   }
 
-  (List<DateTime>, List<DateTime>)? _findCurrentCyclePeriodGroups(
+  (List<DateTime> currentPeriodDates, List<DateTime> nextPeriodDates)
+  _findCurrentAndNextPeriodGroups(
     DateTime date,
-    List<List<DateTime>> periodGroups,
+    List<List<CycleLog>> periodGroups,
   ) {
-    if (periodGroups.length < 2) {
-      return null;
+    if (periodGroups.isEmpty) {
+      throw ArgumentError(l10n.noPeriodDataForCycleError);
     }
 
-    for (var i = 0; i < periodGroups.length - 1; i++) {
-      final currentPeriod = periodGroups[i];
-      final nextPeriod = periodGroups[i + 1];
+    final actualPeriods = periodGroups
+        .where((group) => group.any((log) => !log.isPrediction))
+        .toList();
+    final predictedPeriods = periodGroups
+        .where((group) => group.every((log) => log.isPrediction))
+        .toList();
 
-      if (currentPeriod.isEmpty || nextPeriod.isEmpty) {
-        continue;
-      }
+    var currentPeriodDates = <DateTime>[];
+    var nextPeriodDates = <DateTime>[];
 
-      final cycleStart = currentPeriod.first;
-      final nextCycleStart = nextPeriod.first;
+    // Find current period from actual periods
+    for (final periodGroup in actualPeriods) {
+      final cycleStart = periodGroup.first.dateLocal;
+      final cycleEnd = periodGroup.last.dateLocal;
 
-      final isAfterOrOnCycleStart =
-          date.isAfter(cycleStart) || date.isSameDay(cycleStart);
-
-      if (isAfterOrOnCycleStart && date.isBefore(nextCycleStart)) {
-        return (currentPeriod, nextPeriod);
+      if ((date.isAfter(cycleStart) || date.isSameDay(cycleStart)) &&
+          (date.isBefore(cycleEnd.add(28.days)) || date.isSameDay(cycleEnd))) {
+        currentPeriodDates = periodGroup.map((log) => log.dateLocal).toList();
+        break;
       }
     }
 
-    return null;
+    // If no current actual period found, use the most recent actual period
+    if (currentPeriodDates.isEmpty && actualPeriods.isNotEmpty) {
+      final lastActualPeriod = actualPeriods.last;
+      final lastCycleStart = lastActualPeriod.first.dateLocal;
+
+      if (date.isAfter(lastCycleStart) || date.isSameDay(lastCycleStart)) {
+        currentPeriodDates = lastActualPeriod
+            .map((log) => log.dateLocal)
+            .toList();
+      }
+    }
+
+    // Find next period from predictions
+    if (predictedPeriods.isNotEmpty) {
+      final nextPredictedPeriod = predictedPeriods.first;
+      nextPeriodDates = nextPredictedPeriod
+          .map((log) => log.dateLocal)
+          .toList();
+    }
+
+    if (currentPeriodDates.isEmpty) {
+      throw ArgumentError(l10n.unableToDetermineCycleError);
+    }
+
+    return (currentPeriodDates, nextPeriodDates);
   }
 
   List<DateTime> _getCurrentFertileWindow(
     List<DateTime> ovulationDates,
     DateTime cycleStart,
-    DateTime nextCycleStart,
+    DateTime? nextCycleStart,
   ) {
     if (ovulationDates.isEmpty) return [];
+    if (nextCycleStart == null) {
+      return ovulationDates.where((e) => e.isAfter(cycleStart)).toList();
+    }
     return ovulationDates
         .where((e) => e.isBefore(nextCycleStart) && e.isAfter(cycleStart))
         .toList();
@@ -168,15 +207,13 @@ class CycleDayInsightsService {
         Content.text(prompt),
       ]);
 
-      if (response.text == null) throw Exception();
+      if (response.text == null) throw ArgumentError();
 
       unawaited(_aiInsightsBox.put(key, response.text!));
 
       return response.text!;
     } catch (_) {
-      throw Exception(
-        'We had trouble generating AI insights. Please try again in a moment.',
-      );
+      throw ArgumentError(l10n.aiInsightsGenerationError);
     }
   }
 

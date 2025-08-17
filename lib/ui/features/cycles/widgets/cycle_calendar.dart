@@ -53,11 +53,12 @@ class _CycleCalendarState extends State<CycleCalendar> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<CyclesCubit, CyclesState>(
-      listenWhen: (previous, current) => current.focusedDate.isToday,
+      // Only respond to "back to today" button presses to avoid unnecessary
+      // page animations from other focus date changes
+      listenWhen: (previous, current) =>
+          current is CyclesLoadedState && current.focusedDate.isToday,
       listener: (context, state) {
-        // Only respond to "back to today" button presses to avoid unnecessary
-        // page animations from other focus date changes
-        if (!state.focusedDate.isToday) return;
+        if (!(state as CyclesLoadedState).focusedDate.isToday) return;
 
         final targetIndex = _dates.indexWhere(
           (d) => d.isSameDay(state.focusedDate),
@@ -96,7 +97,7 @@ class _CycleCalendarState extends State<CycleCalendar> {
 
   Widget _buildDayItem({required DateTime date}) {
     return BlocSelector<CyclesCubit, CyclesState, List<CycleLog>>(
-      selector: (state) => state.cycleLogs,
+      selector: (state) => state is CyclesLoadedState ? state.cycleLogs : [],
       builder: (context, cycleLogs) {
         final [periodLog, ovulationLog, symptomLog, intimacyLog] = LogType
             .values

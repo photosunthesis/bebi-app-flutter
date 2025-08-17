@@ -45,10 +45,16 @@ class _CycleLogsState extends State<CycleLogs> {
 
   Widget _buildPeriodSection() {
     return BlocBuilder<CyclesCubit, CyclesState>(
+      buildWhen: (previous, current) => current is CyclesLoadedState,
       builder: (context, state) {
-        final periodLog = state.focusedDateLogs.firstWhereOrNull(
-          (e) => e.type == LogType.period,
-        );
+        final showCurrentUserCycleData = state is CyclesLoadedState
+            ? state.showCurrentUserCycleData
+            : false;
+        final periodLog = state is CyclesLoadedState
+            ? state.focusedDateLogs.firstWhereOrNull(
+                (e) => e.type == LogType.period,
+              )
+            : null;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,8 +73,9 @@ class _CycleLogsState extends State<CycleLogs> {
                 final shouldRefresh = await context.pushNamed(
                   AppRoutes.logMenstrualCycle,
                   queryParameters: {
-                    'logForPartner': '!${state.showCurrentUserCycleData}',
-                    'date': state.focusedDate.toIso8601String(),
+                    'logForPartner': '!$showCurrentUserCycleData',
+                    'date': (state as CyclesLoadedState).focusedDate
+                        .toIso8601String(),
                     if (periodLog != null) ...{
                       'cycleLogId': periodLog.id,
                       'flowIntensity': periodLog.flow!.name,
@@ -99,7 +106,7 @@ class _CycleLogsState extends State<CycleLogs> {
                     ),
                     if (periodLog != null)
                       Text(
-                        state.focusedDateLogs
+                        (state as CyclesLoadedState).focusedDateLogs
                             .firstWhere((e) => e.type == LogType.period)
                             .flow!
                             .label,
@@ -191,10 +198,11 @@ class _CycleLogsState extends State<CycleLogs> {
     required Map<String, String> Function(CycleLog) getRouteParams,
   }) {
     return BlocBuilder<CyclesCubit, CyclesState>(
+      buildWhen: (previous, current) => current is CyclesLoadedState,
       builder: (context, state) {
-        final log = state.focusedDateLogs.firstWhereOrNull(
-          (e) => e.type == logType,
-        );
+        final log = state is CyclesLoadedState
+            ? state.focusedDateLogs.firstWhereOrNull((e) => e.type == logType)
+            : null;
 
         return InkWell(
           onTap: () => _handleLogTap(state, routeName, log, getRouteParams),
@@ -250,7 +258,8 @@ class _CycleLogsState extends State<CycleLogs> {
     final shouldRefresh = await context.pushNamed(
       routeName,
       queryParameters: {
-        'logForPartner': '!${state.showCurrentUserCycleData}',
+        'logForPartner':
+            '!${(state as CyclesLoadedState).showCurrentUserCycleData}',
         'date': state.focusedDate.toIso8601String(),
         if (log != null) ...getRouteParams(log),
       },
