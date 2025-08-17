@@ -152,27 +152,32 @@ class CycleDayInsightsService {
     required bool isCurrentUser,
     required String locale,
   }) async {
-    final date = cycleDayInsights.date.toIso8601String().substring(0, 10);
-    final key = '${date}_${isCurrentUser ? 'self' : 'partner'}';
-    final cachedInsights = _aiInsightsBox.get(key);
-    if (cachedInsights != null) return cachedInsights;
+    try {
+      final date = cycleDayInsights.date.toIso8601String().substring(0, 10);
+      final key = '${date}_${isCurrentUser ? 'self' : 'partner'}';
+      final cachedInsights = _aiInsightsBox.get(key);
+      if (cachedInsights != null) return cachedInsights;
 
-    final prompt = _generateInsightsPrompt(
-      cycleDayInsights,
-      isCurrentUser,
-      locale,
-    );
+      final prompt = _generateInsightsPrompt(
+        cycleDayInsights,
+        isCurrentUser,
+        locale,
+      );
 
-    final response = await _generativeModel.generateContent([
-      Content.text(prompt),
-    ]);
+      final response = await _generativeModel.generateContent([
+        Content.text(prompt),
+      ]);
 
-    final result =
-        response.text ?? 'An error occurred while generating insights.';
+      if (response.text == null) throw Exception();
 
-    unawaited(_aiInsightsBox.put(key, result));
+      unawaited(_aiInsightsBox.put(key, response.text!));
 
-    return result;
+      return response.text!;
+    } catch (_) {
+      throw Exception(
+        'We had trouble generating AI insights. Please try again in a moment.',
+      );
+    }
   }
 
   String _generateInsightsPrompt(
