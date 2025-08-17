@@ -9,21 +9,21 @@ import 'package:injectable/injectable.dart';
 abstract class HiveBoxes {
   @preResolve
   Future<Box<CalendarEvent>> get calendarEventBox async =>
-      Hive.openBox<CalendarEvent>('calendar_events_box');
+      Hive.openBox<CalendarEvent>('calendar_events');
 
   @preResolve
   Future<Box<CycleLog>> get cycleLogBox async =>
-      Hive.openBox<CycleLog>('cycle_logs_box');
+      Hive.openBox<CycleLog>('cycle_logs');
 
   @preResolve
   Future<Box<UserProfile>> get userProfileBox async =>
-      Hive.openBox<UserProfile>('user_profiles_box');
+      Hive.openBox<UserProfile>('user_profiles');
 
   @preResolve
   Future<Box<UserPartnership>> get userPartnershipBox async =>
-      Hive.openBox<UserPartnership>('user_partnerships_box');
+      Hive.openBox<UserPartnership>('user_partnerships');
 
   @preResolve
-  Future<Box<String>> get aiSummaryAndInsightsBox async =>
-      Hive.openBox<String>('ai_summary_and_insights_box');
+  Future<Box<String>> get aiInsightsBox async =>
+      Hive.openBox<String>('ai_insights');
 }
