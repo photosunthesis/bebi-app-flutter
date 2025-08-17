@@ -1,6 +1,5 @@
 import 'package:bebi_app/app/theme/app_colors.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
-import 'package:bebi_app/data/models/cycle_day_insights.dart';
 import 'package:bebi_app/ui/features/cycles/cycles_cubit.dart';
 import 'package:bebi_app/ui/features/cycles/widgets/angled_stripes_background.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
@@ -42,19 +41,29 @@ class _CyclePredictionsState extends State<CyclePredictions> {
   }
 
   Widget _buildFertileWindowPredictions() {
-    return BlocSelector<CyclesCubit, CyclesState, CycleDayInsights?>(
-      selector: (state) =>
-          state is CyclesLoadedState ? state.focusedDateInsights : null,
-      builder: (context, insights) {
+    return BlocBuilder<CyclesCubit, CyclesState>(
+      buildWhen: (previous, current) => current is CyclesLoadedState,
+      builder: (context, state) {
+        final showCurrentUserCycleData = state is CyclesLoadedState
+            ? state.showCurrentUserCycleData
+            : false;
+        final insights = state is CyclesLoadedState
+            ? state.focusedDateInsights
+            : null;
+
         return _buildCalendar(
           focusedDay: insights?.fertileDays.first ?? DateTime.now(),
           eventColor: AppColors.blue,
           title: context.l10n.fertilWindowTitle,
-          description: insights?.fertileDays.isNotEmpty == true
-              ? context.l10n.fertilWindowDescription(
-                  insights!.fertileDays.first.toEEEEMMMMd(),
-                )
-              : context.l10n.notEnoughDataFertileWindow,
+          description: showCurrentUserCycleData
+              ? insights?.fertileDays.isNotEmpty == true
+                    ? context.l10n.fertileWindowDescription(
+                        insights!.fertileDays.first.toEEEEMMMMd(),
+                      )
+                    : context.l10n.notEnoughDataFertileWindow
+              : context.l10n.partnerNextPeriodDescription(
+                  insights?.fertileDays.first.toEEEEMMMMd() ?? '',
+                ),
           events: insights?.fertileDays ?? [],
         );
       },
@@ -62,19 +71,29 @@ class _CyclePredictionsState extends State<CyclePredictions> {
   }
 
   Widget _buildPeriodPredictions() {
-    return BlocSelector<CyclesCubit, CyclesState, CycleDayInsights?>(
-      selector: (state) =>
-          state is CyclesLoadedState ? state.focusedDateInsights : null,
-      builder: (context, insights) {
+    return BlocBuilder<CyclesCubit, CyclesState>(
+      buildWhen: (previous, current) => current is CyclesLoadedState,
+      builder: (context, state) {
+        final showCurrentUserCycleData = state is CyclesLoadedState
+            ? state.showCurrentUserCycleData
+            : false;
+        final insights = state is CyclesLoadedState
+            ? state.focusedDateInsights
+            : null;
+
         return _buildCalendar(
           focusedDay: insights?.nextPeriodDates.first ?? DateTime.now(),
           eventColor: AppColors.red,
           title: context.l10n.nextPeriodTitle,
-          description: insights?.nextPeriodDates.isNotEmpty == true
-              ? context.l10n.nextPeriodDescription(
-                  insights!.nextPeriodDates.first.toEEEEMMMMd(),
-                )
-              : context.l10n.notEnoughDataNextPeriod,
+          description: showCurrentUserCycleData
+              ? insights?.nextPeriodDates.isNotEmpty == true
+                    ? context.l10n.nextPeriodDescription(
+                        insights!.nextPeriodDates.first.toEEEEMMMMd(),
+                      )
+                    : context.l10n.notEnoughDataNextPeriod
+              : context.l10n.partnerNextPeriodDescription(
+                  insights?.nextPeriodDates.first.toEEEEMMMMd() ?? '',
+                ),
           events: insights?.nextPeriodDates ?? [],
         );
       },
@@ -105,7 +124,7 @@ class _CyclePredictionsState extends State<CyclePredictions> {
           styleSheet: MarkdownStyleSheet(
             p: context.textTheme.bodyMedium,
             strong: context.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),
