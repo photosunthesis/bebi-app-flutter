@@ -9,10 +9,8 @@ import 'package:bebi_app/utils/exceptions/simple_exception.dart';
 import 'package:bebi_app/utils/guard.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 
-part 'log_intimacy_cubit.freezed.dart';
 part 'log_intimacy_state.dart';
 
 @injectable
@@ -22,7 +20,7 @@ class LogIntimacyCubit extends Cubit<LogIntimacyState> {
     this._userProfileRepository,
     this._userPartnershipsRepository,
     this._firebaseAuth,
-  ) : super(const LogIntimacyState.data());
+  ) : super(const LogIntimmacyLoadedState());
 
   final CycleLogsRepository _cycleLogsRepository;
   final UserProfileRepository _userProfileRepository;
@@ -39,7 +37,7 @@ class LogIntimacyCubit extends Cubit<LogIntimacyState> {
   }) async {
     await guard(
       () async {
-        emit(const LogIntimacyState.loading());
+        emit(const LogIntimacyLoadingState());
 
         final userProfile = await _userProfileRepository.getByUserId(
           _currentUserId,
@@ -66,7 +64,7 @@ class LogIntimacyCubit extends Cubit<LogIntimacyState> {
           ),
         );
 
-        emit(const LogIntimacyState.success());
+        emit(const LogIntimacySuccessState());
 
         logEvent(
           name: 'intimacy_logged',
@@ -81,10 +79,10 @@ class LogIntimacyCubit extends Cubit<LogIntimacyState> {
       },
       logWhen: (error) => error is! SimpleException,
       onError: (error, _) {
-        emit(LogIntimacyState.error(error.toString()));
+        emit(LogIntimacyErrorState(error.toString()));
       },
       onComplete: () {
-        emit(const LogIntimacyState.data());
+        emit(const LogIntimmacyLoadedState());
       },
     );
   }
@@ -92,17 +90,17 @@ class LogIntimacyCubit extends Cubit<LogIntimacyState> {
   Future<void> delete(String cycleLogId) async {
     await guard(
       () async {
-        emit(const LogIntimacyState.loading());
+        emit(const LogIntimacyLoadingState());
 
         await _cycleLogsRepository.deleteById(cycleLogId);
 
-        emit(const LogIntimacyState.success());
+        emit(const LogIntimacySuccessState());
       },
       onError: (error, _) {
-        emit(LogIntimacyState.error(error.toString()));
+        emit(LogIntimacyErrorState(error.toString()));
       },
       onComplete: () {
-        emit(const LogIntimacyState.data());
+        emit(const LogIntimmacyLoadedState());
       },
     );
   }

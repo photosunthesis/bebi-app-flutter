@@ -32,9 +32,13 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<ProfileSetupCubit, ProfileSetupState>(
-      listener: (context, state) {
-        if (state.success) context.goNamed(AppRoutes.home);
-        if (state.error != null) context.showSnackbar(state.error!);
+      listener: (context, state) => switch (state) {
+        ProfileSetupSuccessState() => context.goNamed(AppRoutes.home),
+        ProfileSetupErrorState(:final error) => context.showSnackbar(
+          error,
+          type: SnackbarType.error,
+        ),
+        _ => null,
       },
       child: Form(
         canPop: false,
@@ -63,7 +67,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
       child: BlocSelector<ProfileSetupCubit, ProfileSetupState, File?>(
-        selector: (state) => state.profilePicture,
+        selector: (state) =>
+            state is ProfileSetupLoadedState ? state.profilePicture : null,
         builder: (context, profilePicture) {
           final hasProfilePicture = profilePicture != null;
           return Align(
@@ -227,7 +232,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       child: Padding(
         padding: const EdgeInsets.all(UiConstants.padding),
         child: BlocSelector<ProfileSetupCubit, ProfileSetupState, bool>(
-          selector: (state) => state.loading,
+          selector: (state) => state is ProfileSetupLoadingState,
           builder: (context, loading) {
             return ElevatedButton(
               onPressed: loading

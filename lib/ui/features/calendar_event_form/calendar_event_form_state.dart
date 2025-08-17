@@ -1,12 +1,24 @@
 part of 'calendar_event_form_cubit.dart';
 
-@freezed
-abstract class CalendarEventFormState with _$CalendarEventFormState {
-  const factory CalendarEventFormState({
-    required String currentUserId,
-    CalendarEvent? calendarEvent,
-    @Default(false) bool loading,
-    @Default(false) bool success,
-    String? error,
-  }) = _CalendarEventFormState;
+sealed class CalendarEventFormState {
+  const CalendarEventFormState();
+}
+
+class CalendarEventFormLoadingState extends CalendarEventFormState {
+  const CalendarEventFormLoadingState();
+}
+
+class CalendarEventFormLoadedState extends CalendarEventFormState {
+  const CalendarEventFormLoadedState(this.calendarEvent, this.currentUserId);
+  final CalendarEvent? calendarEvent;
+  final String currentUserId;
+}
+
+class CalendarEventFormErrorState extends CalendarEventFormState {
+  const CalendarEventFormErrorState(this.error);
+  final String error;
+}
+
+class CalendarEventFormSuccessState extends CalendarEventFormState {
+  const CalendarEventFormSuccessState();
 }

@@ -4,34 +4,30 @@ import 'package:bebi_app/constants/hive_type_ids.dart';
 import 'package:bebi_app/data/models/event_color.dart';
 import 'package:bebi_app/data/models/repeat_rule.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:equatable/equatable.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
-part 'calendar_event.freezed.dart';
 part 'calendar_event.g.dart';
 
-@freezed
-abstract class CalendarEvent with _$CalendarEvent {
-  const CalendarEvent._();
-
-  @HiveType(typeId: HiveTypeIds.calendarEvent)
-  const factory CalendarEvent({
-    @HiveField(0) required String id,
-    String? recurringEventId, // Used only in UI, not saved in Firestore
-    @HiveField(1) required String title,
-    @HiveField(2) String? notes,
-    @HiveField(3) required DateTime date,
-    @HiveField(4) required DateTime startTime,
-    @HiveField(5) DateTime? endTime,
-    @HiveField(6) @Default(false) bool allDay,
-    @HiveField(7) required RepeatRule repeatRule,
-    @HiveField(8) required EventColor eventColor,
-    @HiveField(9) required List<String> users,
-    @HiveField(10) required String createdBy,
-    @HiveField(11) required String updatedBy,
-    @HiveField(12) required DateTime createdAt,
-    @HiveField(13) required DateTime updatedAt,
-  }) = _CalendarEvent;
+@HiveType(typeId: HiveTypeIds.calendarEvent)
+class CalendarEvent extends Equatable {
+  const CalendarEvent({
+    required this.id,
+    this.recurringEventId,
+    required this.title,
+    this.notes,
+    required this.date,
+    required this.startTime,
+    this.endTime,
+    this.allDay = false,
+    required this.repeatRule,
+    required this.eventColor,
+    required this.users,
+    required this.createdBy,
+    required this.updatedBy,
+    required this.createdAt,
+    required this.updatedAt,
+  });
 
   factory CalendarEvent.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
@@ -59,6 +55,36 @@ abstract class CalendarEvent with _$CalendarEvent {
     );
   }
 
+  @HiveField(0)
+  final String id;
+  final String? recurringEventId; // Used in UI only, not stored in Firestore
+  @HiveField(1)
+  final String title;
+  @HiveField(2)
+  final String? notes;
+  @HiveField(3)
+  final DateTime date;
+  @HiveField(4)
+  final DateTime startTime;
+  @HiveField(5)
+  final DateTime? endTime;
+  @HiveField(6)
+  final bool allDay;
+  @HiveField(7)
+  final RepeatRule repeatRule;
+  @HiveField(8)
+  final EventColor eventColor;
+  @HiveField(9)
+  final List<String> users;
+  @HiveField(10)
+  final String createdBy;
+  @HiveField(11)
+  final String updatedBy;
+  @HiveField(12)
+  final DateTime createdAt;
+  @HiveField(13)
+  final DateTime updatedAt;
+
   DateTime get dateLocal => date.toLocal();
   DateTime get startTimeLocal => startTime.toLocal();
   DateTime? get endTimeLocal => endTime?.toLocal();
@@ -75,9 +101,44 @@ abstract class CalendarEvent with _$CalendarEvent {
               int.parse(recurringEventId!.split('_').last) >=
                   repeatRule.occurrences! - 1));
 
+  CalendarEvent copyWith({
+    String? id,
+    String? recurringEventId,
+    String? title,
+    String? notes,
+    DateTime? date,
+    DateTime? startTime,
+    DateTime? endTime,
+    bool? allDay,
+    RepeatRule? repeatRule,
+    EventColor? eventColor,
+    List<String>? users,
+    String? createdBy,
+    String? updatedBy,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return CalendarEvent(
+      id: id ?? this.id,
+      recurringEventId: recurringEventId ?? this.recurringEventId,
+      title: title ?? this.title,
+      notes: notes ?? this.notes,
+      date: date ?? this.date,
+      startTime: startTime ?? this.startTime,
+      endTime: endTime ?? this.endTime,
+      allDay: allDay ?? this.allDay,
+      repeatRule: repeatRule ?? this.repeatRule,
+      eventColor: eventColor ?? this.eventColor,
+      users: users ?? this.users,
+      createdBy: createdBy ?? this.createdBy,
+      updatedBy: updatedBy ?? this.updatedBy,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
   Map<String, dynamic> toFirestore() {
     return {
-      // ID is handled by Firestore
       'title': title,
       'notes': notes,
       'date': Timestamp.fromDate(date),
@@ -93,4 +154,23 @@ abstract class CalendarEvent with _$CalendarEvent {
       'updated_at': Timestamp.fromDate(updatedAt),
     };
   }
+
+  @override
+  List<Object?> get props => [
+    id,
+    recurringEventId,
+    title,
+    notes,
+    date,
+    startTime,
+    endTime,
+    allDay,
+    repeatRule,
+    eventColor,
+    users,
+    createdBy,
+    updatedBy,
+    createdAt,
+    updatedAt,
+  ];
 }

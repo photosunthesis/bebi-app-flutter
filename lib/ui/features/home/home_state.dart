@@ -1,14 +1,36 @@
 part of 'home_cubit.dart';
 
-@freezed
-sealed class HomeState with _$HomeState {
-  const factory HomeState.loading() = HomeLoadingState;
-  const factory HomeState.error(String message) = HomeErrorState;
-  const factory HomeState.data({required UserProfile currentUser}) =
-      HomeDataState;
-  const factory HomeState.shouldSetUpProfile() = HomeShouldSetUpProfileState;
-  const factory HomeState.shouldConfirmEmail() = HomeShouldConfirmEmailState;
-  const factory HomeState.shouldAddPartner() = HomeShouldAddPartnerState;
-  const factory HomeState.shouldUpdateApp(AppUpdateInfo info) =
-      HomeShouldUpdateAppState;
+sealed class HomeState {
+  const HomeState();
+}
+
+class HomeLoadingState extends HomeState {
+  const HomeLoadingState();
+}
+
+class HomeErrorState extends HomeState {
+  const HomeErrorState(this.message);
+  final String message;
+}
+
+class HomeLoadedState extends HomeState {
+  const HomeLoadedState(this.currentUser);
+  final UserProfile currentUser;
+}
+
+class HomeShouldSetUpProfileState extends HomeState {
+  const HomeShouldSetUpProfileState();
+}
+
+class HomeShouldConfirmEmailState extends HomeState {
+  const HomeShouldConfirmEmailState();
+}
+
+class HomeShouldAddPartnerState extends HomeState {
+  const HomeShouldAddPartnerState();
+}
+
+class HomeShouldUpdateAppState extends HomeState {
+  const HomeShouldUpdateAppState(this.info);
+  final AppUpdateInfo info;
 }

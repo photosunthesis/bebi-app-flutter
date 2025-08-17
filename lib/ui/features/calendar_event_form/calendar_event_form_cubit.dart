@@ -12,10 +12,8 @@ import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:bebi_app/utils/guard.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 
-part 'calendar_event_form_cubit.freezed.dart';
 part 'calendar_event_form_state.dart';
 
 @injectable
@@ -24,7 +22,7 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
     this._calendarEventsRepository,
     this._userPartnershipsRepository,
     this._firebaseAuth,
-  ) : super(const CalendarEventFormState(currentUserId: ''));
+  ) : super(const CalendarEventFormLoadingState());
 
   final CalendarEventsRepository _calendarEventsRepository;
   final UserPartnershipsRepository _userPartnershipsRepository;
@@ -32,9 +30,9 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
 
   void initialize(CalendarEvent? calendarEvent) {
     emit(
-      state.copyWith(
-        calendarEvent: calendarEvent,
-        currentUserId: _firebaseAuth.currentUser!.uid,
+      CalendarEventFormLoadedState(
+        calendarEvent,
+        _firebaseAuth.currentUser!.uid,
       ),
     );
 
@@ -63,9 +61,11 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
     DateTime? endRepeatDate,
     DateTime? instanceDate,
   }) async {
+    final calendarEvent = (state as CalendarEventFormLoadedState).calendarEvent;
+
     await guard(
       () async {
-        emit(state.copyWith(loading: true));
+        emit(const CalendarEventFormLoadingState());
 
         final partnership = shareWithPartner
             ? await _userPartnershipsRepository.getByUserId(
@@ -73,8 +73,8 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
               )
             : null;
 
-        final isExistingEvent = state.calendarEvent?.id.isNotEmpty ?? false;
-        final isRecurringEvent = state.calendarEvent?.isRecurring ?? false;
+        final isExistingEvent = calendarEvent?.id.isNotEmpty ?? false;
+        final isRecurringEvent = calendarEvent?.isRecurring ?? false;
 
         if (isExistingEvent && isRecurringEvent && instanceDate != null) {
           assert(
@@ -82,6 +82,7 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
             'saveOption must not be null when handling recurring events',
           );
           await _handleRecurringSave(
+            baseEvent: calendarEvent!,
             saveOption: saveOption!,
             title: title,
             date: date,
@@ -125,18 +126,24 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
           },
         );
 
-        emit(state.copyWith(success: true));
+        emit(const CalendarEventFormSuccessState());
       },
       onError: (error, _) {
-        emit(state.copyWith(error: error.toString()));
+        emit(CalendarEventFormErrorState(error.toString()));
       },
       onComplete: () {
-        emit(state.copyWith(loading: false, error: null));
+        emit(
+          CalendarEventFormLoadedState(
+            calendarEvent,
+            _firebaseAuth.currentUser!.uid,
+          ),
+        );
       },
     );
   }
 
   Future<void> _handleRegularSave({
+    CalendarEvent? calendarEvent,
     required String title,
     required DateTime date,
     required DateTime startTime,
@@ -148,32 +155,30 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
     String? notes,
     partnership,
   }) async {
-    var updatedEvent = CalendarEvent(
-      id: state.calendarEvent?.id ?? '',
-      title: title,
-      date: date,
-      startTime: startTime,
-      endTime: allDay ? null : endTime,
-      allDay: allDay,
-      notes: notes,
-      repeatRule: repeatRule,
-      eventColor: eventColor,
-      createdBy:
-          state.calendarEvent?.createdBy ?? _firebaseAuth.currentUser!.uid,
-      updatedBy: _firebaseAuth.currentUser!.uid,
-      users: shareWithPartner
-          ? partnership!.users
-          : [_firebaseAuth.currentUser!.uid],
-      createdAt: state.calendarEvent?.createdAt ?? DateTime.now(),
-      updatedAt: DateTime.now(),
+    await _calendarEventsRepository.createOrUpdate(
+      CalendarEvent(
+        id: calendarEvent?.id ?? '',
+        title: title,
+        date: date,
+        startTime: startTime,
+        endTime: allDay ? null : endTime,
+        allDay: allDay,
+        notes: notes,
+        repeatRule: repeatRule,
+        eventColor: eventColor,
+        createdBy: calendarEvent?.createdBy ?? _firebaseAuth.currentUser!.uid,
+        updatedBy: _firebaseAuth.currentUser!.uid,
+        users: shareWithPartner
+            ? partnership!.users
+            : [_firebaseAuth.currentUser!.uid],
+        createdAt: calendarEvent?.createdAt ?? DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
     );
-
-    updatedEvent = await _calendarEventsRepository.createOrUpdate(updatedEvent);
-
-    emit(state.copyWith(calendarEvent: updatedEvent));
   }
 
   Future<void> _handleRecurringSave({
+    required CalendarEvent baseEvent,
     required SaveChangesDialogOptions saveOption,
     required String title,
     required DateTime date,
@@ -187,8 +192,6 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
     required DateTime instanceDate,
     partnership,
   }) async {
-    final baseEvent = state.calendarEvent!;
-
     await switch (saveOption) {
       SaveChangesDialogOptions.onlyThisEvent => _handleSaveOnlyThisEvent(
         baseEvent: baseEvent,
@@ -285,10 +288,7 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
       updatedAt: DateTime.now(),
     );
 
-    final createdEvent = await _calendarEventsRepository.createOrUpdate(
-      newSingleEvent,
-    );
-    emit(state.copyWith(calendarEvent: createdEvent));
+    await _calendarEventsRepository.createOrUpdate(newSingleEvent);
   }
 
   Future<void> _handleSaveAllFutureEvents({
@@ -335,10 +335,7 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
       updatedAt: DateTime.now(),
     );
 
-    final createdEvent = await _calendarEventsRepository.createOrUpdate(
-      newRecurringEvent,
-    );
-    emit(state.copyWith(calendarEvent: createdEvent));
+    await _calendarEventsRepository.createOrUpdate(newRecurringEvent);
   }
 
   DateTime? _getNextOccurrence(CalendarEvent event) {

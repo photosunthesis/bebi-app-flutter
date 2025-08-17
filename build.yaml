@@ -1,9 +1,0 @@
-targets:
-  $default:
-    builders:
-      freezed:
-        options:
-          format: true
-          union_key: type
-          union_value_case: snake
-          json_key_case: snake

@@ -9,12 +9,10 @@ import 'package:bebi_app/utils/guard.dart';
 import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:injectable/injectable.dart';
 
 part 'profile_setup_state.dart';
-part 'profile_setup_cubit.freezed.dart';
 
 @injectable
 class ProfileSetupCubit extends Cubit<ProfileSetupState> {
@@ -22,7 +20,7 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
     this._userProfileRepository,
     this._firebaseAuth,
     this._imagePicker,
-  ) : super(const ProfileSetupState());
+  ) : super(const ProfileSetupLoadedState());
 
   final UserProfileRepository _userProfileRepository;
   final FirebaseAuth _firebaseAuth;
@@ -38,7 +36,7 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
     );
 
     if (pickedFile != null) {
-      emit(state.copyWith(profilePicture: File(pickedFile.path)));
+      emit(ProfileSetupLoadedState(File(pickedFile.path)));
 
       logEvent(
         name: 'profile_picture_selected',
@@ -51,7 +49,7 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
   }
 
   void removeProfilePicture() {
-    emit(state.copyWith(profilePicture: null));
+    emit(const ProfileSetupLoadedState());
 
     logEvent(
       name: 'profile_picture_removed',
@@ -60,16 +58,18 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
   }
 
   Future<void> updateUserProfile(String displayName, DateTime birthDate) async {
+    final profilePicture = (state as ProfileSetupLoadedState).profilePicture;
+
     await guard(
       () async {
-        emit(state.copyWith(loading: true));
+        emit(const ProfileSetupLoadingState());
 
-        final photoUrl = state.profilePicture == null
-            ? null
-            : await _userProfileRepository.uploadProfileImage(
+        final photoUrl = profilePicture != null
+            ? await _userProfileRepository.uploadProfileImage(
                 _firebaseAuth.currentUser!.uid,
-                state.profilePicture!,
-              );
+                profilePicture,
+              )
+            : null;
 
         await Future.wait([
           _firebaseAuth.currentUser!.updateDisplayName(displayName),
@@ -88,7 +88,7 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
           ),
         ]);
 
-        emit(state.copyWith(success: true));
+        emit(const ProfileSetupSuccessState());
 
         logEvent(
           name: 'profile_setup_completed',
@@ -101,10 +101,10 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
         );
       },
       onError: (error, _) {
-        emit(state.copyWith(error: l10n.serverError));
+        emit(ProfileSetupErrorState(l10n.serverError));
       },
       onComplete: () {
-        emit(state.copyWith(loading: false, error: null));
+        emit(ProfileSetupLoadedState(profilePicture));
       },
     );
   }

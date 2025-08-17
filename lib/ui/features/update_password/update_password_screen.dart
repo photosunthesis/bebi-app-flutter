@@ -39,8 +39,8 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
       key: _formKey,
       child: BlocListener<UpdatePasswordCubit, UpdatePasswordState>(
         listener: (context, state) => switch (state) {
-          UpdatePasswordStateSuccess() => context.pop(),
-          UpdatePasswordStateError(:final error) => context.showSnackbar(
+          UpdatePasswordSuccessState() => context.pop(),
+          UpdatePasswordErrorState(:final error) => context.showSnackbar(
             error,
             type: SnackbarType.error,
           ),
@@ -201,7 +201,7 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
       child: Padding(
         padding: const EdgeInsets.all(UiConstants.padding),
         child: BlocSelector<UpdatePasswordCubit, UpdatePasswordState, bool>(
-          selector: (state) => state is UpdatePasswordStateLoading,
+          selector: (state) => state is UpdatePasswordLoadingState,
           builder: (context, loading) {
             return ElevatedButton(
               onPressed: loading

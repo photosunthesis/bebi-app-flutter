@@ -13,10 +13,8 @@ import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:bebi_app/utils/guard.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 
-part 'calendar_event_details_cubit.freezed.dart';
 part 'calendar_event_details_state.dart';
 
 @injectable
@@ -27,7 +25,7 @@ class CalendarEventDetailsCubit extends Cubit<CalendarEventDetailsState> {
     this._partnershipsRepository,
     this._profileRepository,
     this._firebaseAuth,
-  ) : super(const CalendarEventDetailsState.loading());
+  ) : super(const CalendarEventDetailsLoadingState());
 
   final CalendarEventsRepository _calendarEventsRepository;
   final RecurringCalendarEventsService _recurringCalendarEventsService;
@@ -54,10 +52,10 @@ class CalendarEventDetailsCubit extends Cubit<CalendarEventDetailsState> {
           (e) => e.userId != _firebaseAuth.currentUser!.uid,
         );
 
-        emit(CalendarEventDetailsState.data(userProfile, partnerProfile));
+        emit(CalendarEventDetailsLoadedState(userProfile, partnerProfile));
       },
       onError: (error, _) {
-        emit(CalendarEventDetailsState.error(error.toString()));
+        emit(CalendarEventDetailsErrorState(error.toString()));
       },
     );
   }
@@ -69,7 +67,7 @@ class CalendarEventDetailsCubit extends Cubit<CalendarEventDetailsState> {
   }) async {
     await guard(
       () async {
-        emit(const CalendarEventDetailsState.loading());
+        emit(const CalendarEventDetailsLoadingState());
 
         final baseEvent = await _calendarEventsRepository.getById(
           calendarEventId,
@@ -81,7 +79,7 @@ class CalendarEventDetailsCubit extends Cubit<CalendarEventDetailsState> {
           await _handleDeleteSingleEvent(baseEvent!, instanceDate);
         }
 
-        emit(const CalendarEventDetailsState.deleteSuccess());
+        emit(const CalendarEventDetailsDeleteSuccessState());
 
         logEvent(
           name: 'calendar_event_deleted',
@@ -95,7 +93,7 @@ class CalendarEventDetailsCubit extends Cubit<CalendarEventDetailsState> {
         );
       },
       onError: (error, _) {
-        emit(CalendarEventDetailsState.error(error.toString()));
+        emit(CalendarEventDetailsErrorState(error.toString()));
       },
     );
   }

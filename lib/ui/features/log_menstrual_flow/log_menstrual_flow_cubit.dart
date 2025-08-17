@@ -9,10 +9,8 @@ import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:bebi_app/utils/guard.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 
-part 'log_menstrual_flow_cubit.freezed.dart';
 part 'log_menstrual_flow_state.dart';
 
 @injectable
@@ -22,7 +20,7 @@ class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState> {
     this._userProfileRepository,
     this._userPartnershipsRepository,
     this._firebaseAuth,
-  ) : super(const LogMenstrualFlowState.data());
+  ) : super(const LogMenstrualFlowLoadedState());
 
   final CycleLogsRepository _cycleLogsRepository;
   final UserProfileRepository _userProfileRepository;
@@ -39,7 +37,7 @@ class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState> {
   }) async {
     await guard(
       () async {
-        emit(const LogMenstrualFlowState.loading());
+        emit(const LogMenstrualFlowLoadingState());
 
         final userProfile = await _userProfileRepository.getByUserId(
           _currentUserId!,
@@ -83,7 +81,7 @@ class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState> {
           await _cycleLogsRepository.createOrUpdate(cycleLog);
         }
 
-        emit(const LogMenstrualFlowState.success());
+        emit(const LogMenstrualFlowSuccessState());
 
         logEvent(
           name: 'menstrual_flow_logged',
@@ -100,10 +98,10 @@ class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState> {
         );
       },
       onError: (error, _) {
-        emit(LogMenstrualFlowState.error(error.toString()));
+        emit(LogMenstrualFlowErrorState(error.toString()));
       },
       onComplete: () {
-        emit(const LogMenstrualFlowState.data());
+        emit(const LogMenstrualFlowLoadedState());
       },
     );
   }
@@ -111,22 +109,19 @@ class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState> {
   Future<void> delete(String cycleLogId) async {
     await guard(
       () async {
-        emit(const LogMenstrualFlowState.loading());
-
+        emit(const LogMenstrualFlowLoadingState());
         await _cycleLogsRepository.deleteById(cycleLogId);
-
-        emit(const LogMenstrualFlowState.success());
-
+        emit(const LogMenstrualFlowSuccessState());
         logEvent(
           name: 'menstrual_flow_deleted',
           parameters: {'user_id': _currentUserId!, 'cycle_log_id': cycleLogId},
         );
       },
       onError: (error, _) {
-        emit(LogMenstrualFlowState.error(error.toString()));
+        emit(LogMenstrualFlowErrorState(error.toString()));
       },
       onComplete: () {
-        emit(const LogMenstrualFlowState.data());
+        emit(const LogMenstrualFlowLoadedState());
       },
     );
   }

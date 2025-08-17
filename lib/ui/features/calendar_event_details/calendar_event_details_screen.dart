@@ -32,7 +32,9 @@ class _CalendarEventDetailsScreenState
   @override
   void initState() {
     super.initState();
-    context.read<CalendarEventDetailsCubit>().initialize();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => context.read<CalendarEventDetailsCubit>().initialize(),
+    );
   }
 
   @override
@@ -52,7 +54,7 @@ class _CalendarEventDetailsScreenState
                 CalendarEventDetailsState,
                 bool
               >(
-                selector: (state) => state is CalendarEventDetailsStateLoading,
+                selector: (state) => state is CalendarEventDetailsLoadingState,
                 builder: (context, loading) {
                   return SizedBox(
                     width: 50,
@@ -230,10 +232,10 @@ class _CalendarEventDetailsScreenState
                       BlocSelector<
                         CalendarEventDetailsCubit,
                         CalendarEventDetailsState,
-                        CalendarEventDetailsStateData?
+                        CalendarEventDetailsLoadedState?
                       >(
                         selector: (state) =>
-                            state is CalendarEventDetailsStateData
+                            state is CalendarEventDetailsLoadedState
                             ? state
                             : null,
                         builder: (context, state) {
@@ -278,7 +280,7 @@ class _CalendarEventDetailsScreenState
                     bool
                   >(
                     selector: (state) =>
-                        state is CalendarEventDetailsStateLoading,
+                        state is CalendarEventDetailsLoadingState,
                     builder: (context, loading) {
                       return OutlinedButton(
                         style: OutlinedButton.styleFrom(

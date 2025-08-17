@@ -1,23 +1,19 @@
 import 'package:bebi_app/constants/hive_type_ids.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:equatable/equatable.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
-part 'user_partnership.freezed.dart';
 part 'user_partnership.g.dart';
 
-@freezed
-abstract class UserPartnership with _$UserPartnership {
-  const UserPartnership._();
-
-  @HiveType(typeId: HiveTypeIds.userPartnership)
-  const factory UserPartnership({
-    @HiveField(0) required String id,
-    @HiveField(1) required List<String> users,
-    @HiveField(2) required String createdBy,
-    @HiveField(3) required DateTime createdAt,
-    @HiveField(4) required DateTime updatedAt,
-  }) = _UserPartnership;
+@HiveType(typeId: HiveTypeIds.userPartnership)
+class UserPartnership extends Equatable {
+  const UserPartnership({
+    required this.id,
+    required this.users,
+    required this.createdBy,
+    required this.createdAt,
+    required this.updatedAt,
+  });
 
   factory UserPartnership.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
@@ -30,13 +26,42 @@ abstract class UserPartnership with _$UserPartnership {
     );
   }
 
+  @HiveField(0)
+  final String id;
+  @HiveField(1)
+  final List<String> users;
+  @HiveField(2)
+  final String createdBy;
+  @HiveField(3)
+  final DateTime createdAt;
+  @HiveField(4)
+  final DateTime updatedAt;
+
+  UserPartnership copyWith({
+    String? id,
+    List<String>? users,
+    String? createdBy,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return UserPartnership(
+      id: id ?? this.id,
+      users: users ?? this.users,
+      createdBy: createdBy ?? this.createdBy,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
   Map<String, dynamic> toFirestore() {
     return {
-      // ID is managed by Firestore
       'users': users,
       'created_by': createdBy,
       'created_at': Timestamp.fromDate(createdAt.toUtc()),
       'updated_at': Timestamp.fromDate(updatedAt.toUtc()),
     };
   }
+
+  @override
+  List<Object?> get props => [id, users, createdBy, createdAt, updatedAt];
 }

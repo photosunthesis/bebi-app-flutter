@@ -1,9 +1,8 @@
 import 'package:bebi_app/constants/hive_type_ids.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:equatable/equatable.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
-part 'repeat_rule.freezed.dart';
 part 'repeat_rule.g.dart';
 
 @HiveType(typeId: HiveTypeIds.repeatFrequency)
@@ -31,18 +30,15 @@ enum RepeatFrequency {
   };
 }
 
-@freezed
-abstract class RepeatRule with _$RepeatRule {
-  const RepeatRule._();
-
-  @HiveType(typeId: HiveTypeIds.repeatRule)
-  const factory RepeatRule({
-    @HiveField(0) required RepeatFrequency frequency,
-    @HiveField(1) List<int>? daysOfWeek,
-    @HiveField(2) DateTime? endDate,
-    @HiveField(3) int? occurrences,
-    @HiveField(4) List<DateTime>? excludedDates,
-  }) = _RepeatRule;
+@HiveType(typeId: HiveTypeIds.repeatRule)
+class RepeatRule extends Equatable {
+  const RepeatRule({
+    required this.frequency,
+    this.daysOfWeek,
+    this.endDate,
+    this.occurrences,
+    this.excludedDates,
+  });
 
   factory RepeatRule.fromMap(Map<String, dynamic> map) {
     return RepeatRule(
@@ -64,6 +60,33 @@ abstract class RepeatRule with _$RepeatRule {
     );
   }
 
+  @HiveField(0)
+  final RepeatFrequency frequency;
+  @HiveField(1)
+  final List<int>? daysOfWeek;
+  @HiveField(2)
+  final DateTime? endDate;
+  @HiveField(3)
+  final int? occurrences;
+  @HiveField(4)
+  final List<DateTime>? excludedDates;
+
+  RepeatRule copyWith({
+    RepeatFrequency? frequency,
+    List<int>? daysOfWeek,
+    DateTime? endDate,
+    int? occurrences,
+    List<DateTime>? excludedDates,
+  }) {
+    return RepeatRule(
+      frequency: frequency ?? this.frequency,
+      daysOfWeek: daysOfWeek ?? this.daysOfWeek,
+      endDate: endDate ?? this.endDate,
+      occurrences: occurrences ?? this.occurrences,
+      excludedDates: excludedDates ?? this.excludedDates,
+    );
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'frequency': frequency.name,
@@ -74,4 +97,13 @@ abstract class RepeatRule with _$RepeatRule {
         'excluded_dates': excludedDates!.map(Timestamp.fromDate).toList(),
     };
   }
+
+  @override
+  List<Object?> get props => [
+    frequency,
+    daysOfWeek,
+    endDate,
+    occurrences,
+    excludedDates,
+  ];
 }

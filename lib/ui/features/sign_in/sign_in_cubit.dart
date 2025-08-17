@@ -4,29 +4,26 @@ import 'package:bebi_app/utils/analytics_utils.dart';
 import 'package:bebi_app/utils/guard.dart';
 import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 
 part 'sign_in_state.dart';
-part 'sign_in_cubit.freezed.dart';
 
 @injectable
 class SignInCubit extends Cubit<SignInState> {
-  SignInCubit(this._firebaseAuth) : super(const SignInInitial());
+  SignInCubit(this._firebaseAuth) : super(const SignInLoadedState());
 
   final FirebaseAuth _firebaseAuth;
 
   Future<void> signInWithEmailAndPassword(String email, String password) async {
     await guard(
       () async {
-        emit(const SignInLoading());
+        emit(const SignInLoadingState());
         await _firebaseAuth.signInWithEmailAndPassword(
           email: email,
           password: password,
         );
-        emit(const SignInSuccess());
+        emit(const SignInSuccessState());
 
         logLogin(
           loginMethod: 'email',
@@ -43,7 +40,7 @@ class SignInCubit extends Cubit<SignInState> {
           _ => l10n.unexpectedError,
         };
 
-        emit(SignInFailure(errorMessage));
+        emit(SignInErrorState(errorMessage));
 
         logEvent(
           name: 'sign_in_failed',

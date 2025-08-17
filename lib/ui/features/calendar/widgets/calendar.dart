@@ -36,6 +36,7 @@ class _Calendar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<CalendarCubit, CalendarState>(
+      buildWhen: (p, c) => p is CalendarLoadedState || c is CalendarLoadedState,
       builder: (context, state) {
         return DecoratedBox(
           decoration: BoxDecoration(
@@ -53,9 +54,9 @@ class _Calendar extends StatelessWidget {
           ),
           child: TableCalendar<CalendarEvent>(
             availableGestures: AvailableGestures.horizontalSwipe,
+            focusedDay: (state as CalendarLoadedState).focusedDay,
             eventLoader: (day) => state.events,
             headerVisible: false,
-            focusedDay: state.focusedDay,
             currentDay: DateTime.now(),
             // TODO Make first and last days dynamic
             firstDay: DateTime.now().subtract(2.years),

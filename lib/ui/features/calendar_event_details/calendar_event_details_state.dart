@@ -1,15 +1,24 @@
 part of 'calendar_event_details_cubit.dart';
 
-@freezed
-sealed class CalendarEventDetailsState with _$CalendarEventDetailsState {
-  const factory CalendarEventDetailsState.loading() =
-      CalendarEventDetailsStateLoading;
-  const factory CalendarEventDetailsState.data(
-    UserProfile userProfile,
-    UserProfile partnerProfile,
-  ) = CalendarEventDetailsStateData;
-  const factory CalendarEventDetailsState.error(String error) =
-      CalendarEventDetailsStateError;
-  const factory CalendarEventDetailsState.deleteSuccess() =
-      CalendarEventDetailsStateDeleteSuccess;
+sealed class CalendarEventDetailsState {
+  const CalendarEventDetailsState();
+}
+
+class CalendarEventDetailsLoadingState extends CalendarEventDetailsState {
+  const CalendarEventDetailsLoadingState();
+}
+
+class CalendarEventDetailsLoadedState extends CalendarEventDetailsState {
+  const CalendarEventDetailsLoadedState(this.userProfile, this.partnerProfile);
+  final UserProfile userProfile;
+  final UserProfile partnerProfile;
+}
+
+class CalendarEventDetailsErrorState extends CalendarEventDetailsState {
+  const CalendarEventDetailsErrorState(this.error);
+  final String error;
+}
+
+class CalendarEventDetailsDeleteSuccessState extends CalendarEventDetailsState {
+  const CalendarEventDetailsDeleteSuccessState();
 }

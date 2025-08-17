@@ -94,14 +94,16 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<CalendarEventFormCubit, CalendarEventFormState>(
-      listener: (context, state) {
-        if (state.error != null) context.showSnackbar(state.error!);
-        if (state.success) {
-          context.goNamed(
-            AppRoutes.calendar,
-            queryParameters: {'loadEventsFromServer': 'true'},
-          );
-        }
+      listener: (context, state) => switch (state) {
+        CalendarEventFormErrorState(:final error) => context.showSnackbar(
+          error,
+          type: SnackbarType.error,
+        ),
+        CalendarEventFormSuccessState() => context.goNamed(
+          AppRoutes.calendar,
+          queryParameters: {'loadEventsFromServer': 'true'},
+        ),
+        _ => null,
       },
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -144,7 +146,7 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
       ),
       actions: [
         BlocSelector<CalendarEventFormCubit, CalendarEventFormState, bool>(
-          selector: (state) => state.loading,
+          selector: (state) => state is CalendarEventFormLoadingState,
           builder: (context, loading) {
             return Padding(
               padding: const EdgeInsets.fromLTRB(0, 12, 10, 12),

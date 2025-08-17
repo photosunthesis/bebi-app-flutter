@@ -10,10 +10,8 @@ import 'package:bebi_app/utils/guard.dart';
 import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 
-part 'log_symptoms_cubit.freezed.dart';
 part 'log_symptoms_state.dart';
 
 @injectable
@@ -23,7 +21,7 @@ class LogSymptomsCubit extends Cubit<LogSymptomsState> {
     this._userProfileRepository,
     this._userPartnershipsRepository,
     this._firebaseAuth,
-  ) : super(const LogSymptomsState.data());
+  ) : super(const LogSymptomsLoadedState());
 
   final CycleLogsRepository _cycleLogsRepository;
   final UserProfileRepository _userProfileRepository;
@@ -40,7 +38,7 @@ class LogSymptomsCubit extends Cubit<LogSymptomsState> {
   }) async {
     await guard(
       () async {
-        emit(const LogSymptomsState.loading());
+        emit(const LogSymptomsLoadingState());
 
         if (cycleLogId == null && symptoms.isEmpty) {
           throw SimpleException(l10n.selectSymptomRequired);
@@ -75,7 +73,7 @@ class LogSymptomsCubit extends Cubit<LogSymptomsState> {
           );
         }
 
-        emit(const LogSymptomsState.success());
+        emit(const LogSymptomsSuccessState());
 
         logEvent(
           name: symptoms.isEmpty ? 'symptoms_deleted' : 'symptoms_logged',
@@ -92,10 +90,10 @@ class LogSymptomsCubit extends Cubit<LogSymptomsState> {
       },
       logWhen: (error) => error is! SimpleException,
       onError: (error, _) {
-        emit(LogSymptomsState.error(error.toString()));
+        emit(LogSymptomsErrorState(error.toString()));
       },
       onComplete: () {
-        emit(const LogSymptomsState.data());
+        emit(const LogSymptomsLoadedState());
       },
     );
   }

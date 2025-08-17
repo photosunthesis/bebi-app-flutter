@@ -28,63 +28,49 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _cubit.initialize();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _cubit.initialize());
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<HomeCubit, HomeState>(
-      builder: (context, state) {
-        // I know I should use a BlocListener here, but for some reason
-        // it's not working as expected ┐(´ー｀)┌
-        _handleStateChanges(state);
-
-        return Scaffold(
-          body: CustomScrollView(
-            slivers: [
-              SliverSafeArea(
-                sliver: SliverPadding(
-                  padding: const EdgeInsets.only(top: UiConstants.padding),
-                  sliver: SliverToBoxAdapter(child: Container()),
-                ),
-              ),
-              SliverToBoxAdapter(child: _buildHeader()),
-              SliverFillRemaining(
-                hasScrollBody: false,
-                fillOverscroll: false,
-                child: _buildMainContent(),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  void _handleStateChanges(HomeState state) {
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => switch (state) {
-        HomeShouldAddPartnerState() => context.goNamed(AppRoutes.addPartner),
-        HomeShouldSetUpProfileState() => context.goNamed(
-          AppRoutes.profileSetup,
-        ),
+    return BlocListener<HomeCubit, HomeState>(
+      listener: (context, state) => switch (state) {
         HomeShouldConfirmEmailState() => context.goNamed(
           AppRoutes.confirmEmail,
         ),
+        HomeShouldSetUpProfileState() => context.goNamed(
+          AppRoutes.profileSetup,
+        ),
+        HomeShouldAddPartnerState() => context.goNamed(AppRoutes.addPartner),
         HomeShouldUpdateAppState(:final info) => _showAppUpdateDialog(info),
         HomeErrorState(:final message) => context.showSnackbar(message),
         _ => null,
       },
+      child: Scaffold(
+        body: CustomScrollView(
+          slivers: [
+            SliverSafeArea(
+              sliver: SliverPadding(
+                padding: const EdgeInsets.only(top: UiConstants.padding),
+                sliver: SliverToBoxAdapter(child: Container()),
+              ),
+            ),
+            SliverToBoxAdapter(child: _buildHeader()),
+            SliverFillRemaining(
+              hasScrollBody: false,
+              fillOverscroll: false,
+              child: _buildMainContent(),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildHeader() {
     final now = DateTime.now();
     return BlocSelector<HomeCubit, HomeState, UserProfile?>(
-      selector: (state) => state.maybeMap(
-        data: (state) => state.currentUser,
-        orElse: () => null,
-      ),
+      selector: (state) => state is HomeLoadedState ? state.currentUser : null,
       builder: (context, userProfile) {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),

@@ -28,7 +28,7 @@ class _AddPartnerScreenState extends State<AddPartnerScreen> {
   @override
   void initState() {
     super.initState();
-    _cubit.initialize();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _cubit.initialize());
   }
 
   @override
@@ -44,18 +44,18 @@ class _AddPartnerScreenState extends State<AddPartnerScreen> {
       canPop: false,
       child: BlocListener<AddPartnerCubit, AddPartnerState>(
         listener: (context, state) {
-          if (state.currentUserCode.isNotEmpty) {
+          if (state is AddPartnerLoadedState) {
             final code = state.currentUserCode;
             final firstPart = code.substring(0, code.length ~/ 2);
             final secondPart = code.substring(code.length ~/ 2);
             _userCodeController.text = '$firstPart-$secondPart';
           }
 
-          if (state.error != null) {
-            context.showSnackbar(state.error!, duration: 6.seconds);
+          if (state is AddPartnerErrorState) {
+            context.showSnackbar(state.error, duration: 6.seconds);
           }
 
-          if (state.success) context.goNamed(AppRoutes.home);
+          if (state is AddPartnerSuccessState) context.goNamed(AppRoutes.home);
         },
         child: Scaffold(
           resizeToAvoidBottomInset: true,
@@ -213,7 +213,7 @@ class _AddPartnerScreenState extends State<AddPartnerScreen> {
       child: Padding(
         padding: const EdgeInsets.all(UiConstants.padding),
         child: BlocSelector<AddPartnerCubit, AddPartnerState, bool>(
-          selector: (state) => state.loading,
+          selector: (state) => state is AddPartnerLoadingState,
           builder: (context, loading) {
             return ElevatedButton(
               onPressed: loading

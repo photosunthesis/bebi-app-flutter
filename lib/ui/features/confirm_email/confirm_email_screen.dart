@@ -22,7 +22,7 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
   @override
   void initState() {
     super.initState();
-    _cubit.initialize();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _cubit.initialize());
   }
 
   @override
@@ -31,8 +31,8 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
       canPop: false,
       child: BlocListener<ConfirmEmailCubit, ConfirmEmailState>(
         listener: (context, state) => switch (state) {
-          ConfirmEmailStateSuccess() => context.goNamed(AppRoutes.home),
-          ConfirmEmailStateError(:final error) => context.showSnackbar(
+          ConfirmEmailSuccessState() => context.goNamed(AppRoutes.home),
+          ConfirmEmailErrorState(:final error) => context.showSnackbar(
             error,
             type: SnackbarType.secondary,
           ),
@@ -72,15 +72,11 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
           ),
           const SizedBox(height: 16),
           SizedBox(
-            child: BlocBuilder<ConfirmEmailCubit, ConfirmEmailState>(
-              buildWhen: (p, c) =>
-                  c is ConfirmEmailStateData || p is ConfirmEmailStateData,
-              builder: (context, state) {
-                final email = _censorEmail(switch (state) {
-                  ConfirmEmailStateData(:final email) => email,
-                  _ => '',
-                });
-
+            child: BlocSelector<ConfirmEmailCubit, ConfirmEmailState, String?>(
+              selector: (state) =>
+                  state is ConfirmEmailLoadedState ? state.email : null,
+              builder: (context, email) {
+                final censoredEmail = _censorEmail(email ?? '');
                 return RichText(
                   text: TextSpan(
                     style: context.textTheme.bodyLarge?.copyWith(
@@ -90,7 +86,7 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
                     children: [
                       TextSpan(text: l10n.checkEmailMessagePrefix),
                       TextSpan(
-                        text: email,
+                        text: censoredEmail,
                         style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                       TextSpan(text: l10n.checkEmailMessageSuffix),
@@ -152,7 +148,7 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
       child: Padding(
         padding: const EdgeInsets.all(UiConstants.padding),
         child: BlocSelector<ConfirmEmailCubit, ConfirmEmailState, bool>(
-          selector: (state) => state is ConfirmEmailStateLoading,
+          selector: (state) => state is ConfirmEmailLoadingState,
           builder: (context, loading) {
             return ElevatedButton(
               onPressed: loading ? null : _cubit.sendVerificationEmail,

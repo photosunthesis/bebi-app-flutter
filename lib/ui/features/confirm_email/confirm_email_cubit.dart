@@ -7,16 +7,14 @@ import 'package:bebi_app/utils/guard.dart';
 import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 
-part 'confirm_email_cubit.freezed.dart';
 part 'confirm_email_state.dart';
 
 @injectable
 class ConfirmEmailCubit extends Cubit<ConfirmEmailState> {
   ConfirmEmailCubit(this._firebaseAuth)
-    : super(const ConfirmEmailState.loading());
+    : super(const ConfirmEmailLoadingState());
 
   final FirebaseAuth _firebaseAuth;
 
@@ -26,7 +24,7 @@ class ConfirmEmailCubit extends Cubit<ConfirmEmailState> {
   Future<void> initialize() async {
     await guard(
       () async {
-        emit(ConfirmEmailState.data(_firebaseAuth.currentUser!.email!));
+        emit(ConfirmEmailLoadedState(_firebaseAuth.currentUser!.email!));
 
         await sendVerificationEmail();
 
@@ -34,7 +32,7 @@ class ConfirmEmailCubit extends Cubit<ConfirmEmailState> {
           await _firebaseAuth.currentUser?.reload();
           if (_firebaseAuth.currentUser?.emailVerified == true) {
             timer.cancel();
-            emit(const ConfirmEmailState.success());
+            emit(const ConfirmEmailSuccessState());
             logEvent(
               name: 'email_verified',
               parameters: {
@@ -47,8 +45,8 @@ class ConfirmEmailCubit extends Cubit<ConfirmEmailState> {
           }
         });
       },
-      onError: (error, stackTrace) {
-        emit(ConfirmEmailState.error(error.toString()));
+      onError: (error, _) {
+        emit(ConfirmEmailErrorState(error.toString()));
       },
     );
   }
@@ -65,7 +63,7 @@ class ConfirmEmailCubit extends Cubit<ConfirmEmailState> {
 
         await _firebaseAuth.currentUser?.sendEmailVerification();
 
-        emit(ConfirmEmailState.data(_firebaseAuth.currentUser!.email!));
+        emit(ConfirmEmailLoadedState(_firebaseAuth.currentUser!.email!));
 
         _resendTimer = Timer(3.minutes, () {
           _canResendVerification = true;
@@ -82,8 +80,8 @@ class ConfirmEmailCubit extends Cubit<ConfirmEmailState> {
         );
       },
       logWhen: (error) => error is! SimpleException,
-      onError: (error, stackTrace) {
-        emit(ConfirmEmailState.error(error.toString()));
+      onError: (error, _) {
+        emit(ConfirmEmailErrorState(error.toString()));
       },
     );
   }

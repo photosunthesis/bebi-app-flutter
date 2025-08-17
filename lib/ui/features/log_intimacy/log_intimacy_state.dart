@@ -1,9 +1,22 @@
 part of 'log_intimacy_cubit.dart';
 
-@freezed
-sealed class LogIntimacyState with _$LogIntimacyState {
-  const factory LogIntimacyState.data() = LogIntimacyStateData;
-  const factory LogIntimacyState.loading() = LogIntimacyStateLoading;
-  const factory LogIntimacyState.error(String error) = LogIntimacyStateError;
-  const factory LogIntimacyState.success() = LogIntimacyStateSuccess;
+sealed class LogIntimacyState {
+  const LogIntimacyState();
+}
+
+class LogIntimmacyLoadedState extends LogIntimacyState {
+  const LogIntimmacyLoadedState();
+}
+
+class LogIntimacyLoadingState extends LogIntimacyState {
+  const LogIntimacyLoadingState();
+}
+
+class LogIntimacyErrorState extends LogIntimacyState {
+  const LogIntimacyErrorState(this.error);
+  final String error;
+}
+
+class LogIntimacySuccessState extends LogIntimacyState {
+  const LogIntimacySuccessState();
 }

@@ -36,15 +36,15 @@ class _LogSymptomsScreenState extends State<LogSymptomsScreen> {
   Widget build(BuildContext context) {
     return BlocConsumer<LogSymptomsCubit, LogSymptomsState>(
       listener: (context, state) => switch (state) {
-        LogSymptomsStateSuccess() => context.pop(true),
-        LogSymptomsStateError(:final error) => context.showSnackbar(
+        LogSymptomsSuccessState() => context.pop(true),
+        LogSymptomsErrorState(:final error) => context.showSnackbar(
           error,
           type: SnackbarType.error,
         ),
         _ => null,
       },
       builder: (context, state) {
-        final loading = state is LogSymptomsStateLoading;
+        final loading = state is LogSymptomsLoadingState;
         return Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,

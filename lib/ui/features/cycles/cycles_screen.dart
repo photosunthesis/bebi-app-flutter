@@ -30,7 +30,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
   @override
   void initState() {
     super.initState();
-    _cubit.initialize();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _cubit.initialize());
   }
 
   @override

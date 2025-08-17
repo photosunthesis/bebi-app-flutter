@@ -37,15 +37,15 @@ class _LogMenstrualFlowScreenState extends State<LogMenstrualFlowScreen> {
   Widget build(BuildContext context) {
     return BlocConsumer<LogMenstrualFlowCubit, LogMenstrualFlowState>(
       listener: (context, state) => switch (state) {
-        LogMenstrualFlowSuccess() => context.pop(true),
-        LogMenstrualFlowError(:final error) => context.showSnackbar(
+        LogMenstrualFlowSuccessState() => context.pop(true),
+        LogMenstrualFlowErrorState(:final error) => context.showSnackbar(
           error,
           type: SnackbarType.error,
         ),
         _ => null,
       },
       builder: (context, state) {
-        final loading = state is LogMenstrualFlowLoading;
+        final loading = state is LogMenstrualFlowLoadingState;
         return Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,

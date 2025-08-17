@@ -3,35 +3,31 @@ import 'dart:ui';
 import 'package:bebi_app/app/theme/app_colors.dart';
 import 'package:bebi_app/constants/hive_type_ids.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:equatable/equatable.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
-part 'cycle_log.freezed.dart';
 part 'cycle_log.g.dart';
 
-@freezed
-abstract class CycleLog with _$CycleLog {
-  const CycleLog._();
-
+class CycleLog extends Equatable {
   @HiveType(typeId: HiveTypeIds.cycleLog)
-  factory CycleLog({
-    @HiveField(0) required String id,
-    @HiveField(1) required DateTime date,
-    @HiveField(2) required LogType type,
-    @HiveField(3) FlowIntensity? flow,
-    @HiveField(4) List<String>? symptoms,
-    @HiveField(5) IntimacyType? intimacyType,
-    @HiveField(6) required String ownedBy,
-    @HiveField(7) required String createdBy,
-    @HiveField(8) required DateTime createdAt,
-    @HiveField(9) required DateTime updatedAt,
-    @HiveField(10) @Default([]) List<String> users,
-    @HiveField(11) @Default(false) bool isPrediction,
-  }) = _CycleLog;
+  const CycleLog._({
+    required this.id,
+    required this.date,
+    required this.type,
+    this.flow,
+    this.symptoms,
+    this.intimacyType,
+    required this.ownedBy,
+    required this.createdBy,
+    required this.createdAt,
+    required this.updatedAt,
+    this.users = const [],
+    this.isPrediction = false,
+  });
 
   factory CycleLog.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    return CycleLog(
+    return CycleLog._(
       id: doc.id,
       date: data['date'].toDate(),
       type: LogType.values[data['type']],
@@ -60,7 +56,7 @@ abstract class CycleLog with _$CycleLog {
     required List<String> users,
     bool isPrediction = false,
   }) {
-    return CycleLog(
+    return CycleLog._(
       id: id,
       date: date.toUtc(),
       type: LogType.period,
@@ -82,7 +78,7 @@ abstract class CycleLog with _$CycleLog {
     required List<String> users,
     bool isPrediction = false,
   }) {
-    return CycleLog(
+    return CycleLog._(
       id: id,
       date: date.toUtc(),
       type: LogType.ovulation,
@@ -104,7 +100,7 @@ abstract class CycleLog with _$CycleLog {
     required List<String> users,
     bool isPrediction = false,
   }) {
-    return CycleLog(
+    return CycleLog._(
       id: id,
       date: date.toUtc(),
       type: LogType.symptom,
@@ -127,7 +123,7 @@ abstract class CycleLog with _$CycleLog {
     required List<String> users,
     bool isPrediction = false,
   }) {
-    return CycleLog(
+    return CycleLog._(
       id: id,
       date: date.toUtc(),
       type: LogType.intimacy,
@@ -141,6 +137,31 @@ abstract class CycleLog with _$CycleLog {
     );
   }
 
+  @HiveField(0)
+  final String id;
+  @HiveField(1)
+  final DateTime date;
+  @HiveField(2)
+  final LogType type;
+  @HiveField(3)
+  final FlowIntensity? flow;
+  @HiveField(4)
+  final List<String>? symptoms;
+  @HiveField(5)
+  final IntimacyType? intimacyType;
+  @HiveField(6)
+  final String ownedBy;
+  @HiveField(7)
+  final String createdBy;
+  @HiveField(8)
+  final DateTime createdAt;
+  @HiveField(9)
+  final DateTime updatedAt;
+  @HiveField(10)
+  final List<String> users;
+  @HiveField(11)
+  final bool isPrediction;
+
   DateTime get dateLocal => date.toLocal();
 
   Color get color => switch (type) {
@@ -150,9 +171,38 @@ abstract class CycleLog with _$CycleLog {
     LogType.intimacy => AppColors.purple,
   };
 
+  CycleLog copyWith({
+    String? id,
+    DateTime? date,
+    LogType? type,
+    FlowIntensity? flow,
+    List<String>? symptoms,
+    IntimacyType? intimacyType,
+    String? ownedBy,
+    String? createdBy,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    List<String>? users,
+    bool? isPrediction,
+  }) {
+    return CycleLog._(
+      id: id ?? this.id,
+      date: date ?? this.date,
+      type: type ?? this.type,
+      flow: flow ?? this.flow,
+      symptoms: symptoms ?? this.symptoms,
+      intimacyType: intimacyType ?? this.intimacyType,
+      ownedBy: ownedBy ?? this.ownedBy,
+      createdBy: createdBy ?? this.createdBy,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      users: users ?? this.users,
+      isPrediction: isPrediction ?? this.isPrediction,
+    );
+  }
+
   Map<String, dynamic> toFirestore() {
     return {
-      // ID is handled by Firestore
       'date': date,
       'type': type.index,
       'flow': flow?.index,
@@ -166,6 +216,22 @@ abstract class CycleLog with _$CycleLog {
       'is_prediction': isPrediction,
     };
   }
+
+  @override
+  List<Object?> get props => [
+    id,
+    date,
+    type,
+    flow,
+    symptoms,
+    intimacyType,
+    ownedBy,
+    createdBy,
+    createdAt,
+    updatedAt,
+    users,
+    isPrediction,
+  ];
 }
 
 @HiveType(typeId: HiveTypeIds.cycleLogType)

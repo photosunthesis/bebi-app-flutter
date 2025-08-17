@@ -318,10 +318,15 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
 
   Widget _buildShareWithPartnerToggle() {
     return BlocBuilder<CalendarEventFormCubit, CalendarEventFormState>(
+      buildWhen: (p, c) =>
+          p is CalendarEventFormLoadedState ||
+          c is CalendarEventFormLoadedState,
       builder: (context, state) {
         final eventCreatedByCurrentUser =
-            state.calendarEvent?.createdBy == state.currentUserId ||
+            (state as CalendarEventFormLoadedState).calendarEvent?.createdBy ==
+                state.currentUserId ||
             state.calendarEvent == null;
+
         return Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [

@@ -8,10 +8,8 @@ import 'package:bebi_app/utils/guard.dart';
 import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 
-part 'add_partner_cubit.freezed.dart';
 part 'add_partner_state.dart';
 
 @injectable
@@ -20,7 +18,7 @@ class AddPartnerCubit extends Cubit<AddPartnerState> {
     this._userPartnershipsRepository,
     this._userProfileRepository,
     this._firebaseAuth,
-  ) : super(const AddPartnerState(currentUserCode: ''));
+  ) : super(const AddPartnerLoadingState());
 
   final UserPartnershipsRepository _userPartnershipsRepository;
   final UserProfileRepository _userProfileRepository;
@@ -29,11 +27,13 @@ class AddPartnerCubit extends Cubit<AddPartnerState> {
   Future<void> initialize() async {
     await guard(
       () async {
-        emit(state.copyWith(loading: true));
+        emit(const AddPartnerLoadingState());
+
         final userProfile = await _userProfileRepository.getByUserId(
           _firebaseAuth.currentUser!.uid,
         );
-        emit(state.copyWith(currentUserCode: userProfile!.code));
+
+        emit(AddPartnerLoadedState(userProfile!.code));
 
         logEvent(
           name: 'add_partner_screen_opened',
@@ -44,10 +44,7 @@ class AddPartnerCubit extends Cubit<AddPartnerState> {
         );
       },
       onError: (e, _) {
-        emit(state.copyWith(error: e.toString()));
-      },
-      onComplete: () {
-        emit(state.copyWith(loading: false));
+        emit(AddPartnerErrorState(e.toString()));
       },
     );
   }
@@ -55,7 +52,7 @@ class AddPartnerCubit extends Cubit<AddPartnerState> {
   Future<void> submit({String? partnerCode}) async {
     await guard(
       () async {
-        emit(state.copyWith(loading: true));
+        emit(const AddPartnerLoadingState());
 
         if (partnerCode?.isEmpty ?? true) {
           // Check if someone has already used current user's code to pair
@@ -66,7 +63,7 @@ class AddPartnerCubit extends Cubit<AddPartnerState> {
             throw ArgumentError(l10n.partnerNotFoundForIntimateActivities);
           }
 
-          return emit(state.copyWith(success: true));
+          return emit(const AddPartnerSuccessState());
         }
 
         final partnerProfile = await _userProfileRepository.getByUserCode(
@@ -97,7 +94,7 @@ class AddPartnerCubit extends Cubit<AddPartnerState> {
           ),
         );
 
-        emit(state.copyWith(success: true));
+        emit(const AddPartnerSuccessState());
 
         logEvent(
           name: 'partner_added_successfully',
@@ -112,10 +109,7 @@ class AddPartnerCubit extends Cubit<AddPartnerState> {
         setUserProperty(name: 'partner_id', value: partnerProfile.userId);
       },
       onError: (e, _) {
-        emit(state.copyWith(error: e.toString()));
-      },
-      onComplete: () {
-        emit(state.copyWith(loading: false, error: null));
+        emit(AddPartnerErrorState(e.toString()));
       },
     );
   }

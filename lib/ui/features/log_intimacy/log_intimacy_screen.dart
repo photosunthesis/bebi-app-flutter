@@ -3,7 +3,6 @@ import 'package:bebi_app/app/theme/app_colors.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/ui/features/log_intimacy/log_intimacy_cubit.dart';
-import 'package:bebi_app/ui/features/log_menstrual_flow/log_menstrual_flow_cubit.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/color_extensions.dart';
@@ -38,15 +37,15 @@ class _LogIntimacyScreenState extends State<LogIntimacyScreen> {
   Widget build(BuildContext context) {
     return BlocConsumer<LogIntimacyCubit, LogIntimacyState>(
       listener: (context, state) => switch (state) {
-        LogIntimacyStateSuccess() => context.pop(true),
-        LogIntimacyStateError(:final error) => context.showSnackbar(
+        LogIntimacySuccessState() => context.pop(true),
+        LogIntimacyErrorState(:final error) => context.showSnackbar(
           error,
           type: SnackbarType.error,
         ),
         _ => null,
       },
       builder: (context, state) {
-        final loading = state is LogMenstrualFlowLoading;
+        final loading = state is LogIntimacyLoadingState;
         return Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,

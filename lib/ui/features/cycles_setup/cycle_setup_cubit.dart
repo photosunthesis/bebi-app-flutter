@@ -9,10 +9,8 @@ import 'package:bebi_app/utils/extension/int_extensions.dart';
 import 'package:bebi_app/utils/guard.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 
-part 'cycle_setup_cubit.freezed.dart';
 part 'cycle_setup_state.dart';
 
 @injectable
@@ -22,7 +20,7 @@ class CycleSetupCubit extends Cubit<CycleSetupState> {
     this._cycleLogsRepository,
     this._userPartnershipsRepository,
     this._firebaseAuth,
-  ) : super(const CycleSetupState.initial());
+  ) : super(const CycleSetupInitialState());
 
   final UserProfileRepository _userProfileRepository;
   final CycleLogsRepository _cycleLogsRepository;
@@ -36,7 +34,7 @@ class CycleSetupCubit extends Cubit<CycleSetupState> {
   }) async {
     await guard(
       () async {
-        emit(const CycleSetupState.loading());
+        emit(const CycleSetupLoadingState());
 
         final userProfile = await _userProfileRepository.getByUserId(
           _firebaseAuth.currentUser!.uid,
@@ -70,7 +68,7 @@ class CycleSetupCubit extends Cubit<CycleSetupState> {
 
         await _cycleLogsRepository.createMany(cycleLogs);
 
-        emit(const CycleSetupState.success());
+        emit(const CycleSetupSuccessState());
 
         logEvent(
           name: 'cycle_setup_completed',
@@ -81,8 +79,8 @@ class CycleSetupCubit extends Cubit<CycleSetupState> {
           },
         );
       },
-      onError: (error, _) => emit(CycleSetupState.error(error.toString())),
-      onComplete: () => emit(const CycleSetupState.initial()),
+      onError: (error, _) => emit(CycleSetupErrorState(error.toString())),
+      onComplete: () => emit(const CycleSetupInitialState()),
     );
   }
 }

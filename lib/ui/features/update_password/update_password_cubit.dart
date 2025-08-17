@@ -3,16 +3,14 @@ import 'package:bebi_app/utils/guard.dart';
 import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 
-part 'update_password_cubit.freezed.dart';
 part 'update_password_state.dart';
 
 @injectable
 class UpdatePasswordCubit extends Cubit<UpdatePasswordState> {
   UpdatePasswordCubit(this._firebaseAuth)
-    : super(const UpdatePasswordState.data());
+    : super(const UpdatePasswordLoadedState());
 
   final FirebaseAuth _firebaseAuth;
 
@@ -21,7 +19,7 @@ class UpdatePasswordCubit extends Cubit<UpdatePasswordState> {
     required String newPassword,
   }) async => guard(
     () async {
-      emit(const UpdatePasswordState.loading());
+      emit(const UpdatePasswordLoadingState());
       final user = _firebaseAuth.currentUser!;
       final credential = EmailAuthProvider.credential(
         email: user.email!,
@@ -29,7 +27,7 @@ class UpdatePasswordCubit extends Cubit<UpdatePasswordState> {
       );
       await user.reauthenticateWithCredential(credential);
       await user.updatePassword(newPassword);
-      emit(const UpdatePasswordState.success());
+      emit(const UpdatePasswordSuccessState());
 
       logEvent(
         name: 'update_password',
@@ -42,7 +40,7 @@ class UpdatePasswordCubit extends Cubit<UpdatePasswordState> {
     },
     onError: (error, _) {
       emit(
-        UpdatePasswordState.error(
+        UpdatePasswordErrorState(
           error is FirebaseAuthException && error.code == 'wrong-password'
               ? l10n.incorrectCurrentPassword
               : error.toString(),

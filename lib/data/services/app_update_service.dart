@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 
 import 'package:bebi_app/data/models/app_update_info.dart';
+import 'package:bebi_app/utils/exceptions/simple_exception.dart';
+import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -22,18 +24,14 @@ class AppUpdateService {
     );
 
     if (response.statusCode != 200) {
-      throw DioException(
-        requestOptions: response.requestOptions,
-        response: response,
-        type: DioExceptionType.badResponse,
-      );
+      throw SimpleException(l10n.checkUpdateError);
     }
 
     return _parseReleaseData(response.data);
   }
 
   AppUpdateInfo _parseReleaseData(Map<String, dynamic> releaseData) {
-    final latestVersion = _extractVersion(releaseData['tag_name'] as String);
+    final latestVersion = releaseData['tag_name'].replaceFirst('v', '');
     final releaseNotes =
         releaseData['body'] as String? ?? 'No release notes available.';
     final releaseUrl = releaseData['html_url'] as String;
@@ -49,8 +47,6 @@ class AppUpdateService {
       publishedAt: publishedAt,
     );
   }
-
-  String _extractVersion(String tagName) => tagName.replaceFirst('v', '');
 
   bool _isVersionNewer(String remoteVersion, String currentVersion) {
     try {

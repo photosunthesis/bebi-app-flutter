@@ -33,8 +33,8 @@ class _SignInScreenState extends State<SignInScreen> {
   Widget build(BuildContext context) {
     return BlocListener<SignInCubit, SignInState>(
       listener: (context, state) => switch (state) {
-        SignInSuccess() => context.goNamed(AppRoutes.home),
-        SignInFailure(:final error) => context.showSnackbar(error),
+        SignInSuccessState() => context.goNamed(AppRoutes.home),
+        SignInErrorState(:final error) => context.showSnackbar(error),
         _ => null,
       },
       child: Form(
@@ -91,7 +91,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
   Widget _buildFormFields() {
     return BlocSelector<SignInCubit, SignInState, bool>(
-      selector: (state) => state is SignInLoading,
+      selector: (state) => state is SignInLoadingState,
       builder: (context, loading) => Column(
         children: [
           Padding(
@@ -143,7 +143,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
   Widget _bottomBar() {
     return BlocSelector<SignInCubit, SignInState, bool>(
-      selector: (state) => state is SignInLoading,
+      selector: (state) => state is SignInLoadingState,
       builder: (context, loading) => SafeArea(
         child: Container(
           margin: const EdgeInsets.all(UiConstants.padding),

@@ -1,14 +1,25 @@
 part of 'calendar_cubit.dart';
 
-@freezed
-abstract class CalendarState with _$CalendarState {
-  const factory CalendarState({
-    required DateTime focusedDay,
-    @Default([]) List<CalendarEvent> events,
-    @Default([]) List<CalendarEvent> focusedDayEvents,
-    @Default(false) bool loading,
-    String? error,
-  }) = _CalendarState;
+sealed class CalendarState {
+  const CalendarState();
+}
 
-  factory CalendarState.initial() => CalendarState(focusedDay: DateTime.now());
+class CalendarLoadingState extends CalendarState {
+  const CalendarLoadingState();
+}
+
+class CalendarLoadedState extends CalendarState {
+  const CalendarLoadedState({
+    required this.focusedDay,
+    required this.events,
+    required this.focusedDayEvents,
+  });
+  final DateTime focusedDay;
+  final List<CalendarEvent> events;
+  final List<CalendarEvent> focusedDayEvents;
+}
+
+class CalendarErrorState extends CalendarState {
+  const CalendarErrorState(this.error);
+  final String error;
 }

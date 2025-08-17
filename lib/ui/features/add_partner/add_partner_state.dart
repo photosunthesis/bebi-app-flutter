@@ -1,11 +1,23 @@
 part of 'add_partner_cubit.dart';
 
-@freezed
-abstract class AddPartnerState with _$AddPartnerState {
-  const factory AddPartnerState({
-    required String currentUserCode,
-    @Default(false) bool loading,
-    @Default(false) bool success,
-    String? error,
-  }) = _AddPartnerState;
+sealed class AddPartnerState {
+  const AddPartnerState();
+}
+
+class AddPartnerLoadingState extends AddPartnerState {
+  const AddPartnerLoadingState();
+}
+
+class AddPartnerLoadedState extends AddPartnerState {
+  const AddPartnerLoadedState(this.currentUserCode);
+  final String currentUserCode;
+}
+
+class AddPartnerSuccessState extends AddPartnerState {
+  const AddPartnerSuccessState();
+}
+
+class AddPartnerErrorState extends AddPartnerState {
+  const AddPartnerErrorState(this.error);
+  final String error;
 }

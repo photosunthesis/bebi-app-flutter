@@ -289,5 +289,6 @@
   },
   "morning": "morning",
   "afternoon": "afternoon",
-  "evening": "evening"
+  "evening": "evening",
+  "checkUpdateError": "Could not check for app updates. Please try again later."
 }

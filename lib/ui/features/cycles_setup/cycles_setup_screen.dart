@@ -37,8 +37,8 @@ class _CyclesSetupScreenState extends State<CyclesSetupScreen> {
   Widget build(BuildContext context) {
     return BlocConsumer<CycleSetupCubit, CycleSetupState>(
       listener: (context, state) => switch (state) {
-        CycleSetupStateError(:final error) => context.showSnackbar(error),
-        CycleSetupStateSuccess() => context.pop(true),
+        CycleSetupErrorState(:final error) => context.showSnackbar(error),
+        CycleSetupSuccessState() => context.pop(true),
         _ => null,
       },
       builder: (context, state) => Form(
@@ -207,7 +207,7 @@ class _CyclesSetupScreenState extends State<CyclesSetupScreen> {
       child: Padding(
         padding: const EdgeInsets.all(UiConstants.padding),
         child: BlocSelector<CycleSetupCubit, CycleSetupState, bool>(
-          selector: (state) => state is CycleSetupStateLoading,
+          selector: (state) => state is CycleSetupLoadingState,
           builder: (context, loading) {
             return ElevatedButton(
               onPressed: loading

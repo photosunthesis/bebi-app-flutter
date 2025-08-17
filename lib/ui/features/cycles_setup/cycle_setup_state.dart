@@ -1,9 +1,22 @@
 part of 'cycle_setup_cubit.dart';
 
-@freezed
-sealed class CycleSetupState with _$CycleSetupState {
-  const factory CycleSetupState.initial() = CycleSetupStateInitial;
-  const factory CycleSetupState.loading() = CycleSetupStateLoading;
-  const factory CycleSetupState.success() = CycleSetupStateSuccess;
-  const factory CycleSetupState.error(String error) = CycleSetupStateError;
+sealed class CycleSetupState {
+  const CycleSetupState();
+}
+
+class CycleSetupInitialState extends CycleSetupState {
+  const CycleSetupInitialState();
+}
+
+class CycleSetupLoadingState extends CycleSetupState {
+  const CycleSetupLoadingState();
+}
+
+class CycleSetupSuccessState extends CycleSetupState {
+  const CycleSetupSuccessState();
+}
+
+class CycleSetupErrorState extends CycleSetupState {
+  const CycleSetupErrorState(this.error);
+  final String error;
 }
