@@ -33,14 +33,10 @@ jobs:
           distribution: "zulu"
           java-version: "17"
 
-      - uses: actions/cache@v4
-        with:
-          path: /Users/runner/hostedtoolcache/flutter
-          key: ${{ runner.os }}-flutter-install-cache-stable
-
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: 3.35.1 # Must be the same with the one in pubspec.yaml
+          cache: true
 
       - name: Cache Flutter dependencies
         uses: actions/cache@v4
@@ -131,14 +127,10 @@ jobs:
         with:
           xcode-version: "16.2"
 
-      - uses: actions/cache@v4
-        with:
-          path: /Users/runner/hostedtoolcache/flutter
-          key: ${{ runner.os }}-flutter-install-cache-stable
-
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: 3.35.1 # Must be the same with the one in pubspec.yaml
+          cache: true
 
       - name: Cache Flutter dependencies
         uses: actions/cache@v4
