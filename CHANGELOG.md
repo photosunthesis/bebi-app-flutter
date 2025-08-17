@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.3] - 2025-08-17
+
+### Added
+
+- Feature to clean up local data when installing new app versions
+
+### Changed
+
+- Switched from freezed classes to good ol' dart classes
+
 ## [0.2.2] - 2025-08-16
 
 ## Fixed
