@@ -1,23 +1,18 @@
 part of 'cycles_cubit.dart';
 
-sealed class CyclesState {
-  const CyclesState();
-}
-
-class CyclesLoadingState extends CyclesState {
-  const CyclesLoadingState();
-}
-
-class CyclesLoadedState extends CyclesState {
-  CyclesLoadedState({
-    DateTime? focusedDate,
+class CyclesState extends Equatable {
+  const CyclesState({
+    required this.focusedDate,
     this.cycleLogs = const [],
     this.showCurrentUserCycleData = true,
     this.aiSummary,
     this.focusedDateInsights,
     this.userProfile,
     this.partnerProfile,
-  }) : focusedDate = focusedDate ?? DateTime.now();
+    this.isLoading = false,
+    this.isInsightLoading = false,
+    this.error,
+  });
 
   final DateTime focusedDate;
   final List<CycleLog> cycleLogs;
@@ -26,12 +21,51 @@ class CyclesLoadedState extends CyclesState {
   final CycleDayInsights? focusedDateInsights;
   final UserProfile? userProfile;
   final UserProfile? partnerProfile;
+  final bool isLoading;
+  final bool isInsightLoading;
+  final String? error;
 
   List<CycleLog> get focusedDateLogs =>
       cycleLogs.where((e) => e.date.isSameDay(focusedDate)).toList();
-}
 
-class CyclesErrorState extends CyclesState {
-  const CyclesErrorState(this.error);
-  final String error;
+  CyclesState copyWith({
+    DateTime? focusedDate,
+    List<CycleLog>? cycleLogs,
+    bool? showCurrentUserCycleData,
+    String? aiSummary,
+    CycleDayInsights? focusedDateInsights,
+    UserProfile? userProfile,
+    UserProfile? partnerProfile,
+    bool? isLoading,
+    bool? isInsightLoading,
+    String? error,
+  }) {
+    return CyclesState(
+      focusedDate: focusedDate ?? this.focusedDate,
+      cycleLogs: cycleLogs ?? this.cycleLogs,
+      showCurrentUserCycleData:
+          showCurrentUserCycleData ?? this.showCurrentUserCycleData,
+      aiSummary: aiSummary ?? this.aiSummary,
+      focusedDateInsights: focusedDateInsights ?? this.focusedDateInsights,
+      userProfile: userProfile ?? this.userProfile,
+      partnerProfile: partnerProfile ?? this.partnerProfile,
+      isLoading: isLoading ?? this.isLoading,
+      isInsightLoading: isInsightLoading ?? this.isInsightLoading,
+      error: error ?? this.error,
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+    focusedDate,
+    cycleLogs,
+    showCurrentUserCycleData,
+    aiSummary,
+    focusedDateInsights,
+    userProfile,
+    partnerProfile,
+    isLoading,
+    isInsightLoading,
+    error,
+  ];
 }

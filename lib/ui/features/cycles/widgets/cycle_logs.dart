@@ -45,16 +45,15 @@ class _CycleLogsState extends State<CycleLogs> {
 
   Widget _buildPeriodSection() {
     return BlocBuilder<CyclesCubit, CyclesState>(
-      buildWhen: (previous, current) => current is CyclesLoadedState,
+      buildWhen: (previous, current) =>
+          current.showCurrentUserCycleData !=
+              previous.showCurrentUserCycleData ||
+          current.focusedDateLogs != previous.focusedDateLogs,
       builder: (context, state) {
-        final showCurrentUserCycleData = state is CyclesLoadedState
-            ? state.showCurrentUserCycleData
-            : false;
-        final periodLog = state is CyclesLoadedState
-            ? state.focusedDateLogs.firstWhereOrNull(
-                (e) => e.type == LogType.period,
-              )
-            : null;
+        final showCurrentUserCycleData = state.showCurrentUserCycleData;
+        final periodLog = state.focusedDateLogs.firstWhereOrNull(
+          (e) => e.type == LogType.period,
+        );
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -74,8 +73,7 @@ class _CycleLogsState extends State<CycleLogs> {
                   AppRoutes.logMenstrualCycle,
                   queryParameters: {
                     'logForPartner': '!$showCurrentUserCycleData',
-                    'date': (state as CyclesLoadedState).focusedDate
-                        .toIso8601String(),
+                    'date': state.focusedDate.toIso8601String(),
                     if (periodLog != null) ...{
                       'cycleLogId': periodLog.id,
                       'flowIntensity': periodLog.flow!.name,
@@ -83,7 +81,7 @@ class _CycleLogsState extends State<CycleLogs> {
                   },
                 );
 
-                if (shouldRefresh == true) _cubit.refreshData();
+                if (shouldRefresh == true) await _cubit.refreshData();
               },
               child: Container(
                 padding: const EdgeInsets.all(12),
@@ -106,7 +104,7 @@ class _CycleLogsState extends State<CycleLogs> {
                     ),
                     if (periodLog != null)
                       Text(
-                        (state as CyclesLoadedState).focusedDateLogs
+                        state.focusedDateLogs
                             .firstWhere((e) => e.type == LogType.period)
                             .flow!
                             .label,
@@ -198,11 +196,12 @@ class _CycleLogsState extends State<CycleLogs> {
     required Map<String, String> Function(CycleLog) getRouteParams,
   }) {
     return BlocBuilder<CyclesCubit, CyclesState>(
-      buildWhen: (previous, current) => current is CyclesLoadedState,
+      buildWhen: (previous, current) =>
+          current.focusedDateLogs != previous.focusedDateLogs,
       builder: (context, state) {
-        final log = state is CyclesLoadedState
-            ? state.focusedDateLogs.firstWhereOrNull((e) => e.type == logType)
-            : null;
+        final log = state.focusedDateLogs.firstWhereOrNull(
+          (e) => e.type == logType,
+        );
 
         return InkWell(
           onTap: () => _handleLogTap(state, routeName, log, getRouteParams),
@@ -258,13 +257,12 @@ class _CycleLogsState extends State<CycleLogs> {
     final shouldRefresh = await context.pushNamed(
       routeName,
       queryParameters: {
-        'logForPartner':
-            '!${(state as CyclesLoadedState).showCurrentUserCycleData}',
+        'logForPartner': '!${state.showCurrentUserCycleData}',
         'date': state.focusedDate.toIso8601String(),
         if (log != null) ...getRouteParams(log),
       },
     );
 
-    if (shouldRefresh == true) _cubit.refreshData();
+    if (shouldRefresh == true) await _cubit.refreshData();
   }
 }

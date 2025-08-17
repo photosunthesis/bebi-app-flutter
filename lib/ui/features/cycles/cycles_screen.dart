@@ -36,22 +36,21 @@ class _CyclesScreenState extends State<CyclesScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<CyclesCubit, CyclesState>(
-      listener: (context, state) => switch (state) {
-        CyclesErrorState() => context.showSnackbar(
-          state.error,
-          type: SnackbarType.primary,
-          duration: 6.seconds,
-        ),
-        _ => null,
+      listener: (context, state) {
+        if (state.error != null) {
+          context.showSnackbar(
+            state.error!,
+            type: SnackbarType.primary,
+            duration: 6.seconds,
+          );
+        }
       },
-
       child: Scaffold(
         appBar: _buildAppBar(),
         body: Stack(
           children: [
             RefreshIndicator(
-              onRefresh: () async =>
-                  _cubit.initialize(loadDataFromCache: false),
+              onRefresh: _cubit.refreshData,
               child: ListView(
                 children: [
                   const SizedBox(height: 16),
@@ -88,13 +87,12 @@ class _CyclesScreenState extends State<CyclesScreen> {
 
   Widget _buildHeader() {
     return SafeArea(
-      child: BlocSelector<CyclesCubit, CyclesState, DateTime?>(
-        selector: (state) =>
-            state is CyclesLoadedState ? state.focusedDate : null,
-        builder: (context, focusedDay) => Center(
+      child: BlocSelector<CyclesCubit, CyclesState, DateTime>(
+        selector: (state) => state.focusedDate,
+        builder: (context, date) => Center(
           child: Stack(
             children: [
-              _buildDateControls(focusedDay),
+              _buildDateControls(date),
               Positioned.fill(
                 top: 34,
                 child: Icon(
@@ -109,7 +107,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
     );
   }
 
-  Widget _buildDateControls(DateTime? date) {
+  Widget _buildDateControls(DateTime date) {
     return SizedBox(
       child: Stack(
         children: [
@@ -117,9 +115,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
           Positioned.fill(
             child: Center(
               child: Text(
-                date?.isToday == true
-                    ? 'Today, ${date!.toMMMMd()}'
-                    : date?.toEEEEMMMd() ?? '',
+                date.isToday ? 'Today, ${date.toMMMMd()}' : date.toEEEEMMMd(),
                 style: context.primaryTextTheme.headlineSmall,
               ),
             ),
@@ -129,7 +125,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
     );
   }
 
-  Widget _buildNavigationButtons(DateTime? date) {
+  Widget _buildNavigationButtons(DateTime date) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
       child: Row(
@@ -139,10 +135,10 @@ class _CyclesScreenState extends State<CyclesScreen> {
     );
   }
 
-  Widget _buildTodayButton(DateTime? date) {
+  Widget _buildTodayButton(DateTime date) {
     return AnimatedSwitcher(
       duration: 120.milliseconds,
-      child: date?.isToday == true
+      child: date.isToday
           ? const SizedBox(height: 30)
           : SizedBox(
               key: const Key('today_button'),
@@ -157,7 +153,11 @@ class _CyclesScreenState extends State<CyclesScreen> {
 
   Widget _buildAccountSwitcher() {
     return BlocBuilder<CyclesCubit, CyclesState>(
-      buildWhen: (previous, current) => current is CyclesLoadedState,
+      buildWhen: (previous, current) =>
+          previous.showCurrentUserCycleData !=
+              current.showCurrentUserCycleData ||
+          previous.userProfile != current.userProfile ||
+          previous.partnerProfile != current.partnerProfile,
       builder: (context, state) {
         return InkWell(
           onTap: _cubit.switchUserProfile,
@@ -171,7 +171,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                   child: Transform.translate(
                     offset: const Offset(16, 0),
                     child: _buildProfileAvatar(
-                      (state as CyclesLoadedState).showCurrentUserCycleData
+                      state.showCurrentUserCycleData
                           ? state.partnerProfile
                           : state.userProfile,
                     ),
@@ -230,10 +230,11 @@ class _CyclesScreenState extends State<CyclesScreen> {
 
   Widget _buildCyclesSetupPrompt() {
     return BlocSelector<CyclesCubit, CyclesState, bool>(
-      selector: (state) => switch (state) {
-        CyclesLoadedState() when !state.showCurrentUserCycleData => true,
-        CyclesLoadedState() => state.userProfile?.hasCycle ?? true,
-        _ => true,
+      selector: (state) {
+        if (state.isLoading) return false;
+        if (!state.showCurrentUserCycleData) return true;
+        if (state.userProfile?.hasCycle == true) return true;
+        return false;
       },
       builder: (context, hidePrompt) {
         return AnimatedSwitcher(
@@ -291,7 +292,9 @@ class _CyclesScreenState extends State<CyclesScreen> {
                           final shouldReinitialize = await context.pushNamed(
                             AppRoutes.cyclesSetup,
                           );
-                          if (shouldReinitialize == true) _cubit.refreshData();
+                          if (shouldReinitialize == true) {
+                            await _cubit.refreshData();
+                          }
                         },
                         child: Text(
                           context.l10n.setupCycleTrackingButton.toUpperCase(),

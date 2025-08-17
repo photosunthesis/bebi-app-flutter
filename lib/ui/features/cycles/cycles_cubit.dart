@@ -13,6 +13,7 @@ import 'package:bebi_app/utils/exceptions/simple_exception.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';
 import 'package:bebi_app/utils/guard.dart';
 import 'package:bebi_app/utils/localizations_utils.dart';
+import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -28,7 +29,7 @@ class CyclesCubit extends Cubit<CyclesState> {
     this._userProfileRepository,
     this._userPartnershipsRepository,
     this._firebaseAuth,
-  ) : super(CyclesLoadedState());
+  ) : super(CyclesState(focusedDate: DateTime.now()));
 
   final CycleLogsRepository _cycleLogsRepository;
   final CyclePredictionsService _cyclePredictionsService;
@@ -40,158 +41,172 @@ class CyclesCubit extends Cubit<CyclesState> {
   static const _userProfileSwitchedEvent = 'user_profile_switched';
   static const _hasCycleProperty = 'has_cycle';
 
-  String get _currentUserId => _firebaseAuth.currentUser!.uid;
+  Future<void> refreshData() async {
+    emit(
+      state.copyWith(
+        focusedDate: state.focusedDate,
+        showCurrentUserCycleData: state.showCurrentUserCycleData,
+        isLoading: true,
+      ),
+    );
 
-  void refreshData() {
-    initialize(loadDataFromCache: false);
+    await initialize(loadDataFromCache: false);
   }
 
   Future<void> initialize({bool loadDataFromCache = true}) async {
-    if (state is CyclesLoadingState) return;
-    await guard(() async {
-      final previousDataState = state is CyclesLoadedState
-          ? state as CyclesLoadedState
-          : null;
+    if (state.isLoading) return;
+    await guard(
+      () async {
+        emit(state.copyWith(isLoading: true));
 
-      emit(const CyclesLoadingState());
-
-      var userProfile = await _fetchUserProfile(
-        _currentUserId,
-        useCache: loadDataFromCache,
-      );
-
-      if (!userProfile.didSetUpCycles) {
-        userProfile = await _disableUserCycleTracking(loadDataFromCache);
-      }
-
-      final partnerProfile = await _fetchPartnerProfile(loadDataFromCache);
-
-      if (!userProfile.hasCycle) {
-        emit(
-          CyclesLoadedState(
-            focusedDate: previousDataState?.focusedDate,
-            userProfile: userProfile,
-            partnerProfile: partnerProfile,
-            showCurrentUserCycleData:
-                previousDataState?.showCurrentUserCycleData ?? true,
-          ),
+        final userProfileFromRepo = await _userProfileRepository.getByUserId(
+          _firebaseAuth.currentUser!.uid,
+          useCache: loadDataFromCache,
         );
-        return;
-      }
 
-      final loadedState = await _getLoadedStateWithCycleData(
-        previousState: previousDataState,
-        userProfile: userProfile,
-        partnerProfile: partnerProfile,
-        showCurrentUserCycleData:
-            previousDataState?.showCurrentUserCycleData ?? true,
-        useCache: loadDataFromCache,
-      );
-      emit(loadedState);
-    }, onError: (error, _) => emit(CyclesErrorState(error.toString())));
+        if (userProfileFromRepo == null) {
+          throw Exception(
+            l10n.userProfileNotFoundError(_firebaseAuth.currentUser!.uid),
+          );
+        }
+
+        var userProfile = userProfileFromRepo;
+
+        if (!userProfile.didSetUpCycles) {
+          userProfile = userProfile.copyWith(
+            hasCycle: false,
+            didSetUpCycles: true,
+          );
+          await _userProfileRepository.createOrUpdate(userProfile);
+          setUserProperty(name: _hasCycleProperty, value: 'false');
+        }
+
+        emit(state.copyWith(userProfile: userProfile));
+
+        final partnership = await _userPartnershipsRepository.getByUserId(
+          _firebaseAuth.currentUser!.uid,
+          useCache: loadDataFromCache,
+        );
+
+        final partnerId = partnership!.users.firstWhere(
+          (userId) => userId != _firebaseAuth.currentUser!.uid,
+        );
+
+        final partnerProfile = await _userProfileRepository.getByUserId(
+          partnerId,
+          useCache: loadDataFromCache,
+        );
+
+        emit(state.copyWith(partnerProfile: partnerProfile));
+
+        if (!userProfile.hasCycle) return;
+
+        await _loadCycleData(
+          userProfile: userProfile,
+          partnerProfile: partnerProfile!,
+          showCurrentUserCycleData: state.showCurrentUserCycleData,
+          useCache: loadDataFromCache,
+        );
+      },
+      onError: (error, _) =>
+          emit(state.copyWith(error: error.toString(), isLoading: false)),
+      onComplete: () => emit(
+        state.copyWith(isLoading: false, error: null, isInsightLoading: false),
+      ),
+    );
   }
 
   Future<void> setFocusedDate(DateTime date) async {
-    await guard(() async {
-      var currentState = state;
-      if (currentState is CyclesLoadingState) {
-        currentState = await stream.firstWhere(
-          (element) => element is! CyclesLoadingState,
+    await guard(
+      () async {
+        if (state.focusedDate.isSameDay(date)) return;
+
+        emit(state.copyWith(isInsightLoading: true, focusedDate: date));
+
+        final insights = _cycleDayInsightsService.getInsightsFromDateAndEvents(
+          date,
+          state.cycleLogs,
         );
-      }
 
-      if (currentState is! CyclesLoadedState) return;
-      final loadedState = currentState;
+        emit(state.copyWith(focusedDateInsights: insights, aiSummary: null));
 
-      if (loadedState.focusedDate.isSameDay(date)) return;
+        final aiSummary = await _cycleDayInsightsService.generateAiInsights(
+          insights,
+          isCurrentUser: state.showCurrentUserCycleData,
+          locale: l10n.localeName,
+        );
 
-      final insights = _cycleDayInsightsService.getInsightsFromDateAndEvents(
-        date,
-        loadedState.cycleLogs,
-      );
-
-      final aiSummary = await _cycleDayInsightsService.generateAiInsights(
-        insights,
-        isCurrentUser: loadedState.showCurrentUserCycleData,
-        locale: l10n.localeName,
-      );
-
-      emit(
-        CyclesLoadedState(
-          focusedDate: date,
-          cycleLogs: loadedState.cycleLogs,
-          showCurrentUserCycleData: loadedState.showCurrentUserCycleData,
-          aiSummary: aiSummary,
-          focusedDateInsights: insights,
-          userProfile: loadedState.userProfile,
-          partnerProfile: loadedState.partnerProfile,
-        ),
-      );
-    }, onError: (error, _) => emit(CyclesErrorState(error.toString())));
+        emit(state.copyWith(aiSummary: aiSummary));
+      },
+      onError: (error, _) => emit(state.copyWith(error: error.toString())),
+      onComplete: () => emit(
+        state.copyWith(isLoading: false, error: null, isInsightLoading: false),
+      ),
+    );
   }
 
   Future<void> switchUserProfile() async {
-    if (state is CyclesLoadingState) return;
     await guard(
       () async {
-        if (state is! CyclesLoadedState) return;
-        final loadedState = state as CyclesLoadedState;
-
-        if (loadedState.partnerProfile?.isSharingCycleWithPartner != true) {
+        if (state.partnerProfile?.isSharingCycleWithPartner != true) {
           throw SimpleException(l10n.partnerCycleSharingNotEnabledError);
         }
 
-        emit(const CyclesLoadingState());
+        final newShowCurrentUser = !state.showCurrentUserCycleData;
 
-        final newShowCurrentUserCycleData =
-            !loadedState.showCurrentUserCycleData;
+        emit(state.copyWith(isLoading: true));
 
-        final newLoadedState = await _getLoadedStateWithCycleData(
-          previousState: loadedState,
-          userProfile: loadedState.userProfile!,
-          partnerProfile: loadedState.partnerProfile!,
-          showCurrentUserCycleData: newShowCurrentUserCycleData,
+        final targetProfile = newShowCurrentUser
+            ? state.userProfile
+            : state.partnerProfile;
+
+        if (targetProfile?.hasCycle != true) {
+          emit(
+            state.copyWith(
+              cycleLogs: [],
+              showCurrentUserCycleData: newShowCurrentUser,
+              aiSummary: null,
+              focusedDateInsights: null,
+            ),
+          );
+
+          logEvent(
+            name: _userProfileSwitchedEvent,
+            parameters: {
+              'user_id': _firebaseAuth.currentUser!.uid,
+              if (state.partnerProfile != null)
+                'partner_id': state.partnerProfile!.userId,
+            },
+          );
+          return;
+        }
+
+        await _loadCycleData(
+          userProfile: state.userProfile!,
+          partnerProfile: state.partnerProfile!,
+          showCurrentUserCycleData: newShowCurrentUser,
           useCache: true,
         );
-
-        emit(newLoadedState);
 
         logEvent(
           name: _userProfileSwitchedEvent,
           parameters: {
-            'user_id': _currentUserId,
-            if (newLoadedState.partnerProfile != null)
-              'partner_id': newLoadedState.partnerProfile!.userId,
+            'user_id': _firebaseAuth.currentUser!.uid,
+            if (state.partnerProfile != null)
+              'partner_id': state.partnerProfile!.userId,
           },
         );
       },
-      onError: (error, _) => emit(CyclesErrorState(error.toString())),
+      onError: (error, _) =>
+          emit(state.copyWith(error: error.toString(), isLoading: false)),
+      onComplete: () => emit(
+        state.copyWith(isLoading: false, error: null, isInsightLoading: false),
+      ),
       logWhen: (error) => error is! SimpleException,
     );
   }
 
-  void trackInsightViewed() {
-    if (state is! CyclesLoadedState) return;
-    final loadedState = state as CyclesLoadedState;
-
-    logEvent(
-      name: 'cycle_insight_viewed',
-      parameters: {
-        'user_id': _currentUserId,
-        if (loadedState.partnerProfile != null)
-          'partner_id': loadedState.partnerProfile!.userId,
-        'focused_date': loadedState.focusedDate.toIso8601String(),
-        'cycle_phase':
-            loadedState.focusedDateInsights?.cyclePhase.name ?? 'unknown',
-        'day_of_cycle': loadedState.focusedDateInsights?.dayOfCycle ?? 0,
-        'has_ai_summary': loadedState.aiSummary != null,
-        'viewing_partner_data': !loadedState.showCurrentUserCycleData,
-      },
-    );
-  }
-
-  Future<CyclesLoadedState> _getLoadedStateWithCycleData({
-    required CyclesLoadedState? previousState,
+  Future<void> _loadCycleData({
     required UserProfile userProfile,
     required UserProfile partnerProfile,
     required bool showCurrentUserCycleData,
@@ -200,23 +215,31 @@ class CyclesCubit extends Cubit<CyclesState> {
     final userId = showCurrentUserCycleData
         ? userProfile.userId
         : partnerProfile.userId;
+
     final cycleLogs = await _cycleLogsRepository.getCycleLogsByUserId(
       userId,
       useCache: useCache,
     );
 
-    final focusedDate = previousState?.focusedDate ?? DateTime.now();
-
     final predictions = _cyclePredictionsService.predictUpcomingCycles(
       cycleLogs,
-      focusedDate,
+      state.focusedDate,
     );
 
     final allLogs = [...cycleLogs, ...predictions];
 
     final insights = _cycleDayInsightsService.getInsightsFromDateAndEvents(
-      focusedDate,
+      state.focusedDate,
       allLogs,
+    );
+
+    emit(
+      state.copyWith(
+        cycleLogs: allLogs,
+        showCurrentUserCycleData: showCurrentUserCycleData,
+        focusedDateInsights: insights,
+        isLoading: false,
+      ),
     );
 
     final aiSummary = await _cycleDayInsightsService.generateAiInsights(
@@ -225,62 +248,6 @@ class CyclesCubit extends Cubit<CyclesState> {
       locale: l10n.localeName,
     );
 
-    return CyclesLoadedState(
-      focusedDate: focusedDate,
-      cycleLogs: allLogs,
-      showCurrentUserCycleData: showCurrentUserCycleData,
-      aiSummary: aiSummary,
-      focusedDateInsights: insights,
-      userProfile: userProfile,
-      partnerProfile: partnerProfile,
-    );
-  }
-
-  Future<UserProfile> _fetchUserProfile(
-    String userId, {
-    bool useCache = true,
-  }) async {
-    final userProfile = await _userProfileRepository.getByUserId(
-      userId,
-      useCache: useCache,
-    );
-    if (userProfile == null) {
-      throw Exception(l10n.userProfileNotFoundError(userId));
-    }
-    return userProfile;
-  }
-
-  Future<UserProfile> _fetchPartnerProfile(bool useCache) async {
-    final partnership = await _userPartnershipsRepository.getByUserId(
-      _currentUserId,
-      useCache: useCache,
-    );
-
-    if (partnership == null) {
-      throw Exception(l10n.partnershipNotFoundError(_currentUserId));
-    }
-
-    final partnerId = partnership.users.firstWhere(
-      (userId) => userId != _currentUserId,
-    );
-
-    return await _fetchUserProfile(partnerId, useCache: useCache);
-  }
-
-  Future<UserProfile> _disableUserCycleTracking(bool useCache) async {
-    final userProfile = await _fetchUserProfile(
-      _currentUserId,
-      useCache: useCache,
-    );
-
-    final updatedUser = userProfile.copyWith(
-      hasCycle: false,
-      didSetUpCycles: true,
-    );
-
-    await _userProfileRepository.createOrUpdate(updatedUser);
-
-    setUserProperty(name: _hasCycleProperty, value: 'false');
-    return updatedUser;
+    emit(state.copyWith(aiSummary: aiSummary, isInsightLoading: false));
   }
 }

@@ -42,29 +42,28 @@ class _CyclePredictionsState extends State<CyclePredictions> {
 
   Widget _buildFertileWindowPredictions() {
     return BlocBuilder<CyclesCubit, CyclesState>(
-      buildWhen: (previous, current) => current is CyclesLoadedState,
+      buildWhen: (previous, current) =>
+          current.showCurrentUserCycleData !=
+              previous.showCurrentUserCycleData ||
+          current.focusedDateInsights != previous.focusedDateInsights,
       builder: (context, state) {
-        final showCurrentUserCycleData = state is CyclesLoadedState
-            ? state.showCurrentUserCycleData
-            : false;
-        final insights = state is CyclesLoadedState
-            ? state.focusedDateInsights
-            : null;
-
         return _buildCalendar(
-          focusedDay: insights?.fertileDays.first ?? DateTime.now(),
+          focusedDay:
+              state.focusedDateInsights?.fertileDays.first ?? DateTime.now(),
           eventColor: AppColors.blue,
           title: context.l10n.fertilWindowTitle,
-          description: showCurrentUserCycleData
-              ? insights?.fertileDays.isNotEmpty == true
+          description: state.showCurrentUserCycleData
+              ? state.focusedDateInsights?.fertileDays.isNotEmpty == true
                     ? context.l10n.fertileWindowDescription(
-                        insights!.fertileDays.first.toEEEEMMMMd(),
+                        state.focusedDateInsights!.fertileDays.first
+                            .toEEEEMMMMd(),
                       )
                     : context.l10n.notEnoughDataFertileWindow
               : context.l10n.partnerNextPeriodDescription(
-                  insights?.fertileDays.first.toEEEEMMMMd() ?? '',
+                  state.focusedDateInsights?.fertileDays.first.toEEEEMMMMd() ??
+                      '',
                 ),
-          events: insights?.fertileDays ?? [],
+          events: state.focusedDateInsights?.fertileDays ?? [],
         );
       },
     );
@@ -72,29 +71,30 @@ class _CyclePredictionsState extends State<CyclePredictions> {
 
   Widget _buildPeriodPredictions() {
     return BlocBuilder<CyclesCubit, CyclesState>(
-      buildWhen: (previous, current) => current is CyclesLoadedState,
+      buildWhen: (previous, current) =>
+          current.showCurrentUserCycleData !=
+              previous.showCurrentUserCycleData ||
+          current.focusedDateInsights != previous.focusedDateInsights,
       builder: (context, state) {
-        final showCurrentUserCycleData = state is CyclesLoadedState
-            ? state.showCurrentUserCycleData
-            : false;
-        final insights = state is CyclesLoadedState
-            ? state.focusedDateInsights
-            : null;
-
         return _buildCalendar(
-          focusedDay: insights?.nextPeriodDates.first ?? DateTime.now(),
+          focusedDay:
+              state.focusedDateInsights?.nextPeriodDates.first ??
+              DateTime.now(),
           eventColor: AppColors.red,
           title: context.l10n.nextPeriodTitle,
-          description: showCurrentUserCycleData
-              ? insights?.nextPeriodDates.isNotEmpty == true
+          description: state.showCurrentUserCycleData
+              ? state.focusedDateInsights?.nextPeriodDates.isNotEmpty == true
                     ? context.l10n.nextPeriodDescription(
-                        insights!.nextPeriodDates.first.toEEEEMMMMd(),
+                        state.focusedDateInsights!.nextPeriodDates.first
+                            .toEEEEMMMMd(),
                       )
                     : context.l10n.notEnoughDataNextPeriod
               : context.l10n.partnerNextPeriodDescription(
-                  insights?.nextPeriodDates.first.toEEEEMMMMd() ?? '',
+                  state.focusedDateInsights?.nextPeriodDates.first
+                          .toEEEEMMMMd() ??
+                      '',
                 ),
-          events: insights?.nextPeriodDates ?? [],
+          events: state.focusedDateInsights?.nextPeriodDates ?? [],
         );
       },
     );

@@ -19,7 +19,13 @@ class CalendarCubit extends Cubit<CalendarState> {
     this._calendarEventsRepository,
     this._recurringCalendarEventsService,
     this._firebaseAuth,
-  ) : super(const CalendarLoadingState());
+  ) : super(
+        CalendarLoadedState(
+          events: [],
+          focusedDayEvents: [],
+          focusedDay: DateTime.now(),
+        ),
+      );
 
   final CalendarEventsRepository _calendarEventsRepository;
   final RecurringCalendarEventsService _recurringCalendarEventsService;
@@ -33,6 +39,8 @@ class CalendarCubit extends Cubit<CalendarState> {
   Future<void> loadCalendarEvents({bool useCache = true}) async {
     await guard(
       () async {
+        emit(const CalendarLoadingState());
+
         final focusedDay = switch (state) {
           CalendarLoadedState(:final focusedDay) => focusedDay,
           _ => DateTime.now(),

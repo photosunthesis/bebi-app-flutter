@@ -35,11 +35,9 @@ class CycleInsights extends StatelessWidget {
                   effect: SoldColorEffect(
                     color: context.colorScheme.secondary.withAlpha(40),
                   ),
-                  enabled: state is CyclesLoadingState,
+                  enabled: state.isInsightLoading || state.aiSummary == null,
                   child: MarkdownBody(
-                    data: state is CyclesLoadedState
-                        ? state.aiSummary ?? _getSkeletonFakeData()
-                        : _getSkeletonFakeData(),
+                    data: state.aiSummary ?? _getSkeletonFakeData(),
                     styleSheet: MarkdownStyleSheet(
                       p: context.textTheme.bodyMedium?.copyWith(height: 1.4),
                       strong: context.textTheme.bodyMedium?.copyWith(

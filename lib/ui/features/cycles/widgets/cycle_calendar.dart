@@ -29,6 +29,8 @@ class _CycleCalendarState extends State<CycleCalendar> {
   static const _initialIndex = 1000;
   static const _daysToShow = 7;
 
+  bool _isTransitioning = false;
+
   @override
   void initState() {
     super.initState();
@@ -53,23 +55,27 @@ class _CycleCalendarState extends State<CycleCalendar> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<CyclesCubit, CyclesState>(
-      // Only respond to "back to today" button presses to avoid unnecessary
-      // page animations from other focus date changes
-      listenWhen: (previous, current) =>
-          current is CyclesLoadedState && current.focusedDate.isToday,
       listener: (context, state) {
-        if (!(state as CyclesLoadedState).focusedDate.isToday) return;
+        // Only respond to "back to today" button presses to avoid unnecessary
+        // page animations from other focus date changes
+        if (!state.focusedDate.isToday) return;
+        if (_isTransitioning) return;
 
         final targetIndex = _dates.indexWhere(
           (d) => d.isSameDay(state.focusedDate),
         );
 
         if (targetIndex != -1) {
-          _pageController.animateToPage(
-            targetIndex,
-            duration: 200.milliseconds,
-            curve: Curves.easeOutCubic,
-          );
+          _isTransitioning = true;
+          _pageController
+              .animateToPage(
+                targetIndex,
+                duration: 200.milliseconds,
+                curve: Curves.easeOutCubic,
+              )
+              .then((_) {
+                _isTransitioning = false;
+              });
         }
       },
       child: SizedBox(
@@ -97,7 +103,7 @@ class _CycleCalendarState extends State<CycleCalendar> {
 
   Widget _buildDayItem({required DateTime date}) {
     return BlocSelector<CyclesCubit, CyclesState, List<CycleLog>>(
-      selector: (state) => state is CyclesLoadedState ? state.cycleLogs : [],
+      selector: (state) => state.cycleLogs,
       builder: (context, cycleLogs) {
         final [periodLog, ovulationLog, symptomLog, intimacyLog] = LogType
             .values
