@@ -8,9 +8,9 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 
 part 'cycle_log.g.dart';
 
+@HiveType(typeId: HiveTypeIds.cycleLog)
 class CycleLog extends Equatable {
-  @HiveType(typeId: HiveTypeIds.cycleLog)
-  const CycleLog._({
+  const CycleLog({
     required this.id,
     required this.date,
     required this.type,
@@ -27,7 +27,7 @@ class CycleLog extends Equatable {
 
   factory CycleLog.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    return CycleLog._(
+    return CycleLog(
       id: doc.id,
       date: data['date'].toDate(),
       type: LogType.values[data['type']],
@@ -56,7 +56,7 @@ class CycleLog extends Equatable {
     required List<String> users,
     bool isPrediction = false,
   }) {
-    return CycleLog._(
+    return CycleLog(
       id: id,
       date: date.toUtc(),
       type: LogType.period,
@@ -78,7 +78,7 @@ class CycleLog extends Equatable {
     required List<String> users,
     bool isPrediction = false,
   }) {
-    return CycleLog._(
+    return CycleLog(
       id: id,
       date: date.toUtc(),
       type: LogType.ovulation,
@@ -100,7 +100,7 @@ class CycleLog extends Equatable {
     required List<String> users,
     bool isPrediction = false,
   }) {
-    return CycleLog._(
+    return CycleLog(
       id: id,
       date: date.toUtc(),
       type: LogType.symptom,
@@ -123,7 +123,7 @@ class CycleLog extends Equatable {
     required List<String> users,
     bool isPrediction = false,
   }) {
-    return CycleLog._(
+    return CycleLog(
       id: id,
       date: date.toUtc(),
       type: LogType.intimacy,
@@ -185,7 +185,7 @@ class CycleLog extends Equatable {
     List<String>? users,
     bool? isPrediction,
   }) {
-    return CycleLog._(
+    return CycleLog(
       id: id ?? this.id,
       date: date ?? this.date,
       type: type ?? this.type,
