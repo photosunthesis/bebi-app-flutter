@@ -36,14 +36,56 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: 3.35.1 # Must be the same with the one in pubspec.yaml
+          channel: stable
+          cache: true
+          cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:"
+          cache-path: "${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:"
+          pub-cache-key: "flutter-pub-:os:-:channel:-:version:-:arch:-:hash:"
+          pub-cache-path: "${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:"
+
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            .dart_tool
+          key: flutter-deps-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            flutter-deps-${{ runner.os }}-
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            android/.gradle
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
 
       - name: Configure environment
         run: echo "${{ secrets.ENVIRONMENT }}" | base64 --decode > .env
 
+      - name: Cache Firebase CLI and global packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/firebase
+            ~/.pub-cache/bin
+            ~/.pub-cache/global_packages
+          key: firebase-cli-${{ runner.os }}-v1
+          restore-keys: |
+            firebase-cli-${{ runner.os }}-
+
       - name: Configure firebase
         run: |
-          curl -sL https://firebase.tools | bash
-          dart pub global activate flutterfire_cli
+          if ! command -v firebase &> /dev/null; then
+            curl -sL https://firebase.tools | bash
+          fi
+          if ! dart pub global list | grep -q flutterfire_cli; then
+            dart pub global activate flutterfire_cli
+          fi
           flutterfire configure \
             --project=bebi-app \
             --platforms=android \
@@ -92,6 +134,33 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: 3.35.1 # Must be the same with the one in pubspec.yaml
+          channel: stable
+          cache: true
+          cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:"
+          cache-path: "${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:"
+          pub-cache-key: "flutter-pub-:os:-:channel:-:version:-:arch:-:hash:"
+          pub-cache-path: "${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:"
+
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            .dart_tool
+          key: flutter-deps-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            flutter-deps-${{ runner.os }}-
+
+      - name: Cache iOS build cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ios/Pods
+            ~/.cocoapods
+            ~/Library/Caches/CocoaPods
+          key: ios-pods-${{ runner.os }}-${{ hashFiles('ios/Podfile.lock') }}
+          restore-keys: |
+            ios-pods-${{ runner.os }}-
 
       - name: Download dependencies
         run: flutter pub get
@@ -101,10 +170,25 @@ jobs:
           flutter pub run build_runner build --delete-conflicting-outputs
           flutter gen-l10n
 
+      - name: Cache Firebase CLI and global packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/firebase
+            ~/.pub-cache/bin
+            ~/.pub-cache/global_packages
+          key: firebase-cli-${{ runner.os }}-v1
+          restore-keys: |
+            firebase-cli-${{ runner.os }}-
+
       - name: Configure firebase
         run: |
-          curl -sL https://firebase.tools | bash
-          dart pub global activate flutterfire_cli
+          if ! command -v firebase &> /dev/null; then
+            curl -sL https://firebase.tools | bash
+          fi
+          if ! dart pub global list | grep -q flutterfire_cli; then
+            dart pub global activate flutterfire_cli
+          fi
           flutterfire configure \
             --project=bebi-app \
             --platforms=ios \
