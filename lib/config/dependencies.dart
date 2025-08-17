@@ -6,7 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:injectable/injectable.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
-import 'dependencies_config.config.dart';
+import 'dependencies.config.dart';
 
 @InjectableInit()
 Future<void> configureDependencies() async => GetIt.I.init();
