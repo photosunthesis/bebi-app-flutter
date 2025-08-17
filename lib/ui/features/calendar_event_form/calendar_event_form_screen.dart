@@ -63,7 +63,7 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
             .map((index) => DayOfWeek.values[index])
             .toList()
       : widget.selectedDate != null
-      ? [DayOfWeek.values[widget.selectedDate!.toLocal().weekday]]
+      ? [DayOfWeek.values[widget.selectedDate!.toLocal().weekday - 1]]
       : const [];
   late bool _allDay = widget.calendarEvent?.allDay ?? false;
   late bool _shareWithPartner = (widget.calendarEvent?.users.length ?? 2) > 1;

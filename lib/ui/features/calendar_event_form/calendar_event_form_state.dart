@@ -12,6 +12,8 @@ class CalendarEventFormLoadedState extends CalendarEventFormState {
   const CalendarEventFormLoadedState(this.calendarEvent, this.currentUserId);
   final CalendarEvent? calendarEvent;
   final String currentUserId;
+  bool get eventWasCreatedByCurrentUser =>
+      calendarEvent?.createdBy == currentUserId;
 }
 
 class CalendarEventFormErrorState extends CalendarEventFormState {

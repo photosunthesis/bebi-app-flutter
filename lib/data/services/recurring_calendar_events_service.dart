@@ -128,17 +128,16 @@ class RecurringCalendarEventsService {
 
       RepeatFrequency.weekly => () {
         final sortedDays = [...rule.daysOfWeek!]..sort();
-        final currentWeekday = current.weekday % 7; // Sunday as 0
 
         // Find next valid weekday in the list
         for (final dayIndex in sortedDays) {
-          if (dayIndex > currentWeekday) {
-            return current.add((dayIndex - currentWeekday).days);
+          if (dayIndex > current.weekday) {
+            return current.add((dayIndex - current.weekday).days);
           }
         }
 
         // If no next day found in same week, jump to next week's first selected day
-        final daysUntilNext = (7 - currentWeekday) + sortedDays.first;
+        final daysUntilNext = (7 - current.weekday) + sortedDays.first;
         return current.add(daysUntilNext.days);
       }(),
 

@@ -35,8 +35,8 @@ class _Calendar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<CalendarCubit, CalendarState>(
-      buildWhen: (p, c) => p is CalendarLoadedState || c is CalendarLoadedState,
+    return BlocSelector<CalendarCubit, CalendarState, CalendarLoadedState?>(
+      selector: (state) => state is CalendarLoadedState ? state : null,
       builder: (context, state) {
         return DecoratedBox(
           decoration: BoxDecoration(
@@ -54,14 +54,17 @@ class _Calendar extends StatelessWidget {
           ),
           child: TableCalendar<CalendarEvent>(
             availableGestures: AvailableGestures.horizontalSwipe,
-            focusedDay: (state as CalendarLoadedState).focusedDay,
-            eventLoader: (day) => state.events,
+            focusedDay: state?.focusedDay ?? DateTime.now(),
+            eventLoader: (day) => state?.events ?? [],
             headerVisible: false,
             currentDay: DateTime.now(),
             // TODO Make first and last days dynamic
             firstDay: DateTime.now().subtract(2.years),
             lastDay: DateTime.now().add(2.years),
-            selectedDayPredicate: (day) => day.isSameDay(state.focusedDay),
+            selectedDayPredicate: (day) {
+              if (state == null) return false;
+              return day.isSameDay(state.focusedDay);
+            },
             daysOfWeekHeight: 32,
             // TODO Add feature to switch to week view
             calendarFormat: CalendarFormat.month,
@@ -81,7 +84,7 @@ class _Calendar extends StatelessWidget {
               outsideBuilder: (context, day, focusedDay) =>
                   _buildDayCell(context, day, focusedDay, isOutside: true),
               markerBuilder: (context, day, events) =>
-                  _markerBuilder(context, day, events, state.focusedDay),
+                  _markerBuilder(context, day, events, state?.focusedDay),
             ),
             onDaySelected: (day, _) {
               context.read<CalendarCubit>().setFocusedDay(day);
@@ -164,7 +167,7 @@ class _Calendar extends StatelessWidget {
     BuildContext context,
     DateTime day,
     List<CalendarEvent> events,
-    DateTime focusedDay,
+    DateTime? focusedDay,
   ) {
     final dayEvents = events.where((e) => e.dateLocal.isSameDay(day)).toList();
 
@@ -186,7 +189,7 @@ class _Calendar extends StatelessWidget {
     );
 
     return Opacity(
-      opacity: day.isSameMonth(focusedDay) ? 1 : 0.4,
+      opacity: focusedDay != null && day.isSameMonth(focusedDay) ? 1 : 0.4,
       child: Padding(
         padding: const EdgeInsets.only(bottom: 8),
         child: Container(

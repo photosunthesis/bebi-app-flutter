@@ -47,9 +47,6 @@ class OptionsBottomDialog<T> extends StatelessWidget {
       enableDrag: enableDrag,
       barrierColor: context.colorScheme.primary.withAlpha(80),
       backgroundColor: Colors.transparent,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-      ),
       builder: (context) => OptionsBottomDialog._(
         title: title,
         description: description,
@@ -64,7 +61,7 @@ class OptionsBottomDialog<T> extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: context.colorScheme.surface,
-        borderRadius: BorderRadius.zero,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,

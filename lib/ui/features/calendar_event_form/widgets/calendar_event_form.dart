@@ -317,28 +317,23 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
   }
 
   Widget _buildShareWithPartnerToggle() {
-    return BlocBuilder<CalendarEventFormCubit, CalendarEventFormState>(
-      buildWhen: (p, c) =>
-          p is CalendarEventFormLoadedState ||
-          c is CalendarEventFormLoadedState,
-      builder: (context, state) {
-        final eventCreatedByCurrentUser =
-            (state as CalendarEventFormLoadedState).calendarEvent?.createdBy ==
-                state.currentUserId ||
-            state.calendarEvent == null;
-
+    return BlocSelector<CalendarEventFormCubit, CalendarEventFormState, bool>(
+      selector: (state) => state is CalendarEventFormLoadedState
+          ? state.eventWasCreatedByCurrentUser
+          : false,
+      builder: (context, eventWasCreatedByCurrentUser) {
         return Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              eventCreatedByCurrentUser
+              eventWasCreatedByCurrentUser
                   ? context.l10n.shareWithPartner
                   : context.l10n.eventSharedWithYou,
             ),
             const Spacer(),
-            if (eventCreatedByCurrentUser)
+            if (eventWasCreatedByCurrentUser)
               AppSwitch(
-                enabled: eventCreatedByCurrentUser,
+                enabled: eventWasCreatedByCurrentUser,
                 value: widget.shareWithPartner,
                 onChanged: widget.onShareWithPartnerChanged,
                 activeColor: widget.selectedColor.color,

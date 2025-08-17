@@ -1,11 +1,11 @@
 enum DayOfWeek {
-  sunday,
   monday,
   tuesday,
   wednesday,
   thursday,
   friday,
-  saturday;
+  saturday,
+  sunday;
 
   String toTitle() => name[0].toUpperCase() + name.substring(1);
 }

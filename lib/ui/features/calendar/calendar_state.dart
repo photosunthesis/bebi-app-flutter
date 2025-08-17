@@ -14,6 +14,7 @@ class CalendarLoadedState extends CalendarState {
     required this.events,
     required this.focusedDayEvents,
   });
+
   final DateTime focusedDay;
   final List<CalendarEvent> events;
   final List<CalendarEvent> focusedDayEvents;
