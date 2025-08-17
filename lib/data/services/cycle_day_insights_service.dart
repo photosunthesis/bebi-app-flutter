@@ -11,15 +11,10 @@ import 'package:injectable/injectable.dart';
 
 @injectable
 class CycleDayInsightsService {
-  const CycleDayInsightsService(
-    this._generativeModel,
-    this._summaryAndInsightsBox,
-  );
+  const CycleDayInsightsService(this._generativeModel, this._aiInsightsBox);
 
   final GenerativeModel _generativeModel;
-  final Box<String> _summaryAndInsightsBox;
-
-  static const _maxDaysBetweenPeriodEvents = 14;
+  final Box<String> _aiInsightsBox;
 
   CycleDayInsights? getInsightsFromDateAndEvents(
     DateTime date,
@@ -74,9 +69,8 @@ class CycleDayInsightsService {
 
     for (final event in events) {
       final group = groups.lastOrNull;
-      if (group == null ||
-          event.date.difference(group.last.date).inDays >
-              _maxDaysBetweenPeriodEvents) {
+      // 14 days is the max distance between two period events
+      if (group == null || event.date.difference(group.last.date).inDays > 14) {
         groups.add([event]);
       } else {
         group.add(event);
@@ -160,7 +154,7 @@ class CycleDayInsightsService {
   }) async {
     final date = cycleDayInsights.date.toIso8601String().substring(0, 10);
     final key = '${date}_${isCurrentUser ? 'self' : 'partner'}';
-    final cachedInsights = _summaryAndInsightsBox.get(key);
+    final cachedInsights = _aiInsightsBox.get(key);
     if (cachedInsights != null) return cachedInsights;
 
     final prompt = _generateInsightsPrompt(
@@ -176,7 +170,7 @@ class CycleDayInsightsService {
     final result =
         response.text ?? 'An error occurred while generating insights.';
 
-    unawaited(_summaryAndInsightsBox.put(key, result));
+    unawaited(_aiInsightsBox.put(key, result));
 
     return result;
   }
