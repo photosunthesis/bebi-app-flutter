@@ -33,15 +33,14 @@ jobs:
           distribution: "zulu"
           java-version: "17"
 
+      - uses: actions/cache@v4
+        with:
+          path: /Users/runner/hostedtoolcache/flutter
+          key: ${{ runner.os }}-flutter-install-cache-stable
+
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: 3.35.1 # Must be the same with the one in pubspec.yaml
-          channel: stable
-          cache: true
-          cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:"
-          cache-path: "${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:"
-          pub-cache-key: "flutter-pub-:os:-:channel:-:version:-:arch:-:hash:"
-          pub-cache-path: "${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:"
 
       - name: Cache Flutter dependencies
         uses: actions/cache@v4
@@ -86,6 +85,7 @@ jobs:
           if ! dart pub global list | grep -q flutterfire_cli; then
             dart pub global activate flutterfire_cli
           fi
+          export PATH="$PATH":"${{ runner.tool_cache }}/flutter/stable-3.35.1/bin"
           flutterfire configure \
             --project=bebi-app \
             --platforms=android \
@@ -131,15 +131,14 @@ jobs:
         with:
           xcode-version: "16.2"
 
+      - uses: actions/cache@v4
+        with:
+          path: /Users/runner/hostedtoolcache/flutter
+          key: ${{ runner.os }}-flutter-install-cache-stable
+
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: 3.35.1 # Must be the same with the one in pubspec.yaml
-          channel: stable
-          cache: true
-          cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:"
-          cache-path: "${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:"
-          pub-cache-key: "flutter-pub-:os:-:channel:-:version:-:arch:-:hash:"
-          pub-cache-path: "${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:"
 
       - name: Cache Flutter dependencies
         uses: actions/cache@v4
@@ -189,6 +188,7 @@ jobs:
           if ! dart pub global list | grep -q flutterfire_cli; then
             dart pub global activate flutterfire_cli
           fi
+          export PATH="$PATH":"${{ runner.tool_cache }}/flutter/stable-3.35.1/bin"
           flutterfire configure \
             --project=bebi-app \
             --platforms=ios \
