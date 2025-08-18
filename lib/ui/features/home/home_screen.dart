@@ -155,11 +155,11 @@ class _HomeScreenState extends State<HomeScreen> {
       description: context.l10n.updateAvailableDescription(info.newVersion),
       options: [
         Option(
-          text: context.l10n.getUpdateButton,
+          text: context.l10n.downloadUpdateButton,
           value: true,
           style: OptionStyle.primary,
           onTap: () async => launchUrlString(
-            info.releaseUrl,
+            info.downloadUrl,
             mode: LaunchMode.externalApplication,
           ),
         ),

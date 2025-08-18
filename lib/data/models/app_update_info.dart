@@ -4,7 +4,7 @@ class AppUpdateInfo {
     required this.newVersion,
     required this.releaseNotes,
     required this.hasUpdate,
-    required this.releaseUrl,
+    required this.downloadUrl,
     required this.publishedAt,
   });
 
@@ -12,6 +12,6 @@ class AppUpdateInfo {
   final String newVersion;
   final String releaseNotes;
   final bool hasUpdate;
-  final String releaseUrl;
+  final String downloadUrl;
   final DateTime publishedAt;
 }

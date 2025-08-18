@@ -291,7 +291,7 @@
   "discardChangesButton": "Discard changes",
   "newUpdateAvailableTitle": "New update available",
   "updateAvailableDescription": "A new version (v{version}) is now available. Tap the button below to go to the release page to get the update.",
-  "getUpdateButton": "Get update",
+  "downloadUpdateButton": "Download new version",
   "homeGreeting": "Good {timeOfDay}, {userName}",
   "@homeGreeting": {
     "placeholders": {

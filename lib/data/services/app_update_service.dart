@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:bebi_app/data/models/app_update_info.dart';
@@ -34,7 +35,10 @@ class AppUpdateService {
     final latestVersion = releaseData['tag_name'].replaceFirst('v', '');
     final releaseNotes =
         releaseData['body'] as String? ?? 'No release notes available.';
-    final releaseUrl = releaseData['html_url'] as String;
+    final assets = releaseData['assets'] as List<dynamic>;
+    final downloadUrl = Platform.isAndroid
+        ? assets.first['browser_download_url'] as String
+        : assets.last['browser_download_url'] as String;
     final publishedAt = DateTime.parse(releaseData['published_at']);
     final hasUpdate = _isVersionNewer(latestVersion, _packageInfo.version);
 
@@ -43,7 +47,7 @@ class AppUpdateService {
       newVersion: latestVersion,
       releaseNotes: releaseNotes,
       hasUpdate: hasUpdate,
-      releaseUrl: releaseUrl,
+      downloadUrl: downloadUrl,
       publishedAt: publishedAt,
     );
   }
