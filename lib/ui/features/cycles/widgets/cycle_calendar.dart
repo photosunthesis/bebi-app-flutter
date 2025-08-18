@@ -55,10 +55,9 @@ class _CycleCalendarState extends State<CycleCalendar> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<CyclesCubit, CyclesState>(
+      listenWhen: (previous, current) =>
+          previous.focusedDate != current.focusedDate,
       listener: (context, state) {
-        // Only respond to "back to today" button presses to avoid unnecessary
-        // page animations from other focus date changes
-        if (!state.focusedDate.isToday) return;
         if (_isTransitioning) return;
 
         final targetIndex = _dates.indexWhere(
@@ -70,7 +69,7 @@ class _CycleCalendarState extends State<CycleCalendar> {
           _pageController
               .animateToPage(
                 targetIndex,
-                duration: 200.milliseconds,
+                duration: 300.milliseconds,
                 curve: Curves.easeOutCubic,
               )
               .then((_) {

@@ -25,6 +25,8 @@ class CyclesScreen extends StatefulWidget {
 
 class _CyclesScreenState extends State<CyclesScreen> {
   late final _cubit = context.read<CyclesCubit>();
+  late final _scrollController = ScrollController();
+  bool _isAnimating = false;
 
   @override
   void initState() {
@@ -33,15 +35,27 @@ class _CyclesScreenState extends State<CyclesScreen> {
   }
 
   @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BlocListener<CyclesCubit, CyclesState>(
+      listenWhen: (previous, current) =>
+          previous.focusedDate != current.focusedDate ||
+          previous.error != current.error,
       listener: (context, state) {
+        if (!_isAnimating) {
+          _isAnimating = true;
+          _scrollController
+              .animateTo(0, duration: 300.milliseconds, curve: Curves.ease)
+              .then((_) => _isAnimating = false);
+        }
+
         if (state.error != null) {
-          context.showSnackbar(
-            state.error!,
-            type: SnackbarType.primary,
-            duration: 6.seconds,
-          );
+          context.showSnackbar(state.error!, duration: 6.seconds);
         }
       },
       child: Scaffold(
@@ -51,6 +65,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
             RefreshIndicator(
               onRefresh: _cubit.refreshData,
               child: ListView(
+                controller: _scrollController,
                 children: [
                   const SizedBox(height: 16),
                   const CycleLogs(),

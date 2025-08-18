@@ -53,10 +53,16 @@ class _CyclePredictionsState extends State<CyclePredictions> {
           : state.partnerProfile?.userId,
       builder: (context, userId) {
         return OutlinedButton(
-          onPressed: () => context.pushNamed(
-            AppRoutes.cycleCalendar,
-            queryParameters: {'userId': userId},
-          ),
+          onPressed: () async {
+            final selectedDate = await context.pushNamed(
+              AppRoutes.cycleCalendar,
+              queryParameters: {'userId': userId},
+            );
+
+            if (selectedDate is DateTime) {
+              await context.read<CyclesCubit>().setFocusedDate(selectedDate);
+            }
+          },
           child: Text(context.l10n.viewAllButton.toUpperCase()),
         );
       },
