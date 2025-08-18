@@ -4,7 +4,6 @@ import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/ui/features/profile_setup/profile_setup_cubit.dart';
 import 'package:bebi_app/ui/shared_widgets/forms/app_text_form_field.dart';
-import 'package:bebi_app/ui/shared_widgets/shadow/shadow_container.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
@@ -108,9 +107,17 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                 Positioned(
                   bottom: -5,
                   right: -18,
-                  child: ShadowContainer(
-                    shape: BoxShape.circle,
-                    shadowOffset: const Offset(0, 0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: context.colorScheme.shadow.withAlpha(10),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
                     child: TextButton(
                       onPressed: hasProfilePicture
                           ? _cubit.removeProfilePicture
