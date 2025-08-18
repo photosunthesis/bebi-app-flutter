@@ -44,6 +44,8 @@ class HomeCubit extends Cubit<HomeState> {
   Future<void> initialize() async {
     await guard(
       () async {
+        emit(HomeLoadedState(_firebaseAuth.currentUser!));
+
         if (_firebaseAuth.currentUser?.emailVerified != true) {
           emit(const HomeShouldConfirmEmailState());
           logEvent(
@@ -93,8 +95,6 @@ class HomeCubit extends Cubit<HomeState> {
           );
           return;
         }
-
-        emit(HomeLoadedState(userProfile));
 
         logEvent(
           name: 'home_screen_loaded',

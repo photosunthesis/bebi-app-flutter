@@ -2,7 +2,6 @@ import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/constants/kaomojis.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/data/models/app_update_info.dart';
-import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:bebi_app/ui/features/home/home_cubit.dart';
 import 'package:bebi_app/ui/shared_widgets/modals/options_bottom_dialog.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
@@ -10,6 +9,7 @@ import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/string_extensions.dart';
 import 'package:bebi_app/utils/localizations_utils.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -69,9 +69,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildHeader() {
     final now = DateTime.now();
-    return BlocSelector<HomeCubit, HomeState, UserProfile?>(
+    return BlocSelector<HomeCubit, HomeState, User?>(
       selector: (state) => state is HomeLoadedState ? state.currentUser : null,
-      builder: (context, userProfile) {
+      builder: (context, user) {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
           child: Row(
@@ -85,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       : now.hour < 17
                       ? context.l10n.afternoon
                       : context.l10n.evening,
-                  userProfile?.displayName.toTitleCase() ?? 'user',
+                  user?.displayName?.toTitleCase() ?? 'user',
                 ),
                 style: context.primaryTextTheme.headlineSmall,
               ),
@@ -101,8 +101,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 child: CircleAvatar(
                   backgroundColor: context.colorScheme.onTertiary,
-                  backgroundImage: userProfile != null
-                      ? CachedNetworkImageProvider(userProfile.photoUrl!)
+                  backgroundImage: user != null
+                      ? CachedNetworkImageProvider(user.photoURL ?? '')
                       : null,
                 ),
               ),

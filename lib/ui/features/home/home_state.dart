@@ -15,7 +15,7 @@ class HomeErrorState extends HomeState {
 
 class HomeLoadedState extends HomeState {
   const HomeLoadedState(this.currentUser);
-  final UserProfile currentUser;
+  final User currentUser;
 }
 
 class HomeShouldSetUpProfileState extends HomeState {
