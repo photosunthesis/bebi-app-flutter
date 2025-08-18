@@ -10,6 +10,8 @@ import 'package:bebi_app/ui/features/calendar_event_form/calendar_event_form_cub
 import 'package:bebi_app/ui/features/calendar_event_form/calendar_event_form_screen.dart';
 import 'package:bebi_app/ui/features/confirm_email/confirm_email_cubit.dart';
 import 'package:bebi_app/ui/features/confirm_email/confirm_email_screen.dart';
+import 'package:bebi_app/ui/features/cycle_calendar/cycle_calendar_cubit.dart';
+import 'package:bebi_app/ui/features/cycle_calendar/cycle_calendar_screen.dart';
 import 'package:bebi_app/ui/features/cycles/cycles_cubit.dart';
 import 'package:bebi_app/ui/features/cycles/cycles_screen.dart';
 import 'package:bebi_app/ui/features/cycles_setup/cycle_setup_cubit.dart';
@@ -145,6 +147,16 @@ abstract class AppRouter {
             ],
           ),
         ],
+      ),
+      GoRoute(
+        path: '/cycles/calendar',
+        name: AppRoutes.cycleCalendar,
+        builder: (_, state) => BlocProvider(
+          create: (_) => GetIt.I<CycleCalendarCubit>(),
+          child: CycleCalendarScreen(
+            userId: state.uri.queryParameters['userId']!,
+          ),
+        ),
       ),
       GoRoute(
         path: '/cycles/log-menstrual-cycle',

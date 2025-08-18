@@ -1,7 +1,7 @@
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/ui/features/cycles/cycles_cubit.dart';
-import 'package:bebi_app/ui/features/cycles/widgets/angled_stripes_background.dart';
+import 'package:bebi_app/ui/shared_widgets/custom/angled_stripes_background.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:bebi_app/utils/extension/color_extensions.dart';
 import 'package:bebi_app/utils/extension/datetime_extensions.dart';

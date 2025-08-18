@@ -17,6 +17,7 @@ abstract class AppRoutes {
   static const updateCalendarEvent = 'update-calendar-event';
   static const viewCalendarEvent = 'view-calendar-event';
   static const cycles = 'cycles';
+  static const cycleCalendar = 'cycle-calendar';
   static const logMenstrualCycle = 'log-menstrual-cycle';
   static const logSymptoms = 'log-symptoms';
   static const logIntimacy = 'log-intimacy';

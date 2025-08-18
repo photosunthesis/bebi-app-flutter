@@ -335,5 +335,6 @@
         "description": "The user ID for which partnership was not found"
       }
     }
-  }
+  },
+  "viewAllButton": "View all"
 }

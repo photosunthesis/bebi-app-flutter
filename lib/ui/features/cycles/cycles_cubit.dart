@@ -78,7 +78,10 @@ class CyclesCubit extends Cubit<CyclesState> {
             didSetUpCycles: true,
           );
           await _userProfileRepository.createOrUpdate(userProfile);
-          setUserProperty(name: _hasCycleProperty, value: 'false');
+          AnalyticsUtils.setUserProperty(
+            name: _hasCycleProperty,
+            value: 'false',
+          );
         }
 
         emit(state.copyWith(userProfile: userProfile));
@@ -170,7 +173,7 @@ class CyclesCubit extends Cubit<CyclesState> {
             ),
           );
 
-          logEvent(
+          AnalyticsUtils.logEvent(
             name: _userProfileSwitchedEvent,
             parameters: {
               'user_id': _firebaseAuth.currentUser!.uid,
@@ -188,7 +191,7 @@ class CyclesCubit extends Cubit<CyclesState> {
           useCache: true,
         );
 
-        logEvent(
+        AnalyticsUtils.logEvent(
           name: _userProfileSwitchedEvent,
           parameters: {
             'user_id': _firebaseAuth.currentUser!.uid,
