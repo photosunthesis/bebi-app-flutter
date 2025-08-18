@@ -11,14 +11,14 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class CycleCalendar extends StatefulWidget {
-  const CycleCalendar({super.key});
+class CycleDatePicker extends StatefulWidget {
+  const CycleDatePicker({super.key});
 
   @override
-  State<CycleCalendar> createState() => _CycleCalendarState();
+  State<CycleDatePicker> createState() => _CycleDatePickerState();
 }
 
-class _CycleCalendarState extends State<CycleCalendar> {
+class _CycleDatePickerState extends State<CycleDatePicker> {
   late List<DateTime> _dates;
   late final _cubit = context.read<CyclesCubit>();
   final _pageController = PageController(

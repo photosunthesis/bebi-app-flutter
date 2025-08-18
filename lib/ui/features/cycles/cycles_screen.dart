@@ -2,7 +2,7 @@ import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:bebi_app/ui/features/cycles/cycles_cubit.dart';
-import 'package:bebi_app/ui/features/cycles/widgets/cycle_calendar.dart';
+import 'package:bebi_app/ui/features/cycles/widgets/cycle_date_picker.dart';
 import 'package:bebi_app/ui/features/cycles/widgets/cycle_insights.dart';
 import 'package:bebi_app/ui/features/cycles/widgets/cycle_logs.dart';
 import 'package:bebi_app/ui/features/cycles/widgets/cycle_predictions.dart';
@@ -93,7 +93,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
         children: [
           _buildHeader(),
           const SizedBox(height: 14),
-          const CycleCalendar(),
+          const CycleDatePicker(),
         ],
       ),
     );
