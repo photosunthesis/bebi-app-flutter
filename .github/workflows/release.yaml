@@ -288,5 +288,15 @@ jobs:
           body: |
             ${{ steps.changelog.outputs.content }}
 
-            > [!WARNING]
-            > The IPA file is unsigned and intended solely for testing purposes. It is not eligible for App Store submission. It requires a developer account and Xcode to install and run on a device.
+            ## 📱 Download Guide
+
+            **For Android users:**
+            - **android_modern_devices.apk** - Recommended for most Android phones (2017 and newer)
+            - **android_older_devices.apk** - For older Android devices (2010-2017)
+            - **android_emulator.apk** - For Android emulators and testing
+
+            **For iOS users:**
+            - **bebi-ios.ipa** - For iOS devices (requires sideloading with developer account and Xcode)
+
+            > [!TIP]
+            > Most users should download the "modern-devices" APK for Android.
