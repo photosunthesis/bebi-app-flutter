@@ -98,6 +98,13 @@ jobs:
       - name: Build Android
         run: flutter build apk --release --obfuscate --split-debug-info=build/app/outputs/symbols --build-number=${{ github.run_number }} --split-per-abi
 
+      - name: Rename APK files with user-friendly names
+        run: |
+          cd build/app/outputs/flutter-apk
+          mv app-arm64-v8a-release.apk "android_modern_devices.apk"
+          mv app-armeabi-v7a-release.apk "android_older_devices.apk"
+          mv app-x86_64-release.apk "android_emulator.apk"
+
       - name: Upload debug symbols to Firebase Crashlytics
         run: |
           firebase crashlytics:symbols:upload \
@@ -198,11 +205,16 @@ jobs:
           cp -r Runner.app Payload
           zip -r app.ipa Payload
 
+      - name: Rename IPA file with user-friendly name
+        run: |
+          cd build/ios/iphoneos
+          mv app.ipa "ios.ipa"
+
       - name: Upload iOS build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ios-artifacts
-          path: build/ios/iphoneos/app.ipa
+          path: build/ios/iphoneos/ios.ipa
 
   create-release:
     name: Create Release
