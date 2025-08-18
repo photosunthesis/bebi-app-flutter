@@ -1,11 +1,6 @@
-import 'package:bebi_app/constants/hive_type_ids.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
-import 'package:hive_ce_flutter/hive_flutter.dart';
 
-part 'user_partnership.g.dart';
-
-@HiveType(typeId: HiveTypeIds.userPartnership)
 class UserPartnership extends Equatable {
   const UserPartnership({
     required this.id,
@@ -26,15 +21,10 @@ class UserPartnership extends Equatable {
     );
   }
 
-  @HiveField(0)
   final String id;
-  @HiveField(1)
   final List<String> users;
-  @HiveField(2)
   final String createdBy;
-  @HiveField(3)
   final DateTime createdAt;
-  @HiveField(4)
   final DateTime updatedAt;
 
   UserPartnership copyWith({

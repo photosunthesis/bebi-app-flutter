@@ -1,11 +1,6 @@
-import 'package:bebi_app/constants/hive_type_ids.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
-import 'package:hive_ce_flutter/hive_flutter.dart';
 
-part 'user_profile.g.dart';
-
-@HiveType(typeId: HiveTypeIds.userProfile)
 class UserProfile extends Equatable {
   const UserProfile({
     required this.userId,
@@ -38,27 +33,16 @@ class UserProfile extends Equatable {
     );
   }
 
-  @HiveField(0)
   final String userId;
-  @HiveField(1)
   final String code;
-  @HiveField(2)
   final DateTime birthDate;
-  @HiveField(3)
   final String displayName;
-  @HiveField(4)
   final String? photoUrl;
-  @HiveField(5)
   final String createdBy;
-  @HiveField(6)
   final DateTime createdAt;
-  @HiveField(7)
   final DateTime updatedAt;
-  @HiveField(8)
   final bool didSetUpCycles;
-  @HiveField(9)
   final bool hasCycle;
-  @HiveField(10)
   final bool isSharingCycleWithPartner;
 
   UserProfile copyWith({

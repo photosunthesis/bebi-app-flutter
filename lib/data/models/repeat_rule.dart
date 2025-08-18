@@ -1,23 +1,12 @@
-import 'package:bebi_app/constants/hive_type_ids.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
-import 'package:hive_ce_flutter/hive_flutter.dart';
 
-part 'repeat_rule.g.dart';
-
-@HiveType(typeId: HiveTypeIds.repeatFrequency)
 enum RepeatFrequency {
-  @HiveField(0)
   daily,
-  @HiveField(1)
   weekly,
-  @HiveField(2)
   monthly,
-  @HiveField(3)
   yearly,
-  @HiveField(4)
   custom,
-  @HiveField(5)
   doNotRepeat;
 
   String get label => switch (this) {
@@ -30,7 +19,6 @@ enum RepeatFrequency {
   };
 }
 
-@HiveType(typeId: HiveTypeIds.repeatRule)
 class RepeatRule extends Equatable {
   const RepeatRule({
     required this.frequency,
@@ -60,15 +48,10 @@ class RepeatRule extends Equatable {
     );
   }
 
-  @HiveField(0)
   final RepeatFrequency frequency;
-  @HiveField(1)
   final List<int>? daysOfWeek;
-  @HiveField(2)
   final DateTime? endDate;
-  @HiveField(3)
   final int? occurrences;
-  @HiveField(4)
   final List<DateTime>? excludedDates;
 
   RepeatRule copyWith({

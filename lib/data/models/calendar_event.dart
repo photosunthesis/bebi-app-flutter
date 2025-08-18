@@ -1,15 +1,10 @@
 import 'dart:ui';
 
-import 'package:bebi_app/constants/hive_type_ids.dart';
-import 'package:bebi_app/data/models/event_color.dart';
+import 'package:bebi_app/app/theme/app_colors.dart';
 import 'package:bebi_app/data/models/repeat_rule.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
-import 'package:hive_ce_flutter/hive_flutter.dart';
 
-part 'calendar_event.g.dart';
-
-@HiveType(typeId: HiveTypeIds.calendarEvent)
 class CalendarEvent extends Equatable {
   CalendarEvent({
     required this.id,
@@ -59,34 +54,20 @@ class CalendarEvent extends Equatable {
     );
   }
 
-  @HiveField(0)
   final String id;
   final String? recurringEventId; // Used in UI only, not stored in Firestore
-  @HiveField(1)
   final String title;
-  @HiveField(2)
   final String? notes;
-  @HiveField(3)
   final DateTime _date;
-  @HiveField(4)
   final DateTime _startTime;
-  @HiveField(5)
   final DateTime? _endTime;
-  @HiveField(6)
   final bool allDay;
-  @HiveField(7)
   final RepeatRule repeatRule;
-  @HiveField(8)
   final EventColor eventColor;
-  @HiveField(9)
   final List<String> users;
-  @HiveField(10)
   final String createdBy;
-  @HiveField(11)
   final String updatedBy;
-  @HiveField(12)
   final DateTime _createdAt;
-  @HiveField(13)
   final DateTime _updatedAt;
 
   DateTime get date => _date.toLocal();
@@ -177,4 +158,24 @@ class CalendarEvent extends Equatable {
     createdAt,
     updatedAt,
   ];
+}
+
+enum EventColor {
+  black,
+  green,
+  blue,
+  yellow,
+  pink,
+  orange,
+  red;
+
+  Color get color => switch (this) {
+    EventColor.black => AppColors.stone600,
+    EventColor.green => AppColors.green,
+    EventColor.blue => AppColors.blue,
+    EventColor.yellow => AppColors.yellow,
+    EventColor.pink => AppColors.pink,
+    EventColor.orange => AppColors.orange,
+    EventColor.red => AppColors.red,
+  };
 }

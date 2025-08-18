@@ -1,7 +1,20 @@
+import 'package:bebi_app/app/router/app_router.dart';
+import 'package:bebi_app/data/models/calendar_event.dart';
+import 'package:bebi_app/data/models/cycle_log.dart';
+import 'package:bebi_app/data/models/user_partnership.dart';
+import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
+import 'package:firebase_ai/firebase_ai.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:injectable/injectable.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -12,7 +25,38 @@ import 'dependencies.config.dart';
 Future<void> configureDependencies() async => GetIt.I.init();
 
 @module
-abstract class OtherDependencies {
+abstract class Dependencies {
+  @lazySingleton
+  FirebaseAuth auth(GoRouter router) =>
+      FirebaseAuth.instance
+        ..authStateChanges().listen((user) {
+          if (user == null) router.goNamed(AppRoutes.signIn);
+        });
+
+  @lazySingleton
+  FirebaseFirestore get firestore => FirebaseFirestore.instance;
+
+  @lazySingleton
+  FirebaseStorage get storage => FirebaseStorage.instance;
+
+  @lazySingleton
+  FirebaseCrashlytics get crashlytics => FirebaseCrashlytics.instance;
+
+  @lazySingleton
+  FirebaseAnalytics get analytics => FirebaseAnalytics.instance;
+
+  @lazySingleton
+  GenerativeModel get geminiModel => FirebaseAI.googleAI().generativeModel(
+    model: 'gemini-2.5-flash-lite',
+    safetySettings: [
+      SafetySetting(
+        HarmCategory.sexuallyExplicit,
+        HarmBlockThreshold.none,
+        null,
+      ),
+    ],
+  );
+
   ImagePicker get imagePicker => ImagePicker();
 
   @preResolve
@@ -34,4 +78,24 @@ abstract class OtherDependencies {
         ..interceptors.addAll([
           if (kDebugMode) LogInterceptor(requestBody: true, responseBody: true),
         ]);
+
+  @preResolve
+  Future<Box<CalendarEvent>> get calendarEventBox async =>
+      Hive.openBox<CalendarEvent>('calendar_events');
+
+  @preResolve
+  Future<Box<CycleLog>> get cycleLogBox async =>
+      Hive.openBox<CycleLog>('cycle_logs');
+
+  @preResolve
+  Future<Box<UserProfile>> get userProfileBox async =>
+      Hive.openBox<UserProfile>('user_profiles');
+
+  @preResolve
+  Future<Box<UserPartnership>> get userPartnershipBox async =>
+      Hive.openBox<UserPartnership>('user_partnerships');
+
+  @preResolve
+  Future<Box<String>> get aiInsightsBox async =>
+      Hive.openBox<String>('ai_insights');
 }
