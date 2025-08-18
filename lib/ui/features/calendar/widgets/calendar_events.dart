@@ -134,7 +134,7 @@ class _EventCard extends StatelessWidget {
     return Text(
       event.allDay
           ? context.l10n.allDayText.toUpperCase()
-          : _formatDuration(context, event.startTimeLocal, event.endTimeLocal),
+          : _formatDuration(context, event.startTime, event.endTime),
       style: context.textTheme.bodySmall?.copyWith(
         color: event.color.darken(0.1),
         fontWeight: FontWeight.w500,

@@ -169,7 +169,7 @@ class _Calendar extends StatelessWidget {
     List<CalendarEvent> events,
     DateTime? focusedDay,
   ) {
-    final dayEvents = events.where((e) => e.dateLocal.isSameDay(day)).toList();
+    final dayEvents = events.where((e) => e.date.isSameDay(day)).toList();
 
     if (dayEvents.isEmpty) return const SizedBox.shrink();
 

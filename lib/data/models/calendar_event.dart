@@ -11,23 +11,27 @@ part 'calendar_event.g.dart';
 
 @HiveType(typeId: HiveTypeIds.calendarEvent)
 class CalendarEvent extends Equatable {
-  const CalendarEvent({
+  CalendarEvent({
     required this.id,
     this.recurringEventId,
     required this.title,
     this.notes,
-    required this.date,
-    required this.startTime,
-    this.endTime,
+    required DateTime date,
+    required DateTime startTime,
+    DateTime? endTime,
     this.allDay = false,
     required this.repeatRule,
     required this.eventColor,
     required this.users,
     required this.createdBy,
     required this.updatedBy,
-    required this.createdAt,
-    required this.updatedAt,
-  });
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) : _date = date.toUtc(),
+       _startTime = startTime.toUtc(),
+       _endTime = endTime?.toUtc(),
+       _createdAt = (createdAt ?? DateTime.now()).toUtc(),
+       _updatedAt = (updatedAt ?? DateTime.now()).toUtc();
 
   factory CalendarEvent.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
@@ -63,11 +67,11 @@ class CalendarEvent extends Equatable {
   @HiveField(2)
   final String? notes;
   @HiveField(3)
-  final DateTime date;
+  final DateTime _date;
   @HiveField(4)
-  final DateTime startTime;
+  final DateTime _startTime;
   @HiveField(5)
-  final DateTime? endTime;
+  final DateTime? _endTime;
   @HiveField(6)
   final bool allDay;
   @HiveField(7)
@@ -81,15 +85,15 @@ class CalendarEvent extends Equatable {
   @HiveField(11)
   final String updatedBy;
   @HiveField(12)
-  final DateTime createdAt;
+  final DateTime _createdAt;
   @HiveField(13)
-  final DateTime updatedAt;
+  final DateTime _updatedAt;
 
-  DateTime get dateLocal => date.toLocal();
-  DateTime get startTimeLocal => startTime.toLocal();
-  DateTime? get endTimeLocal => endTime?.toLocal();
-  DateTime get createdAtLocal => createdAt.toLocal();
-  DateTime get updatedAtLocal => updatedAt.toLocal();
+  DateTime get date => _date.toLocal();
+  DateTime get startTime => _startTime.toLocal();
+  DateTime? get endTime => _endTime?.toLocal();
+  DateTime get createdAt => _createdAt.toLocal();
+  DateTime get updatedAt => _updatedAt.toLocal();
   Color get color => eventColor.color;
   bool get isRecurring => repeatRule.frequency != RepeatFrequency.doNotRepeat;
   bool get isLastRecurringEvent =>

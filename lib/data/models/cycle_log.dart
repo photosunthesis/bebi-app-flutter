@@ -8,26 +8,28 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 
 part 'cycle_log.g.dart';
 
-@HiveType(typeId: HiveTypeIds.cycleLog)
 class CycleLog extends Equatable {
-  const CycleLog({
+  @HiveType(typeId: HiveTypeIds.cycleLog)
+  CycleLog._({
     required this.id,
-    required this.date,
+    required DateTime date,
     required this.type,
     this.flow,
     this.symptoms,
     this.intimacyType,
     required this.ownedBy,
     required this.createdBy,
-    required this.createdAt,
-    required this.updatedAt,
+    required DateTime createdAt,
+    required DateTime updatedAt,
     this.users = const [],
     this.isPrediction = false,
-  });
+  }) : _date = date.toUtc(),
+       _createdAt = createdAt.toUtc(),
+       _updatedAt = updatedAt.toUtc();
 
   factory CycleLog.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    return CycleLog(
+    return CycleLog._(
       id: doc.id,
       date: data['date'].toDate(),
       type: LogType.values[data['type']],
@@ -56,7 +58,7 @@ class CycleLog extends Equatable {
     required List<String> users,
     bool isPrediction = false,
   }) {
-    return CycleLog(
+    return CycleLog._(
       id: id,
       date: date.toUtc(),
       type: LogType.period,
@@ -78,7 +80,7 @@ class CycleLog extends Equatable {
     required List<String> users,
     bool isPrediction = false,
   }) {
-    return CycleLog(
+    return CycleLog._(
       id: id,
       date: date.toUtc(),
       type: LogType.ovulation,
@@ -100,7 +102,7 @@ class CycleLog extends Equatable {
     required List<String> users,
     bool isPrediction = false,
   }) {
-    return CycleLog(
+    return CycleLog._(
       id: id,
       date: date.toUtc(),
       type: LogType.symptom,
@@ -123,7 +125,7 @@ class CycleLog extends Equatable {
     required List<String> users,
     bool isPrediction = false,
   }) {
-    return CycleLog(
+    return CycleLog._(
       id: id,
       date: date.toUtc(),
       type: LogType.intimacy,
@@ -140,7 +142,7 @@ class CycleLog extends Equatable {
   @HiveField(0)
   final String id;
   @HiveField(1)
-  final DateTime date;
+  final DateTime _date;
   @HiveField(2)
   final LogType type;
   @HiveField(3)
@@ -154,15 +156,17 @@ class CycleLog extends Equatable {
   @HiveField(7)
   final String createdBy;
   @HiveField(8)
-  final DateTime createdAt;
+  final DateTime _createdAt;
   @HiveField(9)
-  final DateTime updatedAt;
+  final DateTime _updatedAt;
   @HiveField(10)
   final List<String> users;
   @HiveField(11)
   final bool isPrediction;
 
-  DateTime get dateLocal => date.toLocal();
+  DateTime get date => _date.toLocal();
+  DateTime get createdAt => _createdAt.toLocal();
+  DateTime get updatedAt => _updatedAt.toLocal();
 
   Color get color => switch (type) {
     LogType.period => AppColors.red,
@@ -185,7 +189,7 @@ class CycleLog extends Equatable {
     List<String>? users,
     bool? isPrediction,
   }) {
-    return CycleLog(
+    return CycleLog._(
       id: id ?? this.id,
       date: date ?? this.date,
       type: type ?? this.type,

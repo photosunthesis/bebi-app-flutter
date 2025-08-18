@@ -109,12 +109,12 @@ class CycleDayInsightsService {
 
     // Find current period from actual periods
     for (final periodGroup in actualPeriods) {
-      final cycleStart = periodGroup.first.dateLocal;
-      final cycleEnd = periodGroup.last.dateLocal;
+      final cycleStart = periodGroup.first.date;
+      final cycleEnd = periodGroup.last.date;
 
       if ((date.isAfter(cycleStart) || date.isSameDay(cycleStart)) &&
           (date.isBefore(cycleEnd.add(28.days)) || date.isSameDay(cycleEnd))) {
-        currentPeriodDates = periodGroup.map((log) => log.dateLocal).toList();
+        currentPeriodDates = periodGroup.map((log) => log.date).toList();
         break;
       }
     }
@@ -122,21 +122,17 @@ class CycleDayInsightsService {
     // If no current actual period found, use the most recent actual period
     if (currentPeriodDates.isEmpty && actualPeriods.isNotEmpty) {
       final lastActualPeriod = actualPeriods.last;
-      final lastCycleStart = lastActualPeriod.first.dateLocal;
+      final lastCycleStart = lastActualPeriod.first.date;
 
       if (date.isAfter(lastCycleStart) || date.isSameDay(lastCycleStart)) {
-        currentPeriodDates = lastActualPeriod
-            .map((log) => log.dateLocal)
-            .toList();
+        currentPeriodDates = lastActualPeriod.map((log) => log.date).toList();
       }
     }
 
     // Find next period from predictions
     if (predictedPeriods.isNotEmpty) {
       final nextPredictedPeriod = predictedPeriods.first;
-      nextPeriodDates = nextPredictedPeriod
-          .map((log) => log.dateLocal)
-          .toList();
+      nextPeriodDates = nextPredictedPeriod.map((log) => log.date).toList();
     }
 
     if (currentPeriodDates.isEmpty) {

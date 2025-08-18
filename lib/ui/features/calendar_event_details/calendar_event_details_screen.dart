@@ -136,7 +136,7 @@ class _CalendarEventDetailsScreenState
                 Text(
                   _event.allDay
                       ? context.l10n.allDayText
-                      : '${_event.startTimeLocal.toHHmma()} → ${_event.endTimeLocal!.toHHmma()}',
+                      : '${_event.startTime.toHHmma()} → ${_event.endTime!.toHHmma()}',
                   style: context.textTheme.bodyMedium,
                 ),
               ],
