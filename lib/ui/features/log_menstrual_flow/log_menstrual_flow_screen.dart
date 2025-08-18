@@ -184,9 +184,10 @@ class _LogMenstrualFlowScreenState extends State<LogMenstrualFlowScreen> {
                 logForPartner: widget.logForPartner,
               ),
         child: Text(
-          loading
-              ? context.l10n.loggingMenstrualFlowButton
-              : context.l10n.logMenstrualFlowButton.toUpperCase(),
+          (loading
+                  ? context.l10n.loggingMenstrualFlowButton
+                  : context.l10n.logMenstrualFlowButton)
+              .toUpperCase(),
         ),
       ),
     );

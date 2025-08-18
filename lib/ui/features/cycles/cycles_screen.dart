@@ -245,7 +245,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
   Widget _buildCyclesSetupPrompt() {
     return BlocSelector<CyclesCubit, CyclesState, bool>(
       selector: (state) {
-        if (state.isLoading) return false;
+        if (state.isLoading || state.isInsightLoading) return true;
         if (!state.showCurrentUserCycleData) return true;
         if (state.userProfile?.hasCycle == true) return true;
         return false;

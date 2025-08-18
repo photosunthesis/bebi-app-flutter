@@ -47,6 +47,7 @@ class CyclesCubit extends Cubit<CyclesState>
         focusedDate: state.focusedDate,
         showCurrentUserCycleData: state.showCurrentUserCycleData,
         isLoading: true,
+        isInsightLoading: true,
       ),
     );
 
@@ -54,7 +55,6 @@ class CyclesCubit extends Cubit<CyclesState>
   }
 
   Future<void> initialize({bool loadDataFromCache = true}) async {
-    if (state.isLoading) return;
     await guard(
       () async {
         emit(state.copyWith(isLoading: true));
@@ -245,6 +245,7 @@ class CyclesCubit extends Cubit<CyclesState>
       insights,
       isCurrentUser: showCurrentUserCycleData,
       locale: l10n.localeName,
+      useCache: useCache,
     );
 
     emit(state.copyWith(aiSummary: aiSummary, isInsightLoading: false));

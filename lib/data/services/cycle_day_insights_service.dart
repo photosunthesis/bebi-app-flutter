@@ -33,8 +33,8 @@ class CycleDayInsightsService with LocalizationsMixin {
     }
 
     final periodGroups = _groupPeriodEventsByProximity(periodEvents.toList());
-    final (currentPeriodDates, nextPeriodDates) =
-        _findCurrentAndNextPeriodGroups(date, periodGroups);
+    final (currentPeriodDates, previousPeriodDates, nextPeriodDates) =
+        _findCurrentPreviousAndNextPeriodGroups(date, periodGroups);
 
     if (currentPeriodDates.isEmpty) {
       throw ArgumentError(l10n.unableToDetermineCycleError);
@@ -55,10 +55,13 @@ class CycleDayInsightsService with LocalizationsMixin {
         .difference(cycleStart.noTime())
         .inDays;
 
+    final allPeriodDates = periodGroups
+        .expand((group) => group.map((log) => log.date))
+        .toList();
+
     final cyclePhase = _getCyclePhase(
       date,
-      currentPeriodDates,
-      nextPeriodDates,
+      allPeriodDates,
       currentFertileWindow,
     );
 
@@ -93,8 +96,12 @@ class CycleDayInsightsService with LocalizationsMixin {
     return groups;
   }
 
-  (List<DateTime> currentPeriodDates, List<DateTime> nextPeriodDates)
-  _findCurrentAndNextPeriodGroups(
+  (
+    List<DateTime> currentPeriodDates,
+    List<DateTime> previousPeriodDates,
+    List<DateTime> nextPeriodDates,
+  )
+  _findCurrentPreviousAndNextPeriodGroups(
     DateTime date,
     List<List<CycleLog>> periodGroups,
   ) {
@@ -110,16 +117,20 @@ class CycleDayInsightsService with LocalizationsMixin {
         .toList();
 
     var currentPeriodDates = <DateTime>[];
+    var previousPeriodDates = <DateTime>[];
     var nextPeriodDates = <DateTime>[];
+    int? currentPeriodIndex;
 
     // Find current period from actual periods
-    for (final periodGroup in actualPeriods) {
+    for (var i = 0; i < actualPeriods.length; i++) {
+      final periodGroup = actualPeriods[i];
       final cycleStart = periodGroup.first.date;
       final cycleEnd = periodGroup.last.date;
 
       if ((date.isAfter(cycleStart) || date.isSameDay(cycleStart)) &&
           (date.isBefore(cycleEnd.add(28.days)) || date.isSameDay(cycleEnd))) {
         currentPeriodDates = periodGroup.map((log) => log.date).toList();
+        currentPeriodIndex = i;
         break;
       }
     }
@@ -131,7 +142,14 @@ class CycleDayInsightsService with LocalizationsMixin {
 
       if (date.isAfter(lastCycleStart) || date.isSameDay(lastCycleStart)) {
         currentPeriodDates = lastActualPeriod.map((log) => log.date).toList();
+        currentPeriodIndex = actualPeriods.length - 1;
       }
+    }
+
+    // Find previous period if current period was found
+    if (currentPeriodIndex != null && currentPeriodIndex > 0) {
+      final previousPeriodGroup = actualPeriods[currentPeriodIndex - 1];
+      previousPeriodDates = previousPeriodGroup.map((log) => log.date).toList();
     }
 
     // Find next period from predictions
@@ -144,7 +162,7 @@ class CycleDayInsightsService with LocalizationsMixin {
       throw ArgumentError(l10n.unableToDetermineCycleError);
     }
 
-    return (currentPeriodDates, nextPeriodDates);
+    return (currentPeriodDates, previousPeriodDates, nextPeriodDates);
   }
 
   List<DateTime> _getCurrentFertileWindow(
@@ -163,24 +181,33 @@ class CycleDayInsightsService with LocalizationsMixin {
 
   CyclePhase _getCyclePhase(
     DateTime date,
-    List<DateTime> currentOrPastPeriodDates,
-    List<DateTime> futurePeriodDates,
+    List<DateTime> allPeriodDates,
     List<DateTime> currentFertileWindow,
   ) {
-    final isPeriod =
-        currentOrPastPeriodDates.any((d) => d.isSameDay(date)) ||
-        futurePeriodDates.any((d) => d.isSameDay(date));
-    if (isPeriod) {
-      return CyclePhase.period;
-    }
+    final normalizedDate = date.noTime();
+    final normalizedPeriodDates = allPeriodDates
+        .map((d) => d.noTime())
+        .toList();
+    final normalizedFertileDates = currentFertileWindow
+        .map((d) => d.noTime())
+        .toList();
 
-    if (currentFertileWindow.any((d) => d.isSameDay(date))) {
+    final isPeriod = normalizedPeriodDates.any(
+      (d) => d.isSameDay(normalizedDate),
+    );
+
+    if (isPeriod) return CyclePhase.period;
+
+    if (normalizedFertileDates.any((d) => d.isSameDay(normalizedDate))) {
       return CyclePhase.ovulation;
     }
 
-    if (currentFertileWindow.isNotEmpty &&
-        date.isAfter(currentOrPastPeriodDates.last) &&
-        date.isBefore(currentFertileWindow.first)) {
+    if (normalizedFertileDates.isNotEmpty &&
+        normalizedPeriodDates.isNotEmpty &&
+        normalizedDate.isAfter(
+          normalizedPeriodDates.reduce((a, b) => a.isAfter(b) ? a : b),
+        ) &&
+        normalizedDate.isBefore(normalizedFertileDates.first)) {
       return CyclePhase.follicular;
     }
 
@@ -200,12 +227,13 @@ class CycleDayInsightsService with LocalizationsMixin {
     CycleDayInsights cycleDayInsights, {
     required bool isCurrentUser,
     required String locale,
+    bool useCache = true,
   }) async {
     try {
       final date = cycleDayInsights.date.toIso8601String().substring(0, 10);
       final key = '${date}_${isCurrentUser ? 'self' : 'partner'}';
       final cachedInsights = _aiInsightsBox.get(key);
-      if (cachedInsights != null) return cachedInsights;
+      if (cachedInsights != null && useCache) return cachedInsights;
 
       final prompt = _generateInsightsPrompt(
         cycleDayInsights,
