@@ -248,7 +248,7 @@ jobs:
           fi
 
           # Extract content between the current and the next version or until the end of the file
-          CHANGELOG_CONTENT=$(awk "/^## \[$LATEST_VERSION\]/ {flag=1; next} /^## \[/ {flag=0} flag {print}" CHANGELOG.md)
+          CHANGELOG_CONTENT=$(awk "/^## \[$LATEST_VERSION\]/ {flag=1} /^## \[/ && flag && !/^## \[$LATEST_VERSION\]/ {flag=0} flag {print}" CHANGELOG.md)
 
           if [ -z "$CHANGELOG_CONTENT" ]; then
             echo "No changelog content found for version $LATEST_VERSION"
@@ -288,7 +288,7 @@ jobs:
           body: |
             ${{ steps.changelog.outputs.content }}
 
-            ## 📱 Download Guide
+            ### Download Guide
 
             **For Android users:**
             - **android_modern_devices.apk** - Recommended for most Android phones (2017 and newer)
@@ -296,7 +296,7 @@ jobs:
             - **android_emulator.apk** - For Android emulators and testing
 
             **For iOS users:**
-            - **bebi-ios.ipa** - For iOS devices (requires sideloading with developer account and Xcode)
+            - **ios.ipa** - For iOS devices (requires sideloading with developer account and Xcode)
 
             > [!TIP]
             > Most users should download the "modern-devices" APK for Android.
