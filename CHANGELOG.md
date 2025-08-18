@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0] - 2025-08-19
+
+### Added
+
+- Cycle Calendar: View your past cycle logs and future predictions in a calendar view 🗓️
+
+### Changed
+
+- Period duration calculation now uses actual cycle history instead of hardcoded 5-day default 📈
+- Simplified data models by switching from freezed to regular Dart classes ✨
+- Update dialog now takes you directly to the download file instead of the GitHub release page 🔗
+
+### Fixed
+
+- Fixed issue with the app bar height on Android devices being too small
+
 ## [0.2.4] - 2025-08-17
 
 ### Fixed
