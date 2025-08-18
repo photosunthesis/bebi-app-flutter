@@ -34,8 +34,14 @@ class AppUpdateService with LocalizationsMixin {
         releaseData['body'] as String? ?? 'No release notes available.';
     final assets = releaseData['assets'] as List<dynamic>;
     final downloadUrl = Platform.isAndroid
-        ? assets.first['browser_download_url'] as String
-        : assets.last['browser_download_url'] as String;
+        ? assets.firstWhere(
+                (asset) => asset['name'] == 'android_modern_devices.apk',
+              )['browser_download_url']
+              as String
+        : assets.firstWhere(
+                (asset) => asset['name'] == 'ios.ipa',
+              )['browser_download_url']
+              as String;
     final publishedAt = DateTime.parse(releaseData['published_at']);
     final hasUpdate = _isVersionNewer(latestVersion, _packageInfo.version);
 
