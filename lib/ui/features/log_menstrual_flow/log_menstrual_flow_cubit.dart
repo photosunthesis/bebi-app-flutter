@@ -83,7 +83,7 @@ class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState> {
 
         emit(const LogMenstrualFlowSuccessState());
 
-        logEvent(
+        AnalyticsUtils.logEvent(
           name: 'menstrual_flow_logged',
           parameters: {
             'user_id': _currentUserId!,
@@ -112,7 +112,7 @@ class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState> {
         emit(const LogMenstrualFlowLoadingState());
         await _cycleLogsRepository.deleteById(cycleLogId);
         emit(const LogMenstrualFlowSuccessState());
-        logEvent(
+        AnalyticsUtils.logEvent(
           name: 'menstrual_flow_deleted',
           parameters: {'user_id': _currentUserId!, 'cycle_log_id': cycleLogId},
         );

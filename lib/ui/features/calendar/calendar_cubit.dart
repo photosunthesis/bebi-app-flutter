@@ -77,7 +77,7 @@ class CalendarCubit extends Cubit<CalendarState> {
           ),
         );
 
-        logEvent(
+        AnalyticsUtils.logEvent(
           name: 'calendar_events_loaded',
           parameters: {
             'user_id': _firebaseAuth.currentUser!.uid,
@@ -129,7 +129,7 @@ class CalendarCubit extends Cubit<CalendarState> {
       ),
     );
 
-    logEvent(
+    AnalyticsUtils.logEvent(
       name: 'calendar_date_selected',
       parameters: {
         'user_id': _firebaseAuth.currentUser!.uid,

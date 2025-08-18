@@ -33,7 +33,7 @@ class ConfirmEmailCubit extends Cubit<ConfirmEmailState> {
           if (_firebaseAuth.currentUser?.emailVerified == true) {
             timer.cancel();
             emit(const ConfirmEmailSuccessState());
-            logEvent(
+            AnalyticsUtils.logEvent(
               name: 'email_verified',
               parameters: {
                 'user_id': _firebaseAuth.currentUser!.uid,
@@ -69,7 +69,7 @@ class ConfirmEmailCubit extends Cubit<ConfirmEmailState> {
           _canResendVerification = true;
         });
 
-        logEvent(
+        AnalyticsUtils.logEvent(
           name: 'verification_email_sent',
           parameters: {
             'user_id': _firebaseAuth.currentUser!.uid,

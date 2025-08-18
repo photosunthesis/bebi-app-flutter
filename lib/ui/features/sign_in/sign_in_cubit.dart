@@ -25,7 +25,7 @@ class SignInCubit extends Cubit<SignInState> {
         );
         emit(const SignInSuccessState());
 
-        logLogin(
+        AnalyticsUtils.logLogin(
           loginMethod: 'email',
           parameters: {
             'email': email,
@@ -42,7 +42,7 @@ class SignInCubit extends Cubit<SignInState> {
 
         emit(SignInErrorState(errorMessage));
 
-        logEvent(
+        AnalyticsUtils.logEvent(
           name: 'sign_in_failed',
           parameters: {
             'email': email,

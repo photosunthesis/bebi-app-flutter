@@ -1,7 +1,6 @@
 import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/data/models/day_of_week.dart';
-import 'package:bebi_app/data/models/event_color.dart';
 import 'package:bebi_app/data/models/repeat_rule.dart';
 import 'package:bebi_app/data/models/save_changes_dialog_options.dart';
 import 'package:bebi_app/ui/features/calendar_event_form/calendar_event_form_cubit.dart';

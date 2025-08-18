@@ -35,7 +35,7 @@ class AddPartnerCubit extends Cubit<AddPartnerState> {
 
         emit(AddPartnerLoadedState(userProfile!.code));
 
-        logEvent(
+        AnalyticsUtils.logEvent(
           name: 'add_partner_screen_opened',
           parameters: {
             'user_id': _firebaseAuth.currentUser!.uid,
@@ -71,7 +71,7 @@ class AddPartnerCubit extends Cubit<AddPartnerState> {
         );
 
         if (partnerProfile == null) {
-          logEvent(
+          AnalyticsUtils.logEvent(
             name: 'partner_code_invalid',
             parameters: {
               'user_id': _firebaseAuth.currentUser!.uid,
@@ -96,7 +96,7 @@ class AddPartnerCubit extends Cubit<AddPartnerState> {
 
         emit(const AddPartnerSuccessState());
 
-        logEvent(
+        AnalyticsUtils.logEvent(
           name: 'partner_added_successfully',
           parameters: {
             'user_id': _firebaseAuth.currentUser!.uid,
@@ -105,8 +105,11 @@ class AddPartnerCubit extends Cubit<AddPartnerState> {
           },
         );
 
-        setUserProperty(name: 'has_partner', value: 'true');
-        setUserProperty(name: 'partner_id', value: partnerProfile.userId);
+        AnalyticsUtils.setUserProperty(name: 'has_partner', value: 'true');
+        AnalyticsUtils.setUserProperty(
+          name: 'partner_id',
+          value: partnerProfile.userId,
+        );
       },
       onError: (e, _) {
         emit(AddPartnerErrorState(e.toString()));

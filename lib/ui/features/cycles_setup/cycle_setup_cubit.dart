@@ -70,7 +70,7 @@ class CycleSetupCubit extends Cubit<CycleSetupState> {
 
         emit(const CycleSetupSuccessState());
 
-        logEvent(
+        AnalyticsUtils.logEvent(
           name: 'cycle_setup_completed',
           parameters: {
             'user_id': _firebaseAuth.currentUser!.uid,

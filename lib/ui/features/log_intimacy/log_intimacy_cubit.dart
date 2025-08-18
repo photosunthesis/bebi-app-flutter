@@ -65,7 +65,7 @@ class LogIntimacyCubit extends Cubit<LogIntimacyState> {
 
         emit(const LogIntimacySuccessState());
 
-        logEvent(
+        AnalyticsUtils.logEvent(
           name: 'intimacy_logged',
           parameters: {
             'user_id': _currentUserId,

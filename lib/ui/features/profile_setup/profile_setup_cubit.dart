@@ -38,7 +38,7 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
     if (pickedFile != null) {
       emit(ProfileSetupLoadedState(File(pickedFile.path)));
 
-      logEvent(
+      AnalyticsUtils.logEvent(
         name: 'profile_picture_selected',
         parameters: {
           'user_id': _firebaseAuth.currentUser!.uid,
@@ -51,7 +51,7 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
   void removeProfilePicture() {
     emit(const ProfileSetupLoadedState());
 
-    logEvent(
+    AnalyticsUtils.logEvent(
       name: 'profile_picture_removed',
       parameters: {'user_id': _firebaseAuth.currentUser!.uid},
     );
@@ -90,7 +90,7 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
 
         emit(const ProfileSetupSuccessState());
 
-        logEvent(
+        AnalyticsUtils.logEvent(
           name: 'profile_setup_completed',
           parameters: {
             'user_id': _firebaseAuth.currentUser!.uid,

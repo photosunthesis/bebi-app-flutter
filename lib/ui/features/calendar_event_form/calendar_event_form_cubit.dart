@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:bebi_app/data/models/calendar_event.dart';
-import 'package:bebi_app/data/models/event_color.dart';
 import 'package:bebi_app/data/models/repeat_rule.dart';
 import 'package:bebi_app/data/models/save_changes_dialog_options.dart';
 import 'package:bebi_app/data/repositories/calendar_events_repository.dart';
@@ -36,7 +35,7 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
       ),
     );
 
-    logEvent(
+    AnalyticsUtils.logEvent(
       name: 'calendar_event_form_opened',
       parameters: {
         'user_id': _firebaseAuth.currentUser!.uid,
@@ -111,7 +110,7 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
           );
         }
 
-        logEvent(
+        AnalyticsUtils.logEvent(
           name: isExistingEvent
               ? 'calendar_event_updated'
               : 'calendar_event_created',

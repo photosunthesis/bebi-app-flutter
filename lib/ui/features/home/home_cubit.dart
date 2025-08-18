@@ -48,7 +48,7 @@ class HomeCubit extends Cubit<HomeState> {
 
         if (_firebaseAuth.currentUser?.emailVerified != true) {
           emit(const HomeShouldConfirmEmailState());
-          logEvent(
+          AnalyticsUtils.logEvent(
             name: 'user_redirected_to_confirm_email',
             parameters: {'user_id': _firebaseAuth.currentUser!.uid},
           );
@@ -61,7 +61,7 @@ class HomeCubit extends Cubit<HomeState> {
 
         if (userProfile == null) {
           emit(const HomeShouldSetUpProfileState());
-          logEvent(
+          AnalyticsUtils.logEvent(
             name: 'user_redirected_to_profile_setup',
             parameters: {'userId': _firebaseAuth.currentUser!.uid},
           );
@@ -74,7 +74,7 @@ class HomeCubit extends Cubit<HomeState> {
 
         if (userPartnership == null) {
           emit(const HomeShouldAddPartnerState());
-          logEvent(
+          AnalyticsUtils.logEvent(
             name: 'user_redirected_to_add_partner',
             parameters: {'user_id': _firebaseAuth.currentUser!.uid},
           );
@@ -85,7 +85,7 @@ class HomeCubit extends Cubit<HomeState> {
 
         if (updateInfo?.hasUpdate == true) {
           emit(HomeShouldUpdateAppState(updateInfo!));
-          logEvent(
+          AnalyticsUtils.logEvent(
             name: 'user_redirected_to_update_app',
             parameters: {
               'user_id': _firebaseAuth.currentUser!.uid,
@@ -96,7 +96,7 @@ class HomeCubit extends Cubit<HomeState> {
           return;
         }
 
-        logEvent(
+        AnalyticsUtils.logEvent(
           name: 'home_screen_loaded',
           parameters: {
             'user_id': _firebaseAuth.currentUser!.uid,
@@ -116,7 +116,7 @@ class HomeCubit extends Cubit<HomeState> {
       () async {
         emit(const HomeLoadingState());
 
-        logEvent(
+        AnalyticsUtils.logEvent(
           name: 'user_signed_out',
           parameters: {'userId': _firebaseAuth.currentUser!.uid},
         );

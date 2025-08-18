@@ -81,7 +81,7 @@ class CalendarEventDetailsCubit extends Cubit<CalendarEventDetailsState> {
 
         emit(const CalendarEventDetailsDeleteSuccessState());
 
-        logEvent(
+        AnalyticsUtils.logEvent(
           name: 'calendar_event_deleted',
           parameters: {
             'user_id': _firebaseAuth.currentUser!.uid,

@@ -75,7 +75,7 @@ class LogSymptomsCubit extends Cubit<LogSymptomsState> {
 
         emit(const LogSymptomsSuccessState());
 
-        logEvent(
+        AnalyticsUtils.logEvent(
           name: symptoms.isEmpty ? 'symptoms_deleted' : 'symptoms_logged',
           parameters: {
             'user_id': _currentUserId,

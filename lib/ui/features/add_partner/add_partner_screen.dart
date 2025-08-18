@@ -142,7 +142,7 @@ class _AddPartnerScreenState extends State<AddPartnerScreen> {
                   type: SnackbarType.secondary,
                 );
 
-                logShare(
+                AnalyticsUtils.logShare(
                   method: 'copy',
                   contentType: 'user_code',
                   itemId: _userCodeController.text.replaceAll('-', ''),

@@ -4,11 +4,15 @@ import 'dart:io';
 import 'package:bebi_app/app/app.dart';
 import 'package:bebi_app/config/dependencies.dart';
 import 'package:bebi_app/config/firebase_options.dart';
+import 'package:bebi_app/data/hive_adapters/calendar_event_adapter.dart';
+import 'package:bebi_app/data/hive_adapters/cycle_log_adapter.dart';
+import 'package:bebi_app/data/hive_adapters/repeat_rule_adapter.dart';
+import 'package:bebi_app/data/hive_adapters/user_partnership_adapter.dart';
+import 'package:bebi_app/data/hive_adapters/user_profile_adapter.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/data/models/user_partnership.dart';
 import 'package:bebi_app/data/models/user_profile.dart';
-import 'package:bebi_app/hive_registrar.g.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
@@ -73,7 +77,12 @@ Future<void> _configureHighRefreshScreen() async {
 
 Future<void> _configureHive() async {
   await Hive.initFlutter();
-  Hive.registerAdapters();
+  Hive
+    ..registerAdapter(CalendarEventAdapter())
+    ..registerAdapter(RepeatRuleAdapter())
+    ..registerAdapter(CycleLogAdapter())
+    ..registerAdapter(UserProfileAdapter())
+    ..registerAdapter(UserPartnershipAdapter());
 }
 
 Future<void> _clearLocalStorageOnNewVersion() async {

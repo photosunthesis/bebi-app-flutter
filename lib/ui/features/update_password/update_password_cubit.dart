@@ -29,7 +29,7 @@ class UpdatePasswordCubit extends Cubit<UpdatePasswordState> {
       await user.updatePassword(newPassword);
       emit(const UpdatePasswordSuccessState());
 
-      logEvent(
+      AnalyticsUtils.logEvent(
         name: 'update_password',
         parameters: {
           'user_id': _firebaseAuth.currentUser!.uid,

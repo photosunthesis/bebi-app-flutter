@@ -95,7 +95,7 @@ class _AppTextFormFieldState extends State<AppTextFormField> {
       setState(() => _errorText = error);
 
       if (error != null) {
-        logEvent(
+        AnalyticsUtils.logEvent(
           name: 'form_validation_error',
           parameters: {
             'user_id': GetIt.I<FirebaseAuth>().currentUser?.uid ?? 'anonymous',
