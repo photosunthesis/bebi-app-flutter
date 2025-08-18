@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/utils/extension/int_extensions.dart';
+import 'package:bebi_app/utils/localizations_utils.dart';
 // ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
 import 'package:injectable/injectable.dart';
@@ -18,10 +19,23 @@ class CyclePredictionsService {
   static const _irregularityThreshold = 4.0;
   static const _ovulationDayBeforePeriod = 14;
   static const _baseFertileWindowDays = 6;
+  static const _defaultPeriodLength = 4;
+  static const _recentSymptomsLookbackDays = 7;
+  static const _maxPastDateDays = 60;
+  static const _minPeriodDays = 1;
+  static const _maxPeriodDays = 10;
+  static const _periodAdjustmentDays = 1;
+  static const _consecutiveDayThreshold = 1;
+  static const _ovulationWindowExtensionDivisor = 2;
+  static const _maxOvulationWindowExtension = 3;
+  static const _periodExtensionDivisor = 4;
+  static const _maxPeriodExtension = 2;
+  static const _ovulationWindowStartOffset = 5;
+  static const _heavyFlowDays = 2;
 
   List<CycleLog> predictUpcomingCycles(List<CycleLog> logs, DateTime now) {
     final periodLogs = _getSortedActualPeriodLogs(logs);
-    if (periodLogs.length < 2) return [];
+    if (periodLogs.isEmpty) throw ArgumentError(l10n.noPeriodDataError);
 
     final cycleData = _preprocessCycleData(periodLogs, logs, now);
     final predictions = <CycleLog>[];
@@ -73,9 +87,11 @@ class CyclePredictionsService {
       periodStartDates,
     );
     final isIrregular = cycleStats.stdDev > _irregularityThreshold;
+    final lastPeriodDate = periodLogs.last.date;
+    final baseNextPeriodStart = lastPeriodDate;
     final nextPeriodStart = _adjustNextPeriodForSymptoms(
       allLogs,
-      periodLogs.last.date,
+      baseNextPeriodStart,
       now,
     );
 
@@ -122,47 +138,41 @@ class CyclePredictionsService {
     List<CycleLog> periodLogs,
     List<DateTime> periodStartDates,
   ) {
-    if (periodStartDates.isEmpty) return 4;
+    if (periodStartDates.isEmpty) throw ArgumentError(l10n.noPeriodDataError);
+
+    final periodGroups = _groupPeriodEventsByProximity(periodLogs);
+    if (periodGroups.isEmpty) throw ArgumentError(l10n.noPeriodDataError);
 
     final cyclePeriodDays = <int>[];
-    for (final startDate in periodStartDates) {
-      final cycleEndDate = _findCycleEndDateOptimized(periodLogs, startDate);
-      if (cycleEndDate != null) {
-        final periodDays = cycleEndDate.difference(startDate).inDays + 1;
-        cyclePeriodDays.add(periodDays);
-      }
+    for (final group in periodGroups) {
+      if (group.isNotEmpty) cyclePeriodDays.add(group.length);
     }
 
-    if (cyclePeriodDays.isEmpty) return 4;
+    if (cyclePeriodDays.isEmpty) return _defaultPeriodLength;
 
-    final avgDays = cyclePeriodDays.average;
-    return avgDays.round().clamp(3, 7);
+    return cyclePeriodDays.average.round();
   }
 
-  DateTime? _findCycleEndDateOptimized(
-    List<CycleLog> periodLogs,
-    DateTime startDate,
-  ) {
-    DateTime? lastConsecutiveDate;
-    var foundStart = false;
+  List<List<CycleLog>> _groupPeriodEventsByProximity(List<CycleLog> events) {
+    if (events.isEmpty) return [];
 
-    for (final log in periodLogs) {
-      if (!foundStart) {
-        if (log.date.isAtSameMomentAs(startDate)) {
-          foundStart = true;
-          lastConsecutiveDate = log.date;
-        }
-        continue;
-      }
+    final sortedEvents = events.toList()
+      ..sort((a, b) => a.date.compareTo(b.date));
 
-      if (log.date.difference(lastConsecutiveDate!).inDays == 1) {
-        lastConsecutiveDate = log.date;
+    final groups = <List<CycleLog>>[];
+
+    for (final event in sortedEvents) {
+      final group = groups.lastOrNull;
+      if (group == null ||
+          event.date.difference(group.last.date).inDays >
+              _consecutiveDayThreshold) {
+        groups.add([event]);
       } else {
-        break;
+        group.add(event);
       }
     }
 
-    return lastConsecutiveDate;
+    return groups;
   }
 
   double _calculateStandardDeviation(List<int> gaps, double mean) {
@@ -171,15 +181,14 @@ class CyclePredictionsService {
   }
 
   List<DateTime> _extractPeriodStartDates(List<CycleLog> periodLogs) {
-    if (periodLogs.isEmpty) return [];
+    if (periodLogs.isEmpty) throw ArgumentError(l10n.noPeriodDataError);
 
-    final startDates = <DateTime>[periodLogs.first.date];
-    for (var i = 1; i < periodLogs.length; i++) {
-      if (periodLogs[i].date.difference(periodLogs[i - 1].date).inDays > 1) {
-        startDates.add(periodLogs[i].date);
-      }
+    final periodGroups = _groupPeriodEventsByProximity(periodLogs);
+    if (periodGroups.isEmpty) {
+      throw ArgumentError(l10n.noPeriodDataError);
     }
-    return startDates;
+
+    return periodGroups.map((group) => group.first.date).toList();
   }
 
   DateTime _adjustNextPeriodForSymptoms(
@@ -187,7 +196,7 @@ class CyclePredictionsService {
     DateTime lastPeriodDate,
     DateTime now,
   ) {
-    final cutoffDate = now.subtract(7.days);
+    final cutoffDate = now.subtract(_recentSymptomsLookbackDays.days);
 
     final hasRecentCramps = allLogs.any(
       (log) =>
@@ -197,7 +206,15 @@ class CyclePredictionsService {
           log.symptoms?.contains('cramps') == true,
     );
 
-    return hasRecentCramps ? lastPeriodDate.subtract(1.days) : lastPeriodDate;
+    final adjustedDate = hasRecentCramps
+        ? lastPeriodDate.subtract(_periodAdjustmentDays.days)
+        : lastPeriodDate;
+
+    if (adjustedDate.isBefore(now.subtract(_maxPastDateDays.days))) {
+      throw ArgumentError(l10n.unableToDetermineCycleError);
+    }
+
+    return adjustedDate;
   }
 
   int _getPredictedCycleLength(
@@ -206,11 +223,21 @@ class CyclePredictionsService {
     bool isIrregular,
     Random? rand,
   ) {
+    if (avgCycleLength < _minCycleGap || avgCycleLength > _maxCycleGap) {
+      throw ArgumentError(l10n.unableToDetermineCycleError);
+    }
+
     if (!isIrregular) return avgCycleLength.round();
 
     final deviation =
         (rand!.nextDouble() * 2 - 1) * min(stdDev, _maxCycleLengthDeviation);
-    return (avgCycleLength + deviation).round();
+    final predictedLength = (avgCycleLength + deviation).round();
+
+    if (predictedLength < _minCycleGap || predictedLength > _maxCycleGap) {
+      return avgCycleLength.round();
+    }
+
+    return predictedLength;
   }
 
   List<CycleLog> _generatePredictedOvulationWindow(
@@ -220,8 +247,16 @@ class CyclePredictionsService {
     double stdDev,
   ) {
     final ovulationDate = periodStart.subtract(_ovulationDayBeforePeriod.days);
-    final windowExtension = isIrregular ? (stdDev / 2).clamp(0, 3).round() : 0;
-    final fertileStart = ovulationDate.subtract((5 + windowExtension).days);
+    final windowExtension = isIrregular
+        ? (stdDev / _ovulationWindowExtensionDivisor)
+              .clamp(0, _maxOvulationWindowExtension)
+              .round()
+        : 0;
+
+    final fertileStart = ovulationDate.subtract(
+      (_ovulationWindowStartOffset + windowExtension).days,
+    );
+
     final windowDays = _baseFertileWindowDays + windowExtension;
 
     return List.generate(windowDays, (i) {
@@ -244,15 +279,26 @@ class CyclePredictionsService {
     bool isIrregular,
     double stdDev,
   ) {
-    final periodExtension = isIrregular ? (stdDev / 4).clamp(0, 2).round() : 0;
-    final periodDays = avgPeriodDays + periodExtension;
+    if (avgPeriodDays <= 0) {
+      throw ArgumentError(l10n.unableToDetermineCycleError);
+    }
+
+    final periodExtension = isIrregular
+        ? (stdDev / _periodExtensionDivisor)
+              .clamp(0, _maxPeriodExtension)
+              .round()
+        : 0;
+    final periodDays = (avgPeriodDays + periodExtension).clamp(
+      _minPeriodDays,
+      _maxPeriodDays,
+    );
 
     return List.generate(periodDays, (i) {
       final date = start.add(i.days);
       return CycleLog.period(
         id: '${cycleId}_period_$i',
         date: date,
-        flow: i < 2 ? FlowIntensity.medium : FlowIntensity.light,
+        flow: i < _heavyFlowDays ? FlowIntensity.medium : FlowIntensity.light,
         createdBy: 'system',
         ownedBy: 'system',
         users: [],
