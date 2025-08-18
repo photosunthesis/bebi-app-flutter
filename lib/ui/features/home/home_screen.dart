@@ -129,10 +129,7 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               OutlinedButton(
-                onPressed: () async {
-                  await _cubit.signOut();
-                  context.goNamed(AppRoutes.signIn);
-                },
+                onPressed: _cubit.signOut,
                 child: Text(context.l10n.signOutButton.toUpperCase()),
               ),
               const SizedBox(width: 12),

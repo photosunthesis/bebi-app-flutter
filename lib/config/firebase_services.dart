@@ -1,15 +1,21 @@
+import 'package:bebi_app/app/router/app_router.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:go_router/go_router.dart';
 import 'package:injectable/injectable.dart';
 
 @module
 abstract class FirebaseServices {
   @lazySingleton
-  FirebaseAuth get auth => FirebaseAuth.instance;
+  FirebaseAuth auth(GoRouter router) =>
+      FirebaseAuth.instance
+        ..authStateChanges().listen((user) {
+          if (user == null) router.goNamed(AppRoutes.signIn);
+        });
 
   @lazySingleton
   FirebaseFirestore get firestore => FirebaseFirestore.instance;

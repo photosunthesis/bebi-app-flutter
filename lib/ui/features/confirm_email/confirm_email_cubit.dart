@@ -61,7 +61,7 @@ class ConfirmEmailCubit extends Cubit<ConfirmEmailState> {
         _canResendVerification = false;
         _resendTimer?.cancel();
 
-        await _firebaseAuth.currentUser?.sendEmailVerification();
+        await _firebaseAuth.currentUser!.sendEmailVerification();
 
         emit(ConfirmEmailLoadedState(_firebaseAuth.currentUser!.email!));
 
