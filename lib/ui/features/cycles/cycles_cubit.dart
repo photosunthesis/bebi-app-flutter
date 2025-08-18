@@ -202,7 +202,6 @@ class CyclesCubit extends Cubit<CyclesState> {
       onComplete: () => emit(
         state.copyWith(isLoading: false, error: null, isInsightLoading: false),
       ),
-      logWhen: (error) => error is! SimpleException,
     );
   }
 

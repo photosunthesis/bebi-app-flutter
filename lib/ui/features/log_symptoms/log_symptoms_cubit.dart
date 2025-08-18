@@ -88,7 +88,6 @@ class LogSymptomsCubit extends Cubit<LogSymptomsState> {
           },
         );
       },
-      logWhen: (error) => error is! SimpleException,
       onError: (error, _) {
         emit(LogSymptomsErrorState(error.toString()));
       },

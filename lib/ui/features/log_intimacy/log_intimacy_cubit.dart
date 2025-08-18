@@ -5,7 +5,6 @@ import 'package:bebi_app/data/repositories/cycle_logs_repository.dart';
 import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
 import 'package:bebi_app/utils/analytics_utils.dart';
-import 'package:bebi_app/utils/exceptions/simple_exception.dart';
 import 'package:bebi_app/utils/guard.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -77,7 +76,6 @@ class LogIntimacyCubit extends Cubit<LogIntimacyState> {
           },
         );
       },
-      logWhen: (error) => error is! SimpleException,
       onError: (error, _) {
         emit(LogIntimacyErrorState(error.toString()));
       },

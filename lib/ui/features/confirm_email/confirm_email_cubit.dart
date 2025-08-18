@@ -79,7 +79,6 @@ class ConfirmEmailCubit extends Cubit<ConfirmEmailState> {
           },
         );
       },
-      logWhen: (error) => error is! SimpleException,
       onError: (error, _) {
         emit(ConfirmEmailErrorState(error.toString()));
       },
