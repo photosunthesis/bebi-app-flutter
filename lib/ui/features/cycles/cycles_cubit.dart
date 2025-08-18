@@ -8,11 +8,11 @@ import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
 import 'package:bebi_app/data/services/cycle_day_insights_service.dart';
 import 'package:bebi_app/data/services/cycle_predictions_service.dart';
-import 'package:bebi_app/utils/analytics_utils.dart';
 import 'package:bebi_app/utils/exceptions/simple_exception.dart';
-import 'package:bebi_app/utils/extension/datetime_extensions.dart';
-import 'package:bebi_app/utils/guard.dart';
-import 'package:bebi_app/utils/localizations_utils.dart';
+import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
+import 'package:bebi_app/utils/mixins/analytics_utils.dart';
+import 'package:bebi_app/utils/mixins/guard_mixin.dart';
+import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,7 +21,8 @@ import 'package:injectable/injectable.dart';
 part 'cycles_state.dart';
 
 @injectable
-class CyclesCubit extends Cubit<CyclesState> {
+class CyclesCubit extends Cubit<CyclesState>
+    with GuardMixin, AnalyticsMixin, LocalizationsMixin {
   CyclesCubit(
     this._cycleLogsRepository,
     this._cyclePredictionsService,
@@ -78,10 +79,7 @@ class CyclesCubit extends Cubit<CyclesState> {
             didSetUpCycles: true,
           );
           await _userProfileRepository.createOrUpdate(userProfile);
-          AnalyticsUtils.setUserProperty(
-            name: _hasCycleProperty,
-            value: 'false',
-          );
+          setUserProperty(name: _hasCycleProperty, value: 'false');
         }
 
         emit(state.copyWith(userProfile: userProfile));
@@ -173,7 +171,7 @@ class CyclesCubit extends Cubit<CyclesState> {
             ),
           );
 
-          AnalyticsUtils.logEvent(
+          logEvent(
             name: _userProfileSwitchedEvent,
             parameters: {
               'user_id': _firebaseAuth.currentUser!.uid,
@@ -191,7 +189,7 @@ class CyclesCubit extends Cubit<CyclesState> {
           useCache: true,
         );
 
-        AnalyticsUtils.logEvent(
+        logEvent(
           name: _userProfileSwitchedEvent,
           parameters: {
             'user_id': _firebaseAuth.currentUser!.uid,

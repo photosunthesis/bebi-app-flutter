@@ -5,11 +5,8 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 
-abstract class AnalyticsUtils {
-  static void logEvent({
-    required String name,
-    Map<String, Object>? parameters,
-  }) {
+mixin AnalyticsMixin {
+  void logEvent({required String name, Map<String, Object>? parameters}) {
     if (isTest || kDebugMode) return;
 
     unawaited(
@@ -17,7 +14,7 @@ abstract class AnalyticsUtils {
     );
   }
 
-  static void logLogin({
+  void logLogin({
     required String loginMethod,
     Map<String, Object>? parameters,
   }) {
@@ -31,7 +28,7 @@ abstract class AnalyticsUtils {
     );
   }
 
-  static void setUserProperty({required String name, required String value}) {
+  void setUserProperty({required String name, required String value}) {
     if (isTest || kDebugMode) return;
 
     unawaited(
@@ -39,7 +36,7 @@ abstract class AnalyticsUtils {
     );
   }
 
-  static void logShare({
+  void logShare({
     required String method,
     required String contentType,
     required String itemId,

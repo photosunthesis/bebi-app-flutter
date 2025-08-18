@@ -4,9 +4,9 @@ import 'dart:math';
 
 import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
-import 'package:bebi_app/utils/analytics_utils.dart';
-import 'package:bebi_app/utils/guard.dart';
-import 'package:bebi_app/utils/localizations_utils.dart';
+import 'package:bebi_app/utils/mixins/analytics_utils.dart';
+import 'package:bebi_app/utils/mixins/guard_mixin.dart';
+import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -15,7 +15,8 @@ import 'package:injectable/injectable.dart';
 part 'profile_setup_state.dart';
 
 @injectable
-class ProfileSetupCubit extends Cubit<ProfileSetupState> {
+class ProfileSetupCubit extends Cubit<ProfileSetupState>
+    with GuardMixin, AnalyticsMixin, LocalizationsMixin {
   ProfileSetupCubit(
     this._userProfileRepository,
     this._firebaseAuth,
@@ -38,7 +39,7 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
     if (pickedFile != null) {
       emit(ProfileSetupLoadedState(File(pickedFile.path)));
 
-      AnalyticsUtils.logEvent(
+      logEvent(
         name: 'profile_picture_selected',
         parameters: {
           'user_id': _firebaseAuth.currentUser!.uid,
@@ -51,7 +52,7 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
   void removeProfilePicture() {
     emit(const ProfileSetupLoadedState());
 
-    AnalyticsUtils.logEvent(
+    logEvent(
       name: 'profile_picture_removed',
       parameters: {'user_id': _firebaseAuth.currentUser!.uid},
     );
@@ -90,7 +91,7 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
 
         emit(const ProfileSetupSuccessState());
 
-        AnalyticsUtils.logEvent(
+        logEvent(
           name: 'profile_setup_completed',
           parameters: {
             'user_id': _firebaseAuth.currentUser!.uid,

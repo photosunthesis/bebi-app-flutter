@@ -1,8 +1,8 @@
 import 'package:bebi_app/constants/ui_constants.dart';
-import 'package:bebi_app/utils/analytics_utils.dart';
-import 'package:bebi_app/utils/extension/build_context_extensions.dart';
-import 'package:bebi_app/utils/extension/int_extensions.dart';
-import 'package:bebi_app/utils/extension/string_extensions.dart';
+import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
+import 'package:bebi_app/utils/extensions/int_extensions.dart';
+import 'package:bebi_app/utils/extensions/string_extensions.dart';
+import 'package:bebi_app/utils/mixins/analytics_utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -60,7 +60,8 @@ class AppTextFormField extends StatefulWidget {
   State<AppTextFormField> createState() => _AppTextFormFieldState();
 }
 
-class _AppTextFormFieldState extends State<AppTextFormField> {
+class _AppTextFormFieldState extends State<AppTextFormField>
+    with AnalyticsMixin {
   String? _errorText;
   late final _focusNode = widget.focusNode ?? FocusNode();
   late final _inputBorder =
@@ -95,7 +96,7 @@ class _AppTextFormFieldState extends State<AppTextFormField> {
       setState(() => _errorText = error);
 
       if (error != null) {
-        AnalyticsUtils.logEvent(
+        logEvent(
           name: 'form_validation_error',
           parameters: {
             'user_id': GetIt.I<FirebaseAuth>().currentUser?.uid ?? 'anonymous',

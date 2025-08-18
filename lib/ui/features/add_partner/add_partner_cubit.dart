@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:bebi_app/data/models/user_partnership.dart';
 import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
-import 'package:bebi_app/utils/analytics_utils.dart';
-import 'package:bebi_app/utils/guard.dart';
-import 'package:bebi_app/utils/localizations_utils.dart';
+import 'package:bebi_app/utils/mixins/analytics_utils.dart';
+import 'package:bebi_app/utils/mixins/guard_mixin.dart';
+import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -13,7 +13,8 @@ import 'package:injectable/injectable.dart';
 part 'add_partner_state.dart';
 
 @injectable
-class AddPartnerCubit extends Cubit<AddPartnerState> {
+class AddPartnerCubit extends Cubit<AddPartnerState>
+    with GuardMixin, AnalyticsMixin, LocalizationsMixin {
   AddPartnerCubit(
     this._userPartnershipsRepository,
     this._userProfileRepository,
@@ -35,7 +36,7 @@ class AddPartnerCubit extends Cubit<AddPartnerState> {
 
         emit(AddPartnerLoadedState(userProfile!.code));
 
-        AnalyticsUtils.logEvent(
+        logEvent(
           name: 'add_partner_screen_opened',
           parameters: {
             'user_id': _firebaseAuth.currentUser!.uid,
@@ -71,7 +72,7 @@ class AddPartnerCubit extends Cubit<AddPartnerState> {
         );
 
         if (partnerProfile == null) {
-          AnalyticsUtils.logEvent(
+          logEvent(
             name: 'partner_code_invalid',
             parameters: {
               'user_id': _firebaseAuth.currentUser!.uid,
@@ -96,7 +97,7 @@ class AddPartnerCubit extends Cubit<AddPartnerState> {
 
         emit(const AddPartnerSuccessState());
 
-        AnalyticsUtils.logEvent(
+        logEvent(
           name: 'partner_added_successfully',
           parameters: {
             'user_id': _firebaseAuth.currentUser!.uid,
@@ -105,11 +106,8 @@ class AddPartnerCubit extends Cubit<AddPartnerState> {
           },
         );
 
-        AnalyticsUtils.setUserProperty(name: 'has_partner', value: 'true');
-        AnalyticsUtils.setUserProperty(
-          name: 'partner_id',
-          value: partnerProfile.userId,
-        );
+        setUserProperty(name: 'has_partner', value: 'true');
+        setUserProperty(name: 'partner_id', value: partnerProfile.userId);
       },
       onError: (e, _) {
         emit(AddPartnerErrorState(e.toString()));

@@ -3,13 +3,13 @@ import 'dart:math' as math;
 
 import 'package:bebi_app/data/models/app_update_info.dart';
 import 'package:bebi_app/utils/exceptions/simple_exception.dart';
-import 'package:bebi_app/utils/localizations_utils.dart';
+import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 @injectable
-class AppUpdateService {
+class AppUpdateService with LocalizationsMixin {
   const AppUpdateService(this._dio, this._packageInfo);
 
   final Dio _dio;

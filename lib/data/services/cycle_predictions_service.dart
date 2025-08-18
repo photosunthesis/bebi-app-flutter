@@ -1,14 +1,14 @@
 import 'dart:math';
 
 import 'package:bebi_app/data/models/cycle_log.dart';
-import 'package:bebi_app/utils/extension/int_extensions.dart';
-import 'package:bebi_app/utils/localizations_utils.dart';
+import 'package:bebi_app/utils/extensions/int_extensions.dart';
+import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
 // ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
 import 'package:injectable/injectable.dart';
 
 @injectable
-class CyclePredictionsService {
+class CyclePredictionsService with LocalizationsMixin {
   const CyclePredictionsService();
 
   static const _maxPredictions = 6;

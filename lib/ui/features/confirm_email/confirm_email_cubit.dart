@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:bebi_app/utils/analytics_utils.dart';
 import 'package:bebi_app/utils/exceptions/simple_exception.dart';
-import 'package:bebi_app/utils/extension/int_extensions.dart';
-import 'package:bebi_app/utils/guard.dart';
-import 'package:bebi_app/utils/localizations_utils.dart';
+import 'package:bebi_app/utils/extensions/int_extensions.dart';
+import 'package:bebi_app/utils/mixins/analytics_utils.dart';
+import 'package:bebi_app/utils/mixins/guard_mixin.dart';
+import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -12,7 +12,8 @@ import 'package:injectable/injectable.dart';
 part 'confirm_email_state.dart';
 
 @injectable
-class ConfirmEmailCubit extends Cubit<ConfirmEmailState> {
+class ConfirmEmailCubit extends Cubit<ConfirmEmailState>
+    with GuardMixin, AnalyticsMixin, LocalizationsMixin {
   ConfirmEmailCubit(this._firebaseAuth)
     : super(const ConfirmEmailLoadingState());
 
@@ -33,7 +34,7 @@ class ConfirmEmailCubit extends Cubit<ConfirmEmailState> {
           if (_firebaseAuth.currentUser?.emailVerified == true) {
             timer.cancel();
             emit(const ConfirmEmailSuccessState());
-            AnalyticsUtils.logEvent(
+            logEvent(
               name: 'email_verified',
               parameters: {
                 'user_id': _firebaseAuth.currentUser!.uid,
@@ -69,7 +70,7 @@ class ConfirmEmailCubit extends Cubit<ConfirmEmailState> {
           _canResendVerification = true;
         });
 
-        AnalyticsUtils.logEvent(
+        logEvent(
           name: 'verification_email_sent',
           parameters: {
             'user_id': _firebaseAuth.currentUser!.uid,

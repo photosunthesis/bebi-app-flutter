@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:bebi_app/data/models/cycle_day_insights.dart';
 import 'package:bebi_app/data/models/cycle_log.dart';
-import 'package:bebi_app/utils/extension/datetime_extensions.dart';
-import 'package:bebi_app/utils/extension/int_extensions.dart';
-import 'package:bebi_app/utils/localizations_utils.dart';
+import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
+import 'package:bebi_app/utils/extensions/int_extensions.dart';
+import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
 // ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
 import 'package:firebase_ai/firebase_ai.dart';
@@ -12,7 +12,7 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:injectable/injectable.dart';
 
 @injectable
-class CycleDayInsightsService {
+class CycleDayInsightsService with LocalizationsMixin {
   const CycleDayInsightsService(this._generativeModel, this._aiInsightsBox);
 
   final GenerativeModel _generativeModel;

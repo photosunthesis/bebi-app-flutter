@@ -1,10 +1,9 @@
 import 'dart:async';
 
 import 'package:bebi_app/ui/shared_widgets/forms/app_text_form_field.dart';
-import 'package:bebi_app/utils/extension/build_context_extensions.dart';
-import 'package:bebi_app/utils/extension/datetime_extensions.dart';
-import 'package:bebi_app/utils/extension/int_extensions.dart';
-import 'package:bebi_app/utils/localizations_utils.dart';
+import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
+import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
+import 'package:bebi_app/utils/extensions/int_extensions.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -155,7 +154,7 @@ class _AppTimeFormFieldState extends State<AppTimeFormField> {
           top: 14,
           left: 12,
           child: Text(
-            widget.hintText ?? l10n.selectTime,
+            widget.hintText ?? context.l10n.selectTime,
             style: context.textTheme.bodyMedium?.copyWith(
               color: context.colorScheme.onSurface.withAlpha(120),
             ),

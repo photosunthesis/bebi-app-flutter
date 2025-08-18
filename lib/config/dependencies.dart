@@ -3,7 +3,7 @@ import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/data/models/user_partnership.dart';
 import 'package:bebi_app/data/models/user_profile.dart';
-import 'package:bebi_app/utils/extension/int_extensions.dart';
+import 'package:bebi_app/utils/extensions/int_extensions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_ai/firebase_ai.dart';

@@ -3,8 +3,7 @@ import 'package:bebi_app/constants/kaomojis.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/ui/features/confirm_email/confirm_email_cubit.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
-import 'package:bebi_app/utils/extension/build_context_extensions.dart';
-import 'package:bebi_app/utils/localizations_utils.dart';
+import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -67,7 +66,7 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            l10n.checkEmailTitle,
+            context.l10n.checkEmailTitle,
             style: context.primaryTextTheme.headlineSmall,
           ),
           const SizedBox(height: 16),
@@ -84,12 +83,12 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
                       fontWeight: FontWeight.normal,
                     ),
                     children: [
-                      TextSpan(text: l10n.checkEmailMessagePrefix),
+                      TextSpan(text: context.l10n.checkEmailMessagePrefix),
                       TextSpan(
                         text: censoredEmail,
                         style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
-                      TextSpan(text: l10n.checkEmailMessageSuffix),
+                      TextSpan(text: context.l10n.checkEmailMessageSuffix),
                     ],
                   ),
                 );
@@ -153,7 +152,9 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
             return ElevatedButton(
               onPressed: loading ? null : _cubit.sendVerificationEmail,
               child: Text(
-                (loading ? l10n.resendingEmailButton : l10n.resendEmailButton)
+                (loading
+                        ? context.l10n.resendingEmailButton
+                        : context.l10n.resendEmailButton)
                     .toUpperCase(),
               ),
             );

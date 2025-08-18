@@ -5,10 +5,10 @@ import 'package:bebi_app/data/models/repeat_rule.dart';
 import 'package:bebi_app/data/models/save_changes_dialog_options.dart';
 import 'package:bebi_app/data/repositories/calendar_events_repository.dart';
 import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
-import 'package:bebi_app/utils/analytics_utils.dart';
-import 'package:bebi_app/utils/extension/datetime_extensions.dart';
-import 'package:bebi_app/utils/extension/int_extensions.dart';
-import 'package:bebi_app/utils/guard.dart';
+import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
+import 'package:bebi_app/utils/extensions/int_extensions.dart';
+import 'package:bebi_app/utils/mixins/analytics_utils.dart';
+import 'package:bebi_app/utils/mixins/guard_mixin.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -16,7 +16,8 @@ import 'package:injectable/injectable.dart';
 part 'calendar_event_form_state.dart';
 
 @injectable
-class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
+class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
+    with GuardMixin, AnalyticsMixin {
   CalendarEventFormCubit(
     this._calendarEventsRepository,
     this._userPartnershipsRepository,
@@ -35,7 +36,7 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
       ),
     );
 
-    AnalyticsUtils.logEvent(
+    logEvent(
       name: 'calendar_event_form_opened',
       parameters: {
         'user_id': _firebaseAuth.currentUser!.uid,
@@ -110,7 +111,7 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState> {
           );
         }
 
-        AnalyticsUtils.logEvent(
+        logEvent(
           name: isExistingEvent
               ? 'calendar_event_updated'
               : 'calendar_event_created',

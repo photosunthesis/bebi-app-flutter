@@ -8,8 +8,8 @@ import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
 import 'package:bebi_app/data/services/app_update_service.dart';
-import 'package:bebi_app/utils/analytics_utils.dart';
-import 'package:bebi_app/utils/guard.dart';
+import 'package:bebi_app/utils/mixins/analytics_utils.dart';
+import 'package:bebi_app/utils/mixins/guard_mixin.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
@@ -18,7 +18,7 @@ import 'package:injectable/injectable.dart';
 part 'home_state.dart';
 
 @injectable
-class HomeCubit extends Cubit<HomeState> {
+class HomeCubit extends Cubit<HomeState> with GuardMixin, AnalyticsMixin {
   HomeCubit(
     this._userProfileRepository,
     this._userPartnershipsRepository,
@@ -48,7 +48,7 @@ class HomeCubit extends Cubit<HomeState> {
 
         if (_firebaseAuth.currentUser?.emailVerified != true) {
           emit(const HomeShouldConfirmEmailState());
-          AnalyticsUtils.logEvent(
+          logEvent(
             name: 'user_redirected_to_confirm_email',
             parameters: {'user_id': _firebaseAuth.currentUser!.uid},
           );
@@ -61,7 +61,7 @@ class HomeCubit extends Cubit<HomeState> {
 
         if (userProfile == null) {
           emit(const HomeShouldSetUpProfileState());
-          AnalyticsUtils.logEvent(
+          logEvent(
             name: 'user_redirected_to_profile_setup',
             parameters: {'userId': _firebaseAuth.currentUser!.uid},
           );
@@ -74,7 +74,7 @@ class HomeCubit extends Cubit<HomeState> {
 
         if (userPartnership == null) {
           emit(const HomeShouldAddPartnerState());
-          AnalyticsUtils.logEvent(
+          logEvent(
             name: 'user_redirected_to_add_partner',
             parameters: {'user_id': _firebaseAuth.currentUser!.uid},
           );
@@ -85,7 +85,7 @@ class HomeCubit extends Cubit<HomeState> {
 
         if (updateInfo?.hasUpdate == true) {
           emit(HomeShouldUpdateAppState(updateInfo!));
-          AnalyticsUtils.logEvent(
+          logEvent(
             name: 'user_redirected_to_update_app',
             parameters: {
               'user_id': _firebaseAuth.currentUser!.uid,
@@ -96,7 +96,7 @@ class HomeCubit extends Cubit<HomeState> {
           return;
         }
 
-        AnalyticsUtils.logEvent(
+        logEvent(
           name: 'home_screen_loaded',
           parameters: {
             'user_id': _firebaseAuth.currentUser!.uid,
@@ -116,7 +116,7 @@ class HomeCubit extends Cubit<HomeState> {
       () async {
         emit(const HomeLoadingState());
 
-        AnalyticsUtils.logEvent(
+        logEvent(
           name: 'user_signed_out',
           parameters: {'userId': _firebaseAuth.currentUser!.uid},
         );

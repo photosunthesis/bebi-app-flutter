@@ -3,9 +3,8 @@ import 'package:bebi_app/app/theme/app_colors.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/ui/features/cycles/cycles_cubit.dart';
-import 'package:bebi_app/utils/extension/build_context_extensions.dart';
-import 'package:bebi_app/utils/extension/color_extensions.dart';
-import 'package:bebi_app/utils/localizations_utils.dart';
+import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
+import 'package:bebi_app/utils/extensions/color_extensions.dart';
 // ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';

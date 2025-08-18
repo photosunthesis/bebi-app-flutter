@@ -1,6 +1,6 @@
-import 'package:bebi_app/utils/analytics_utils.dart';
-import 'package:bebi_app/utils/guard.dart';
-import 'package:bebi_app/utils/localizations_utils.dart';
+import 'package:bebi_app/utils/mixins/analytics_utils.dart';
+import 'package:bebi_app/utils/mixins/guard_mixin.dart';
+import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -8,7 +8,8 @@ import 'package:injectable/injectable.dart';
 part 'update_password_state.dart';
 
 @injectable
-class UpdatePasswordCubit extends Cubit<UpdatePasswordState> {
+class UpdatePasswordCubit extends Cubit<UpdatePasswordState>
+    with GuardMixin, AnalyticsMixin, LocalizationsMixin {
   UpdatePasswordCubit(this._firebaseAuth)
     : super(const UpdatePasswordLoadedState());
 
@@ -29,7 +30,7 @@ class UpdatePasswordCubit extends Cubit<UpdatePasswordState> {
       await user.updatePassword(newPassword);
       emit(const UpdatePasswordSuccessState());
 
-      AnalyticsUtils.logEvent(
+      logEvent(
         name: 'update_password',
         parameters: {
           'user_id': _firebaseAuth.currentUser!.uid,

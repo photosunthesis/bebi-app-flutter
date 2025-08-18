@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/data/repositories/calendar_events_repository.dart';
 import 'package:bebi_app/data/services/recurring_calendar_events_service.dart';
-import 'package:bebi_app/utils/analytics_utils.dart';
-import 'package:bebi_app/utils/extension/datetime_extensions.dart';
-import 'package:bebi_app/utils/extension/int_extensions.dart';
-import 'package:bebi_app/utils/guard.dart';
+import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
+import 'package:bebi_app/utils/extensions/int_extensions.dart';
+import 'package:bebi_app/utils/mixins/analytics_utils.dart';
+import 'package:bebi_app/utils/mixins/guard_mixin.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -14,7 +14,8 @@ import 'package:injectable/injectable.dart';
 part 'calendar_state.dart';
 
 @injectable
-class CalendarCubit extends Cubit<CalendarState> {
+class CalendarCubit extends Cubit<CalendarState>
+    with GuardMixin, AnalyticsMixin {
   CalendarCubit(
     this._calendarEventsRepository,
     this._recurringCalendarEventsService,
@@ -77,7 +78,7 @@ class CalendarCubit extends Cubit<CalendarState> {
           ),
         );
 
-        AnalyticsUtils.logEvent(
+        logEvent(
           name: 'calendar_events_loaded',
           parameters: {
             'user_id': _firebaseAuth.currentUser!.uid,
@@ -129,7 +130,7 @@ class CalendarCubit extends Cubit<CalendarState> {
       ),
     );
 
-    AnalyticsUtils.logEvent(
+    logEvent(
       name: 'calendar_date_selected',
       parameters: {
         'user_id': _firebaseAuth.currentUser!.uid,

@@ -4,9 +4,9 @@ import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/data/repositories/cycle_logs_repository.dart';
 import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
-import 'package:bebi_app/utils/analytics_utils.dart';
-import 'package:bebi_app/utils/extension/int_extensions.dart';
-import 'package:bebi_app/utils/guard.dart';
+import 'package:bebi_app/utils/extensions/int_extensions.dart';
+import 'package:bebi_app/utils/mixins/analytics_utils.dart';
+import 'package:bebi_app/utils/mixins/guard_mixin.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -14,7 +14,8 @@ import 'package:injectable/injectable.dart';
 part 'cycle_setup_state.dart';
 
 @injectable
-class CycleSetupCubit extends Cubit<CycleSetupState> {
+class CycleSetupCubit extends Cubit<CycleSetupState>
+    with GuardMixin, AnalyticsMixin {
   CycleSetupCubit(
     this._userProfileRepository,
     this._cycleLogsRepository,
@@ -70,7 +71,7 @@ class CycleSetupCubit extends Cubit<CycleSetupState> {
 
         emit(const CycleSetupSuccessState());
 
-        AnalyticsUtils.logEvent(
+        logEvent(
           name: 'cycle_setup_completed',
           parameters: {
             'user_id': _firebaseAuth.currentUser!.uid,

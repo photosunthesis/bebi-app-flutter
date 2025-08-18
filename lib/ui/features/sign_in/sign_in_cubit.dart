@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:bebi_app/utils/analytics_utils.dart';
-import 'package:bebi_app/utils/guard.dart';
-import 'package:bebi_app/utils/localizations_utils.dart';
+import 'package:bebi_app/utils/mixins/analytics_utils.dart';
+import 'package:bebi_app/utils/mixins/guard_mixin.dart';
+import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -10,7 +10,8 @@ import 'package:injectable/injectable.dart';
 part 'sign_in_state.dart';
 
 @injectable
-class SignInCubit extends Cubit<SignInState> {
+class SignInCubit extends Cubit<SignInState>
+    with GuardMixin, AnalyticsMixin, LocalizationsMixin {
   SignInCubit(this._firebaseAuth) : super(const SignInLoadedState());
 
   final FirebaseAuth _firebaseAuth;
@@ -25,7 +26,7 @@ class SignInCubit extends Cubit<SignInState> {
         );
         emit(const SignInSuccessState());
 
-        AnalyticsUtils.logLogin(
+        logLogin(
           loginMethod: 'email',
           parameters: {
             'email': email,
@@ -42,7 +43,7 @@ class SignInCubit extends Cubit<SignInState> {
 
         emit(SignInErrorState(errorMessage));
 
-        AnalyticsUtils.logEvent(
+        logEvent(
           name: 'sign_in_failed',
           parameters: {
             'email': email,

@@ -4,9 +4,9 @@ import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/data/repositories/cycle_logs_repository.dart';
 import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
-import 'package:bebi_app/utils/analytics_utils.dart';
-import 'package:bebi_app/utils/extension/int_extensions.dart';
-import 'package:bebi_app/utils/guard.dart';
+import 'package:bebi_app/utils/extensions/int_extensions.dart';
+import 'package:bebi_app/utils/mixins/analytics_utils.dart';
+import 'package:bebi_app/utils/mixins/guard_mixin.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -14,7 +14,8 @@ import 'package:injectable/injectable.dart';
 part 'log_menstrual_flow_state.dart';
 
 @injectable
-class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState> {
+class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState>
+    with GuardMixin, AnalyticsMixin {
   LogMenstrualFlowCubit(
     this._cycleLogsRepository,
     this._userProfileRepository,
@@ -83,7 +84,7 @@ class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState> {
 
         emit(const LogMenstrualFlowSuccessState());
 
-        AnalyticsUtils.logEvent(
+        logEvent(
           name: 'menstrual_flow_logged',
           parameters: {
             'user_id': _currentUserId!,
@@ -112,7 +113,7 @@ class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState> {
         emit(const LogMenstrualFlowLoadingState());
         await _cycleLogsRepository.deleteById(cycleLogId);
         emit(const LogMenstrualFlowSuccessState());
-        AnalyticsUtils.logEvent(
+        logEvent(
           name: 'menstrual_flow_deleted',
           parameters: {'user_id': _currentUserId!, 'cycle_log_id': cycleLogId},
         );

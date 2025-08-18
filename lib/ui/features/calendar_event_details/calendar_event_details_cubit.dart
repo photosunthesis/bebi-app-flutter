@@ -7,10 +7,10 @@ import 'package:bebi_app/data/repositories/calendar_events_repository.dart';
 import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
 import 'package:bebi_app/data/services/recurring_calendar_events_service.dart';
-import 'package:bebi_app/utils/analytics_utils.dart';
-import 'package:bebi_app/utils/extension/datetime_extensions.dart';
-import 'package:bebi_app/utils/extension/int_extensions.dart';
-import 'package:bebi_app/utils/guard.dart';
+import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
+import 'package:bebi_app/utils/extensions/int_extensions.dart';
+import 'package:bebi_app/utils/mixins/analytics_utils.dart';
+import 'package:bebi_app/utils/mixins/guard_mixin.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -18,7 +18,8 @@ import 'package:injectable/injectable.dart';
 part 'calendar_event_details_state.dart';
 
 @injectable
-class CalendarEventDetailsCubit extends Cubit<CalendarEventDetailsState> {
+class CalendarEventDetailsCubit extends Cubit<CalendarEventDetailsState>
+    with GuardMixin, AnalyticsMixin {
   CalendarEventDetailsCubit(
     this._calendarEventsRepository,
     this._recurringCalendarEventsService,
@@ -81,7 +82,7 @@ class CalendarEventDetailsCubit extends Cubit<CalendarEventDetailsState> {
 
         emit(const CalendarEventDetailsDeleteSuccessState());
 
-        AnalyticsUtils.logEvent(
+        logEvent(
           name: 'calendar_event_deleted',
           parameters: {
             'user_id': _firebaseAuth.currentUser!.uid,

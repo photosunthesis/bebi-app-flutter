@@ -1,3 +1,4 @@
+import 'package:bebi_app/localizations/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 extension BuildContextExtensions on BuildContext {
@@ -12,4 +13,6 @@ extension BuildContextExtensions on BuildContext {
   double get screenHeight => MediaQuery.of(this).size.height;
 
   double get screenWidth => MediaQuery.of(this).size.width;
+
+  AppLocalizations get l10n => AppLocalizations.of(this)!;
 }

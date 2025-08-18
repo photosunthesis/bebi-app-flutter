@@ -4,10 +4,10 @@ import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/data/repositories/cycle_logs_repository.dart';
 import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
-import 'package:bebi_app/utils/analytics_utils.dart';
 import 'package:bebi_app/utils/exceptions/simple_exception.dart';
-import 'package:bebi_app/utils/guard.dart';
-import 'package:bebi_app/utils/localizations_utils.dart';
+import 'package:bebi_app/utils/mixins/analytics_utils.dart';
+import 'package:bebi_app/utils/mixins/guard_mixin.dart';
+import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -15,7 +15,8 @@ import 'package:injectable/injectable.dart';
 part 'log_symptoms_state.dart';
 
 @injectable
-class LogSymptomsCubit extends Cubit<LogSymptomsState> {
+class LogSymptomsCubit extends Cubit<LogSymptomsState>
+    with GuardMixin, AnalyticsMixin, LocalizationsMixin {
   LogSymptomsCubit(
     this._cycleLogsRepository,
     this._userProfileRepository,
@@ -75,7 +76,7 @@ class LogSymptomsCubit extends Cubit<LogSymptomsState> {
 
         emit(const LogSymptomsSuccessState());
 
-        AnalyticsUtils.logEvent(
+        logEvent(
           name: symptoms.isEmpty ? 'symptoms_deleted' : 'symptoms_logged',
           parameters: {
             'user_id': _currentUserId,
