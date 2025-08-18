@@ -71,10 +71,12 @@ class _CycleLogsState extends State<CycleLogs> {
                 final shouldRefresh = await context.pushNamed(
                   AppRoutes.logMenstrualCycle,
                   queryParameters: {
-                    'logForPartner': '!$showCurrentUserCycleData',
+                    'logForPartner': '${!showCurrentUserCycleData}',
                     'date': state.focusedDate.toIso8601String(),
-                    'averagePeriodDurationInDays':
-                        state.focusedDateInsights?.averagePeriodDurationInDays,
+                    'averagePeriodDurationInDays': state
+                        .focusedDateInsights!
+                        .averagePeriodDurationInDays
+                        .toString(),
                     if (periodLog != null) ...{
                       'cycleLogId': periodLog.id,
                       'flowIntensity': periodLog.flow!.name,
