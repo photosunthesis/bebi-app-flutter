@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/utils/extension/build_context_extensions.dart';
 import 'package:flutter/material.dart';
@@ -35,7 +37,9 @@ abstract class MainAppBar {
             ),
           ),
       flexibleSpace: flexibleSpace,
-      toolbarHeight: toolbarHeight,
+      toolbarHeight:
+          toolbarHeight ??
+          (Platform.isAndroid ? kToolbarHeight * 1.2 : kToolbarHeight),
     );
   }
 }
