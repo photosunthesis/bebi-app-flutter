@@ -270,9 +270,9 @@ jobs:
           fi
           if [[ "${{ github.event.inputs.build_ios }}" == "true" || "${{ github.event_name }}" != "workflow_dispatch" ]]; then
             if [[ -n "$ARTIFACTS" ]]; then
-              ARTIFACTS+=",ios-artifacts/app.ipa"
+              ARTIFACTS+=",ios-artifacts/*.ipa"
             else
-              ARTIFACTS+="ios-artifacts/app.ipa"
+              ARTIFACTS+="ios-artifacts/*.ipa"
             fi
           fi
           echo "artifacts=$ARTIFACTS" >> $GITHUB_OUTPUT
