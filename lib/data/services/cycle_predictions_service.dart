@@ -11,7 +11,6 @@ import 'package:injectable/injectable.dart';
 class CyclePredictionsService with LocalizationsMixin {
   const CyclePredictionsService();
 
-  static const _maxPredictions = 6;
   static const _defaultCycleLength = 28;
   static const _maxCycleLengthDeviation = 14.0;
   static const _minCycleGap = 15;
@@ -20,34 +19,45 @@ class CyclePredictionsService with LocalizationsMixin {
   static const _ovulationDayBeforePeriod = 14;
   static const _baseFertileWindowDays = 6;
   static const _defaultPeriodLength = 4;
-  static const _recentSymptomsLookbackDays = 7;
-  static const _maxPastDateDays = 60;
   static const _minPeriodDays = 1;
   static const _maxPeriodDays = 10;
-  static const _periodAdjustmentDays = 1;
   static const _consecutiveDayThreshold = 1;
   static const _ovulationWindowExtensionDivisor = 2;
   static const _maxOvulationWindowExtension = 3;
   static const _periodExtensionDivisor = 4;
   static const _maxPeriodExtension = 2;
-  static const _ovulationWindowStartOffset = 5;
-  static const _heavyFlowDays = 2;
 
   List<CycleLog> predictUpcomingCycles(List<CycleLog> logs, DateTime now) {
     final periodLogs = _getSortedActualPeriodLogs(logs);
     if (periodLogs.isEmpty) throw ArgumentError(l10n.noPeriodDataError);
 
-    final cycleData = _preprocessCycleData(periodLogs, logs, now);
-    final predictions = <CycleLog>[];
-    var nextPeriodStart = cycleData.nextPeriodStart;
+    final periodStartDates = _extractPeriodStartDates(periodLogs);
+    final avgCycleLength = _calculateAverageCycleLength(periodStartDates);
+    final stdDev = _calculateCycleStandardDeviation(periodStartDates);
+    final avgPeriodDays = _calculateAveragePeriodDaysFromDates(
+      periodLogs,
+      periodStartDates,
+    );
+    final isIrregular = stdDev > _irregularityThreshold;
+    final lastPeriodDate = periodLogs.last.date;
+    final baseNextPeriodStart = lastPeriodDate;
+    var nextPeriodStart = _adjustNextPeriodForSymptoms(
+      logs,
+      baseNextPeriodStart,
+      now,
+    );
+    final random = isIrregular ? Random(now.millisecondsSinceEpoch) : null;
 
-    for (var i = 0; i < _maxPredictions; i++) {
+    final predictions = <CycleLog>[];
+
+    for (var i = 0; i < 6; i++) {
+      // maximum number of cycle predictions to generate
       final cycleId = 'predicted_cycle_$i';
       final cycleLength = _getPredictedCycleLength(
-        cycleData.avgCycleLength,
-        cycleData.stdDev,
-        cycleData.isIrregular,
-        cycleData.random,
+        avgCycleLength,
+        stdDev,
+        isIrregular,
+        random,
       );
 
       nextPeriodStart = nextPeriodStart.add(cycleLength.days);
@@ -56,9 +66,9 @@ class CyclePredictionsService with LocalizationsMixin {
         _generatePredictedPeriodLogs(
           nextPeriodStart,
           cycleId,
-          cycleData.avgPeriodDays,
-          cycleData.isIrregular,
-          cycleData.stdDev,
+          avgPeriodDays,
+          isIrregular,
+          stdDev,
         ),
       );
 
@@ -66,8 +76,8 @@ class CyclePredictionsService with LocalizationsMixin {
         _generatePredictedOvulationWindow(
           nextPeriodStart,
           cycleId,
-          cycleData.isIrregular,
-          cycleData.stdDev,
+          isIrregular,
+          stdDev,
         ),
       );
     }
@@ -75,44 +85,13 @@ class CyclePredictionsService with LocalizationsMixin {
     return predictions;
   }
 
-  _CycleData _preprocessCycleData(
-    List<CycleLog> periodLogs,
-    List<CycleLog> allLogs,
-    DateTime now,
-  ) {
-    final periodStartDates = _extractPeriodStartDates(periodLogs);
-    final cycleStats = _calculateCycleStatisticsFromDates(periodStartDates);
-    final avgPeriodDays = _calculateAveragePeriodDaysFromDates(
-      periodLogs,
-      periodStartDates,
-    );
-    final isIrregular = cycleStats.stdDev > _irregularityThreshold;
-    final lastPeriodDate = periodLogs.last.date;
-    final baseNextPeriodStart = lastPeriodDate;
-    final nextPeriodStart = _adjustNextPeriodForSymptoms(
-      allLogs,
-      baseNextPeriodStart,
-      now,
-    );
-
-    return _CycleData(
-      avgCycleLength: cycleStats.avg,
-      stdDev: cycleStats.stdDev,
-      avgPeriodDays: avgPeriodDays,
-      isIrregular: isIrregular,
-      nextPeriodStart: nextPeriodStart,
-      random: isIrregular ? Random(now.millisecondsSinceEpoch) : null,
-    );
-  }
-
-  ({double avg, double stdDev}) _calculateCycleStatisticsFromDates(
-    List<DateTime> periodStartDates,
-  ) {
+  double _calculateAverageCycleLength(List<DateTime> periodStartDates) {
     if (periodStartDates.length < 2) {
-      return (avg: _defaultCycleLength.toDouble(), stdDev: 0.0);
+      return _defaultCycleLength.toDouble();
     }
 
     final gaps = <int>[];
+
     for (var i = 1; i < periodStartDates.length; i++) {
       final diff = periodStartDates[i]
           .difference(periodStartDates[i - 1])
@@ -123,15 +102,30 @@ class CyclePredictionsService with LocalizationsMixin {
     }
 
     if (gaps.isEmpty) {
-      return (avg: _defaultCycleLength.toDouble(), stdDev: 0.0);
+      return _defaultCycleLength.toDouble();
     }
 
-    final avg = gaps.average;
-    final stdDev = gaps.length < 2
-        ? 0.0
-        : _calculateStandardDeviation(gaps, avg);
+    return gaps.average;
+  }
 
-    return (avg: avg, stdDev: stdDev);
+  double _calculateCycleStandardDeviation(List<DateTime> periodStartDates) {
+    if (periodStartDates.length < 2) return 0.0;
+
+    final gaps = <int>[];
+    for (var i = 1; i < periodStartDates.length; i++) {
+      final diff = periodStartDates[i]
+          .difference(periodStartDates[i - 1])
+          .inDays;
+
+      if (diff >= _minCycleGap && diff <= _maxCycleGap) {
+        gaps.add(diff);
+      }
+    }
+
+    if (gaps.isEmpty || gaps.length < 2) return 0.0;
+
+    final avg = gaps.average;
+    return _calculateStandardDeviation(gaps, avg);
   }
 
   int _calculateAveragePeriodDaysFromDates(
@@ -144,6 +138,7 @@ class CyclePredictionsService with LocalizationsMixin {
     if (periodGroups.isEmpty) throw ArgumentError(l10n.noPeriodDataError);
 
     final cyclePeriodDays = <int>[];
+
     for (final group in periodGroups) {
       if (group.isNotEmpty) cyclePeriodDays.add(group.length);
     }
@@ -196,7 +191,9 @@ class CyclePredictionsService with LocalizationsMixin {
     DateTime lastPeriodDate,
     DateTime now,
   ) {
-    final cutoffDate = now.subtract(_recentSymptomsLookbackDays.days);
+    final cutoffDate = now.subtract(
+      7.days,
+    ); // look back 7 days for recent symptoms
 
     final hasRecentCramps = allLogs.any(
       (log) =>
@@ -207,10 +204,13 @@ class CyclePredictionsService with LocalizationsMixin {
     );
 
     final adjustedDate = hasRecentCramps
-        ? lastPeriodDate.subtract(_periodAdjustmentDays.days)
+        ? lastPeriodDate.subtract(
+            1.days,
+          ) // adjust period start by 1 day if cramps detected
         : lastPeriodDate;
 
-    if (adjustedDate.isBefore(now.subtract(_maxPastDateDays.days))) {
+    if (adjustedDate.isBefore(now.subtract(60.days))) {
+      // prevent predictions more than 60 days in the past
       throw ArgumentError(l10n.unableToDetermineCycleError);
     }
 
@@ -254,7 +254,8 @@ class CyclePredictionsService with LocalizationsMixin {
         : 0;
 
     final fertileStart = ovulationDate.subtract(
-      (_ovulationWindowStartOffset + windowExtension).days,
+      (5 + windowExtension)
+          .days, // fertile window starts 5 days before ovulation
     );
 
     final windowDays = _baseFertileWindowDays + windowExtension;
@@ -298,7 +299,9 @@ class CyclePredictionsService with LocalizationsMixin {
       return CycleLog.period(
         id: '${cycleId}_period_$i',
         date: date,
-        flow: i < _heavyFlowDays ? FlowIntensity.medium : FlowIntensity.light,
+        flow: i < 2
+            ? FlowIntensity.medium
+            : FlowIntensity.light, // first 2 days are heavier flow
         createdBy: 'system',
         ownedBy: 'system',
         users: [],
@@ -313,22 +316,4 @@ class CyclePredictionsService with LocalizationsMixin {
         .toList()
       ..sort((a, b) => a.date.compareTo(b.date));
   }
-}
-
-class _CycleData {
-  const _CycleData({
-    required this.avgCycleLength,
-    required this.stdDev,
-    required this.avgPeriodDays,
-    required this.isIrregular,
-    required this.nextPeriodStart,
-    this.random,
-  });
-
-  final double avgCycleLength;
-  final double stdDev;
-  final int avgPeriodDays;
-  final bool isIrregular;
-  final DateTime nextPeriodStart;
-  final Random? random;
 }

@@ -73,6 +73,8 @@ class _CycleLogsState extends State<CycleLogs> {
                   queryParameters: {
                     'logForPartner': '!$showCurrentUserCycleData',
                     'date': state.focusedDate.toIso8601String(),
+                    'averagePeriodDurationInDays':
+                        state.focusedDateInsights?.averagePeriodDurationInDays,
                     if (periodLog != null) ...{
                       'cycleLogId': periodLog.id,
                       'flowIntensity': periodLog.flow!.name,

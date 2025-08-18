@@ -31,7 +31,8 @@ class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState>
   String? get _currentUserId => _firebaseAuth.currentUser?.uid;
 
   Future<void> logFlow({
-    required String? cycleLogId,
+    String? cycleLogId,
+    required int averagePeriodDurationInDays,
     required DateTime date,
     required FlowIntensity flowIntensity,
     required bool logForPartner,
@@ -73,7 +74,7 @@ class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState>
         if (previousLogs.isEmpty || cycleLogId != null) {
           // Auto-log the next few days of menstrual flow to reduce daily manual entries
           final cycleLogs = List.generate(
-            5, // TODO Make this dynamic
+            averagePeriodDurationInDays,
             (i) => cycleLog.copyWith(date: date.add(i.days)),
           );
 

@@ -6,6 +6,7 @@ class CycleDayInsights {
     required this.cyclePhase,
     required this.dayOfCycle,
     required this.cycleLengthInDays,
+    required this.averagePeriodDurationInDays,
     required this.nextPeriodDates,
     required this.fertileDays,
   });
@@ -14,6 +15,7 @@ class CycleDayInsights {
   final CyclePhase cyclePhase;
   final int dayOfCycle;
   final int cycleLengthInDays;
+  final int averagePeriodDurationInDays;
   final List<DateTime> nextPeriodDates;
   final List<DateTime> fertileDays;
 }

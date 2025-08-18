@@ -62,11 +62,16 @@ class CycleDayInsightsService with LocalizationsMixin {
       currentFertileWindow,
     );
 
+    final averagePeriodDurationInDays = _calculateAveragePeriodDays(
+      periodGroups,
+    );
+
     return CycleDayInsights(
       cyclePhase: cyclePhase,
       date: date,
       dayOfCycle: dayOfCycle,
       cycleLengthInDays: cycleLengthInDays,
+      averagePeriodDurationInDays: averagePeriodDurationInDays,
       nextPeriodDates: nextPeriodDates,
       fertileDays: currentFertileWindow,
     );
@@ -180,6 +185,15 @@ class CycleDayInsightsService with LocalizationsMixin {
     }
 
     return CyclePhase.luteal;
+  }
+
+  int _calculateAveragePeriodDays(List<List<CycleLog>> periodGroups) {
+    if (periodGroups.isEmpty) {
+      throw ArgumentError(l10n.noPeriodDataForCycleError);
+    }
+
+    final periodLengths = periodGroups.map((group) => group.length).toList();
+    return periodLengths.average.round();
   }
 
   Future<String> generateAiInsights(

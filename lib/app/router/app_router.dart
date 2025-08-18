@@ -165,6 +165,9 @@ abstract class AppRouter {
           child: BlocProvider(
             create: (_) => GetIt.I<LogMenstrualFlowCubit>(),
             child: LogMenstrualFlowScreen(
+              averagePeriodDurationInDays: int.parse(
+                state.uri.queryParameters['averagePeriodDurationInDays']!,
+              ),
               cycleLogId: state.uri.queryParameters['cycleLogId'],
               logForPartner:
                   state.uri.queryParameters['logForPartner'] == 'true',

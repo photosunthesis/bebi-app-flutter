@@ -13,6 +13,7 @@ import 'package:material_symbols_icons/symbols.dart';
 class LogMenstrualFlowScreen extends StatefulWidget {
   const LogMenstrualFlowScreen({
     required this.date,
+    required this.averagePeriodDurationInDays,
     required this.logForPartner,
     this.cycleLogId,
     this.flowIntensity,
@@ -20,6 +21,7 @@ class LogMenstrualFlowScreen extends StatefulWidget {
   });
 
   final DateTime date;
+  final int averagePeriodDurationInDays;
   final bool logForPartner;
   final String? cycleLogId;
   final FlowIntensity? flowIntensity;
@@ -175,6 +177,7 @@ class _LogMenstrualFlowScreenState extends State<LogMenstrualFlowScreen> {
         onPressed: loading
             ? null
             : () async => await context.read<LogMenstrualFlowCubit>().logFlow(
+                averagePeriodDurationInDays: widget.averagePeriodDurationInDays,
                 cycleLogId: widget.cycleLogId,
                 date: widget.date,
                 flowIntensity: _flowIntensity,
