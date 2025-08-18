@@ -8,7 +8,6 @@ import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
 import 'package:bebi_app/data/services/cycle_day_insights_service.dart';
 import 'package:bebi_app/data/services/cycle_predictions_service.dart';
-import 'package:bebi_app/utils/exceptions/simple_exception.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
 import 'package:bebi_app/utils/mixins/analytics_utils.dart';
 import 'package:bebi_app/utils/mixins/guard_mixin.dart';
@@ -150,7 +149,7 @@ class CyclesCubit extends Cubit<CyclesState>
     await guard(
       () async {
         if (state.partnerProfile?.isSharingCycleWithPartner != true) {
-          throw SimpleException(l10n.partnerCycleSharingNotEnabledError);
+          throw Exception(l10n.partnerCycleSharingNotEnabledError);
         }
 
         final newShowCurrentUser = !state.showCurrentUserCycleData;

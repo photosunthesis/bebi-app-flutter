@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:bebi_app/data/models/app_update_info.dart';
-import 'package:bebi_app/utils/exceptions/simple_exception.dart';
 import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
@@ -24,9 +23,7 @@ class AppUpdateService with LocalizationsMixin {
       '$_baseUrl/repos/$_owner/$_repo/releases/latest',
     );
 
-    if (response.statusCode != 200) {
-      throw SimpleException(l10n.checkUpdateError);
-    }
+    if (response.statusCode != 200) throw Exception(l10n.checkUpdateError);
 
     return _parseReleaseData(response.data);
   }

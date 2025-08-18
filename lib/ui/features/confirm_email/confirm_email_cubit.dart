@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:bebi_app/utils/exceptions/simple_exception.dart';
 import 'package:bebi_app/utils/extensions/int_extensions.dart';
 import 'package:bebi_app/utils/mixins/analytics_utils.dart';
 import 'package:bebi_app/utils/mixins/guard_mixin.dart';
@@ -56,7 +55,7 @@ class ConfirmEmailCubit extends Cubit<ConfirmEmailState>
     await guard(
       () async {
         if (!_canResendVerification) {
-          throw SimpleException(l10n.resendEmailError);
+          throw Exception(l10n.resendEmailError);
         }
 
         _canResendVerification = false;
