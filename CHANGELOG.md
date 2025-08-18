@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.1] - 2025-08-19
+
+### Fixed
+
+- Fixed issue with logging menstrual flow data not being saved properly 🌸
+- Fixed incorrect URL being used as the download URL in the app update dialog 🔗
+
 ## [0.3.0] - 2025-08-19
 
 ### Added
