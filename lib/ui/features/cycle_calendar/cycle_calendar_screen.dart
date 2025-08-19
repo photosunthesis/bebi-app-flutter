@@ -133,7 +133,7 @@ class _CycleCalendarScreenState extends State<CycleCalendarScreen> {
     CycleLog? intimacyLog,
   }) {
     return Container(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
@@ -142,41 +142,71 @@ class _CycleCalendarScreenState extends State<CycleCalendarScreen> {
           ),
         ),
       ),
-      child: Stack(
-        children: [
-          _buildDayBackground(periodLog, ovulationLog),
-          _buildDayText(date, periodLog, ovulationLog),
-          if (symptomLog != null || intimacyLog != null)
-            _buildSymptomIndicator(symptomLog, intimacyLog),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 6),
+        child: Stack(
+          children: [
+            _buildDayBackground(periodLog, ovulationLog, date.isToday),
+            _buildDayText(date, periodLog, ovulationLog),
+            if (symptomLog != null || intimacyLog != null)
+              _buildSymptomIndicator(symptomLog, intimacyLog),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildDayBackground(CycleLog? periodLog, CycleLog? ovulationLog) {
+  Widget _buildDayBackground(
+    CycleLog? periodLog,
+    CycleLog? ovulationLog,
+    bool isToday,
+  ) {
+    final eventLog = periodLog ?? ovulationLog;
+    final hasEvent = eventLog != null;
+
     return Center(
-      child: (periodLog ?? ovulationLog)?.isPrediction == true
-          ? AngledStripesBackground(
-              color: (periodLog ?? ovulationLog) != null
-                  ? (periodLog ?? ovulationLog)!.color.withAlpha(90)
-                  : Colors.transparent,
-              backgroundColor: (periodLog ?? ovulationLog) != null
-                  ? (periodLog ?? ovulationLog)!.color.withAlpha(60)
-                  : Colors.transparent,
-            )
-          : SizedBox(
-              width: 26,
-              height: 26,
-              child: DecoratedBox(
+      child: Container(
+        decoration: BoxDecoration(
+          border: isToday && hasEvent
+              ? Border.all(color: eventLog.color, width: 2)
+              : isToday
+              ? Border.all(color: context.colorScheme.secondary, width: 2)
+              : null,
+          shape: BoxShape.circle,
+        ),
+        child: hasEvent && isToday
+            ? Container(
+                margin: const EdgeInsets.all(2),
                 decoration: BoxDecoration(
-                  color: (periodLog ?? ovulationLog) != null
-                      ? (periodLog ?? ovulationLog)!.color
-                      : Colors.transparent,
+                  border: Border.all(
+                    color: context.colorScheme.surface,
+                    width: UiConstants.borderWidth,
+                  ),
                   shape: BoxShape.circle,
                 ),
+                child: _buildEventContent(eventLog),
+              )
+            : _buildEventContent(eventLog),
+      ),
+    );
+  }
+
+  Widget _buildEventContent(CycleLog? eventLog) {
+    return eventLog?.isPrediction == true
+        ? AngledStripesBackground(
+            color: eventLog!.color.withAlpha(90),
+            backgroundColor: eventLog.color.withAlpha(60),
+          )
+        : SizedBox(
+            width: 26,
+            height: 26,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: eventLog?.color ?? Colors.transparent,
+                shape: BoxShape.circle,
               ),
             ),
-    );
+          );
   }
 
   Widget _buildDayText(
