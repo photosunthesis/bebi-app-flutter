@@ -76,23 +76,32 @@ class _CyclePredictionsState extends State<CyclePredictions> {
               previous.showCurrentUserCycleData ||
           current.focusedDateInsights != previous.focusedDateInsights,
       builder: (context, state) {
+        final fertileDays = state.focusedDateInsights?.fertileDays ?? [];
+
+        late String description;
+        if (state.showCurrentUserCycleData) {
+          if (fertileDays.isNotEmpty) {
+            description = context.l10n.fertileWindowDescription(
+              fertileDays.first.toEEEEMMMMd(),
+            );
+          } else {
+            description = context.l10n.notEnoughDataFertileWindow;
+          }
+        } else {
+          final dateString = fertileDays.isNotEmpty
+              ? fertileDays.first.toEEEEMMMMd()
+              : '';
+          description = context.l10n.partnerNextPeriodDescription(dateString);
+        }
+
         return _buildCalendar(
-          focusedDay:
-              state.focusedDateInsights?.fertileDays.first ?? DateTime.now(),
+          focusedDay: fertileDays.isNotEmpty
+              ? fertileDays.first
+              : DateTime.now(),
           eventColor: AppColors.blue,
           title: context.l10n.fertilWindowTitle,
-          description: state.showCurrentUserCycleData
-              ? state.focusedDateInsights?.fertileDays.isNotEmpty == true
-                    ? context.l10n.fertileWindowDescription(
-                        state.focusedDateInsights!.fertileDays.first
-                            .toEEEEMMMMd(),
-                      )
-                    : context.l10n.notEnoughDataFertileWindow
-              : context.l10n.partnerNextPeriodDescription(
-                  state.focusedDateInsights?.fertileDays.first.toEEEEMMMMd() ??
-                      '',
-                ),
-          events: state.focusedDateInsights?.fertileDays ?? [],
+          description: description,
+          events: fertileDays,
         );
       },
     );
@@ -105,25 +114,33 @@ class _CyclePredictionsState extends State<CyclePredictions> {
               previous.showCurrentUserCycleData ||
           current.focusedDateInsights != previous.focusedDateInsights,
       builder: (context, state) {
+        final nextPeriodDates =
+            state.focusedDateInsights?.nextPeriodDates ?? [];
+
+        late String description;
+        if (state.showCurrentUserCycleData) {
+          if (nextPeriodDates.isNotEmpty) {
+            description = context.l10n.nextPeriodDescription(
+              nextPeriodDates.first.toEEEEMMMMd(),
+            );
+          } else {
+            description = context.l10n.notEnoughDataNextPeriod;
+          }
+        } else {
+          final dateString = nextPeriodDates.isNotEmpty
+              ? nextPeriodDates.first.toEEEEMMMMd()
+              : '';
+          description = context.l10n.partnerNextPeriodDescription(dateString);
+        }
+
         return _buildCalendar(
-          focusedDay:
-              state.focusedDateInsights?.nextPeriodDates.first ??
-              DateTime.now(),
+          focusedDay: nextPeriodDates.isNotEmpty
+              ? nextPeriodDates.first
+              : DateTime.now(),
           eventColor: AppColors.red,
           title: context.l10n.nextPeriodTitle,
-          description: state.showCurrentUserCycleData
-              ? state.focusedDateInsights?.nextPeriodDates.isNotEmpty == true
-                    ? context.l10n.nextPeriodDescription(
-                        state.focusedDateInsights!.nextPeriodDates.first
-                            .toEEEEMMMMd(),
-                      )
-                    : context.l10n.notEnoughDataNextPeriod
-              : context.l10n.partnerNextPeriodDescription(
-                  state.focusedDateInsights?.nextPeriodDates.first
-                          .toEEEEMMMMd() ??
-                      '',
-                ),
-          events: state.focusedDateInsights?.nextPeriodDates ?? [],
+          description: description,
+          events: nextPeriodDates,
         );
       },
     );
