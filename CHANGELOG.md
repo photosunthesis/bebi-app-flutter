@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.3] - 2025-08-19
+
+## Added
+
+- Historical ovulation tracking: View ovulation predictions for your past cycles 🥚
+
+## Fixed
+
+- Fixed insights section showing the incorrect cycle phase 🔧
+
 ## [0.3.2] - 2025-08-19
 
 ### Fixed
