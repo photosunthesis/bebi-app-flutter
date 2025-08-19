@@ -9,8 +9,11 @@ class ProfileSetupLoadingState extends ProfileSetupState {
 }
 
 class ProfileSetupLoadedState extends ProfileSetupState {
-  const ProfileSetupLoadedState([this.profilePicture]);
-  final File? profilePicture;
+  const ProfileSetupLoadedState({this.photo, this.displayName, this.birthDate});
+  final String? photo;
+  final String? displayName;
+  final DateTime? birthDate;
+  bool get isPhotoUrl => photo?.startsWith('http') ?? false;
 }
 
 class ProfileSetupSuccessState extends ProfileSetupState {

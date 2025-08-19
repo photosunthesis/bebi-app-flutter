@@ -27,6 +27,24 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState>
   final FirebaseAuth _firebaseAuth;
   final ImagePicker _imagePicker;
 
+  Future<void> initialize() async {
+    await guard(() async {
+      emit(const ProfileSetupLoadingState());
+
+      final userProfile = await _userProfileRepository.getByUserId(
+        _firebaseAuth.currentUser!.uid,
+      );
+
+      emit(
+        ProfileSetupLoadedState(
+          photo: userProfile?.photoUrl,
+          displayName: userProfile?.displayName,
+          birthDate: userProfile?.birthDate,
+        ),
+      );
+    });
+  }
+
   Future<void> setProfilePicture() async {
     final pickedFile = await _imagePicker.pickImage(
       source: ImageSource.gallery,
@@ -37,7 +55,7 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState>
     );
 
     if (pickedFile != null) {
-      emit(ProfileSetupLoadedState(File(pickedFile.path)));
+      emit(ProfileSetupLoadedState(photo: pickedFile.path));
 
       logEvent(
         name: 'profile_picture_selected',
@@ -59,16 +77,16 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState>
   }
 
   Future<void> updateUserProfile(String displayName, DateTime birthDate) async {
-    final profilePicture = (state as ProfileSetupLoadedState).profilePicture;
+    final photoFilePath = (state as ProfileSetupLoadedState).photo;
 
     await guard(
       () async {
         emit(const ProfileSetupLoadingState());
 
-        final photoUrl = profilePicture != null
+        final photoUrl = photoFilePath != null
             ? await _userProfileRepository.uploadProfileImage(
                 _firebaseAuth.currentUser!.uid,
-                profilePicture,
+                File(photoFilePath),
               )
             : null;
 
@@ -103,9 +121,6 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState>
       },
       onError: (error, _) {
         emit(ProfileSetupErrorState(l10n.serverError));
-      },
-      onComplete: () {
-        emit(ProfileSetupLoadedState(profilePicture));
       },
     );
   }

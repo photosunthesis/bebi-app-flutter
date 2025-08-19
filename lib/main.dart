@@ -73,7 +73,7 @@ void _initializeApp({
 
     // Clear local storage on new version after initializing everything
     await _clearLocalStorageOnNewVersion();
- 
+
     onSuccess();
   } catch (error, stackTrace) {
     onError(error, stackTrace);

@@ -16,6 +16,8 @@ extension DatetimeExtensions on DateTime {
   String toEEEEMMMMdyyyyhhmma() =>
       DateFormat('EEEE MMMM d, yyyy h:mm a').format(this);
 
+  String toMMddyyyy() => DateFormat('MM/dd/yyyy').format(this);
+
   String toHHmma() => DateFormat('h:mm a').format(this);
 
   bool isSameDay(DateTime other) =>

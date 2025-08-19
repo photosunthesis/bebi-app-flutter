@@ -363,5 +363,7 @@
     }
   },
   "retryInitialization": "Retry initialization",
-  "maxRetryReachedMessage": "Maximum initialization attempts reached. If the problem persists, you may need to uninstall and reinstall the app to resolve any corrupted data or configuration issues."
+  "maxRetryReachedMessage": "Maximum initialization attempts reached. If the problem persists, you may need to uninstall and reinstall the app to resolve any corrupted data or configuration issues.",
+  "signOutDialogTitle": "Sign Out?",
+  "signOutDialogDescription": "You will need to sign in again to continue using the app. Your data will remain safe and accessible when you sign back in."
 }
