@@ -50,8 +50,12 @@ class CyclePredictionsService with LocalizationsMixin {
 
     final predictions = <CycleLog>[];
 
+    final historicalOvulations = _generateHistoricalOvulationPredictions(
+      periodLogs,
+    );
+    predictions.addAll(historicalOvulations);
+
     for (var i = 0; i < 6; i++) {
-      // maximum number of cycle predictions to generate
       final cycleId = 'predicted_cycle_$i';
       final cycleLength = _getPredictedCycleLength(
         avgCycleLength,
@@ -241,12 +245,22 @@ class CyclePredictionsService with LocalizationsMixin {
   }
 
   List<CycleLog> _generatePredictedOvulationWindow(
-    DateTime periodStart,
+    DateTime nextPeriodStart,
     String cycleId,
     bool isIrregular,
     double stdDev,
   ) {
-    final ovulationDate = periodStart.subtract(_ovulationDayBeforePeriod.days);
+    final cycleLength = _getPredictedCycleLength(
+      _defaultCycleLength.toDouble(),
+      stdDev,
+      isIrregular,
+      isIrregular ? Random(nextPeriodStart.millisecondsSinceEpoch) : null,
+    );
+    final previousPeriodStart = nextPeriodStart.subtract(cycleLength.days);
+    final ovulationDate = previousPeriodStart.add(
+      _ovulationDayBeforePeriod.days,
+    );
+
     final windowExtension = isIrregular
         ? (stdDev / _ovulationWindowExtensionDivisor)
               .clamp(0, _maxOvulationWindowExtension)
@@ -308,6 +322,58 @@ class CyclePredictionsService with LocalizationsMixin {
         isPrediction: true,
       );
     });
+  }
+
+  List<CycleLog> _generateHistoricalOvulationPredictions(
+    List<CycleLog> periodLogs,
+  ) {
+    if (periodLogs.length < 2) return [];
+
+    final periodGroups = _groupPeriodEventsByProximity(periodLogs);
+    if (periodGroups.length < 2) return [];
+
+    final historicalOvulations = <CycleLog>[];
+
+    for (var i = 0; i < periodGroups.length - 1; i++) {
+      final currentPeriodGroup = periodGroups[i];
+      final nextPeriodGroup = periodGroups[i + 1];
+
+      final currentPeriodStart = currentPeriodGroup.first.date;
+      final nextPeriodStart = nextPeriodGroup.first.date;
+
+      final cycleLength = nextPeriodStart.difference(currentPeriodStart).inDays;
+
+      if (cycleLength >= _minCycleGap && cycleLength <= _maxCycleGap) {
+        final ovulationDate = nextPeriodStart.subtract(
+          _ovulationDayBeforePeriod.days,
+        );
+
+        if (ovulationDate.isBefore(nextPeriodStart)) {
+          final fertileStart = ovulationDate.subtract(5.days);
+
+          for (var j = 0; j < _baseFertileWindowDays; j++) {
+            final date = fertileStart.add(j.days);
+            if (date.isAfter(
+                  currentPeriodStart.add(currentPeriodGroup.length.days),
+                ) &&
+                date.isBefore(nextPeriodStart)) {
+              historicalOvulations.add(
+                CycleLog.ovulation(
+                  id: 'historical_ovulation_${i}_$j',
+                  date: date,
+                  createdBy: 'system',
+                  ownedBy: 'system',
+                  users: [],
+                  isPrediction: true,
+                ),
+              );
+            }
+          }
+        }
+      }
+    }
+
+    return historicalOvulations;
   }
 
   List<CycleLog> _getSortedActualPeriodLogs(List<CycleLog> logs) {
