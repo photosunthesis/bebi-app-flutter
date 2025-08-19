@@ -11,6 +11,7 @@ import 'package:bebi_app/utils/extensions/string_extensions.dart';
 import 'package:bebi_app/utils/formatters/date_input_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_keyboard_visibility_temp_fork/flutter_keyboard_visibility_temp_fork.dart';
 
 class CyclesSetupScreen extends StatefulWidget {
   const CyclesSetupScreen({super.key});
@@ -40,33 +41,36 @@ class _CyclesSetupScreenState extends State<CyclesSetupScreen> {
         CycleSetupSuccessState() => context.pop(true),
         _ => null,
       },
-      builder: (context, state) => Form(
-        canPop: false,
-        onPopInvokedWithResult: _onPop,
-        key: _formKey,
-        child: Scaffold(
-          appBar: MainAppBar.build(context),
-          body: CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(child: _buildHeader()),
-              const SliverPadding(
-                padding: EdgeInsets.only(top: 24),
-                sliver: SliverToBoxAdapter(child: SizedBox.shrink()),
-              ),
-              SliverToBoxAdapter(child: _buildLastPeriodDateField()),
-              const SliverPadding(
-                padding: EdgeInsets.only(top: 16),
-                sliver: SliverToBoxAdapter(child: SizedBox.shrink()),
-              ),
-              SliverToBoxAdapter(child: _buildPeriodDurationField()),
-              const SliverPadding(
-                padding: EdgeInsets.only(top: 12),
-                sliver: SliverToBoxAdapter(child: SizedBox.shrink()),
-              ),
-              SliverToBoxAdapter(child: _buildSharingOption()),
-            ],
+      builder: (context, state) => KeyboardDismissOnTap(
+        dismissOnCapturedTaps: true,
+        child: Form(
+          canPop: false,
+          onPopInvokedWithResult: _onPop,
+          key: _formKey,
+          child: Scaffold(
+            appBar: MainAppBar.build(context),
+            body: CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(child: _buildHeader()),
+                const SliverPadding(
+                  padding: EdgeInsets.only(top: 24),
+                  sliver: SliverToBoxAdapter(child: SizedBox.shrink()),
+                ),
+                SliverToBoxAdapter(child: _buildLastPeriodDateField()),
+                const SliverPadding(
+                  padding: EdgeInsets.only(top: 16),
+                  sliver: SliverToBoxAdapter(child: SizedBox.shrink()),
+                ),
+                SliverToBoxAdapter(child: _buildPeriodDurationField()),
+                const SliverPadding(
+                  padding: EdgeInsets.only(top: 12),
+                  sliver: SliverToBoxAdapter(child: SizedBox.shrink()),
+                ),
+                SliverToBoxAdapter(child: _buildSharingOption()),
+              ],
+            ),
+            bottomNavigationBar: _buildBottomSection(),
           ),
-          bottomNavigationBar: _buildBottomSection(),
         ),
       ),
     );

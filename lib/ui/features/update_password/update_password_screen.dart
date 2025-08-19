@@ -8,6 +8,7 @@ import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_keyboard_visibility_temp_fork/flutter_keyboard_visibility_temp_fork.dart';
 
 class UpdatePasswordScreen extends StatefulWidget {
   const UpdatePasswordScreen({super.key});
@@ -32,33 +33,36 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      canPop: false,
-      onPopInvokedWithResult: _onPop,
-      key: _formKey,
-      child: BlocListener<UpdatePasswordCubit, UpdatePasswordState>(
-        listener: (context, state) => switch (state) {
-          UpdatePasswordSuccessState() => context.pop(),
-          UpdatePasswordErrorState(:final error) => context.showSnackbar(
-            error,
-            type: SnackbarType.error,
+    return KeyboardDismissOnTap(
+      dismissOnCapturedTaps: true,
+      child: Form(
+        canPop: false,
+        onPopInvokedWithResult: _onPop,
+        key: _formKey,
+        child: BlocListener<UpdatePasswordCubit, UpdatePasswordState>(
+          listener: (context, state) => switch (state) {
+            UpdatePasswordSuccessState() => context.pop(),
+            UpdatePasswordErrorState(:final error) => context.showSnackbar(
+              error,
+              type: SnackbarType.error,
+            ),
+            _ => null,
+          },
+          child: Scaffold(
+            appBar: MainAppBar.build(context),
+            body: ListView(
+              children: [
+                _buildHeader(),
+                const SizedBox(height: 16),
+                _buildOldPasswordField(),
+                const SizedBox(height: 16),
+                _buildNewPasswordField(),
+                const SizedBox(height: 16),
+                _buildConfirmPasswordField(),
+              ],
+            ),
+            bottomNavigationBar: _buildBottomBar(),
           ),
-          _ => null,
-        },
-        child: Scaffold(
-          appBar: MainAppBar.build(context),
-          body: ListView(
-            children: [
-              _buildHeader(),
-              const SizedBox(height: 16),
-              _buildOldPasswordField(),
-              const SizedBox(height: 16),
-              _buildNewPasswordField(),
-              const SizedBox(height: 16),
-              _buildConfirmPasswordField(),
-            ],
-          ),
-          bottomNavigationBar: _buildBottomBar(),
         ),
       ),
     );

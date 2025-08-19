@@ -14,6 +14,7 @@ import 'package:bebi_app/utils/formatters/date_input_formatter.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_keyboard_visibility_temp_fork/flutter_keyboard_visibility_temp_fork.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 class ProfileSetupScreen extends StatefulWidget {
@@ -62,29 +63,32 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             state is ProfileSetupLoadedState &&
             state.displayName != null &&
             state.birthDate != null;
-        return Form(
-          canPop: isEditing,
-          key: _formKey,
-          child: Scaffold(
-            resizeToAvoidBottomInset: true,
-            appBar: isEditing ? MainAppBar.build(context) : null,
-            body: ListView(
-              children: [
-                isEditing
-                    ? const SizedBox(height: UiConstants.padding)
-                    : const SafeArea(
-                        child: SizedBox(height: UiConstants.padding),
-                      ),
-                _buildHeader(),
-                const SizedBox(height: 32),
-                _buildProfilePicture(),
-                const SizedBox(height: 44),
-                _buildDisplayNameField(),
-                const SizedBox(height: 16),
-                _buildBirthdateField(),
-              ],
+        return KeyboardDismissOnTap(
+          dismissOnCapturedTaps: true,
+          child: Form(
+            canPop: isEditing,
+            key: _formKey,
+            child: Scaffold(
+              resizeToAvoidBottomInset: true,
+              appBar: isEditing ? MainAppBar.build(context) : null,
+              body: ListView(
+                children: [
+                  isEditing
+                      ? const SizedBox(height: UiConstants.padding)
+                      : const SafeArea(
+                          child: SizedBox(height: UiConstants.padding),
+                        ),
+                  _buildHeader(),
+                  const SizedBox(height: 32),
+                  _buildProfilePicture(),
+                  const SizedBox(height: 44),
+                  _buildDisplayNameField(),
+                  const SizedBox(height: 16),
+                  _buildBirthdateField(),
+                ],
+              ),
+              bottomNavigationBar: _buildBottomBar(),
             ),
-            bottomNavigationBar: _buildBottomBar(),
           ),
         );
       },
