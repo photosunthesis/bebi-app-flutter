@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:bebi_app/data/models/cycle_day_insights.dart';
 import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
-import 'package:bebi_app/utils/extensions/int_extensions.dart';
 import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
 // ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
@@ -33,21 +32,19 @@ class CycleDayInsightsService with LocalizationsMixin {
     }
 
     final periodGroups = _groupPeriodEventsByProximity(periodEvents.toList());
-    final (currentPeriodDates, previousPeriodDates, nextPeriodDates) =
-        _findCurrentPreviousAndNextPeriodGroups(date, periodGroups);
 
-    if (currentPeriodDates.isEmpty) {
+    if (periodGroups.isEmpty) {
       throw ArgumentError(l10n.unableToDetermineCycleError);
     }
 
-    final cycleStart = currentPeriodDates.first;
-    final nextCycleStart = nextPeriodDates.first;
-
-    final currentFertileWindow = _getCurrentFertileWindow(
-      ovulationEvents.map((e) => e.date).toList(),
-      cycleStart,
-      nextCycleStart,
+    final currentPeriodGroup = _findCurrentPeriodGroup(date, periodGroups);
+    final cycleStart = currentPeriodGroup.first.date;
+    final nextPeriodGroup = _findNextPeriodGroup(
+      periodGroups,
+      currentPeriodGroup,
     );
+
+    final nextCycleStart = nextPeriodGroup.first.date;
 
     final dayOfCycle = date.noTime().difference(cycleStart.noTime()).inDays + 1;
     final cycleLengthInDays = nextCycleStart
@@ -55,16 +52,13 @@ class CycleDayInsightsService with LocalizationsMixin {
         .difference(cycleStart.noTime())
         .inDays;
 
-    final allPeriodDates = periodGroups
-        .expand((group) => group.map((log) => log.date))
-        .toList();
-
-    final cyclePhase = _getCyclePhase(
-      date,
-      allPeriodDates,
-      currentFertileWindow,
+    final currentFertileWindow = _getCurrentFertileWindow(
+      ovulationEvents.map((e) => e.date).toList(),
+      cycleStart,
+      nextCycleStart,
     );
 
+    final cyclePhase = _getCyclePhase(date, sortedEvents.toList());
     final averagePeriodDurationInDays = _calculateAveragePeriodDays(
       periodGroups,
     );
@@ -75,94 +69,75 @@ class CycleDayInsightsService with LocalizationsMixin {
       dayOfCycle: dayOfCycle,
       cycleLengthInDays: cycleLengthInDays,
       averagePeriodDurationInDays: averagePeriodDurationInDays,
-      nextPeriodDates: nextPeriodDates,
+      nextPeriodDates: nextPeriodGroup.map((log) => log.date).toList(),
       fertileDays: currentFertileWindow,
     );
   }
 
   List<List<CycleLog>> _groupPeriodEventsByProximity(List<CycleLog> events) {
-    final groups = <List<CycleLog>>[];
+    final periodGroups = <List<CycleLog>>[];
 
     for (final event in events) {
-      final group = groups.lastOrNull;
+      final currentGroup = periodGroups.lastOrNull;
       // 14 days is the max distance between two period events
-      if (group == null || event.date.difference(group.last.date).inDays > 14) {
-        groups.add([event]);
+      if (currentGroup == null ||
+          event.date.difference(currentGroup.last.date).inDays > 14) {
+        periodGroups.add([event]);
       } else {
-        group.add(event);
+        currentGroup.add(event);
       }
     }
 
-    return groups;
+    return periodGroups;
   }
 
-  (
-    List<DateTime> currentPeriodDates,
-    List<DateTime> previousPeriodDates,
-    List<DateTime> nextPeriodDates,
-  )
-  _findCurrentPreviousAndNextPeriodGroups(
+  List<CycleLog> _findCurrentPeriodGroup(
     DateTime date,
     List<List<CycleLog>> periodGroups,
   ) {
-    if (periodGroups.isEmpty) {
-      throw ArgumentError(l10n.noPeriodDataForCycleError);
-    }
+    final normalizedDate = date.noTime();
 
-    final actualPeriods = periodGroups
-        .where((group) => group.any((log) => !log.isPrediction))
-        .toList();
-    final predictedPeriods = periodGroups
-        .where((group) => group.every((log) => log.isPrediction))
-        .toList();
+    for (final periodGroup in periodGroups) {
+      final periodDates = periodGroup.map((log) => log.date.noTime()).toList();
 
-    var currentPeriodDates = <DateTime>[];
-    var previousPeriodDates = <DateTime>[];
-    var nextPeriodDates = <DateTime>[];
-    int? currentPeriodIndex;
-
-    // Find current period from actual periods
-    for (var i = 0; i < actualPeriods.length; i++) {
-      final periodGroup = actualPeriods[i];
-      final cycleStart = periodGroup.first.date;
-      final cycleEnd = periodGroup.last.date;
-
-      if ((date.isAfter(cycleStart) || date.isSameDay(cycleStart)) &&
-          (date.isBefore(cycleEnd.add(28.days)) || date.isSameDay(cycleEnd))) {
-        currentPeriodDates = periodGroup.map((log) => log.date).toList();
-        currentPeriodIndex = i;
-        break;
+      if (periodDates.any(
+        (periodDate) =>
+            periodDate.isAtSameMomentAs(normalizedDate) ||
+            (periodDate.isBefore(normalizedDate) &&
+                normalizedDate.difference(periodDate).inDays <= 7),
+      )) {
+        return periodGroup;
       }
     }
 
-    // If no current actual period found, use the most recent actual period
-    if (currentPeriodDates.isEmpty && actualPeriods.isNotEmpty) {
-      final lastActualPeriod = actualPeriods.last;
-      final lastCycleStart = lastActualPeriod.first.date;
+    for (var i = 0; i < periodGroups.length - 1; i++) {
+      final currentGroup = periodGroups[i];
+      final nextGroup = periodGroups[i + 1];
+      final currentGroupEndDate = currentGroup
+          .map((log) => log.date.noTime())
+          .last;
+      final nextGroupStartDate = nextGroup
+          .map((log) => log.date.noTime())
+          .first;
 
-      if (date.isAfter(lastCycleStart) || date.isSameDay(lastCycleStart)) {
-        currentPeriodDates = lastActualPeriod.map((log) => log.date).toList();
-        currentPeriodIndex = actualPeriods.length - 1;
+      if (normalizedDate.isAfter(currentGroupEndDate) &&
+          normalizedDate.isBefore(nextGroupStartDate)) {
+        return currentGroup;
       }
     }
 
-    // Find previous period if current period was found
-    if (currentPeriodIndex != null && currentPeriodIndex > 0) {
-      final previousPeriodGroup = actualPeriods[currentPeriodIndex - 1];
-      previousPeriodDates = previousPeriodGroup.map((log) => log.date).toList();
-    }
+    return periodGroups.first;
+  }
 
-    // Find next period from predictions
-    if (predictedPeriods.isNotEmpty) {
-      final nextPredictedPeriod = predictedPeriods.first;
-      nextPeriodDates = nextPredictedPeriod.map((log) => log.date).toList();
+  List<CycleLog> _findNextPeriodGroup(
+    List<List<CycleLog>> periodGroups,
+    List<CycleLog> currentPeriodGroup,
+  ) {
+    final currentIndex = periodGroups.indexOf(currentPeriodGroup);
+    if (currentIndex < periodGroups.length - 1) {
+      return periodGroups[currentIndex + 1];
     }
-
-    if (currentPeriodDates.isEmpty) {
-      throw ArgumentError(l10n.unableToDetermineCycleError);
-    }
-
-    return (currentPeriodDates, previousPeriodDates, nextPeriodDates);
+    return periodGroups.first;
   }
 
   List<DateTime> _getCurrentFertileWindow(
@@ -172,46 +147,84 @@ class CycleDayInsightsService with LocalizationsMixin {
   ) {
     if (ovulationDates.isEmpty) return [];
     if (nextCycleStart == null) {
-      return ovulationDates.where((e) => e.isAfter(cycleStart)).toList();
+      return ovulationDates.where((date) => date.isAfter(cycleStart)).toList();
     }
     return ovulationDates
-        .where((e) => e.isBefore(nextCycleStart) && e.isAfter(cycleStart))
+        .where(
+          (date) => date.isBefore(nextCycleStart) && date.isAfter(cycleStart),
+        )
         .toList();
   }
 
-  CyclePhase _getCyclePhase(
-    DateTime date,
-    List<DateTime> allPeriodDates,
-    List<DateTime> currentFertileWindow,
-  ) {
+  CyclePhase _getCyclePhase(DateTime date, List<CycleLog> allCycleLogs) {
     final normalizedDate = date.noTime();
-    final normalizedPeriodDates = allPeriodDates
-        .map((d) => d.noTime())
+
+    final periodLogs = allCycleLogs
+        .where((log) => log.type == LogType.period)
+        .map((log) => log.date.noTime())
         .toList();
-    final normalizedFertileDates = currentFertileWindow
-        .map((d) => d.noTime())
+    final ovulationLogs = allCycleLogs
+        .where((log) => log.type == LogType.ovulation)
+        .map((log) => log.date.noTime())
         .toList();
 
-    final isPeriod = normalizedPeriodDates.any(
-      (d) => d.isSameDay(normalizedDate),
-    );
+    if (periodLogs.any((periodDate) => periodDate.isSameDay(normalizedDate))) {
+      return CyclePhase.period;
+    }
 
-    if (isPeriod) return CyclePhase.period;
-
-    if (normalizedFertileDates.any((d) => d.isSameDay(normalizedDate))) {
+    if (ovulationLogs.any(
+      (ovulationDate) => ovulationDate.isSameDay(normalizedDate),
+    )) {
       return CyclePhase.ovulation;
     }
 
-    if (normalizedFertileDates.isNotEmpty &&
-        normalizedPeriodDates.isNotEmpty &&
-        normalizedDate.isAfter(
-          normalizedPeriodDates.reduce((a, b) => a.isAfter(b) ? a : b),
-        ) &&
-        normalizedDate.isBefore(normalizedFertileDates.first)) {
-      return CyclePhase.follicular;
+    final previousPeriodDate = _findClosestDate(
+      periodLogs.where((date) => date.isBefore(normalizedDate)),
+      isLatest: true,
+    );
+    final nextPeriodDate = _findClosestDate(
+      periodLogs.where((date) => date.isAfter(normalizedDate)),
+      isLatest: false,
+    );
+    final previousOvulationDate = _findClosestDate(
+      ovulationLogs.where((date) => date.isBefore(normalizedDate)),
+      isLatest: true,
+    );
+
+    if (previousPeriodDate != null) {
+      final ovulationAfterPreviousPeriod = _findClosestDate(
+        ovulationLogs.where((date) => date.isAfter(previousPeriodDate)),
+        isLatest: false,
+      );
+
+      if (ovulationAfterPreviousPeriod != null &&
+          normalizedDate.isAfter(previousPeriodDate) &&
+          normalizedDate.isBefore(ovulationAfterPreviousPeriod)) {
+        return CyclePhase.follicular;
+      }
+    }
+
+    if (previousOvulationDate != null &&
+        nextPeriodDate != null &&
+        normalizedDate.isAfter(previousOvulationDate) &&
+        normalizedDate.isBefore(nextPeriodDate)) {
+      return CyclePhase.luteal;
     }
 
     return CyclePhase.luteal;
+  }
+
+  DateTime? _findClosestDate(
+    Iterable<DateTime> dates, {
+    required bool isLatest,
+  }) {
+    return dates.fold<DateTime?>(
+      null,
+      (prev, curr) =>
+          prev == null || (isLatest ? curr.isAfter(prev) : curr.isBefore(prev))
+          ? curr
+          : prev,
+    );
   }
 
   int _calculateAveragePeriodDays(List<List<CycleLog>> periodGroups) {
@@ -311,8 +324,8 @@ class CycleDayInsightsService with LocalizationsMixin {
     - This is a couples app - occasionally include partner support or relationship dynamics when naturally relevant
 
     CONTRACEPTION/FERTILITY GUIDANCE:
-    - Only mention protection/contraception during ovulation phase when fertility is actually relevant
-    - For ovulation phase: Be inclusive - mention "if pregnancy isn't the goal" or "unless baby-making is on the agenda"
+    - For ovulation phase: Use supportive, empowering language like "a great time to use your preferred protection methods" or "perfect opportunity to practice safe intimacy"
+    - Frame protection as self-care and empowerment, focusing on choice and control over your body
     - Avoid assuming heterosexual relationships - use inclusive language like "intimate activities" or "bedroom adventures"
     - During non-fertile phases, focus on other aspects of sexuality, comfort, and well-being
 
