@@ -91,7 +91,9 @@ class _CyclePredictionsState extends State<CyclePredictions> {
           final dateString = fertileDays.isNotEmpty
               ? fertileDays.first.toEEEEMMMMd()
               : '';
-          description = context.l10n.partnerNextPeriodDescription(dateString);
+          description = context.l10n.partnerFertileWindowDescription(
+            dateString,
+          );
         }
 
         return _buildCalendar(

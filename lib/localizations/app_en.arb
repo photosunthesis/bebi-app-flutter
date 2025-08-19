@@ -164,7 +164,7 @@
   "welcomeToCycleTrackingMessage": "Start tracking your cycle by tapping the button below, or view your partner's data using the profile icons above.",
   "setupCycleTrackingButton": "Set up cycle tracking",
   "cycleTrackingDisclaimer": "This app provides helpful information to support your cycle tracking. For personalized guidance, we recommend consulting with a medical professional. The AI-generated insights and cycle predictions are designed to be informative and supportive, though they may not always be accurate for everyone's unique cycle.",
-  "fertileWindowDescription": "Your fertile window is predicted to begin on **{date}** according to recent tracking.",
+  "fertileWindowDescription": "Your fertile window is predicted to begin on **{date}**.",
   "@fertileWindowDescription": {
     "placeholders": {
       "date": {
@@ -173,7 +173,7 @@
       }
     }
   },
-  "partnerFertileWindowDescription": "Your partner's fertile window is predicted to begin on **{date}** according to recent tracking.",
+  "partnerFertileWindowDescription": "Your partner's fertile window is predicted to begin on **{date}**.",
   "@partnerFertileWindowDescription": {
     "placeholders": {
       "date": {
@@ -182,7 +182,7 @@
       }
     }
   },
-  "nextPeriodDescription": "Your next period is predicted to begin on **{date}** according to recent tracking.",
+  "nextPeriodDescription": "Your next period is predicted to begin on **{date}**.",
   "@nextPeriodDescription": {
     "placeholders": {
       "date": {
@@ -191,7 +191,7 @@
       }
     }
   },
-  "partnerNextPeriodDescription": "Your partner's next period is predicted to begin on **{date}** according to recent tracking.",
+  "partnerNextPeriodDescription": "Your partner's next period is predicted to begin on **{date}**.",
   "@partnerNextPeriodDescription": {
     "placeholders": {
       "date": {
