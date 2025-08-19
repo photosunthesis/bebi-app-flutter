@@ -22,7 +22,6 @@ enum RepeatFrequency {
 class RepeatRule extends Equatable {
   const RepeatRule({
     required this.frequency,
-    this.daysOfWeek,
     this.endDate,
     this.occurrences,
     this.excludedDates,
@@ -33,9 +32,6 @@ class RepeatRule extends Equatable {
       frequency: RepeatFrequency.values.firstWhere(
         (e) => e.name == map['frequency'],
       ),
-      daysOfWeek: map['days_of_week'] != null
-          ? List<int>.from(map['days_of_week'])
-          : null,
       endDate: map['end_date'] != null
           ? (map['end_date'] as Timestamp).toDate()
           : null,
@@ -49,21 +45,18 @@ class RepeatRule extends Equatable {
   }
 
   final RepeatFrequency frequency;
-  final List<int>? daysOfWeek;
   final DateTime? endDate;
   final int? occurrences;
   final List<DateTime>? excludedDates;
 
   RepeatRule copyWith({
     RepeatFrequency? frequency,
-    List<int>? daysOfWeek,
     DateTime? endDate,
     int? occurrences,
     List<DateTime>? excludedDates,
   }) {
     return RepeatRule(
       frequency: frequency ?? this.frequency,
-      daysOfWeek: daysOfWeek ?? this.daysOfWeek,
       endDate: endDate ?? this.endDate,
       occurrences: occurrences ?? this.occurrences,
       excludedDates: excludedDates ?? this.excludedDates,
@@ -73,7 +66,6 @@ class RepeatRule extends Equatable {
   Map<String, dynamic> toMap() {
     return {
       'frequency': frequency.name,
-      if (daysOfWeek != null) 'days_of_week': daysOfWeek,
       if (endDate != null) 'end_date': Timestamp.fromDate(endDate!),
       if (occurrences != null) 'occurrences': occurrences,
       if (excludedDates != null)
@@ -82,11 +74,5 @@ class RepeatRule extends Equatable {
   }
 
   @override
-  List<Object?> get props => [
-    frequency,
-    daysOfWeek,
-    endDate,
-    occurrences,
-    excludedDates,
-  ];
+  List<Object?> get props => [frequency, endDate, occurrences, excludedDates];
 }

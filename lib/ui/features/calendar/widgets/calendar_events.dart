@@ -108,10 +108,10 @@ class _EventCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildTitle(context),
-        const SizedBox(height: 4),
+        const SizedBox(height: 3),
         _buildTime(context),
         if (event.notes != null && event.notes!.isNotEmpty) ...[
-          const SizedBox(height: 3),
+          const SizedBox(height: 2),
           _buildNotes(context),
         ],
       ],

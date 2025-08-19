@@ -1,6 +1,5 @@
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
-import 'package:bebi_app/data/models/day_of_week.dart';
 import 'package:bebi_app/data/models/repeat_rule.dart';
 import 'package:bebi_app/ui/features/calendar_event_form/calendar_event_form_cubit.dart';
 import 'package:bebi_app/ui/features/calendar_event_form/widgets/repeat_picker.dart';
@@ -32,8 +31,6 @@ class CalendarEventForm extends StatefulWidget {
     required this.selectedColor,
     required this.onSelectedColorChanged,
     required this.repeatFrequency,
-    required this.daysOfWeekSelected,
-    required this.onDaysOfWeekChanged,
     required this.onRepeatFrequencyChanged,
     this.selectedDate,
     super.key,
@@ -53,8 +50,6 @@ class CalendarEventForm extends StatefulWidget {
   final EventColor selectedColor;
   final ValueChanged<EventColor> onSelectedColorChanged;
   final RepeatFrequency repeatFrequency;
-  final List<DayOfWeek> daysOfWeekSelected;
-  final ValueChanged<List<DayOfWeek>> onDaysOfWeekChanged;
   final ValueChanged<RepeatFrequency> onRepeatFrequencyChanged;
   final DateTime? selectedDate;
 
@@ -190,8 +185,6 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
                 repeatFrequency: widget.repeatFrequency,
                 onRepeatFrequencyChanged: widget.onRepeatFrequencyChanged,
                 endDateController: widget.endRepeatDateController,
-                daysOfWeekSelected: widget.daysOfWeekSelected,
-                onDaysOfWeekChanged: widget.onDaysOfWeekChanged,
               ),
             ],
           ),

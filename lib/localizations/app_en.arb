@@ -110,7 +110,7 @@
       }
     }
   },
-  "eventSharedWith": "You share this event with {partnerName}.",
+  "eventSharedWith": "You share this event with **{partnerName}**.",
   "@eventSharedWith": {
     "placeholders": {
       "partnerName": {
@@ -119,7 +119,7 @@
       }
     }
   },
-  "eventSharedBy": "Event is shared with you by {partnerName}.",
+  "eventSharedBy": "Event is shared with you by **{partnerName}**.",
   "@eventSharedBy": {
     "placeholders": {
       "partnerName": {
@@ -128,6 +128,7 @@
       }
     }
   },
+  "yourPartner": "Your partner",
   "deleteEventButton": "Delete event",
   "deleteEventTitle": "Delete event?",
   "deleteEventMessage": "Do you want to delete this event? This action cannot be undone.",

@@ -1,7 +1,6 @@
 import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
-import 'package:bebi_app/data/models/day_of_week.dart';
 import 'package:bebi_app/data/models/repeat_rule.dart';
 import 'package:bebi_app/data/models/save_changes_dialog_options.dart';
 import 'package:bebi_app/ui/features/calendar_event_details/calendar_event_details_cubit.dart';
@@ -12,6 +11,7 @@ import 'package:bebi_app/utils/extensions/color_extensions.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 class CalendarEventDetailsScreen extends StatefulWidget {
@@ -157,21 +157,9 @@ class _CalendarEventDetailsScreenState
               children: [
                 const SizedBox(width: 40),
                 Text(
-                  _event.repeatRule.frequency == RepeatFrequency.weekly
-                      ? context.l10n.repeatsFrequencyWithDays(
-                          _event.repeatRule.frequency.name,
-                          _event.repeatRule.daysOfWeek
-                                  ?.map(
-                                    (e) => DayOfWeek.values[e]
-                                        .toTitle()
-                                        .substring(0, 3),
-                                  )
-                                  .join(', ') ??
-                              '',
-                        )
-                      : context.l10n.repeatsFrequency(
-                          _event.repeatRule.frequency.name,
-                        ),
+                  context.l10n.repeatsFrequency(
+                    _event.repeatRule.frequency.name,
+                  ),
                   style: context.textTheme.bodyMedium,
                 ),
               ],
@@ -237,20 +225,23 @@ class _CalendarEventDetailsScreenState
                             state is CalendarEventDetailsLoadedState
                             ? state
                             : null,
-                        builder: (context, state) {
-                          return Text(
-                            _event.createdBy == state?.userProfile.userId
-                                ? context.l10n.eventSharedWith(
-                                    state?.partnerProfile.displayName ??
-                                        'your partner',
-                                  )
-                                : context.l10n.eventSharedBy(
-                                    state?.partnerProfile.displayName ??
-                                        'your partner',
-                                  ),
-                            style: context.textTheme.bodyMedium,
-                          );
-                        },
+                        builder: (context, state) => MarkdownBody(
+                          data: _event.createdBy == state?.userProfile.userId
+                              ? context.l10n.eventSharedWith(
+                                  state?.partnerProfile.displayName ??
+                                      context.l10n.yourPartner,
+                                )
+                              : context.l10n.eventSharedBy(
+                                  state?.partnerProfile.displayName ??
+                                      context.l10n.yourPartner,
+                                ),
+                          styleSheet: MarkdownStyleSheet(
+                            p: context.textTheme.bodyMedium,
+                            strong: context.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
                       ),
                 ),
               ],

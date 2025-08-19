@@ -1,6 +1,5 @@
 import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
-import 'package:bebi_app/data/models/day_of_week.dart';
 import 'package:bebi_app/data/models/repeat_rule.dart';
 import 'package:bebi_app/data/models/save_changes_dialog_options.dart';
 import 'package:bebi_app/ui/features/calendar_event_form/calendar_event_form_cubit.dart';
@@ -56,14 +55,6 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
   late final _notesController = TextEditingController(
     text: widget.calendarEvent?.notes,
   );
-  late List<DayOfWeek> _daysOfWeekSelected =
-      widget.calendarEvent?.repeatRule.daysOfWeek != null
-      ? widget.calendarEvent!.repeatRule.daysOfWeek!
-            .map((index) => DayOfWeek.values[index])
-            .toList()
-      : widget.selectedDate != null
-      ? [DayOfWeek.values[widget.selectedDate!.toLocal().weekday - 1]]
-      : const [];
   late bool _allDay = widget.calendarEvent?.allDay ?? false;
   late bool _shareWithPartner = (widget.calendarEvent?.users.length ?? 2) > 1;
   late EventColor _selectedColor =
@@ -127,9 +118,6 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
           onRepeatFrequencyChanged: (value) =>
               setState(() => _repeatFrequency = value),
           selectedDate: widget.selectedDate,
-          daysOfWeekSelected: _daysOfWeekSelected,
-          onDaysOfWeekChanged: (value) =>
-              setState(() => _daysOfWeekSelected = value),
         ),
       ),
     );
@@ -182,9 +170,6 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
       final repeat = RepeatRule(
         frequency: _repeatFrequency,
         endDate: endRepeatDate,
-        daysOfWeek: _repeatFrequency == RepeatFrequency.weekly
-            ? _daysOfWeekSelected.map((e) => e.index).toList()
-            : null,
       );
 
       await _cubit.save(

@@ -121,26 +121,7 @@ class RecurringCalendarEventsService {
   DateTime getNextOccurrence(DateTime current, RepeatRule rule) {
     return switch (rule.frequency) {
       RepeatFrequency.daily => current.add(1.days),
-
-      RepeatFrequency.weekly
-          when rule.daysOfWeek == null || rule.daysOfWeek!.isEmpty =>
-        current.add(7.days),
-
-      RepeatFrequency.weekly => () {
-        final sortedDays = [...rule.daysOfWeek!]..sort();
-
-        // Find next valid weekday in the list
-        for (final dayIndex in sortedDays) {
-          if (dayIndex > current.weekday) {
-            return current.add((dayIndex - current.weekday).days);
-          }
-        }
-
-        // If no next day found in same week, jump to next week's first selected day
-        final daysUntilNext = (7 - current.weekday) + sortedDays.first;
-        return current.add(daysUntilNext.days);
-      }(),
-
+      RepeatFrequency.weekly => current.add(7.days),
       RepeatFrequency.monthly => DateTime(
         current.year,
         current.month + 1,
@@ -148,7 +129,6 @@ class RecurringCalendarEventsService {
         current.hour,
         current.minute,
       ),
-
       RepeatFrequency.yearly => DateTime(
         current.year + 1,
         current.month,
@@ -156,7 +136,6 @@ class RecurringCalendarEventsService {
         current.hour,
         current.minute,
       ),
-
       _ => current,
     };
   }
