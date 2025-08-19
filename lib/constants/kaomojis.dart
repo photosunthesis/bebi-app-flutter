@@ -1,11 +1,11 @@
 import 'dart:math';
 
 abstract class Kaomojis {
-  static String getRandomFromHappySet() {
-    return happySet[Random(
-      DateTime.now().millisecondsSinceEpoch,
-    ).nextInt(happySet.length)];
-  }
+  static String getRandomFromHappySet() =>
+      happySet[Random().nextInt(happySet.length)];
+
+  static String getRandomFromSadSet() =>
+      sadSet[Random().nextInt(sadSet.length)];
 
   static const happySet = [
     '(¯▿¯)',
@@ -14,5 +14,14 @@ abstract class Kaomojis {
     '(⌒ω⌒)',
     '╰(▔∀▔)╯',
     '(ﾉ´ з )ノ',
+  ];
+
+  static const sadSet = [
+    '(◞‸◟；)',
+    '(ಥ﹏ಥ)',
+    '(ಥ_ಥ)',
+    '( • ᴖ • ｡)',
+    '(╥﹏╥)',
+    '(╥﹏╥)',
   ];
 }

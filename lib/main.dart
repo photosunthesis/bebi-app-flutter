@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:bebi_app/app/app.dart';
+import 'package:bebi_app/app/error_app.dart';
 import 'package:bebi_app/config/dependencies.dart';
 import 'package:bebi_app/config/firebase_options.dart';
 import 'package:bebi_app/data/hive_adapters/calendar_event_adapter.dart';
@@ -24,8 +25,41 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 void main() {
-  runZoned(() async {
-    WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
+  _attemptInitialization();
+}
+
+void _attemptInitialization({int attempt = 1, int maxAttempts = 3}) {
+  _initializeApp(
+    attempt: attempt,
+    onSuccess: () => runApp(const App()),
+    onError: (error, stackTrace) async {
+      final shouldRetry = attempt < maxAttempts;
+
+      runApp(
+        ErrorApp(
+          error: error,
+          attemptNumber: attempt,
+          maxAttempts: maxAttempts,
+          canRetry: shouldRetry,
+          onRetry: shouldRetry
+              ? () => _attemptInitialization(
+                  attempt: attempt + 1,
+                  maxAttempts: maxAttempts,
+                )
+              : null,
+        ),
+      );
+    },
+  );
+}
+
+void _initializeApp({
+  required int attempt,
+  required VoidCallback onSuccess,
+  required Function(Object error, StackTrace stackTrace) onError,
+}) async {
+  try {
     _configureFontLicenses();
 
     await Future.wait([
@@ -40,8 +74,10 @@ void main() {
     // Clear local storage on new version after initializing everything
     await _clearLocalStorageOnNewVersion();
 
-    runApp(const App());
-  });
+    onSuccess();
+  } catch (error, stackTrace) {
+    onError(error, stackTrace);
+  }
 }
 
 Future<void> _configureFirebase() async {
@@ -90,13 +126,11 @@ Future<void> _clearLocalStorageOnNewVersion() async {
   final previousVersion = box.get('version', defaultValue: '');
   final packageVersion = GetIt.I<PackageInfo>().version;
   if (previousVersion != packageVersion) {
-    await Future.wait([
-      box.put('version', packageVersion),
-      GetIt.I<Box<CalendarEvent>>().clear(),
-      GetIt.I<Box<CycleLog>>().clear(),
-      GetIt.I<Box<UserProfile>>().clear(),
-      GetIt.I<Box<UserPartnership>>().clear(),
-      GetIt.I<Box<String>>().clear(),
-    ]);
+    await GetIt.I<Box<CalendarEvent>>().clear();
+    await GetIt.I<Box<CycleLog>>().clear();
+    await GetIt.I<Box<UserProfile>>().clear();
+    await GetIt.I<Box<UserPartnership>>().clear();
+    await GetIt.I<Box<String>>().clear();
+    await box.put('version', packageVersion);
   }
 }

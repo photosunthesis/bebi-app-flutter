@@ -336,5 +336,31 @@
       }
     }
   },
-  "viewAllButton": "View all"
+  "viewAllButton": "View all",
+  "initializationFailed": "Initialization Failed",
+  "initializationErrorDescription": "Something went wrong while starting the app. Please try again or restart the application.",
+  "attemptDetails": "Attempt {attemptNumber} of {maxAttempts}",
+  "@attemptDetails": {
+    "placeholders": {
+      "attemptNumber": {
+        "type": "int",
+        "description": "Current attempt number"
+      },
+      "maxAttempts": {
+        "type": "int",
+        "description": "Maximum number of attempts"
+      }
+    }
+  },
+  "errorDetails": "Error Details: {error}",
+  "@errorDetails": {
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "The error message"
+      }
+    }
+  },
+  "retryInitialization": "Retry initialization",
+  "maxRetryReachedMessage": "Maximum initialization attempts reached. If the problem persists, you may need to uninstall and reinstall the app to resolve any corrupted data or configuration issues."
 }
