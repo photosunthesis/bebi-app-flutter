@@ -65,8 +65,6 @@ class _Calendar extends StatelessWidget {
               return day.isSameDay(state.focusedDay);
             },
             daysOfWeekHeight: 32,
-            // TODO Add feature to switch to week view
-            calendarFormat: CalendarFormat.month,
             availableCalendarFormats: {
               CalendarFormat.month: context.l10n.monthFormat,
               CalendarFormat.week: context.l10n.weekFormat,

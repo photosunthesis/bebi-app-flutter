@@ -106,7 +106,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
           };
 
           return Align(
-            alignment: Alignment.center,
             child: Stack(
               clipBehavior: Clip.none,
               children: [

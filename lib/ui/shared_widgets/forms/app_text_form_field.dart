@@ -2,7 +2,7 @@ import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:bebi_app/utils/extensions/int_extensions.dart';
 import 'package:bebi_app/utils/extensions/string_extensions.dart';
-import 'package:bebi_app/utils/mixins/analytics_utils.dart';
+import 'package:bebi_app/utils/mixins/analytics_mixin.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -67,7 +67,6 @@ class _AppTextFormFieldState extends State<AppTextFormField>
   late final _inputBorder =
       widget.inputBorder ??
       OutlineInputBorder(
-        borderRadius: UiConstants.borderRadius,
         borderSide: BorderSide(
           color: context.colorScheme.outline,
           width: UiConstants.borderWidth,

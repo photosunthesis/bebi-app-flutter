@@ -9,7 +9,7 @@ import 'package:bebi_app/data/repositories/user_profile_repository.dart';
 import 'package:bebi_app/data/services/cycle_day_insights_service.dart';
 import 'package:bebi_app/data/services/cycle_predictions_service.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
-import 'package:bebi_app/utils/mixins/analytics_utils.dart';
+import 'package:bebi_app/utils/mixins/analytics_mixin.dart';
 import 'package:bebi_app/utils/mixins/guard_mixin.dart';
 import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
 import 'package:equatable/equatable.dart';
@@ -110,9 +110,8 @@ class CyclesCubit extends Cubit<CyclesState>
       },
       onError: (error, _) =>
           emit(state.copyWith(error: error.toString(), isLoading: false)),
-      onComplete: () => emit(
-        state.copyWith(isLoading: false, error: null, isInsightLoading: false),
-      ),
+      onComplete: () =>
+          emit(state.copyWith(isLoading: false, isInsightLoading: false)),
     );
   }
 
@@ -128,7 +127,7 @@ class CyclesCubit extends Cubit<CyclesState>
           state.cycleLogs,
         );
 
-        emit(state.copyWith(focusedDateInsights: insights, aiSummary: null));
+        emit(state.copyWith(focusedDateInsights: insights));
 
         final aiSummary = await _cycleDayInsightsService.generateAiInsights(
           insights,
@@ -139,9 +138,8 @@ class CyclesCubit extends Cubit<CyclesState>
         emit(state.copyWith(aiSummary: aiSummary));
       },
       onError: (error, _) => emit(state.copyWith(error: error.toString())),
-      onComplete: () => emit(
-        state.copyWith(isLoading: false, error: null, isInsightLoading: false),
-      ),
+      onComplete: () =>
+          emit(state.copyWith(isLoading: false, isInsightLoading: false)),
     );
   }
 
@@ -165,8 +163,6 @@ class CyclesCubit extends Cubit<CyclesState>
             state.copyWith(
               cycleLogs: [],
               showCurrentUserCycleData: newShowCurrentUser,
-              aiSummary: null,
-              focusedDateInsights: null,
             ),
           );
 
@@ -199,9 +195,8 @@ class CyclesCubit extends Cubit<CyclesState>
       },
       onError: (error, _) =>
           emit(state.copyWith(error: error.toString(), isLoading: false)),
-      onComplete: () => emit(
-        state.copyWith(isLoading: false, error: null, isInsightLoading: false),
-      ),
+      onComplete: () =>
+          emit(state.copyWith(isLoading: false, isInsightLoading: false)),
     );
   }
 

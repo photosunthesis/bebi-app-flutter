@@ -72,7 +72,6 @@ abstract class Dependencies {
               'Accept': 'application/json',
               'Content-Type': 'application/json',
             },
-            responseType: ResponseType.json,
           ),
         )
         ..interceptors.addAll([

@@ -33,9 +33,7 @@ extension DefaultSnackbar on BuildContext {
             content: snackBarContent,
             duration: duration ?? 4.seconds,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.zero,
-            ),
+            shape: const RoundedRectangleBorder(),
             backgroundColor: switch (type) {
               SnackbarType.success => colorScheme.inversePrimary,
               SnackbarType.secondary => colorScheme.surface,

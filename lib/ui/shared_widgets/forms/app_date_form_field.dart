@@ -189,7 +189,6 @@ class _AppDateFormFieldState extends State<AppDateFormField> {
           lastDay: widget.maximumDate ?? DateTime.now().add(365.days),
           selectedDayPredicate: (day) => _selectedDay?.isSameDay(day) ?? false,
           daysOfWeekHeight: 32,
-          calendarFormat: CalendarFormat.month,
           availableCalendarFormats: const {CalendarFormat.month: 'Month'},
           calendarBuilders: CalendarBuilders(
             selectedBuilder: (context, day, focusedDay) =>

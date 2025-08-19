@@ -98,7 +98,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: UiConstants.padding,
-                  vertical: 0,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -138,7 +137,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 ),
               ),
               Align(
-                alignment: Alignment.center,
                 child: Text(
                   focusedDay?.toMMMMyyyy() ?? '',
                   style: context.primaryTextTheme.headlineSmall,

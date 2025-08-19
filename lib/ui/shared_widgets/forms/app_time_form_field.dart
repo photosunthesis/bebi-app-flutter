@@ -183,7 +183,6 @@ class _AppTimeFormFieldState extends State<AppTimeFormField> {
         mode: CupertinoDatePickerMode.time,
         initialDateTime: initialDateTime,
         onDateTimeChanged: _onTimeChanged,
-        use24hFormat: false,
         minimumDate: widget.minimumDate,
         maximumDate: widget.maximumDate,
         selectionOverlayBuilder:

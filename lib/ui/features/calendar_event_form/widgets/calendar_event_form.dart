@@ -169,7 +169,7 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
           padding: const EdgeInsets.only(right: 14, top: 8),
           child: Icon(
             Symbols.calendar_today,
-            color: widget.selectedColor.color.darken(0.1),
+            color: widget.selectedColor.color.darken(),
           ),
         ),
         Expanded(
@@ -195,7 +195,6 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
 
   Widget _buildAllDayToggle() {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(context.l10n.allDayText, style: context.textTheme.bodyMedium),
         const Spacer(),
@@ -283,12 +282,11 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
               padding: const EdgeInsets.only(right: 14, top: 8),
               child: Icon(
                 Symbols.notes,
-                color: widget.selectedColor.color.darken(0.1),
+                color: widget.selectedColor.color.darken(),
               ),
             ),
             Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   _buildShareWithPartnerToggle(),
                   const SizedBox(height: 6),
@@ -315,7 +313,6 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
           : false,
       builder: (context, eventWasCreatedByCurrentUser) {
         return Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
               eventWasCreatedByCurrentUser

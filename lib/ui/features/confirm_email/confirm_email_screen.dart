@@ -46,11 +46,7 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
                 ),
               ),
               SliverToBoxAdapter(child: _buildHeader()),
-              SliverFillRemaining(
-                hasScrollBody: false,
-                fillOverscroll: false,
-                child: _buildKaomoji(),
-              ),
+              SliverFillRemaining(hasScrollBody: false, child: _buildKaomoji()),
             ],
           ),
           bottomNavigationBar: _buildBottomBar(),

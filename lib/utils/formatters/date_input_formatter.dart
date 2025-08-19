@@ -33,7 +33,6 @@ class DateInputFormatter extends TextInputFormatter {
     // If user erased and it's back to the mask, clear the field
     if (digits.isEmpty || result == _mask) {
       return const TextEditingValue(
-        text: '',
         selection: TextSelection.collapsed(offset: 0),
       );
     }

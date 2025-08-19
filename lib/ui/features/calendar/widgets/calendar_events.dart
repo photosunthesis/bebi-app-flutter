@@ -135,7 +135,7 @@ class _EventCard extends StatelessWidget {
           ? context.l10n.allDayText.toUpperCase()
           : _formatDuration(context, event.startTime, event.endTime),
       style: context.textTheme.bodySmall?.copyWith(
-        color: event.color.darken(0.1),
+        color: event.color.darken(),
         fontWeight: FontWeight.w500,
       ),
     );
@@ -147,7 +147,7 @@ class _EventCard extends StatelessWidget {
       child: Text(
         event.notes!,
         style: context.textTheme.bodyMedium?.copyWith(
-          color: event.color.darken(0.1),
+          color: event.color.darken(),
         ),
         overflow: TextOverflow.ellipsis,
         maxLines: 1,

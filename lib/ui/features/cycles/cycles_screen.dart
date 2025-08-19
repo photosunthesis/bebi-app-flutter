@@ -271,7 +271,6 @@ class _CyclesScreenState extends State<CyclesScreen> {
                             BoxShadow(
                               color: context.colorScheme.surface.withAlpha(200),
                               blurRadius: 12,
-                              offset: const Offset(0, 0),
                               spreadRadius: 1,
                             ),
                           ],
@@ -288,7 +287,6 @@ class _CyclesScreenState extends State<CyclesScreen> {
                             BoxShadow(
                               color: context.colorScheme.surface.withAlpha(200),
                               blurRadius: 12,
-                              offset: const Offset(0, 0),
                               spreadRadius: 8,
                             ),
                           ],

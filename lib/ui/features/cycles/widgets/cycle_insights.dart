@@ -14,7 +14,6 @@ class CycleInsights extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedSize(
       duration: 120.milliseconds,
-      alignment: Alignment.center,
       curve: Curves.easeOutCirc,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),

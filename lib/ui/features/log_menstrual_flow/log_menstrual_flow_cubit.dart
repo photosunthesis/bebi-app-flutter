@@ -5,7 +5,7 @@ import 'package:bebi_app/data/repositories/cycle_logs_repository.dart';
 import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
 import 'package:bebi_app/utils/extensions/int_extensions.dart';
-import 'package:bebi_app/utils/mixins/analytics_utils.dart';
+import 'package:bebi_app/utils/mixins/analytics_mixin.dart';
 import 'package:bebi_app/utils/mixins/guard_mixin.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -62,7 +62,6 @@ class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState>
           users: userProfile!.isSharingCycleWithPartner == true
               ? partnership.users
               : [_currentUserId!],
-          isPrediction: false,
         );
 
         final previousLogs = await _cycleLogsRepository.getByUserIdAndDateRange(

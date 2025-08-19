@@ -29,7 +29,6 @@ Future<SaveChangesDialogOptions?> showDeleteEventBottomDialog(
       Option(
         text: context.l10n.cancelButton,
         value: SaveChangesDialogOptions.cancel,
-        style: OptionStyle.secondary,
       ),
     ],
   );

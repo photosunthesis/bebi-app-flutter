@@ -268,7 +268,6 @@ class _CyclePredictionsState extends State<CyclePredictions> {
                       BoxShadow(
                         color: context.colorScheme.surface.withAlpha(140),
                         blurRadius: 8,
-                        offset: const Offset(0, 0),
                       ),
                   ],
                 ),

@@ -27,3 +27,4 @@ linter:
     unawaited_futures: true
     use_super_parameters: true
     avoid_unnecessary_containers: true
+    avoid_redundant_argument_values: true

@@ -58,7 +58,6 @@ class _HomeScreenState extends State<HomeScreen> {
             SliverToBoxAdapter(child: _buildHeader()),
             SliverFillRemaining(
               hasScrollBody: false,
-              fillOverscroll: false,
               child: _buildMainContent(),
             ),
           ],

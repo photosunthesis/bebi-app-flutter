@@ -131,7 +131,7 @@ abstract class AppTheme {
         TextButton.styleFrom(
           backgroundColor: _colorScheme.surface,
           foregroundColor: _colorScheme.primary,
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+          shape: const RoundedRectangleBorder(),
           textStyle: _textTheme.labelLarge?.copyWith(
             fontSize: 12,
             fontWeight: FontWeight.w600,

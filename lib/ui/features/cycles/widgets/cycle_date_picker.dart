@@ -196,7 +196,6 @@ class _CycleDatePickerState extends State<CycleDatePicker> {
           ? AngledStripesBackground(
               color: event?.color.withAlpha(60) ?? Colors.transparent,
               backgroundColor: event?.color.withAlpha(40) ?? Colors.transparent,
-              shape: const CircleBorder(),
             )
           : Container(
               width: 26,
@@ -248,7 +247,6 @@ class _CycleDatePickerState extends State<CycleDatePicker> {
               BoxShadow(
                 color: context.colorScheme.surface.withAlpha(140),
                 blurRadius: 8,
-                offset: const Offset(0, 0),
               ),
           ],
         ),

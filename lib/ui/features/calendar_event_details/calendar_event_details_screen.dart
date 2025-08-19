@@ -119,7 +119,7 @@ class _CalendarEventDetailsScreenState
               children: [
                 Icon(
                   Symbols.calendar_clock,
-                  color: widget.calendarEvent.color.darken(0.1),
+                  color: widget.calendarEvent.color.darken(),
                 ),
                 const SizedBox(width: 16),
                 Text(
@@ -180,10 +180,7 @@ class _CalendarEventDetailsScreenState
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
-                  Symbols.notes,
-                  color: widget.calendarEvent.color.darken(0.1),
-                ),
+                Icon(Symbols.notes, color: widget.calendarEvent.color.darken()),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Text(
@@ -207,11 +204,10 @@ class _CalendarEventDetailsScreenState
           children: [
             const SizedBox(height: 24),
             Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Icon(
                   Symbols.people_alt,
-                  color: widget.calendarEvent.color.darken(0.1),
+                  color: widget.calendarEvent.color.darken(),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -274,9 +270,7 @@ class _CalendarEventDetailsScreenState
                     builder: (context, loading) {
                       return OutlinedButton(
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: context.colorScheme.error.darken(
-                            0.1,
-                          ),
+                          foregroundColor: context.colorScheme.error.darken(),
                           padding: const EdgeInsets.symmetric(
                             vertical: 8,
                             horizontal: 10,
