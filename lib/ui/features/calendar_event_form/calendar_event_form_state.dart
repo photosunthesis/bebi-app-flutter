@@ -13,7 +13,7 @@ class CalendarEventFormLoadedState extends CalendarEventFormState {
   final CalendarEvent? calendarEvent;
   final String currentUserId;
   bool get eventWasCreatedByCurrentUser =>
-      calendarEvent?.createdBy == currentUserId;
+      calendarEvent == null || calendarEvent?.createdBy == currentUserId;
 }
 
 class CalendarEventFormErrorState extends CalendarEventFormState {
