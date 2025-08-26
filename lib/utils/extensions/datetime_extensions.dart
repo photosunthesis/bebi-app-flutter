@@ -16,9 +16,20 @@ extension DatetimeExtensions on DateTime {
   String toEEEEMMMMdyyyyhhmma() =>
       DateFormat('EEEE MMMM d, yyyy h:mm a').format(this);
 
+  String toEEEMMMdyyyyhhmma() =>
+      DateFormat('EEE MMM d, yyyy h:mm a').format(this);
+
   String toMMddyyyy() => DateFormat('MM/dd/yyyy').format(this);
 
   String toHHmma() => DateFormat('h:mm a').format(this);
+
+  String toDateRange(DateTime other) {
+    if (isSameDay(other)) {
+      return '${toEEEEMMMdyyyy()} ${toHHmma()} - ${other.toHHmma()}';
+    }
+
+    return '${toEEEEMMMdyyyy()} - ${other.toEEEEMMMdyyyy()}';
+  }
 
   bool isSameDay(DateTime other) =>
       year == other.year && month == other.month && day == other.day;

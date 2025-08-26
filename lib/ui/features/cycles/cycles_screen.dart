@@ -62,7 +62,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
         appBar: _buildAppBar(),
         body: Stack(
           children: [
-            RefreshIndicator(
+            RefreshIndicator.adaptive(
               onRefresh: _cubit.refreshData,
               child: ListView(
                 controller: _scrollController,

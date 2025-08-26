@@ -76,9 +76,8 @@ class CalendarEventsRepository {
 
   Future<CalendarEvent> createOrUpdate(CalendarEvent event) async {
     final updatedEvent = event.copyWith(
-      date: event.date.toUtc(),
-      startTime: event.startTime.toUtc(),
-      endTime: event.endTime?.toUtc(),
+      startDate: event.startDate.toUtc(),
+      endDate: event.endDate?.toUtc(),
       createdAt: event.createdAt.toUtc(),
       updatedAt: DateTime.now().toUtc(),
     );
@@ -119,14 +118,14 @@ class CalendarEventsRepository {
 
       // Check if the event is within the date range
       if (startDate != null &&
-          event.date.isBefore(startDate) &&
-          !event.date.isSameDay(startDate)) {
+          event.startDate.isBefore(startDate) &&
+          !event.startDate.isSameDay(startDate)) {
         return false;
       }
 
       if (endDate != null &&
-          event.date.isAfter(endDate) &&
-          !event.date.isSameDay(endDate)) {
+          event.startDate.isAfter(endDate) &&
+          !event.startDate.isSameDay(endDate)) {
         return false;
       }
 

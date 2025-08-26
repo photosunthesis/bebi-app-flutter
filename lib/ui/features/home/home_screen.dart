@@ -47,20 +47,23 @@ class _HomeScreenState extends State<HomeScreen> {
         _ => null,
       },
       child: Scaffold(
-        body: CustomScrollView(
-          slivers: [
-            SliverSafeArea(
-              sliver: SliverPadding(
-                padding: const EdgeInsets.only(top: UiConstants.padding),
-                sliver: SliverToBoxAdapter(child: Container()),
+        body: RefreshIndicator.adaptive(
+          onRefresh: _cubit.initialize,
+          child: CustomScrollView(
+            slivers: [
+              SliverSafeArea(
+                sliver: SliverPadding(
+                  padding: const EdgeInsets.only(top: UiConstants.padding),
+                  sliver: SliverToBoxAdapter(child: Container()),
+                ),
               ),
-            ),
-            SliverToBoxAdapter(child: _buildHeader()),
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: _buildMainContent(),
-            ),
-          ],
+              SliverToBoxAdapter(child: _buildHeader()),
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: _buildMainContent(),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -75,19 +78,22 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                context.l10n.homeGreeting(
-                  now.hour < 12
-                      ? context.l10n.morning
-                      : now.hour < 17
-                      ? context.l10n.afternoon
-                      : context.l10n.evening,
-                  user?.displayName?.toTitleCase() ?? 'user',
+              Expanded(
+                child: Text(
+                  context.l10n.homeGreeting(
+                    now.hour < 12
+                        ? context.l10n.morning
+                        : now.hour < 17
+                        ? context.l10n.afternoon
+                        : context.l10n.evening,
+                    user?.displayName?.toTitleCase() ?? 'user',
+                  ),
+                  style: context.primaryTextTheme.headlineSmall,
                 ),
-                style: context.primaryTextTheme.headlineSmall,
               ),
+              const SizedBox(width: 20),
               _buildAccountMenu(user),
             ],
           ),

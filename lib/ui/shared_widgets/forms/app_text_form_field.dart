@@ -31,6 +31,8 @@ class AppTextFormField extends StatefulWidget {
     this.textAlign,
     this.fillColor,
     this.onTap,
+    this.visualDensity,
+    this.contentPadding,
     super.key,
   });
 
@@ -55,6 +57,8 @@ class AppTextFormField extends StatefulWidget {
   final TextAlign? textAlign;
   final Color? fillColor;
   final VoidCallback? onTap;
+  final VisualDensity? visualDensity;
+  final EdgeInsetsGeometry? contentPadding;
 
   @override
   State<AppTextFormField> createState() => _AppTextFormFieldState();
@@ -149,6 +153,8 @@ class _AppTextFormFieldState extends State<AppTextFormField>
             minLines: widget.minLines,
             maxLines: widget.maxLines ?? 1,
             decoration: InputDecoration(
+              contentPadding: widget.contentPadding,
+              visualDensity: widget.visualDensity,
               border: _inputBorder,
               enabledBorder: _inputBorder,
               focusedBorder: _inputBorder,

@@ -11,7 +11,6 @@ import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_keyboard_visibility_temp_fork/flutter_keyboard_visibility_temp_fork.dart';
 
 class AddPartnerScreen extends StatefulWidget {
   const AddPartnerScreen({super.key});
@@ -59,34 +58,31 @@ class _AddPartnerScreenState extends State<AddPartnerScreen>
 
           if (state is AddPartnerSuccessState) context.goNamed(AppRoutes.home);
         },
-        child: KeyboardDismissOnTap(
-          dismissOnCapturedTaps: true,
-          child: Scaffold(
-            resizeToAvoidBottomInset: true,
-            body: Form(
-              key: _formKey,
-              child: CustomScrollView(
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: Column(
-                      children: [
-                        const SafeArea(
-                          child: SizedBox(height: UiConstants.padding),
-                        ),
-                        _buildHeader(),
-                        const SizedBox(height: 18),
-                      ],
-                    ),
+        child: Scaffold(
+          resizeToAvoidBottomInset: true,
+          body: Form(
+            key: _formKey,
+            child: CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Column(
+                    children: [
+                      const SafeArea(
+                        child: SizedBox(height: UiConstants.padding),
+                      ),
+                      _buildHeader(),
+                      const SizedBox(height: 18),
+                    ],
                   ),
-                  SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: _buildCodeSections(),
-                  ),
-                ],
-              ),
+                ),
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: _buildCodeSections(),
+                ),
+              ],
             ),
-            bottomNavigationBar: _buildBottomBar(),
           ),
+          bottomNavigationBar: _buildBottomBar(),
         ),
       ),
     );

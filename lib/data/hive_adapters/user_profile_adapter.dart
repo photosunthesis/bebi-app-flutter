@@ -41,9 +41,7 @@ class UserProfileAdapter extends TypeAdapter<UserProfile> {
     writer.writeInt(obj.birthDate.millisecondsSinceEpoch);
     writer.writeString(obj.displayName);
     writer.writeBool(obj.photoUrl != null);
-    if (obj.photoUrl != null) {
-      writer.writeString(obj.photoUrl!);
-    }
+    if (obj.photoUrl != null) writer.writeString(obj.photoUrl!);
     writer.writeString(obj.createdBy);
     writer.writeInt(obj.createdAt.millisecondsSinceEpoch);
     writer.writeInt(obj.updatedAt.millisecondsSinceEpoch);
