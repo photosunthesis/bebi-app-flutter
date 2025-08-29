@@ -72,12 +72,9 @@ jobs:
           zip -r app.ipa Payload
 
       - name: Rename IPA file with user-friendly name
--        run: |
--          cd build/ios/iphoneos
--          mv app.ipa "ios.ipa"
-+        uses: ./.github/actions/rename-artifacts
-+        with:
-+          platform: ios
+        uses: ./.github/actions/rename-artifacts
+        with:
+          platform: ios
 
       - name: Upload debug symbols to Sentry
         uses: ./.github/actions/sentry-upload
