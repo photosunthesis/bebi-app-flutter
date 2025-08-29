@@ -67,7 +67,7 @@ class _MainScaffoldState extends State<MainScaffold> {
         ),
       ),
       child: Padding(
-        padding: EdgeInsets.only(bottom: kIsWebiOS && kIsPwa ? 12 : 0),
+        padding: EdgeInsets.only(bottom: kIsWebiOS && kIsPwa ? 20 : 0),
         child: SafeArea(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
