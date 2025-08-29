@@ -15,7 +15,7 @@ mixin GuardMixin {
     try {
       return await body();
     } catch (e, s) {
-      if ((kDebugMode && isTest) || disableLogging) {
+      if ((kDebugMode && isTest) || disableLogging || kIsWeb) {
         debugPrint('Error caught by guard: $e\n$s');
       } else {
         unawaited(GetIt.I<FirebaseCrashlytics>().recordError(e, s));

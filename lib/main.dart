@@ -83,7 +83,7 @@ void _initializeApp({
 Future<void> _configureFirebase() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  if (!kDebugMode) {
+  if (!kDebugMode || !kIsWeb) {
     FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
   }
 }
