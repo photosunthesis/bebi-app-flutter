@@ -1,0 +1,80 @@
+name: Flutter Prepare
+
+inputs:
+  flutter_version:
+    description: Flutter version
+    required: true
+  firebase_project:
+    description: Firebase project id
+    required: true
+  firebase_token:
+    description: Firebase CI token
+    required: true
+  firebase_platforms:
+    description: Platforms to configure for flutterfire (android,ios)
+    required: true
+  out_path:
+    description: Path to write firebase_options.dart
+    required: true
+  generate_l10n:
+    description: Whether to run flutter gen-l10n
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{ inputs.flutter_version }}
+        cache: true
+
+    - name: Cache Flutter dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.pub-cache
+          .dart_tool
+        key: flutter-deps-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
+        restore-keys: |
+          flutter-deps-${{ runner.os }}-
+
+    - name: Cache Firebase CLI and global packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/firebase
+          ~/.pub-cache/bin
+          ~/.pub-cache/global_packages
+        key: firebase-cli-${{ runner.os }}-v1
+        restore-keys: |
+          firebase-cli-${{ runner.os }}-
+
+    - name: Configure firebase
+      shell: bash
+      run: |
+        if ! command -v firebase &> /dev/null; then
+          curl -sL https://firebase.tools | bash
+        fi
+        if ! dart pub global list | grep -q flutterfire_cli; then
+          dart pub global activate flutterfire_cli
+        fi
+        flutterfire configure \
+          --project=${{ inputs.firebase_project }} \
+          --platforms=${{ inputs.firebase_platforms }} \
+          --token=${{ inputs.firebase_token }} \
+          --out=${{ inputs.out_path }} \
+          --yes
+
+    - name: Download dependencies
+      shell: bash
+      run: flutter pub get
+
+    - name: Run build runner
+      shell: bash
+      run: flutter pub run build_runner build --delete-conflicting-outputs
+
+    - name: Generate localizations
+      if: ${{ inputs.generate_l10n == 'true' }}
+      shell: bash
+      run: flutter gen-l10n

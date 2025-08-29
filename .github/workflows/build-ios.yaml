@@ -1,0 +1,89 @@
+name: Build iOS IPA
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_number:
+        description: "Build number (optional, defaults to run number)"
+        required: false
+        type: string
+  workflow_call:
+    inputs:
+      build_number:
+        required: false
+        type: string
+
+jobs:
+  build-ios:
+    name: Build IPA
+    runs-on: macos-14
+    permissions:
+      contents: write
+      packages: write
+      actions: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Xcode version
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: "16.2"
+
+      - name: Prepare Flutter project
+        uses: ./.github/actions/flutter-prepare
+        with:
+          flutter_version: 3.35.2
+          firebase_project: bebi-app
+          firebase_token: ${{ secrets.FIREBASE_CI_TOKEN }}
+          firebase_platforms: ios
+          out_path: lib/config/firebase_options.dart
+          generate_l10n: "true"
+
+      - name: Cache iOS build cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ios/Pods
+            ~/.cocoapods
+            ~/Library/Caches/CocoaPods
+          key: ios-pods-${{ runner.os }}-${{ hashFiles('ios/Podfile.lock') }}
+          restore-keys: |
+            ios-pods-${{ runner.os }}-
+
+      - name: Set build number
+        id: build_number
+        run: |
+          if [ -n "${{ inputs.build_number }}" ]; then
+            echo "number=${{ inputs.build_number }}" >> $GITHUB_OUTPUT
+          elif [ -n "${{ github.event.inputs.build_number }}" ]; then
+            echo "number=${{ github.event.inputs.build_number }}" >> $GITHUB_OUTPUT
+          else
+            echo "number=${{ github.run_number }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build iOS
+        run: flutter build ios --release --no-codesign --obfuscate --split-debug-info=build/ios/outputs/symbols --build-number=${{ steps.build_number.outputs.number }}
+
+      - name: Create IPA
+        run: |
+          cd build/ios/iphoneos
+          mkdir Payload
+          cp -r Runner.app Payload
+          zip -r app.ipa Payload
+
+      - name: Rename IPA file with user-friendly name
+-        run: |
+-          cd build/ios/iphoneos
+-          mv app.ipa "ios.ipa"
++        uses: ./.github/actions/rename-artifacts
++        with:
++          platform: ios
+
+      - name: Upload debug symbols to Sentry
+        uses: ./.github/actions/sentry-upload
+
+      - name: Upload iOS build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-artifacts
+          path: build/ios/iphoneos/ios.ipa

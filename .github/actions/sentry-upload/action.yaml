@@ -1,0 +1,8 @@
+name: Sentry Upload
+
+runs:
+  using: composite
+  steps:
+    - name: Upload debug symbols to Sentry
+      shell: bash
+      run: flutter pub run sentry_dart_plugin
