@@ -90,7 +90,6 @@ Future<void> _configureFirebase() async {
 }
 
 void _configureFontLicenses() {
-  if (kIsWeb) return; // Weird bug where on the web this would fail 🤷🏻
   LicenseRegistry.addLicense(() async* {
     final licenses = await Future.wait([
       rootBundle.loadString('assets/fonts/ibm_plex_mono/OFL.txt'),
