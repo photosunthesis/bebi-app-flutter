@@ -17,10 +17,6 @@ jobs:
   build-ios:
     name: Build IPA
     runs-on: macos-14
-    permissions:
-      contents: write
-      packages: write
-      actions: write
     steps:
       - uses: actions/checkout@v4
 

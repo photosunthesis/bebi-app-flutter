@@ -17,10 +17,6 @@ jobs:
   build-android:
     name: Build APK
     runs-on: ubuntu-24.04
-    permissions:
-      contents: write
-      packages: write
-      actions: write
     steps:
       - uses: actions/checkout@v4
 
