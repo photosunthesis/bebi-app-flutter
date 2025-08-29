@@ -102,7 +102,7 @@ icons_launcher:
   platforms:
     web:
       enable: true
-      image_path: "assets/app_logo/app_logo.png"
+      image_path: "assets/app_logo/app_logo_ios.png"
     android:
       enable: true
       image_path: "assets/app_logo/app_logo_android12.png"
