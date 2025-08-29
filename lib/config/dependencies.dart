@@ -63,7 +63,6 @@ abstract class Dependencies {
           BaseOptions(
             connectTimeout: 5.seconds,
             receiveTimeout: 5.seconds,
-            sendTimeout: 5.seconds,
             headers: {
               'Accept': 'application/json',
               'Content-Type': 'application/json',
