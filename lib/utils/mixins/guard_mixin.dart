@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:bebi_app/utils/is_test.dart';
+import 'package:bebi_app/utils/platform/platform_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 

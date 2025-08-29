@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:bebi_app/app/app.dart';
-import 'package:bebi_app/app/error_app.dart';
 import 'package:bebi_app/config/dependencies.dart';
 import 'package:bebi_app/config/firebase_options.dart';
 import 'package:bebi_app/data/hive_adapters/calendar_event_adapter.dart';
@@ -25,42 +24,9 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  _attemptInitialization();
-}
-
-void _attemptInitialization({int attempt = 1, int maxAttempts = 3}) {
-  _initializeApp(
-    attempt: attempt,
-    onSuccess: () async => _initializeSentry(const App()),
-    onError: (error, stackTrace) async {
-      final shouldRetry = attempt < maxAttempts;
-
-      runApp(
-        ErrorApp(
-          error: error,
-          attemptNumber: attempt,
-          maxAttempts: maxAttempts,
-          canRetry: shouldRetry,
-          onRetry: shouldRetry
-              ? () => _attemptInitialization(
-                  attempt: attempt + 1,
-                  maxAttempts: maxAttempts,
-                )
-              : null,
-        ),
-      );
-    },
-  );
-}
-
-Future<void> _initializeApp({
-  required int attempt,
-  required Future<void> Function() onSuccess,
-  required Function(Object error, StackTrace stackTrace) onError,
-}) async {
-  try {
+void main() {
+  runZoned(() async {
+    WidgetsFlutterBinding.ensureInitialized();
     _configureFontLicenses();
 
     await Future.wait([
@@ -69,21 +35,16 @@ Future<void> _initializeApp({
       _configureHive(),
     ]);
 
-    // Configure dependencies after Firebase and Hive are initialized
     await configureDependencies();
-
-    // Clear local storage on new version after initializing everything
     await _clearLocalStorageOnNewVersion();
+    await _configureSentry();
 
-    await onSuccess();
-  } catch (error, stackTrace) {
-    onError(error, stackTrace);
-  }
+    runApp(await _getSentryWidget());
+  });
 }
 
-Future<void> _initializeSentry(Widget appWidget) async {
+Future<void> _configureSentry() async {
   final sentryDsn = await _getSentryDsn();
-
   if (sentryDsn.isNotEmpty || !kDebugMode) {
     await SentryFlutter.init((options) {
       options.dsn = sentryDsn;
@@ -93,10 +54,15 @@ Future<void> _initializeSentry(Widget appWidget) async {
       options.profilesSampleRate = 1.0;
       options.replay.sessionSampleRate = 0.1;
       options.replay.onErrorSampleRate = 1.0;
-    }, appRunner: () => runApp(SentryWidget(child: appWidget)));
-  } else {
-    runApp(appWidget);
+    });
   }
+}
+
+Future<Widget> _getSentryWidget() async {
+  final sentryDsn = await _getSentryDsn();
+  return sentryDsn.isNotEmpty || !kDebugMode
+      ? SentryWidget(child: const App())
+      : const App();
 }
 
 Future<String> _getSentryDsn() async {

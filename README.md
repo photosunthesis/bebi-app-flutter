@@ -38,7 +38,7 @@ The app follows a clean architecture pattern with clear separation of concerns:
 
 - **State Management**: `flutter_bloc`
 - **Navigation**: `go_router`
-- **Backend**: Firebase (Auth, Firestore, Storage, Analytics, Crashlytics)
+- **Backend**: Firebase (Auth, Firestore, Storage, Analytics, Sentry)
 - **Local Storage**: `hive_ce_flutter`
 - **Dependency Injection**: `get_it` + `injectable`
 - **UI**: `table_calendar`, `cached_network_image`
