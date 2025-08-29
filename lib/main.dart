@@ -15,7 +15,7 @@ import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/data/models/user_partnership.dart';
 import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,8 +23,9 @@ import 'package:flutter_refresh_rate_control/flutter_refresh_rate_control.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   _attemptInitialization();
 }
@@ -32,7 +33,7 @@ void main() {
 void _attemptInitialization({int attempt = 1, int maxAttempts = 3}) {
   _initializeApp(
     attempt: attempt,
-    onSuccess: () => runApp(const App()),
+    onSuccess: () async => _initializeSentry(const App()),
     onError: (error, stackTrace) async {
       final shouldRetry = attempt < maxAttempts;
 
@@ -54,9 +55,9 @@ void _attemptInitialization({int attempt = 1, int maxAttempts = 3}) {
   );
 }
 
-void _initializeApp({
+Future<void> _initializeApp({
   required int attempt,
-  required VoidCallback onSuccess,
+  required Future<void> Function() onSuccess,
   required Function(Object error, StackTrace stackTrace) onError,
 }) async {
   try {
@@ -74,18 +75,52 @@ void _initializeApp({
     // Clear local storage on new version after initializing everything
     await _clearLocalStorageOnNewVersion();
 
-    onSuccess();
+    await onSuccess();
   } catch (error, stackTrace) {
     onError(error, stackTrace);
   }
 }
 
+Future<void> _initializeSentry(Widget appWidget) async {
+  final sentryDsn = await _getSentryDsn();
+
+  if (sentryDsn.isNotEmpty || !kDebugMode) {
+    await SentryFlutter.init((options) {
+      options.dsn = sentryDsn;
+      options.sendDefaultPii = true;
+      options.enableLogs = true;
+      options.tracesSampleRate = 1.0;
+      options.profilesSampleRate = 1.0;
+      options.replay.sessionSampleRate = 0.1;
+      options.replay.onErrorSampleRate = 1.0;
+    }, appRunner: () => runApp(SentryWidget(child: appWidget)));
+  } else {
+    runApp(appWidget);
+  }
+}
+
+Future<String> _getSentryDsn() async {
+  try {
+    final remoteConfig = FirebaseRemoteConfig.instance;
+
+    await remoteConfig.setConfigSettings(
+      RemoteConfigSettings(
+        fetchTimeout: const Duration(minutes: 1),
+        minimumFetchInterval: const Duration(hours: 1),
+      ),
+    );
+
+    await remoteConfig.setDefaults({'sentry_dsn': ''});
+    await remoteConfig.fetchAndActivate();
+
+    return remoteConfig.getString('sentry_dsn');
+  } catch (e) {
+    return '';
+  }
+}
+
 Future<void> _configureFirebase() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
-  if (!kDebugMode || !kIsWeb) {
-    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
-  }
 }
 
 void _configureFontLicenses() {
@@ -106,8 +141,8 @@ Future<void> _configureHighRefreshScreen() async {
     if (Platform.isAndroid) {
       await FlutterRefreshRateControl().requestHighRefreshRate();
     }
-  } catch (e, s) {
-    if (!kDebugMode) await FirebaseCrashlytics.instance.recordError(e, s);
+  } catch (_) {
+    // If this fails... oh well :D
   }
 }
 

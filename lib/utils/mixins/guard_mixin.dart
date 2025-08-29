@@ -1,9 +1,8 @@
 import 'dart:async';
 
 import 'package:bebi_app/utils/is_test.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
-import 'package:get_it/get_it.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 mixin GuardMixin {
   FutureOr<T?> guard<T>(
@@ -18,7 +17,7 @@ mixin GuardMixin {
       if ((kDebugMode && isTest) || disableLogging || kIsWeb) {
         debugPrint('Error caught by guard: $e\n$s');
       } else {
-        unawaited(GetIt.I<FirebaseCrashlytics>().recordError(e, s));
+        unawaited(Sentry.captureException(e, stackTrace: s));
       }
       onError?.call(e, s);
       return null;

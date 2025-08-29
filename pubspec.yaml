@@ -17,7 +17,7 @@ dependencies:
   firebase_analytics: ^12.0.0
   firebase_auth: ^6.0.1
   firebase_core: ^4.0.0
-  firebase_crashlytics: ^5.0.0
+  firebase_remote_config: ^6.0.0
   firebase_storage: ^13.0.0
   flutter:
     sdk: flutter
@@ -36,6 +36,7 @@ dependencies:
   material_symbols_icons: ^4.2815.1
   package_info_plus: ^8.3.1
   paged_vertical_calendar: ^1.1.10
+  sentry_flutter: ^9.6.0
   skeletonizer: ^2.1.0+1
   super_editor: ^0.3.0-dev.29
   super_editor_markdown: ^0.2.0
@@ -50,6 +51,7 @@ dev_dependencies:
     sdk: flutter
   icons_launcher: ^3.0.1
   injectable_generator: ^2.8.1
+  sentry_dart_plugin: ^3.1.1
 
 flutter:
   uses-material-design: true
@@ -109,3 +111,9 @@ icons_launcher:
     ios:
       enable: true
       image_path: "assets/app_logo/app_logo_ios.png"
+
+sentry:
+  upload_debug_symbols: true
+  upload_source_maps: true
+  project: bebi-app-flutter
+  org: personal-projects-organization

@@ -63,3 +63,5 @@ app.*.map.json
 firebase.json
 ios/build/**
 lib/localizations/*.dart
+
+sentry.properties

@@ -112,6 +112,9 @@ jobs:
             --app=${{ secrets.FIREBASE_ANDROID_APP_ID }} \
             build/app/outputs/symbols
 
+      - name: Upload debug symbols to Sentry
+        run: flutter pub run sentry_dart_plugin
+
       - name: Upload Android build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -209,6 +212,9 @@ jobs:
         run: |
           cd build/ios/iphoneos
           mv app.ipa "ios.ipa"
+
+      - name: Upload debug symbols to Sentry
+        run: flutter pub run sentry_dart_plugin
 
       - name: Upload iOS build artifacts
         uses: actions/upload-artifact@v4
