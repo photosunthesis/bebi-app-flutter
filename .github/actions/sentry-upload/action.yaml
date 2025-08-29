@@ -3,6 +3,10 @@ name: Sentry Upload
 runs:
   using: composite
   steps:
+    - name: Create sentry.properties file
+      shell: bash
+      run: echo "${{ secrets.SENTRY_PROPERTIES }}" > sentry.properties
+
     - name: Upload debug symbols to Sentry
       shell: bash
       run: flutter pub run sentry_dart_plugin
