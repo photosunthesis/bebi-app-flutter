@@ -56,7 +56,7 @@ jobs:
           EOF
 
       - name: Analyze
-        run: flutter analyze --no-pub
+        run: dart analyze
 
       - name: Format
         run: dart format --set-exit-if-changed .
