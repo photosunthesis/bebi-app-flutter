@@ -39,7 +39,7 @@ jobs:
     with:
       build_number: ${{ github.run_number }}
       channel_id: live
-      project_id: awesome-period-tracker
+      project_id: bebi-app
     secrets: inherit
     permissions:
       contents: read

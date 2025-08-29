@@ -65,5 +65,5 @@ jobs:
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BEBI_APP }}
-          projectId: ${{ inputs.project_id || 'awesome-period-tracker' }}
+          projectId: ${{ inputs.project_id || 'bebi-app' }}
           channelId: ${{ inputs.channel_id || 'live' }}
