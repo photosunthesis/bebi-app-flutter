@@ -98,6 +98,9 @@ flutter_native_splash:
 
 icons_launcher:
   platforms:
+    web:
+      enable: true
+      image_path: "assets/app_logo/app_logo.png"
     android:
       enable: true
       image_path: "assets/app_logo/app_logo_android12.png"
