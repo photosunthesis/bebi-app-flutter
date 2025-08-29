@@ -3,8 +3,6 @@ import 'dart:math' as math;
 import 'package:bebi_app/data/models/app_update_info.dart';
 import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
 import 'package:bebi_app/utils/platform/platform_utils.dart';
-// ignore: depend_on_referenced_packages
-import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
@@ -22,15 +20,20 @@ class AppUpdateService with LocalizationsMixin {
   static const _baseUrl = 'https://api.github.com';
 
   Future<AppUpdateInfo?> checkForUpdate() async {
-    if (kIsWeb) return null;
+    try {
+      if (kIsWeb) return null;
 
-    final response = await _dio.get(
-      '$_baseUrl/repos/$_owner/$_repo/releases/latest',
-    );
+      final response = await _dio.get(
+        '$_baseUrl/repos/$_owner/$_repo/releases/latest',
+      );
 
-    if (response.statusCode != 200) throw Exception(l10n.checkUpdateError);
+      if (response.statusCode != 200) throw Exception(l10n.checkUpdateError);
 
-    return _parseReleaseData(response.data);
+      return _parseReleaseData(response.data);
+    } catch (_) {
+      // On error we simply just not do anything 🤠
+      return null;
+    }
   }
 
   AppUpdateInfo _parseReleaseData(Map<String, dynamic> releaseData) {
@@ -39,14 +42,14 @@ class AppUpdateService with LocalizationsMixin {
         releaseData['body'] as String? ?? 'No release notes available.';
     final assets = releaseData['assets'] as List<dynamic>;
     final downloadUrl = kIsAndroid
-        ? assets.firstWhereOrNull(
+        ? assets.firstWhere(
                 (asset) => asset['name'] == 'android_modern_devices.apk',
               )['browser_download_url']
-              as String?
-        : assets.firstWhereOrNull(
+              as String
+        : assets.firstWhere(
                 (asset) => asset['name'] == 'ios.ipa',
               )['browser_download_url']
-              as String?;
+              as String;
     final publishedAt = DateTime.parse(releaseData['published_at']);
     final hasUpdate = _isVersionNewer(latestVersion, _packageInfo.version);
 
@@ -55,7 +58,7 @@ class AppUpdateService with LocalizationsMixin {
       newVersion: latestVersion,
       releaseNotes: releaseNotes,
       hasUpdate: hasUpdate,
-      downloadUrl: downloadUrl ?? '',
+      downloadUrl: downloadUrl,
       publishedAt: publishedAt,
     );
   }
