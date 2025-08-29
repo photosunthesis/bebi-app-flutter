@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
@@ -15,6 +15,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_keyboard_visibility_temp_fork/flutter_keyboard_visibility_temp_fork.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 class ProfileSetupScreen extends StatefulWidget {
@@ -101,91 +102,107 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       child: BlocBuilder<ProfileSetupCubit, ProfileSetupState>(
         buildWhen: (previous, current) => current is ProfileSetupLoadedState,
         builder: (context, state) {
-          final backgroundImage = switch (state) {
-            ProfileSetupLoadedState(photo: final photo?, isPhotoUrl: false) =>
-              FileImage(File(photo)),
-            ProfileSetupLoadedState(photo: final photo?, isPhotoUrl: true) =>
-              CachedNetworkImageProvider(photo),
-            _ => null,
-          };
+          ImageProvider? backgroundImage;
 
-          return Align(
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                AnimatedSwitcher(
-                  duration: 300.milliseconds,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: context.colorScheme.outline,
-                        width: UiConstants.borderWidth,
-                      ),
-                    ),
-                    child: CircleAvatar(
-                      key: ValueKey(state),
-                      radius: 60,
-                      backgroundColor: Colors.transparent,
-                      backgroundImage: backgroundImage as ImageProvider?,
-                      child:
-                          state is ProfileSetupLoadedState &&
-                              state.photo == null
-                          ? Icon(
-                              Symbols.face,
-                              size: 50,
-                              color: context.colorScheme.secondary.withAlpha(
-                                100,
-                              ),
-                            )
-                          : null,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  bottom: -5,
-                  right: -18,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: context.colorScheme.shadow.withAlpha(10),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: TextButton(
-                      onPressed:
-                          state is ProfileSetupLoadedState &&
-                              state.photo != null
-                          ? _cubit.removeProfilePicture
-                          : _cubit.setProfilePicture,
-                      style: IconButton.styleFrom(
-                        backgroundColor: context.colorScheme.onPrimary,
-                        foregroundColor:
-                            state is ProfileSetupLoadedState &&
-                                state.photo != null
-                            ? context.colorScheme.error
-                            : context.colorScheme.primary,
-                        padding: const EdgeInsets.all(8),
-                        shape: const CircleBorder(),
-                      ),
-                      child: Icon(
-                        state is ProfileSetupLoadedState && state.photo != null
-                            ? Symbols.delete
-                            : Symbols.add_a_photo,
+          if (state is ProfileSetupLoadedState && state.photo != null) {
+            if (state.isPhotoUrl) {
+              backgroundImage = CachedNetworkImageProvider(state.photo!);
+            } else {
+              return FutureBuilder<Uint8List>(
+                future: XFile(state.photo!).readAsBytes(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    backgroundImage = MemoryImage(snapshot.data!);
+                  }
 
-                        size: 20,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
+                  return _buildProfilePictureWidget(
+                    context,
+                    state,
+                    backgroundImage,
+                  );
+                },
+              );
+            }
+          }
+
+          return _buildProfilePictureWidget(context, state, backgroundImage);
         },
+      ),
+    );
+  }
+
+  Widget _buildProfilePictureWidget(
+    BuildContext context,
+    ProfileSetupState state,
+    ImageProvider? backgroundImage,
+  ) {
+    return Align(
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          AnimatedSwitcher(
+            duration: 300.milliseconds,
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: context.colorScheme.outline,
+                  width: UiConstants.borderWidth,
+                ),
+              ),
+              child: CircleAvatar(
+                key: ValueKey(state),
+                radius: 60,
+                backgroundColor: Colors.transparent,
+                backgroundImage: backgroundImage,
+                child: state is ProfileSetupLoadedState && state.photo == null
+                    ? Icon(
+                        Symbols.face,
+                        size: 50,
+                        color: context.colorScheme.secondary.withAlpha(100),
+                      )
+                    : null,
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: -5,
+            right: -18,
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: context.colorScheme.shadow.withAlpha(10),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: TextButton(
+                onPressed:
+                    state is ProfileSetupLoadedState && state.photo != null
+                    ? _cubit.removeProfilePicture
+                    : _cubit.setProfilePicture,
+                style: IconButton.styleFrom(
+                  backgroundColor: context.colorScheme.onPrimary,
+                  foregroundColor:
+                      state is ProfileSetupLoadedState && state.photo != null
+                      ? context.colorScheme.error
+                      : context.colorScheme.primary,
+                  padding: const EdgeInsets.all(8),
+                  shape: const CircleBorder(),
+                ),
+                child: Icon(
+                  state is ProfileSetupLoadedState && state.photo != null
+                      ? Symbols.delete
+                      : Symbols.add_a_photo,
+                  size: 20,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
