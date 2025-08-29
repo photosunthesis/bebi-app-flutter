@@ -1,11 +1,16 @@
 name: Sentry Upload
 
+inputs:
+  sentry_auth_token:
+    description: Sentry Auth Token
+    required: true
+
 runs:
   using: composite
   steps:
     - name: Create sentry.properties file
       shell: bash
-      run: echo "${{ secrets.SENTRY_PROPERTIES }}" > sentry.properties
+      run: echo '${{ inputs.sentry_auth_token }}' > sentry.properties
 
     - name: Upload debug symbols to Sentry
       shell: bash

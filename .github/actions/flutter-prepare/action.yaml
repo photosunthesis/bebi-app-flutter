@@ -11,7 +11,7 @@ inputs:
     description: Firebase CI token
     required: true
   firebase_platforms:
-    description: Platforms to configure for flutterfire (android,ios)
+    description: Platforms to configure for flutterfire (android,ios,web)
     required: true
   out_path:
     description: Path to write firebase_options.dart
