@@ -35,25 +35,15 @@ jobs:
         with:
           flutter-version: 3.35.2 # Must be the same with the one in pubspec.yaml
 
-      - name: Configure firebase
-        run: |
-          curl -sL https://firebase.tools | bash
-          firebase experiments:enable webframeworks
-          dart pub global activate flutterfire_cli
-          flutterfire configure \
-            --project=bebi-app \
-            --platforms=web \
-            --token=${{ secrets.FIREBASE_CI_TOKEN }} \
-            --out=lib/config/firebase_options.dart \
-            --yes
-
-      - name: Download dependencies
-        run: flutter pub get
-
-      - name: Run build runner and generate localization files
-        run: |
-          flutter pub run build_runner build --delete-conflicting-outputs
-          flutter gen-l10n
+      - name: Prepare Flutter project
+        uses: ./.github/actions/flutter-prepare
+        with:
+          flutter_version: 3.35.2
+          firebase_project: bebi-app
+          firebase_token: ${{ secrets.FIREBASE_CI_TOKEN }}
+          firebase_platforms: web
+          out_path: lib/config/firebase_options.dart
+          generate_l10n: "true"
 
       - name: Configure firebase.json
         run: echo '${{ secrets.FIREBASE_JSON }}' > firebase.json

@@ -33,7 +33,7 @@ jobs:
           firebase_token: ${{ secrets.FIREBASE_CI_TOKEN }}
           firebase_platforms: android
           out_path: lib/config/firebase_options.dart
-          generate_l10n: "false"
+          generate_l10n: "true"
 
       - name: Cache Gradle dependencies
         uses: actions/cache@v4
