@@ -117,3 +117,4 @@ sentry:
   upload_source_maps: true
   project: bebi-app-flutter
   org: personal-projects-organization
+  ignore_missing: true
