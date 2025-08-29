@@ -51,9 +51,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-android, build-ios, build-and-deploy-web]
     if: |
-      always() &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled') &&
       (needs.build-android.result == 'success' || needs.build-android.result == 'skipped') &&
-      (needs.build-ios.result == 'success' || needs.build-ios.result == 'skipped')
+      (needs.build-ios.result == 'success' || needs.build-ios.result == 'skipped') &&
+      (needs.build-and-deploy-web.result == 'success' || needs.build-and-deploy-web.result == 'skipped')
     permissions:
       contents: write
       packages: write
