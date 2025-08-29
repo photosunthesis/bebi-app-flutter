@@ -151,10 +151,12 @@ abstract class AppRouter {
       GoRoute(
         path: '/cycles/calendar',
         name: AppRoutes.cycleCalendar,
-        builder: (_, state) => BlocProvider(
-          create: (_) => GetIt.I<CycleCalendarCubit>(),
-          child: CycleCalendarScreen(
-            userId: state.uri.queryParameters['userId']!,
+        pageBuilder: (_, state) => BottomSheetPage(
+          child: BlocProvider(
+            create: (_) => GetIt.I<CycleCalendarCubit>(),
+            child: CycleCalendarScreen(
+              userId: state.uri.queryParameters['userId']!,
+            ),
           ),
         ),
       ),
@@ -216,13 +218,11 @@ abstract class AppRouter {
       GoRoute(
         path: '/calendar/create',
         name: AppRoutes.createCalendarEvent,
-        pageBuilder: (_, state) => BottomSheetPage(
-          child: BlocProvider(
-            create: (_) => GetIt.I<CalendarEventFormCubit>(),
-            child: CalendarEventFormScreen(
-              selectedDate: DateTime.tryParse(
-                state.uri.queryParameters['selectedDate'] ?? '',
-              ),
+        builder: (_, state) => BlocProvider(
+          create: (_) => GetIt.I<CalendarEventFormCubit>(),
+          child: CalendarEventFormScreen(
+            selectedDate: DateTime.tryParse(
+              state.uri.queryParameters['selectedDate'] ?? '',
             ),
           ),
         ),

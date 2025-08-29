@@ -12,6 +12,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:paged_vertical_calendar/paged_vertical_calendar.dart';
 
 class CycleCalendarScreen extends StatefulWidget {
@@ -26,6 +27,7 @@ class CycleCalendarScreen extends StatefulWidget {
 class _CycleCalendarScreenState extends State<CycleCalendarScreen> {
   late final _scrollController = ScrollController();
   bool _showTodayButton = false;
+  DateTime _currentVisibleMonth = DateTime.now();
 
   @override
   void initState() {
@@ -37,10 +39,31 @@ class _CycleCalendarScreenState extends State<CycleCalendarScreen> {
   }
 
   void _onScroll() {
-    final shouldShow = _scrollController.offset > 50;
-    if (shouldShow != _showTodayButton) {
-      setState(() => _showTodayButton = shouldShow);
+    final today = DateTime.now();
+    final isAwayFromToday =
+        _currentVisibleMonth.month != today.month ||
+        _currentVisibleMonth.year != today.year;
+
+    if (isAwayFromToday != _showTodayButton) {
+      setState(() => _showTodayButton = isAwayFromToday);
     }
+  }
+
+  void _scrollToToday() {
+    final today = DateTime.now();
+    final todayOffset = _calculateOffsetForDate(today);
+    _scrollController.animateTo(
+      todayOffset,
+      duration: 300.milliseconds,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  double _calculateOffsetForDate(DateTime date) {
+    final monthsDifference =
+        (date.year - DateTime.now().year) * 12 +
+        (date.month - DateTime.now().month);
+    return monthsDifference * 400.0;
   }
 
   @override
@@ -53,6 +76,7 @@ class _CycleCalendarScreenState extends State<CycleCalendarScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: _buildAppBar(),
       body:
           BlocSelector<CycleCalendarCubit, CycleCalendarState, List<CycleLog>>(
@@ -62,13 +86,21 @@ class _CycleCalendarScreenState extends State<CycleCalendarScreen> {
               return PagedVerticalCalendar(
                 scrollController: _scrollController,
                 initialDate: DateTime.now(),
-                monthBuilder: (context, month, year) => Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Text(
-                    DateTime(year, month).toMMMMyyyy(),
-                    style: context.primaryTextTheme.titleLarge,
-                  ),
-                ),
+                monthBuilder: (context, month, year) {
+                  final monthDate = DateTime(year, month);
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (_currentVisibleMonth != monthDate) {
+                      _currentVisibleMonth = monthDate;
+                    }
+                  });
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Text(
+                      monthDate.toMMMMyyyy(),
+                      style: context.primaryTextTheme.titleLarge,
+                    ),
+                  );
+                },
                 onDayPressed: context.pop,
                 dayBuilder: (context, date) {
                   final [
@@ -100,6 +132,10 @@ class _CycleCalendarScreenState extends State<CycleCalendarScreen> {
   AppBar _buildAppBar() {
     return MainAppBar.build(
       context,
+      leading: IconButton(
+        onPressed: context.pop,
+        icon: const Icon(Symbols.close),
+      ),
       actions: [
         AnimatedSwitcher(
           duration: 200.milliseconds,
@@ -109,11 +145,7 @@ class _CycleCalendarScreenState extends State<CycleCalendarScreen> {
                   child: SizedBox(
                     width: 60,
                     child: OutlinedButton(
-                      onPressed: () => _scrollController.animateTo(
-                        0,
-                        duration: 300.milliseconds,
-                        curve: Curves.easeInOut,
-                      ),
+                      onPressed: _scrollToToday,
                       child: Text(context.l10n.todayButton.toUpperCase()),
                     ),
                   ),
