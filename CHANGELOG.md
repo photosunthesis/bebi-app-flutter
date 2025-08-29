@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0] - 2025-08-29
+
+### Added
+
+- Web App Support: Access the app from any browser with full feature parity 🌐
+
+### Changed
+
+- Upgraded to Flutter v3.35.2
+- Improved calendar events UI
+
 ## [0.3.3] - 2025-08-19
 
 ## Added
