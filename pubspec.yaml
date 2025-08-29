@@ -58,6 +58,7 @@ flutter:
   generate: true
   assets:
     - assets/app_logo/app_logo.png
+    - assets/fonts/ibm_plex_mono/
     - assets/fonts/ibm_plex_sans/
     - assets/fonts/vidaloka/
   fonts:
