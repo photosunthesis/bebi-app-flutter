@@ -73,9 +73,10 @@ jobs:
           platform: ios
 
       - name: Upload debug symbols to Sentry
-        uses: ./.github/actions/sentry-upload
-        with:
-          sentry_auth_token: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        shell: bash
+        run: flutter pub run sentry_dart_plugin
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
       - name: Upload iOS build artifacts
         uses: actions/upload-artifact@v4
