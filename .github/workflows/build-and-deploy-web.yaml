@@ -61,6 +61,9 @@ jobs:
       - name: Build Web
         run: flutter build web --release --wasm --build-number=${{ inputs.build_number || github.run_number }}
 
+      - name: Upload debug symbols to Sentry
+        uses: ./.github/actions/sentry-upload
+
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:

@@ -74,13 +74,6 @@ jobs:
         with:
           platform: android
 
-      - name: Upload debug symbols to Firebase Crashlytics
-        uses: ./.github/actions/crashlytics-upload
-        with:
-          token: ${{ secrets.FIREBASE_CI_TOKEN }}
-          app_id: ${{ secrets.FIREBASE_ANDROID_APP_ID }}
-          symbols_path: build/app/outputs/symbols
-
       - name: Upload debug symbols to Sentry
         uses: ./.github/actions/sentry-upload
 
