@@ -44,13 +44,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<CalendarCubit, CalendarState>(
-      listener: (context, state) => switch (state) {
-        CalendarErrorState(:final error) => context.showSnackbar(error),
-        _ => null,
+      listener: (context, state) {
+        if (state.error != null) context.showSnackbar(state.error!);
       },
       builder: (context, state) => Scaffold(
         appBar: _buildAppBar(),
-        body: RefreshIndicator(
+        body: RefreshIndicator.adaptive(
           onRefresh: () async => _cubit.loadCalendarEvents(useCache: false),
           child: CustomScrollView(
             slivers: [
@@ -58,13 +57,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 delegate: CalendarSliverDelegate(),
                 pinned: true,
               ),
-              switch (state) {
-                CalendarLoadedState(:final focusedDayEvents) =>
-                  focusedDayEvents.isNotEmpty
-                      ? CalendarEvents.buildList(focusedDayEvents)
-                      : CalendarEvents.buildEmptyPlaceholder(context),
-                _ => const SliverToBoxAdapter(),
-              },
+              (state.focusedDayEvents.isNotEmpty)
+                  ? CalendarEvents.buildList(state.focusedDayEvents)
+                  : CalendarEvents.buildEmptyPlaceholder(context),
             ],
           ),
         ),
@@ -87,10 +82,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Widget _buildTitle() {
     return SafeArea(
       child: BlocSelector<CalendarCubit, CalendarState, DateTime?>(
-        selector: (state) => switch (state) {
-          CalendarLoadedState(:final focusedDay) => focusedDay,
-          _ => null,
-        },
+        selector: (state) => state.focusedDay,
         builder: (context, focusedDay) => SizedBox(
           height: 30,
           child: Stack(
@@ -104,12 +96,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   children: [
                     AnimatedSwitcher(
                       duration: 120.milliseconds,
-                      child: focusedDay?.isToday == true
+                      child: focusedDay?.isToday == true || focusedDay == null
                           ? const SizedBox.shrink()
                           : OutlinedButton(
-                              onPressed: () => context
-                                  .read<CalendarCubit>()
-                                  .setFocusedDay(DateTime.now()),
+                              onPressed: () =>
+                                  _cubit.setFocusedDay(DateTime.now()),
                               child: Text(
                                 context.l10n.todayButton.toUpperCase(),
                               ),
@@ -123,7 +114,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           final eventWasCreated = await context.pushNamed<bool>(
                             AppRoutes.createCalendarEvent,
                             queryParameters: {
-                              'selectedDate': focusedDay?.toIso8601String(),
+                              'selectedDate': focusedDay
+                                  ?.withRoundedOffTime()
+                                  .toIso8601String(),
                             },
                           );
                           if (eventWasCreated == true) {

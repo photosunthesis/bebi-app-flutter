@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:bebi_app/app/theme/app_colors.dart';
 import 'package:bebi_app/data/models/repeat_rule.dart';
+import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
@@ -11,9 +12,8 @@ class CalendarEvent extends Equatable {
     this.recurringEventId,
     required this.title,
     this.notes,
-    required DateTime date,
-    required DateTime startTime,
-    DateTime? endTime,
+    required DateTime startDate,
+    DateTime? endDate,
     this.allDay = false,
     required this.repeatRule,
     required this.eventColor,
@@ -22,9 +22,8 @@ class CalendarEvent extends Equatable {
     required this.updatedBy,
     DateTime? createdAt,
     DateTime? updatedAt,
-  }) : _date = date.toUtc(),
-       _startTime = startTime.toUtc(),
-       _endTime = endTime?.toUtc(),
+  }) : _startDate = startDate.toUtc(),
+       _endDate = endDate?.toUtc(),
        _createdAt = (createdAt ?? DateTime.now()).toUtc(),
        _updatedAt = (updatedAt ?? DateTime.now()).toUtc();
 
@@ -34,10 +33,9 @@ class CalendarEvent extends Equatable {
       id: doc.id,
       title: data['title'] as String,
       notes: data['notes'] as String?,
-      date: (data['date'] as Timestamp).toDate(),
-      startTime: (data['start_time'] as Timestamp).toDate(),
-      endTime: data['end_time'] != null
-          ? (data['end_time'] as Timestamp).toDate()
+      startDate: (data['start_date'] as Timestamp).toDate(),
+      endDate: data['end_date'] != null
+          ? (data['end_date'] as Timestamp).toDate()
           : null,
       allDay: data['all_day'] as bool? ?? false,
       repeatRule: RepeatRule.fromMap(
@@ -58,9 +56,8 @@ class CalendarEvent extends Equatable {
   final String? recurringEventId; // Used in UI only, not stored in Firestore
   final String title;
   final String? notes;
-  final DateTime _date;
-  final DateTime _startTime;
-  final DateTime? _endTime;
+  final DateTime _startDate;
+  final DateTime? _endDate;
   final bool allDay;
   final RepeatRule repeatRule;
   final EventColor eventColor;
@@ -70,17 +67,15 @@ class CalendarEvent extends Equatable {
   final DateTime _createdAt;
   final DateTime _updatedAt;
 
-  DateTime get date => _date.toLocal();
-  DateTime get startTime => _startTime.toLocal();
-  DateTime? get endTime => _endTime?.toLocal();
+  DateTime get startDate => _startDate.toLocal();
+  DateTime? get endDate => _endDate?.toLocal();
   DateTime get createdAt => _createdAt.toLocal();
   DateTime get updatedAt => _updatedAt.toLocal();
   Color get color => eventColor.color;
   bool get isRecurring => repeatRule.frequency != RepeatFrequency.doNotRepeat;
   bool get isLastRecurringEvent =>
       isRecurring &&
-      ((repeatRule.endDate != null &&
-              date.isAtSameMomentAs(repeatRule.endDate!)) ||
+      ((_endDate != null && _startDate.isAtSameMomentAs(_endDate)) ||
           (repeatRule.occurrences != null &&
               recurringEventId != null &&
               int.parse(recurringEventId!.split('_').last) >=
@@ -91,9 +86,8 @@ class CalendarEvent extends Equatable {
     String? recurringEventId,
     String? title,
     String? notes,
-    DateTime? date,
-    DateTime? startTime,
-    DateTime? endTime,
+    DateTime? startDate,
+    DateTime? endDate,
     bool? allDay,
     RepeatRule? repeatRule,
     EventColor? eventColor,
@@ -108,17 +102,16 @@ class CalendarEvent extends Equatable {
       recurringEventId: recurringEventId ?? this.recurringEventId,
       title: title ?? this.title,
       notes: notes ?? this.notes,
-      date: date ?? this.date,
-      startTime: startTime ?? this.startTime,
-      endTime: endTime ?? this.endTime,
+      startDate: startDate?.toUtc() ?? this.startDate,
+      endDate: endDate?.toUtc() ?? this.endDate,
       allDay: allDay ?? this.allDay,
       repeatRule: repeatRule ?? this.repeatRule,
       eventColor: eventColor ?? this.eventColor,
       users: users ?? this.users,
       createdBy: createdBy ?? this.createdBy,
       updatedBy: updatedBy ?? this.updatedBy,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
+      createdAt: createdAt?.toUtc() ?? this.createdAt,
+      updatedAt: updatedAt?.toUtc() ?? this.updatedAt,
     );
   }
 
@@ -126,9 +119,8 @@ class CalendarEvent extends Equatable {
     return {
       'title': title,
       'notes': notes,
-      'date': Timestamp.fromDate(date),
-      'start_time': Timestamp.fromDate(startTime),
-      'end_time': endTime != null ? Timestamp.fromDate(endTime!) : null,
+      'start_date': Timestamp.fromDate(startDate),
+      'end_date': endDate != null ? Timestamp.fromDate(endDate!) : null,
       'all_day': allDay,
       'repeat_rule': repeatRule.toMap(),
       'event_color': eventColor.name,
@@ -146,9 +138,8 @@ class CalendarEvent extends Equatable {
     recurringEventId,
     title,
     notes,
-    date,
-    startTime,
-    endTime,
+    startDate,
+    endDate,
     allDay,
     repeatRule,
     eventColor,
@@ -160,7 +151,7 @@ class CalendarEvent extends Equatable {
   ];
 }
 
-enum EventColor {
+enum EventColor with LocalizationsMixin {
   black,
   green,
   blue,
@@ -177,5 +168,15 @@ enum EventColor {
     EventColor.pink => AppColors.pink,
     EventColor.orange => AppColors.orange,
     EventColor.red => AppColors.red,
+  };
+
+  String get label => switch (this) {
+    EventColor.black => l10n.eventColorBlack,
+    EventColor.green => l10n.eventColorGreen,
+    EventColor.blue => l10n.eventColorBlue,
+    EventColor.yellow => l10n.eventColorYellow,
+    EventColor.pink => l10n.eventColorPink,
+    EventColor.orange => l10n.eventColorOrange,
+    EventColor.red => l10n.eventColorRed,
   };
 }

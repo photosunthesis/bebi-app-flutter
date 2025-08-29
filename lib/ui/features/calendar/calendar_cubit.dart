@@ -20,13 +20,7 @@ class CalendarCubit extends Cubit<CalendarState>
     this._calendarEventsRepository,
     this._recurringCalendarEventsService,
     this._firebaseAuth,
-  ) : super(
-        CalendarLoadedState(
-          events: [],
-          focusedDayEvents: [],
-          focusedDay: DateTime.now(),
-        ),
-      );
+  ) : super(CalendarState(focusedDay: DateTime.now()));
 
   final CalendarEventsRepository _calendarEventsRepository;
   final RecurringCalendarEventsService _recurringCalendarEventsService;
@@ -40,17 +34,10 @@ class CalendarCubit extends Cubit<CalendarState>
   Future<void> loadCalendarEvents({bool useCache = true}) async {
     await guard(
       () async {
-        emit(const CalendarLoadingState());
+        emit(state.copyWith(isLoading: true));
 
-        final focusedDay = switch (state) {
-          CalendarLoadedState(:final focusedDay) => focusedDay,
-          _ => DateTime.now(),
-        };
-
-        _windowStart = focusedDay.subtract(_defaultTimeWindow);
-        _windowEnd = focusedDay.add(_defaultTimeWindow);
-
-        emit(const CalendarLoadingState());
+        _windowStart = state.focusedDay.subtract(_defaultTimeWindow);
+        _windowEnd = state.focusedDay.add(_defaultTimeWindow);
 
         final events = await _calendarEventsRepository.getByUserId(
           userId: _firebaseAuth.currentUser!.uid,
@@ -67,15 +54,11 @@ class CalendarCubit extends Cubit<CalendarState>
         final allEvents = [...events, ...recurringEvents];
 
         final focusedDayEvents = allEvents
-            .where((e) => e.date.isSameDay(focusedDay))
+            .where((e) => e.startDate.isSameDay(state.focusedDay))
             .toList();
 
         emit(
-          CalendarLoadedState(
-            events: allEvents,
-            focusedDayEvents: focusedDayEvents,
-            focusedDay: focusedDay,
-          ),
+          state.copyWith(events: allEvents, focusedDayEvents: focusedDayEvents),
         );
 
         logEvent(
@@ -89,9 +72,8 @@ class CalendarCubit extends Cubit<CalendarState>
           },
         );
       },
-      onError: (error, _) {
-        emit(CalendarErrorState(error.toString()));
-      },
+      onError: (error, _) => emit(state.copyWith(error: error.toString())),
+      onComplete: () => emit(state.copyWith(isLoading: false)),
     );
   }
 
@@ -105,12 +87,6 @@ class CalendarCubit extends Cubit<CalendarState>
   }
 
   Future<void> setFocusedDay(DateTime date) async {
-    final previousLoadedState = state is CalendarLoadedState
-        ? state as CalendarLoadedState
-        : null;
-
-    if (previousLoadedState == null) return;
-
     final needsExpansion =
         (_windowStart == null && _windowEnd == null) ||
         date.isBefore(_windowStart!.add(30.days)) ||
@@ -118,13 +94,13 @@ class CalendarCubit extends Cubit<CalendarState>
 
     if (needsExpansion) return await _expandTimeRange(date);
 
-    final dayEvents = previousLoadedState.events
-        .where((e) => e.date.isSameDay(date))
+    final dayEvents = state.events
+        .where((e) => e.startDate.isSameDay(date))
         .toList();
 
     emit(
-      CalendarLoadedState(
-        events: previousLoadedState.events,
+      state.copyWith(
+        events: state.events,
         focusedDayEvents: dayEvents,
         focusedDay: date,
       ),
@@ -159,33 +135,22 @@ class CalendarCubit extends Cubit<CalendarState>
 
   Future<void> _loadMoreEvents(DateTime rangeStart, DateTime rangeEnd) async {
     await guard(() async {
-      final previousLoadedState = state is CalendarLoadedState
-          ? state as CalendarLoadedState
-          : null;
-
-      if (previousLoadedState == null) return;
-
-      emit(const CalendarLoadingState());
+      emit(state.copyWith(isLoading: true));
 
       final newRecurringEvents = _recurringCalendarEventsService
-          .generateRecurringEventsInWindow(
-            previousLoadedState.events,
-            rangeStart,
-            rangeEnd,
-          );
+          .generateRecurringEventsInWindow(state.events, rangeStart, rangeEnd);
 
       _windowStart = _windowStart?.earlierDate(rangeStart) ?? rangeStart;
       _windowEnd = _windowEnd?.laterDate(rangeEnd) ?? rangeEnd;
 
-      final allEvents = [...previousLoadedState.events, ...newRecurringEvents];
+      final allEvents = [...state.events, ...newRecurringEvents];
 
       emit(
-        CalendarLoadedState(
+        state.copyWith(
           events: allEvents,
           focusedDayEvents: allEvents
-              .where((e) => e.date.isSameDay(previousLoadedState.focusedDay))
+              .where((e) => e.startDate.isSameDay(state.focusedDay))
               .toList(),
-          focusedDay: previousLoadedState.focusedDay,
         ),
       );
     });

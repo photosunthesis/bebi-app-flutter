@@ -5,7 +5,7 @@ version: 0.3.3
 
 environment:
   sdk: ">=3.9.0 <4.0.0"
-  flutter: ">= 3.35.1"
+  flutter: ">= 3.35.2"
 
 dependencies:
   cached_network_image: ^3.4.1
@@ -37,6 +37,8 @@ dependencies:
   package_info_plus: ^8.3.1
   paged_vertical_calendar: ^1.1.10
   skeletonizer: ^2.1.0+1
+  super_editor: ^0.3.0-dev.29
+  super_editor_markdown: ^0.2.0
   table_calendar: ^3.2.0
   url_launcher: ^6.3.2
 

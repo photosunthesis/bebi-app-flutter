@@ -103,7 +103,7 @@ class CalendarEventDetailsCubit extends Cubit<CalendarEventDetailsState>
     CalendarEvent baseEvent,
     DateTime instanceDate,
   ) async {
-    if (baseEvent.date.isSameDay(instanceDate)) {
+    if (baseEvent.startDate.isSameDay(instanceDate)) {
       await _calendarEventsRepository.deleteById(baseEvent.id);
       _recurringCalendarEventsService.removeEventFromCache(
         baseEvent.id,
@@ -134,7 +134,7 @@ class CalendarEventDetailsCubit extends Cubit<CalendarEventDetailsState>
       return;
     }
 
-    if (baseEvent.date.isSameDay(instanceDate)) {
+    if (baseEvent.startDate.isSameDay(instanceDate)) {
       await _updateToNextOccurrence(baseEvent);
     } else {
       await _excludeInstanceDate(baseEvent, instanceDate);
@@ -145,15 +145,14 @@ class CalendarEventDetailsCubit extends Cubit<CalendarEventDetailsState>
 
   Future<void> _updateToNextOccurrence(CalendarEvent baseEvent) async {
     final nextOccurrence = _recurringCalendarEventsService.getNextOccurrence(
-      baseEvent.date,
+      baseEvent.startDate,
       baseEvent.repeatRule,
     );
 
     final updatedEvent = baseEvent.copyWith(
-      date: nextOccurrence,
-      startTime: _updateTimeToNewDate(baseEvent.startTime, nextOccurrence),
-      endTime: baseEvent.endTime != null
-          ? _updateTimeToNewDate(baseEvent.endTime!, nextOccurrence)
+      startDate: nextOccurrence,
+      endDate: baseEvent.endDate != null
+          ? _updateTimeToNewDate(baseEvent.endDate!, nextOccurrence)
           : null,
     );
 

@@ -123,7 +123,7 @@ class _CalendarEventDetailsScreenState
                 ),
                 const SizedBox(width: 16),
                 Text(
-                  _event.date.toEEEEMMMMdyyyy(),
+                  _event.startDate.toEEEEMMMMdyyyy(),
                   style: context.textTheme.bodyMedium,
                 ),
               ],
@@ -135,7 +135,7 @@ class _CalendarEventDetailsScreenState
                 Text(
                   _event.allDay
                       ? context.l10n.allDayText
-                      : '${_event.startTime.toHHmma()} → ${_event.endTime!.toHHmma()}',
+                      : '${_event.startDate.toHHmma()} → ${_event.endDate!.toHHmma()}',
                   style: context.textTheme.bodyMedium,
                 ),
               ],
@@ -302,7 +302,7 @@ class _CalendarEventDetailsScreenState
       await context.read<CalendarEventDetailsCubit>().deleteCalendarEvent(
         widget.calendarEvent.id,
         deleteAllEvents: result == SaveChangesDialogOptions.allFutureEvents,
-        instanceDate: widget.calendarEvent.date,
+        instanceDate: widget.calendarEvent.startDate,
       );
 
       context.goNamed(

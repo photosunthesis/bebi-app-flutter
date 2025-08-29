@@ -12,9 +12,8 @@ class CalendarEventAdapter extends TypeAdapter<CalendarEvent> {
     final recurringEventId = reader.readBool() ? reader.readString() : null;
     final title = reader.readString();
     final notes = reader.readBool() ? reader.readString() : null;
-    final date = DateTime.fromMillisecondsSinceEpoch(reader.readInt());
-    final startTime = DateTime.fromMillisecondsSinceEpoch(reader.readInt());
-    final endTime = reader.readBool()
+    final startDate = DateTime.fromMillisecondsSinceEpoch(reader.readInt());
+    final endDate = reader.readBool()
         ? DateTime.fromMillisecondsSinceEpoch(reader.readInt())
         : null;
     final allDay = reader.readBool();
@@ -32,9 +31,8 @@ class CalendarEventAdapter extends TypeAdapter<CalendarEvent> {
       recurringEventId: recurringEventId,
       title: title,
       notes: notes,
-      date: date,
-      startTime: startTime,
-      endTime: endTime,
+      startDate: startDate,
+      endDate: endDate,
       allDay: allDay,
       repeatRule: repeatRule,
       eventColor: eventColor,
@@ -58,11 +56,10 @@ class CalendarEventAdapter extends TypeAdapter<CalendarEvent> {
     if (obj.notes != null) {
       writer.writeString(obj.notes!);
     }
-    writer.writeInt(obj.date.millisecondsSinceEpoch);
-    writer.writeInt(obj.startTime.millisecondsSinceEpoch);
-    writer.writeBool(obj.endTime != null);
-    if (obj.endTime != null) {
-      writer.writeInt(obj.endTime!.millisecondsSinceEpoch);
+    writer.writeInt(obj.startDate.millisecondsSinceEpoch);
+    writer.writeBool(obj.endDate != null);
+    if (obj.endDate != null) {
+      writer.writeInt(obj.endDate!.millisecondsSinceEpoch);
     }
     writer.writeBool(obj.allDay);
     RepeatRuleAdapter().write(writer, obj.repeatRule);

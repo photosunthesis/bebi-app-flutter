@@ -76,7 +76,7 @@ abstract class AppTheme {
             borderRadius: UiConstants.borderRadius,
           ),
           textStyle: _textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
             fontSize: 12,
           ),
           minimumSize: const Size.fromHeight(42),

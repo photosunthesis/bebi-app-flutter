@@ -33,6 +33,7 @@ class AppTextFormField extends StatefulWidget {
     this.onTap,
     this.visualDensity,
     this.contentPadding,
+    this.onChanged,
     super.key,
   });
 
@@ -59,6 +60,7 @@ class AppTextFormField extends StatefulWidget {
   final VoidCallback? onTap;
   final VisualDensity? visualDensity;
   final EdgeInsetsGeometry? contentPadding;
+  final ValueChanged<String>? onChanged;
 
   @override
   State<AppTextFormField> createState() => _AppTextFormFieldState();
@@ -152,6 +154,7 @@ class _AppTextFormFieldState extends State<AppTextFormField>
             inputFormatters: widget.inputFormatters,
             minLines: widget.minLines,
             maxLines: widget.maxLines ?? 1,
+            onChanged: widget.onChanged,
             decoration: InputDecoration(
               contentPadding: widget.contentPadding,
               visualDensity: widget.visualDensity,
@@ -165,7 +168,9 @@ class _AppTextFormFieldState extends State<AppTextFormField>
               hintText: widget.hintText,
               hintStyle: (widget.inputStyle ?? context.textTheme.bodyMedium)
                   ?.copyWith(
-                    color: context.colorScheme.onSurface.withAlpha(120),
+                    color: (widget.inputStyle ?? context.textTheme.bodyMedium)!
+                        .color!
+                        .withAlpha(120),
                   ),
               errorText: '',
               errorStyle: const TextStyle(fontSize: 0),

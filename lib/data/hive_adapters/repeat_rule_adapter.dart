@@ -8,10 +8,6 @@ class RepeatRuleAdapter extends TypeAdapter<RepeatRule> {
   @override
   RepeatRule read(BinaryReader reader) {
     final frequencyIndex = reader.readInt();
-    final endDateMillis = reader.readInt();
-    final endDate = endDateMillis == -1
-        ? null
-        : DateTime.fromMillisecondsSinceEpoch(endDateMillis);
     final occurrences = reader.readInt();
     final excludedDatesLength = reader.readInt();
     final excludedDates = excludedDatesLength == -1
@@ -23,7 +19,6 @@ class RepeatRuleAdapter extends TypeAdapter<RepeatRule> {
 
     return RepeatRule(
       frequency: RepeatFrequency.values[frequencyIndex],
-      endDate: endDate,
       occurrences: occurrences == -1 ? null : occurrences,
       excludedDates: excludedDates,
     );
@@ -32,7 +27,6 @@ class RepeatRuleAdapter extends TypeAdapter<RepeatRule> {
   @override
   void write(BinaryWriter writer, RepeatRule obj) {
     writer.writeInt(obj.frequency.index);
-    writer.writeInt(obj.endDate?.millisecondsSinceEpoch ?? -1);
     writer.writeInt(obj.occurrences ?? -1);
 
     if (obj.excludedDates == null) {

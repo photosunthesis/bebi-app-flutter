@@ -1,26 +1,33 @@
 part of 'calendar_cubit.dart';
 
-sealed class CalendarState {
-  const CalendarState();
-}
-
-class CalendarLoadingState extends CalendarState {
-  const CalendarLoadingState();
-}
-
-class CalendarLoadedState extends CalendarState {
-  const CalendarLoadedState({
+class CalendarState {
+  const CalendarState({
     required this.focusedDay,
-    required this.events,
-    required this.focusedDayEvents,
+    this.events = const [],
+    this.focusedDayEvents = const [],
+    this.isLoading = false,
+    this.error,
   });
 
   final DateTime focusedDay;
   final List<CalendarEvent> events;
   final List<CalendarEvent> focusedDayEvents;
-}
+  final bool isLoading;
+  final String? error;
 
-class CalendarErrorState extends CalendarState {
-  const CalendarErrorState(this.error);
-  final String error;
+  CalendarState copyWith({
+    DateTime? focusedDay,
+    List<CalendarEvent>? events,
+    List<CalendarEvent>? focusedDayEvents,
+    bool? isLoading,
+    String? error,
+  }) {
+    return CalendarState(
+      focusedDay: focusedDay ?? this.focusedDay,
+      events: events ?? this.events,
+      focusedDayEvents: focusedDayEvents ?? this.focusedDayEvents,
+      isLoading: isLoading ?? this.isLoading,
+      error: error ?? this.error,
+    );
+  }
 }

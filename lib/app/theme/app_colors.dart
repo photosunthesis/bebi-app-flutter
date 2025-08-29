@@ -13,7 +13,7 @@ abstract class AppColors {
   static const stone900 = Color(0xFF1C1917);
   static const green = Color(0xFF5EA080);
   static const blue = Color(0xFF6085B7);
-  static const pink = Color(0xFFB67A9B);
+  static const pink = Color(0xFFE682B4);
   static const purple = Color(0xFF9F75B0);
   static const yellow = Color(0xFFD9BD60);
   static const red = Color(0xFFCE7676);

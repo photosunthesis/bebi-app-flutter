@@ -35,7 +35,7 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: 3.35.1 # Must be the same with the one in pubspec.yaml
+          flutter-version: 3.35.2 # Must be the same with the one in pubspec.yaml
           cache: true
 
       - name: Cache Flutter dependencies
@@ -81,7 +81,7 @@ jobs:
           if ! dart pub global list | grep -q flutterfire_cli; then
             dart pub global activate flutterfire_cli
           fi
-          export PATH="$PATH":"${{ runner.tool_cache }}/flutter/stable-3.35.1/bin"
+          export PATH="$PATH":"${{ runner.tool_cache }}/flutter/stable-3.35.2/bin"
           flutterfire configure \
             --project=bebi-app \
             --platforms=android \
@@ -136,7 +136,7 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: 3.35.1 # Must be the same with the one in pubspec.yaml
+          flutter-version: 3.35.2 # Must be the same with the one in pubspec.yaml
           cache: true
 
       - name: Cache Flutter dependencies
@@ -187,7 +187,7 @@ jobs:
           if ! dart pub global list | grep -q flutterfire_cli; then
             dart pub global activate flutterfire_cli
           fi
-          export PATH="$PATH":"${{ runner.tool_cache }}/flutter/stable-3.35.1/bin"
+          export PATH="$PATH":"${{ runner.tool_cache }}/flutter/stable-3.35.2/bin"
           flutterfire configure \
             --project=bebi-app \
             --platforms=ios \

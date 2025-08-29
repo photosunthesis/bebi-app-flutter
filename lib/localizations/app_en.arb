@@ -69,16 +69,16 @@
   "logSymptomsButton": "Log symptoms",
   "loggingSymptomsButton": "Logging...",
   "selectSymptomRequired": "Please select at least one symptom.",
-  "newEventHint": "New event",
+  "newEventHint": "Event title",
   "titleRequired": "Title is required",
   "allDayLabel": "All-day",
   "dateHint": "Date",
   "dateRequired": "Date is required",
-  "startTimeHint": "Start time",
-  "startTimeRequired": "Start time is required",
-  "endTimeHint": "End time",
-  "endTimeRequired": "End time is required",
-  "endTimeAfterStart": "End time must be after start time",
+  "startDateHint": "Start date",
+  "startDateRequired": "Start date is required",
+  "endDateHint": "End date",
+  "endDateRequired": "End date is required",
+  "endDateAfterStart": "End date must be after start date",
   "notesHint": "Notes (optional)",
   "shareWithPartnerEvent": "Share with partner",
   "shareWithPartnerDescription": "Turn this on to allow your partner to view and add cycle logs and symptoms for you. You can turn this setting off anytime in your account.",
@@ -365,5 +365,28 @@
   "retryInitialization": "Retry initialization",
   "maxRetryReachedMessage": "Maximum initialization attempts reached. If the problem persists, you may need to uninstall and reinstall the app to resolve any corrupted data or configuration issues.",
   "signOutDialogTitle": "Sign Out?",
-  "signOutDialogDescription": "You will need to sign in again to continue using the app. Your data will remain safe and accessible when you sign back in."
+  "signOutDialogDescription": "You will need to sign in again to continue using the app. Your data will remain safe and accessible when you sign back in.",
+  "eventColorBlack": "Black",
+  "eventColorGreen": "Green",
+  "eventColorBlue": "Blue",
+  "eventColorYellow": "Yellow",
+  "eventColorPink": "Pink",
+  "eventColorOrange": "Orange",
+  "eventColorRed": "Red",
+  "eventNotesHint": "Event notes (optional)",
+  "repeats": "Repeats",
+  "repeatDaily": "Daily",
+  "repeatWeekly": "Weekly",
+  "repeatMonthly": "Monthly",
+  "repeatYearly": "Yearly",
+  "repeatDoNotRepeat": "Do not repeat",
+  "repeatForOccurrences": "for {count} occurrences",
+  "@repeatForOccurrences": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Number of occurrences"
+      }
+    }
+  }
 }

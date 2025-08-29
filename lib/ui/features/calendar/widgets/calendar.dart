@@ -34,8 +34,7 @@ class _Calendar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocSelector<CalendarCubit, CalendarState, CalendarLoadedState?>(
-      selector: (state) => state is CalendarLoadedState ? state : null,
+    return BlocBuilder<CalendarCubit, CalendarState>(
       builder: (context, state) {
         return DecoratedBox(
           decoration: BoxDecoration(
@@ -53,17 +52,14 @@ class _Calendar extends StatelessWidget {
           ),
           child: TableCalendar<CalendarEvent>(
             availableGestures: AvailableGestures.horizontalSwipe,
-            focusedDay: state?.focusedDay ?? DateTime.now(),
-            eventLoader: (day) => state?.events ?? [],
+            focusedDay: state.focusedDay,
+            eventLoader: (day) => state.events,
             headerVisible: false,
             currentDay: DateTime.now(),
             // TODO Make first and last days dynamic
             firstDay: DateTime.now().subtract(2.years),
             lastDay: DateTime.now().add(2.years),
-            selectedDayPredicate: (day) {
-              if (state == null) return false;
-              return day.isSameDay(state.focusedDay);
-            },
+            selectedDayPredicate: (day) => day.isSameDay(state.focusedDay),
             daysOfWeekHeight: 32,
             availableCalendarFormats: {
               CalendarFormat.month: context.l10n.monthFormat,
@@ -81,7 +77,7 @@ class _Calendar extends StatelessWidget {
               outsideBuilder: (context, day, focusedDay) =>
                   _buildDayCell(context, day, focusedDay, isOutside: true),
               markerBuilder: (context, day, events) =>
-                  _markerBuilder(context, day, events, state?.focusedDay),
+                  _markerBuilder(context, day, events, state.focusedDay),
             ),
             onDaySelected: (day, _) {
               context.read<CalendarCubit>().setFocusedDay(day);
@@ -166,7 +162,7 @@ class _Calendar extends StatelessWidget {
     List<CalendarEvent> events,
     DateTime? focusedDay,
   ) {
-    final dayEvents = events.where((e) => e.date.isSameDay(day)).toList();
+    final dayEvents = events.where((e) => e.startDate.isSameDay(day)).toList();
 
     if (dayEvents.isEmpty) return const SizedBox.shrink();
 

@@ -46,7 +46,7 @@ class RecurringCalendarEventsService {
       );
 
       for (final instance in recurringEvents) {
-        final dateKey = _startOfDay(instance.date);
+        final dateKey = _startOfDay(instance.startDate);
         _cache.putIfAbsent(dateKey, () => []).add(instance);
         generatedEvents.add(instance);
       }
@@ -79,7 +79,10 @@ class RecurringCalendarEventsService {
     final events = <CalendarEvent>[];
     final seenDates = <DateTime>{};
 
-    var currentDate = getNextOccurrence(baseEvent.date, baseEvent.repeatRule);
+    var currentDate = getNextOccurrence(
+      baseEvent.startDate,
+      baseEvent.repeatRule,
+    );
     var occurrenceCount = 1;
 
     while (currentDate.isBefore(windowEnd) &&
@@ -88,6 +91,7 @@ class RecurringCalendarEventsService {
           baseEvent.repeatRule,
           currentDate,
           occurrenceCount,
+          baseEvent.endDate,
         )) {
       final dateKey = _startOfDay(currentDate);
 
@@ -98,7 +102,7 @@ class RecurringCalendarEventsService {
         events.add(
           baseEvent.copyWith(
             recurringEventId: _instanceKey(baseEvent.id, currentDate),
-            date: currentDate,
+            startDate: currentDate,
           ),
         );
       }
@@ -110,6 +114,7 @@ class RecurringCalendarEventsService {
         baseEvent.repeatRule,
         currentDate,
         occurrenceCount,
+        baseEvent.endDate,
       )) {
         break;
       }
@@ -144,8 +149,9 @@ class RecurringCalendarEventsService {
     RepeatRule rule,
     DateTime currentDate,
     int occurrenceCount,
+    DateTime? endDate,
   ) {
-    if (rule.endDate != null && currentDate.isAfter(rule.endDate!)) {
+    if (endDate != null && currentDate.isAfter(endDate)) {
       return true;
     }
     if (rule.occurrences != null && occurrenceCount >= rule.occurrences!) {
@@ -166,7 +172,7 @@ class RecurringCalendarEventsService {
     events.sort((a, b) {
       if (a.allDay && !b.allDay) return -1;
       if (!a.allDay && b.allDay) return 1;
-      return a.startTime.compareTo(b.startTime);
+      return a.startDate.compareTo(b.startDate);
     });
     return events;
   }
@@ -193,7 +199,7 @@ class RecurringCalendarEventsService {
         _baseEventCache[event.id] = event;
         if (event.recurringEventId != null) {
           merged[event.recurringEventId!] = event;
-          final dateKey = _startOfDay(event.date);
+          final dateKey = _startOfDay(event.startDate);
           _cache.putIfAbsent(dateKey, () => []).add(event);
         }
       } else {

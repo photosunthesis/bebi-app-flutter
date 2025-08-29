@@ -1,6 +1,10 @@
 import 'package:intl/intl.dart';
 
 extension DatetimeExtensions on DateTime {
+  String toMMMdyyyy() => DateFormat('MMM d yyyy').format(this);
+
+  String toMMMd() => DateFormat('MMM d').format(this);
+
   String toMMMMyyyy() => DateFormat('MMMM yyyy').format(this);
 
   String toEEEEMMMMd() => DateFormat('EEEE, MMMM d').format(this);
@@ -11,13 +15,13 @@ extension DatetimeExtensions on DateTime {
 
   String toEEEEMMMMdyyyy() => DateFormat('EEEE MMMM d, yyyy').format(this);
 
-  String toEEEEMMMdyyyy() => DateFormat('EEE MMM d, yyyy').format(this);
+  String toEEEEMMMdyyyy() => DateFormat('EEE, MMM d, yyyy').format(this);
 
   String toEEEEMMMMdyyyyhhmma() =>
       DateFormat('EEEE MMMM d, yyyy h:mm a').format(this);
 
   String toEEEMMMdyyyyhhmma() =>
-      DateFormat('EEE MMM d, yyyy h:mm a').format(this);
+      DateFormat('EEE, MMM d, yyyy h:mm a').format(this);
 
   String toMMddyyyy() => DateFormat('MM/dd/yyyy').format(this);
 
@@ -25,7 +29,11 @@ extension DatetimeExtensions on DateTime {
 
   String toDateRange(DateTime other) {
     if (isSameDay(other)) {
-      return '${toEEEEMMMdyyyy()} ${toHHmma()} - ${other.toHHmma()}';
+      return '${toEEEEMMMdyyyy()} ${toHHmma()} → ${other.toHHmma()}';
+    }
+
+    if (isSameMonth(other)) {
+      return '${toMMMd()} - ${other.toMMMdyyyy()}';
     }
 
     return '${toEEEEMMMdyyyy()} - ${other.toEEEEMMMdyyyy()}';
@@ -50,4 +58,7 @@ extension DatetimeExtensions on DateTime {
   DateTime laterDate(DateTime other) => isAfter(other) ? this : other;
 
   DateTime noTime() => DateTime(year, month, day);
+
+  DateTime withRoundedOffTime() =>
+      DateTime(year, month, day, hour, (minute ~/ 10) * 10);
 }

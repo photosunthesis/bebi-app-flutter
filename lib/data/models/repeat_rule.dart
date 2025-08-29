@@ -1,28 +1,26 @@
+import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
-enum RepeatFrequency {
+enum RepeatFrequency with LocalizationsMixin {
   daily,
   weekly,
   monthly,
   yearly,
-  custom,
   doNotRepeat;
 
   String get label => switch (this) {
-    RepeatFrequency.daily => 'Daily',
-    RepeatFrequency.weekly => 'Weekly',
-    RepeatFrequency.monthly => 'Monthly',
-    RepeatFrequency.yearly => 'Yearly',
-    RepeatFrequency.custom => 'Custom',
-    RepeatFrequency.doNotRepeat => 'Do not repeat',
+    RepeatFrequency.daily => l10n.repeatDaily,
+    RepeatFrequency.weekly => l10n.repeatWeekly,
+    RepeatFrequency.monthly => l10n.repeatMonthly,
+    RepeatFrequency.yearly => l10n.repeatYearly,
+    RepeatFrequency.doNotRepeat => l10n.repeatDoNotRepeat,
   };
 }
 
 class RepeatRule extends Equatable {
   const RepeatRule({
     required this.frequency,
-    this.endDate,
     this.occurrences,
     this.excludedDates,
   });
@@ -32,9 +30,6 @@ class RepeatRule extends Equatable {
       frequency: RepeatFrequency.values.firstWhere(
         (e) => e.name == map['frequency'],
       ),
-      endDate: map['end_date'] != null
-          ? (map['end_date'] as Timestamp).toDate()
-          : null,
       occurrences: map['occurrences'],
       excludedDates: map['excluded_dates'] != null
           ? List<DateTime>.from(
@@ -45,7 +40,6 @@ class RepeatRule extends Equatable {
   }
 
   final RepeatFrequency frequency;
-  final DateTime? endDate;
   final int? occurrences;
   final List<DateTime>? excludedDates;
 
@@ -57,7 +51,6 @@ class RepeatRule extends Equatable {
   }) {
     return RepeatRule(
       frequency: frequency ?? this.frequency,
-      endDate: endDate ?? this.endDate,
       occurrences: occurrences ?? this.occurrences,
       excludedDates: excludedDates ?? this.excludedDates,
     );
@@ -66,7 +59,6 @@ class RepeatRule extends Equatable {
   Map<String, dynamic> toMap() {
     return {
       'frequency': frequency.name,
-      if (endDate != null) 'end_date': Timestamp.fromDate(endDate!),
       if (occurrences != null) 'occurrences': occurrences,
       if (excludedDates != null)
         'excluded_dates': excludedDates!.map(Timestamp.fromDate).toList(),
@@ -74,5 +66,5 @@ class RepeatRule extends Equatable {
   }
 
   @override
-  List<Object?> get props => [frequency, endDate, occurrences, excludedDates];
+  List<Object?> get props => [frequency, occurrences, excludedDates];
 }

@@ -4,7 +4,7 @@ extension StringExtensions on String {
   DateTime? toDateTime(String format) =>
       DateFormat(format).tryParseStrict(this);
 
-  DateTime? toEEEMMMdyyyyHHmmaaDate() => toDateTime('EEE MMM d, yyyy h:mm a');
+  DateTime? toEEEMMMdyyyyHHmmaaDate() => toDateTime('EEE, MMM d, yyyy h:mm a');
 
   DateTime? toHHmmaTime() => toDateTime('h:mm a');
 

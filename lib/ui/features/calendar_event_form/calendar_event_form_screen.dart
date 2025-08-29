@@ -1,4 +1,5 @@
 import 'package:bebi_app/app/router/app_router.dart';
+import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/data/models/repeat_rule.dart';
 import 'package:bebi_app/data/models/save_changes_dialog_options.dart';
@@ -8,11 +9,10 @@ import 'package:bebi_app/ui/shared_widgets/layouts/main_app_bar.dart';
 import 'package:bebi_app/ui/shared_widgets/modals/options_bottom_dialog.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
-import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
-import 'package:bebi_app/utils/extensions/string_extensions.dart';
+import 'package:bebi_app/utils/extensions/int_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:material_symbols_icons/material_symbols_icons.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 class CalendarEventFormScreen extends StatefulWidget {
   const CalendarEventFormScreen({
@@ -30,55 +30,26 @@ class CalendarEventFormScreen extends StatefulWidget {
 }
 
 class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
+  late String _title = widget.calendarEvent?.title ?? '';
+  late DateTime _startDate =
+      widget.calendarEvent?.startDate ?? widget.selectedDate!;
+  late DateTime _endDate =
+      widget.calendarEvent?.endDate ?? _startDate.add(10.minutes);
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  late final _cubit = context.read<CalendarEventFormCubit>();
-  late final _titleController = TextEditingController(
-    text: widget.calendarEvent?.title,
-  );
-  late final _dateController = TextEditingController(
-    text: (widget.calendarEvent?.date ?? widget.selectedDate)!
-        .toEEEEMMMMdyyyy(),
-  );
-  late final _startTimeController = TextEditingController(
-    text:
-        widget.calendarEvent?.startTime.toHHmma() ??
-        widget.selectedDate?.toHHmma(),
-  );
-  late final _endTimeController = TextEditingController(
-    text:
-        widget.calendarEvent?.endTime?.toHHmma() ??
-        widget.selectedDate?.add(const Duration(hours: 1)).toHHmma(),
-  );
-  late final _endRepeatDateController = TextEditingController(
-    text: widget.calendarEvent?.repeatRule.endDate?.toEEEEMMMMdyyyy(),
-  );
-  late final _notesController = TextEditingController(
-    text: widget.calendarEvent?.notes,
-  );
+  late String? notes = widget.calendarEvent?.notes;
   late bool _allDay = widget.calendarEvent?.allDay ?? false;
-  late bool _shareWithPartner = (widget.calendarEvent?.users.length ?? 2) > 1;
   late EventColor _selectedColor =
       widget.calendarEvent?.eventColor ?? EventColor.black;
-  late RepeatFrequency _repeatFrequency =
-      widget.calendarEvent?.repeatRule.frequency ?? RepeatFrequency.doNotRepeat;
+  late RepeatRule _repeatRule =
+      widget.calendarEvent?.repeatRule ??
+      const RepeatRule(frequency: RepeatFrequency.doNotRepeat);
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _cubit.initialize(widget.calendarEvent);
+      context.read<CalendarEventFormCubit>().initialize(widget.calendarEvent);
     });
-  }
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _dateController.dispose();
-    _startTimeController.dispose();
-    _endTimeController.dispose();
-    _endRepeatDateController.dispose();
-    _notesController.dispose();
-    super.dispose();
   }
 
   @override
@@ -96,28 +67,30 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
         _ => null,
       },
       child: Scaffold(
-        backgroundColor: Colors.transparent,
         appBar: _buildAppBar(),
         body: CalendarEventForm(
+          // Form validation
           formKey: _formKey,
-          titleController: _titleController,
-          dateController: _dateController,
-          startTimeController: _startTimeController,
-          endTimeController: _endTimeController,
-          endRepeatDateController: _endRepeatDateController,
-          notesController: _notesController,
-          allDay: _allDay,
-          onAllDayChanged: (value) => setState(() => _allDay = value),
-          shareWithPartner: _shareWithPartner,
-          onShareWithPartnerChanged: (value) =>
-              setState(() => _shareWithPartner = value),
+          onSave: _onSave,
+
+          // Basic event details
+          title: _title,
+          onTitleChanged: (value) => _title = value,
           selectedColor: _selectedColor,
-          onSelectedColorChanged: (value) =>
-              setState(() => _selectedColor = value),
-          repeatFrequency: _repeatFrequency,
-          onRepeatFrequencyChanged: (value) =>
-              setState(() => _repeatFrequency = value),
-          selectedDate: widget.selectedDate,
+          notes: notes ?? '',
+          onNotesChanged: (value) => notes = value,
+
+          // Date and time settings
+          allDay: _allDay,
+          startDate: _startDate,
+          endDate: _endDate,
+          onStartDateChanged: (value) => _startDate = value,
+          onEndDateChanged: (value) => _endDate = value,
+          onAllDayChanged: (value) => setState(() => _allDay = value),
+
+          // Recurrence settings
+          repeatRule: _repeatRule,
+          onRepeatRuleChanged: (value) => setState(() => _repeatRule = value),
         ),
       ),
     );
@@ -126,30 +99,84 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
   AppBar _buildAppBar() {
     return MainAppBar.build(
       context,
-      darkStatusBarIcons: false,
-      leading: IconButton(
-        icon: const Icon(Symbols.close),
-        onPressed: context.pop,
+      actions: [_buildColorSwitcherMenu(), const SizedBox(width: 8)],
+    );
+  }
+
+  Widget _buildColorSwitcherMenu() {
+    return PopupMenuButton<EventColor>(
+      splashRadius: 0,
+      color: context.colorScheme.surface,
+      padding: EdgeInsets.zero,
+      menuPadding: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: UiConstants.borderRadius,
+        side: BorderSide(
+          color: context.colorScheme.outline,
+          width: UiConstants.borderWidth,
+        ),
       ),
-      actions: [
-        BlocSelector<CalendarEventFormCubit, CalendarEventFormState, bool>(
-          selector: (state) => state is CalendarEventFormLoadingState,
-          builder: (context, loading) {
-            return Padding(
-              padding: const EdgeInsets.fromLTRB(0, 12, 10, 12),
-              child: OutlinedButton(
-                onPressed: loading ? null : _onSave,
-                child: Text(
-                  (loading
-                          ? context.l10n.savingButton
-                          : context.l10n.saveButton)
-                      .toUpperCase(),
+      elevation: 0,
+      offset: const Offset(0, 50),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        width: 48,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: UiConstants.borderRadius,
+            border: Border.all(
+              color: context.colorScheme.outline,
+              width: UiConstants.borderWidth,
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(width: 4),
+              Container(
+                width: 14,
+                height: 14,
+                decoration: BoxDecoration(
+                  color: _selectedColor.color,
+                  shape: BoxShape.circle,
                 ),
               ),
-            );
-          },
+              const Icon(Symbols.keyboard_arrow_down, size: 20),
+            ],
+          ),
         ),
-      ],
+      ),
+      onSelected: (value) => setState(() => _selectedColor = value),
+      itemBuilder: (_) => EventColor.values
+          .map(
+            (e) => PopupMenuItem(
+              value: e,
+              height: 36,
+              padding: const EdgeInsets.only(left: 12, right: 8),
+              child: Row(
+                children: [
+                  Container(
+                    width: 14,
+                    height: 14,
+                    decoration: BoxDecoration(
+                      color: e.color,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    e.label,
+                    style: context.textTheme.bodyMedium!.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const Spacer(),
+                  if (e == _selectedColor) const Icon(Symbols.check, size: 20),
+                ],
+              ),
+            ),
+          )
+          .toList(),
     );
   }
 
@@ -162,39 +189,15 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
     }
 
     if (_formKey.currentState?.validate() ?? false) {
-      final date = _dateController.text.toEEEMMMdyyyyDate()!;
-      final startTimeParsed = _startTimeController.text.toHHmmaTime();
-      final endTimeParsed = _endTimeController.text.toHHmmaTime();
-      final endRepeatDate = _endRepeatDateController.text.toEEEMMMdyyyyDate();
-
-      final repeat = RepeatRule(
-        frequency: _repeatFrequency,
-        endDate: endRepeatDate,
-      );
-
-      await _cubit.save(
+      await context.read<CalendarEventFormCubit>().save(
         saveOption: saveOption,
-        title: _titleController.text,
-        notes: _notesController.text,
-        date: date,
-        startTime: DateTime(
-          date.year,
-          date.month,
-          date.day,
-          startTimeParsed?.hour ?? 0,
-          startTimeParsed?.minute ?? 0,
-        ),
-        endTime: DateTime(
-          date.year,
-          date.month,
-          date.day,
-          endTimeParsed?.hour ?? 0,
-          endTimeParsed?.minute ?? 0,
-        ),
+        title: _title,
+        notes: notes,
+        startDate: _startDate,
+        endDate: _endDate,
         allDay: _allDay,
         eventColor: _selectedColor,
-        shareWithPartner: _shareWithPartner,
-        repeatRule: repeat,
+        repeatRule: _repeatRule,
       );
     }
   }
