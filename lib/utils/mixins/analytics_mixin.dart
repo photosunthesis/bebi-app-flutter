@@ -7,7 +7,7 @@ import 'package:get_it/get_it.dart';
 
 mixin AnalyticsMixin {
   void logEvent({required String name, Map<String, Object>? parameters}) {
-    if (isTest || kDebugMode) return;
+    if (kIsTest || kDebugMode) return;
 
     unawaited(
       GetIt.I<FirebaseAnalytics>().logEvent(name: name, parameters: parameters),
@@ -18,7 +18,7 @@ mixin AnalyticsMixin {
     required String loginMethod,
     Map<String, Object>? parameters,
   }) {
-    if (isTest || kDebugMode) return;
+    if (kIsTest || kDebugMode) return;
 
     unawaited(
       GetIt.I<FirebaseAnalytics>().logLogin(
@@ -29,7 +29,7 @@ mixin AnalyticsMixin {
   }
 
   void setUserProperty({required String name, required String value}) {
-    if (isTest || kDebugMode) return;
+    if (kIsTest || kDebugMode) return;
 
     unawaited(
       GetIt.I<FirebaseAnalytics>().setUserProperty(name: name, value: value),
@@ -42,7 +42,7 @@ mixin AnalyticsMixin {
     required String itemId,
     Map<String, Object>? parameters,
   }) {
-    if (isTest || kDebugMode) return;
+    if (kIsTest || kDebugMode) return;
 
     unawaited(
       GetIt.I<FirebaseAnalytics>().logShare(

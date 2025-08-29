@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 
 import 'package:bebi_app/data/models/user_profile.dart';
@@ -86,7 +85,7 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState>
         final photoUrl = photoFilePath != null
             ? await _userProfileRepository.uploadProfileImage(
                 _firebaseAuth.currentUser!.uid,
-                File(photoFilePath),
+                XFile(photoFilePath),
               )
             : null;
 

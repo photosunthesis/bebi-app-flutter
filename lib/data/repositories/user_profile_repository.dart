@@ -1,12 +1,11 @@
 import 'dart:async';
-import 'dart:io';
-
 import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 // ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:injectable/injectable.dart';
 
 @injectable
@@ -99,9 +98,9 @@ class UserProfileRepository {
     return finalUserProfile;
   }
 
-  Future<String> uploadProfileImage(String userId, File imageFile) async {
+  Future<String> uploadProfileImage(String userId, XFile imageFile) async {
     final ref = _storage.ref().child('$_profileImagePath/$userId');
-    await ref.putFile(imageFile);
+    await ref.putData(await imageFile.readAsBytes());
     final downloadUrl = await ref.getDownloadURL();
     return downloadUrl;
   }

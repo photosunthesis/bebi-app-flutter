@@ -1,9 +1,12 @@
-import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:bebi_app/data/models/app_update_info.dart';
 import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
+import 'package:bebi_app/utils/platform/platform_utils.dart';
+// ignore: depend_on_referenced_packages
+import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -19,6 +22,8 @@ class AppUpdateService with LocalizationsMixin {
   static const _baseUrl = 'https://api.github.com';
 
   Future<AppUpdateInfo?> checkForUpdate() async {
+    if (kIsWeb) return null;
+
     final response = await _dio.get(
       '$_baseUrl/repos/$_owner/$_repo/releases/latest',
     );
@@ -33,15 +38,15 @@ class AppUpdateService with LocalizationsMixin {
     final releaseNotes =
         releaseData['body'] as String? ?? 'No release notes available.';
     final assets = releaseData['assets'] as List<dynamic>;
-    final downloadUrl = Platform.isAndroid
-        ? assets.firstWhere(
+    final downloadUrl = kIsAndroid
+        ? assets.firstWhereOrNull(
                 (asset) => asset['name'] == 'android_modern_devices.apk',
               )['browser_download_url']
-              as String
-        : assets.firstWhere(
+              as String?
+        : assets.firstWhereOrNull(
                 (asset) => asset['name'] == 'ios.ipa',
               )['browser_download_url']
-              as String;
+              as String?;
     final publishedAt = DateTime.parse(releaseData['published_at']);
     final hasUpdate = _isVersionNewer(latestVersion, _packageInfo.version);
 
@@ -50,7 +55,7 @@ class AppUpdateService with LocalizationsMixin {
       newVersion: latestVersion,
       releaseNotes: releaseNotes,
       hasUpdate: hasUpdate,
-      downloadUrl: downloadUrl,
+      downloadUrl: downloadUrl ?? '',
       publishedAt: publishedAt,
     );
   }

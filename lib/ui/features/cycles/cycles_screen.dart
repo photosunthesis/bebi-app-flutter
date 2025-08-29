@@ -11,7 +11,9 @@ import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
 import 'package:bebi_app/utils/extensions/int_extensions.dart';
+import 'package:bebi_app/utils/platform/platform_utils.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -88,7 +90,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
   AppBar _buildAppBar() {
     return MainAppBar.build(
       context,
-      toolbarHeight: 138,
+      toolbarHeight: 138 + (kIsWeb || kIsAndroid ? 12 : 0),
       flexibleSpace: Column(
         children: [
           _buildHeader(),
@@ -101,6 +103,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
 
   Widget _buildHeader() {
     return SafeArea(
+      minimum: EdgeInsets.only(top: kIsWeb || kIsAndroid ? 12 : 0),
       child: BlocSelector<CyclesCubit, CyclesState, DateTime>(
         selector: (state) => state.focusedDate,
         builder: (context, date) => Center(

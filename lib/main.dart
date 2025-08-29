@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:bebi_app/app/app.dart';
 import 'package:bebi_app/config/dependencies.dart';
@@ -13,6 +12,7 @@ import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/data/models/user_partnership.dart';
 import 'package:bebi_app/data/models/user_profile.dart';
+import 'package:bebi_app/utils/platform/platform_utils.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
@@ -90,6 +90,7 @@ Future<void> _configureFirebase() async {
 }
 
 void _configureFontLicenses() {
+  if (kIsWeb) return; // Weird bug where on the web this would fail 🤷🏻
   LicenseRegistry.addLicense(() async* {
     final licenses = await Future.wait([
       rootBundle.loadString('assets/fonts/ibm_plex_mono/OFL.txt'),
@@ -104,7 +105,7 @@ void _configureFontLicenses() {
 
 Future<void> _configureHighRefreshScreen() async {
   try {
-    if (Platform.isAndroid) {
+    if (kIsAndroid) {
       await FlutterRefreshRateControl().requestHighRefreshRate();
     }
   } catch (_) {

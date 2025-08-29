@@ -1,6 +1,6 @@
-import 'dart:io';
+import 'package:flutter/foundation.dart';
 
-export 'web_platform_utils.dart'
-    if (dart.library.io) 'stub_platform_utils.dart';
+export 'web_platform_utils.dart' if (dart.library.io) 'io_platform_utils.dart';
 
-bool get isTest => Platform.environment.containsKey('FLUTTER_TEST');
+bool get kIsAndroid =>
+    !kIsWeb && defaultTargetPlatform == TargetPlatform.android;

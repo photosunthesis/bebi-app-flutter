@@ -1,6 +1,8 @@
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:bebi_app/utils/extensions/int_extensions.dart';
+import 'package:bebi_app/utils/platform/platform_utils.dart';
+import 'package:bebi_app/utils/platform/web_platform_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -55,7 +57,7 @@ class _MainScaffoldState extends State<MainScaffold> {
   }
 
   Widget _buildBottomBar(BuildContext context) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: context.colorScheme.surface,
         border: Border(
@@ -65,35 +67,38 @@ class _MainScaffoldState extends State<MainScaffold> {
           ),
         ),
       ),
-      child: SafeArea(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: MainScaffoldTab.values.map((tab) {
-            final isActive = tab == activeTab;
-            final color = isActive
-                ? context.colorScheme.primary
-                : context.colorScheme.secondary.withAlpha(120);
+      child: Padding(
+        padding: EdgeInsets.only(bottom: kIsWebiOS && kIsPwa ? 12 : 0),
+        child: SafeArea(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: MainScaffoldTab.values.map((tab) {
+              final isActive = tab == activeTab;
+              final color = isActive
+                  ? context.colorScheme.primary
+                  : context.colorScheme.secondary.withAlpha(120);
 
-            return Padding(
-              padding: const EdgeInsets.all(4),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  customBorder: const CircleBorder(),
-                  onTap: () => _onTap(MainScaffoldTab.values.indexOf(tab)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Icon(
-                      tab.iconData,
-                      color: color,
-                      size: 28,
-                      fill: isActive ? 1 : 0,
+              return Padding(
+                padding: const EdgeInsets.all(4),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    customBorder: const CircleBorder(),
+                    onTap: () => _onTap(MainScaffoldTab.values.indexOf(tab)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Icon(
+                        tab.iconData,
+                        color: color,
+                        size: 28,
+                        fill: isActive ? 1 : 0,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            );
-          }).toList(),
+              );
+            }).toList(),
+          ),
         ),
       ),
     );

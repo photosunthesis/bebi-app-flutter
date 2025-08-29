@@ -14,7 +14,7 @@ mixin GuardMixin {
     try {
       return await body();
     } catch (e, s) {
-      if ((kDebugMode && isTest) || disableLogging) {
+      if ((kDebugMode && kIsTest) || disableLogging) {
         debugPrint('Error caught by guard: $e\n$s');
       } else {
         unawaited(Sentry.captureException(e, stackTrace: s));

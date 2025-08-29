@@ -11,7 +11,6 @@ import 'package:bebi_app/data/services/app_update_service.dart';
 import 'package:bebi_app/utils/mixins/analytics_mixin.dart';
 import 'package:bebi_app/utils/mixins/guard_mixin.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:injectable/injectable.dart';
@@ -84,7 +83,7 @@ class HomeCubit extends Cubit<HomeState> with GuardMixin, AnalyticsMixin {
 
         final updateInfo = await _appUpdateService.checkForUpdate();
 
-        if (updateInfo?.hasUpdate == true && !kIsWeb) {
+        if (updateInfo?.hasUpdate == true) {
           emit(HomeShouldUpdateAppState(updateInfo!));
           logEvent(
             name: 'user_redirected_to_update_app',
