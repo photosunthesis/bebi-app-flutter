@@ -84,9 +84,6 @@ class _CalendarEventDetailsScreenState
         const SliverToBoxAdapter(child: SizedBox(height: 24)),
         _buildTitleSection(),
         _buildDateTimeSection(),
-        if (_event.repeatRule.frequency != RepeatFrequency.doNotRepeat)
-          _buildRepeatSection(),
-        if (_event.users.length > 1) _buildPartnerSection(),
         if (_event.notes != null && _event.notes!.isNotEmpty)
           _buildNotesSection(),
         _buildDeleteButton(),
@@ -100,8 +97,8 @@ class _CalendarEventDetailsScreenState
       sliver: SliverToBoxAdapter(
         child: Text(
           _event.title,
-          style: context.primaryTextTheme.headlineSmall?.copyWith(
-            color: _event.color.darken(0.2),
+          style: context.primaryTextTheme.headlineMedium?.copyWith(
+            color: _event.color.darken(0.15),
           ),
         ),
       ),
@@ -109,60 +106,29 @@ class _CalendarEventDetailsScreenState
   }
 
   Widget _buildDateTimeSection() {
-    return SliverPadding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      sliver: SliverToBoxAdapter(
-        child: Column(
-          children: [
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Icon(
-                  Symbols.calendar_clock,
-                  color: widget.calendarEvent.color.darken(),
-                ),
-                const SizedBox(width: 16),
-                Text(
-                  _event.startDate.toEEEEMMMMdyyyy(),
-                  style: context.textTheme.bodyMedium,
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Row(
-              children: [
-                const SizedBox(width: 40),
-                Text(
-                  _event.allDay
-                      ? context.l10n.allDayText
-                      : '${_event.startDate.toHHmma()} → ${_event.endDate!.toHHmma()}',
-                  style: context.textTheme.bodyMedium,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+    final date = _event.allDay
+        ? _event.startDate.toEEEEMMMMdyyyy()
+        : _event.startDate.toDateRange(_event.endDate!);
 
-  Widget _buildRepeatSection() {
+    final dateTimeText =
+        _event.repeatRule.frequency == RepeatFrequency.doNotRepeat
+        ? date
+        : '$date - ${context.l10n.repeats} ${_event.repeatRule.frequency.label.toLowerCase()}';
+
     return SliverPadding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.fromLTRB(24, 10, 24, 0),
       sliver: SliverToBoxAdapter(
-        child: Column(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 6),
-            Row(
-              children: [
-                const SizedBox(width: 40),
-                Text(
-                  context.l10n.repeatsFrequency(
-                    _event.repeatRule.frequency.name,
-                  ),
-                  style: context.textTheme.bodyMedium,
-                ),
-              ],
+            Icon(
+              Symbols.edit_calendar,
+              size: 18,
+              color: _event.color.darken(0.2),
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(dateTimeText, style: context.textTheme.bodyMedium),
             ),
           ],
         ),
@@ -172,77 +138,39 @@ class _CalendarEventDetailsScreenState
 
   Widget _buildNotesSection() {
     return SliverPadding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.fromLTRB(24, 14, 24, 0),
       sliver: SliverToBoxAdapter(
-        child: Column(
-          children: [
-            const SizedBox(height: 24),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(Symbols.notes, color: widget.calendarEvent.color.darken()),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    _event.notes!,
-                    style: context.textTheme.bodyMedium,
-                  ),
-                ),
-              ],
+        child: Expanded(
+          child: MarkdownBody(
+            data: _event.notes!,
+            styleSheet: MarkdownStyleSheet(
+              p: context.textTheme.bodyMedium,
+              h1: context.textTheme.headlineLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+              h2: context.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+              h3: context.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+              h4: context.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+              h5: context.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+              h6: context.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+              strong: context.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+              em: context.textTheme.bodyMedium?.copyWith(
+                fontStyle: FontStyle.italic,
+              ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPartnerSection() {
-    return SliverPadding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      sliver: SliverToBoxAdapter(
-        child: Column(
-          children: [
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Icon(
-                  Symbols.people_alt,
-                  color: widget.calendarEvent.color.darken(),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child:
-                      BlocSelector<
-                        CalendarEventDetailsCubit,
-                        CalendarEventDetailsState,
-                        CalendarEventDetailsLoadedState?
-                      >(
-                        selector: (state) =>
-                            state is CalendarEventDetailsLoadedState
-                            ? state
-                            : null,
-                        builder: (context, state) => MarkdownBody(
-                          data: _event.createdBy == state?.userProfile.userId
-                              ? context.l10n.eventSharedWith(
-                                  state?.partnerProfile.displayName ??
-                                      context.l10n.yourPartner,
-                                )
-                              : context.l10n.eventSharedBy(
-                                  state?.partnerProfile.displayName ??
-                                      context.l10n.yourPartner,
-                                ),
-                          styleSheet: MarkdownStyleSheet(
-                            p: context.textTheme.bodyMedium,
-                            strong: context.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-                ),
-              ],
-            ),
-          ],
+          ),
         ),
       ),
     );
