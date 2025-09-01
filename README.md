@@ -2,7 +2,7 @@
   <img src="assets/app_logo/app_logo_readme.png" alt="The Bebi App Logo" width="120" height="120" style="filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));">
 </div>
 
-# The Bebi App
+# Bebi App
 
 A simple couples app I made for me and my girlfriend to keep track of stuff and share moments together <3
 
