@@ -11,16 +11,19 @@ plugins {
 
 val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("key.properties")
-val localPropertiesFile = rootProject.file("local.properties")
 
-when {
-    keystorePropertiesFile.exists() -> {
-        keystoreProperties.load(FileInputStream(keystorePropertiesFile))
-    }
-    localPropertiesFile.exists() -> {
-        keystoreProperties.load(FileInputStream(localPropertiesFile))
-    }
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+} else {
+    throw GradleException("key.properties file not found at ${keystorePropertiesFile.absolutePath}")
 }
+
+// Debug: Print loaded properties (without values)
+println("Loaded keystore properties: ${keystoreProperties.keys}")
+println("keyAlias exists: ${keystoreProperties.containsKey("keyAlias")}")
+println("keyPassword exists: ${keystoreProperties.containsKey("keyPassword")}")
+println("storeFile exists: ${keystoreProperties.containsKey("storeFile")}")
+println("storePassword exists: ${keystoreProperties.containsKey("storePassword")}")
 
 android {
     namespace = "com.sunenvidiado.bebi_app"
@@ -48,7 +51,7 @@ android {
         create("release") {
             keyAlias = keystoreProperties["keyAlias"] as String
             keyPassword = keystoreProperties["keyPassword"] as String
-            storeFile = keystoreProperties["storeFile"]?.let { file(it) }
+            storeFile = file(keystoreProperties["storeFile"] as String)
             storePassword = keystoreProperties["storePassword"] as String
         }
     }
