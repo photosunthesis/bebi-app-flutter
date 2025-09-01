@@ -122,7 +122,6 @@ jobs:
             ---
 
             > [!NOTE]
-            > For Android users: Download **android_modern_devices.apk** if your device is from 2017 or newer (Android 7.0+). For older devices use **android_older_devices.apk**, and for emulators use **android_emulator.apk**.
-
-            > [!NOTE]
-            > For iOS users: Download **ios.ipa**. You'll need a developer account and Xcode to sideload the app on your device.
+            > **Download Guide:**
+            > - **Android users:** Download `android_modern_devices.apk` if your device is from 2017 or newer (Android 7.0+). For older devices use `android_older_devices.apk`, and for emulators use `android_emulator.apk`.
+            > - **iOS users**: Download `ios.ipa`. You'll need a developer account and Xcode to sideload the app on your device.
