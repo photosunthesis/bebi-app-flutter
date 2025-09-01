@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.3] - 2025-09-01
+
+## Changed
+
+- Added Android app signing for smoother update installations 📱
+
 ## [0.4.2] - 2025-08-30
 
 ### Fixed
