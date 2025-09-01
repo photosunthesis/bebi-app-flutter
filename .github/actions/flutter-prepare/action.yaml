@@ -13,9 +13,6 @@ inputs:
   firebase_platforms:
     description: Platforms to configure for flutterfire (android,ios,web)
     required: true
-  out_path:
-    description: Path to write firebase_options.dart
-    required: true
   generate_l10n:
     description: Whether to run flutter gen-l10n
     required: false
@@ -63,7 +60,7 @@ runs:
           --project=${{ inputs.firebase_project }} \
           --platforms=${{ inputs.firebase_platforms }} \
           --token=${{ inputs.firebase_token }} \
-          --out=${{ inputs.out_path }} \
+          --out=lib/config/firebase_options.dart \
           --yes
 
     - name: Download dependencies
