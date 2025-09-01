@@ -60,7 +60,7 @@ jobs:
 
       - name: Create keystore and key.properties
         run: |
-          echo ${{ secrets.KEYSTORE_JKS_BASE64 }} | base64 --decode > android/keystore.jks
+          echo ${{ secrets.KEYSTORE_JKS_BASE64 }} | base64 --decode > android/app/keystore.jks
           echo "${{ secrets.KEYSTORE_PROPERTIES }}" > android/key.properties
 
       - name: Build Android
