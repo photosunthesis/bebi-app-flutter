@@ -19,7 +19,7 @@ on:
 jobs:
   build-android:
     name: Build APK
-    if: ${{ github.event.inputs.build_android == 'true' }}
+    if: ${{ github.event.inputs.build_android == 'true' || github.event_name == 'push' }}
     uses: ./.github/workflows/build-android.yaml
     with:
       build_number: ${{ github.run_number }}
@@ -27,7 +27,7 @@ jobs:
 
   build-ios:
     name: Build IPA
-    if: ${{ github.event.inputs.build_ios == 'true' }}
+    if: ${{ github.event.inputs.build_ios == 'true' || github.event_name == 'push' }}
     uses: ./.github/workflows/build-ios.yaml
     with:
       build_number: ${{ github.run_number }}
