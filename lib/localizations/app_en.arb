@@ -266,7 +266,6 @@
   "resendingEmailButton": "Resending...",
   "resendEmailError": "You can only send resend once every 3 minutes.",
   "incorrectCurrentPassword": "The current password you entered is incorrect. Please try again.",
-  "checkEmailMessage": "We sent a verification link to {email}. Tap it to verify your email and start using the app.",
   "checkEmailMessagePrefix": "We sent a verification link to ",
   "checkEmailMessageSuffix": ". Tap it to verify your email and start using the app.",
   "updatePasswordButton": "Update password",
@@ -291,8 +290,16 @@
   "continueEditingButton": "Continue editing",
   "discardChangesButton": "Discard changes",
   "newUpdateAvailableTitle": "New update available",
-  "updateAvailableDescription": "A new version (v{version}) is now available. Tap the button below to go to the release page to get the update.",
-  "downloadUpdateButton": "Download new version",
+  "updateAvailableDescription": "A new version (v{version}) is now available. Tap the button below to download update.",
+  "@updateAvailableDescription": {
+    "placeholders": {
+      "version": {
+        "type": "String",
+        "description": "The version number of the new update"
+      }
+    }
+  },
+  "downloadUpdateButton": "Download udpate",
   "homeGreeting": "Good {timeOfDay}, {userName}",
   "@homeGreeting": {
     "placeholders": {

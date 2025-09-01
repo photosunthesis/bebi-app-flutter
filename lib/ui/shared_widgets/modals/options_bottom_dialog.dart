@@ -1,6 +1,7 @@
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:go_router/go_router.dart';
 
 enum OptionStyle { primary, secondary, destructive }
@@ -24,11 +25,13 @@ class OptionsBottomDialog<T> extends StatelessWidget {
     super.key,
     required this.title,
     this.description,
+    this.descriptionMarkdown,
     required this.options,
   });
 
   final String title;
   final String? description;
+  final String? descriptionMarkdown;
   final List<Option<T>> options;
 
   static Future<T?> show<T>(
@@ -36,10 +39,16 @@ class OptionsBottomDialog<T> extends StatelessWidget {
     required String title,
     required List<Option<T>> options,
     String? description,
+    String? descriptionMarkdown,
     bool useRootNavigator = true,
     bool isDismissible = true,
     bool enableDrag = true,
   }) {
+    assert(
+      !(description != null && descriptionMarkdown != null),
+      'Cannot provide both description and descriptionMarkdown. Use only one.',
+    );
+
     return showModalBottomSheet<T>(
       context: context,
       showDragHandle: false,
@@ -50,6 +59,7 @@ class OptionsBottomDialog<T> extends StatelessWidget {
       builder: (context) => OptionsBottomDialog._(
         title: title,
         description: description,
+        descriptionMarkdown: descriptionMarkdown,
         options: options,
       ),
       useRootNavigator: useRootNavigator,
@@ -83,6 +93,49 @@ class OptionsBottomDialog<T> extends StatelessWidget {
               child: Text(
                 description!,
                 style: context.textTheme.bodyMedium?.copyWith(height: 1.6),
+              ),
+            ),
+          ],
+          if (descriptionMarkdown != null) ...[
+            const SizedBox(height: 14),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: UiConstants.padding,
+              ),
+              child: MarkdownBody(
+                data: descriptionMarkdown!,
+                styleSheet: MarkdownStyleSheet(
+                  p: context.textTheme.bodyMedium,
+                  pPadding: const EdgeInsets.symmetric(vertical: 4),
+                  h1: context.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                  h1Padding: const EdgeInsets.symmetric(vertical: 4),
+                  h2: context.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                  h2Padding: const EdgeInsets.symmetric(vertical: 4),
+                  h3: context.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                  h3Padding: const EdgeInsets.symmetric(vertical: 4),
+                  h4: context.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                  h4Padding: const EdgeInsets.symmetric(vertical: 4),
+                  h5: context.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                  h5Padding: const EdgeInsets.symmetric(vertical: 4),
+                  h6: context.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                  h6Padding: const EdgeInsets.symmetric(vertical: 4),
+                  strong: context.textTheme.bodyMedium,
+                  em: context.textTheme.bodyMedium,
+                  code: context.textTheme.bodyMedium,
+                  listBullet: context.textTheme.bodyMedium,
+                ),
               ),
             ),
           ],

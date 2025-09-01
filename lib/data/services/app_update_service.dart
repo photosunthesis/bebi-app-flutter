@@ -38,8 +38,9 @@ class AppUpdateService with LocalizationsMixin {
 
   AppUpdateInfo _parseReleaseData(Map<String, dynamic> releaseData) {
     final latestVersion = releaseData['tag_name'].replaceFirst('v', '');
-    final releaseNotes =
+    final rawReleaseNotes =
         releaseData['body'] as String? ?? 'No release notes available.';
+    final releaseNotes = rawReleaseNotes.split('---')[0].trim();
     final assets = releaseData['assets'] as List<dynamic>;
     final downloadUrl = kIsAndroid
         ? assets.firstWhere(

@@ -251,7 +251,7 @@ class _HomeScreenState extends State<HomeScreen> {
       isDismissible: false,
       enableDrag: false,
       title: context.l10n.newUpdateAvailableTitle,
-      description: context.l10n.updateAvailableDescription(info.newVersion),
+      descriptionMarkdown: info.releaseNotes,
       options: [
         Option(
           text: context.l10n.downloadUpdateButton,
