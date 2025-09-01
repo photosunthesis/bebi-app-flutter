@@ -44,9 +44,6 @@ jobs:
           restore-keys: |
             gradle-${{ runner.os }}-
 
-      - name: Configure environment
-        run: echo "${{ secrets.ENVIRONMENT }}" | base64 --decode > .env
-
       - name: Set build number
         id: build_number
         run: |
