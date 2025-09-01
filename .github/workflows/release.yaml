@@ -78,8 +78,8 @@ jobs:
             exit 1
           fi
 
-          # Extract content between the current and the next version or until the end of the file
-          CHANGELOG_CONTENT=$(awk "/^## \[$LATEST_VERSION\]/ {flag=1} /^## \[/ && flag && !/^## \[$LATEST_VERSION\]/ {flag=0} flag {print}" CHANGELOG.md)
+          # Extract content between the current and the next version, excluding the version line itself
+          CHANGELOG_CONTENT=$(awk "/^## \[$LATEST_VERSION\]/ {flag=1; next} /^## \[/ && flag {flag=0} flag {print}" CHANGELOG.md)
 
           if [ -z "$CHANGELOG_CONTENT" ]; then
             echo "No changelog content found for version $LATEST_VERSION"
@@ -119,15 +119,10 @@ jobs:
           body: |
             ${{ steps.changelog.outputs.content }}
 
-            ### Download Guide
+            ---
 
-            **For Android users:**
-            - **android_modern_devices.apk** - Recommended for most Android phones (2017 and newer)
-            - **android_older_devices.apk** - For older Android devices (2010-2017)
-            - **android_emulator.apk** - For Android emulators and testing
+            > [!NOTE]
+            > For Android users: Download **android_modern_devices.apk** if your device is from 2017 or newer (Android 7.0+). For older devices use **android_older_devices.apk**, and for emulators use **android_emulator.apk**.
 
-            **For iOS users:**
-            - **ios.ipa** - For iOS devices (requires sideloading with developer account and Xcode)
-
-            > [!TIP]
-            > Most users should download the "modern-devices" APK for Android.
+            > [!NOTE]
+            > For iOS users: Download **ios.ipa**. You'll need a developer account and Xcode to sideload the app on your device.
