@@ -77,9 +77,9 @@ abstract class AppTheme {
           ),
           textStyle: _textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.w600,
-            fontSize: 12,
+            fontSize: 13,
           ),
-          minimumSize: const Size.fromHeight(42),
+          minimumSize: const Size.fromHeight(48),
         ).copyWith(
           elevation: const WidgetStatePropertyAll(0),
           shadowColor: WidgetStatePropertyAll(_colorScheme.shadow),
