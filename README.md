@@ -43,6 +43,10 @@ The app follows a clean architecture pattern with clear separation of concerns:
 - **Dependency Injection**: `get_it` + `injectable`
 - **UI**: `table_calendar`, `cached_network_image`
 
+### 📝 License
+
+This project is licensed under the MIT License with Commons Clause, Copyright © 2025 Sun Adriann Envidiado. See the [LICENSE](LICENSE) file for details.
+
 ---
 
 _This project is under active development. Core features are functional with new capabilities being added regularly._
