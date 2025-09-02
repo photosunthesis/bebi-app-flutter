@@ -8,10 +8,10 @@ A simple couples app I made for me and my girlfriend to keep track of stuff and 
 
 ## What it does
 
-- 📅 **Shared calendar** - track important dates and events together
-- 📸 **Stories** - share photos and moments (🚧 in progress)
-- 🌸 **Cycle tracking** - track and monitor menstrual cycles with shared insights
-- 📍 **Location sharing** - share location with a partner when needed (🚧 in progress)
+- 📅 **Shared Calendar**: Keep track of important dates, events, and appointments together.
+- 📸 **Stories**: Instantly share candid photos with your partner (🚧 in progress).
+- 🌸 **Cycle Tracking**: Monitor menstrual cycles, log symptoms, and view shared insights and predictions.
+- 📍 **Location Sharing**: Share your location with your partner when needed (🚧 in progress).
 
 ## App Architecture & Tech Stack
 
@@ -20,9 +20,8 @@ A simple couples app I made for me and my girlfriend to keep track of stuff and 
 The app follows a clean architecture pattern with clear separation of concerns:
 
 - 🎨 **UI Layer** (`ui/`): Feature-based organization with shared widgets
-
-  - Features: Calendar, Cycles, Profile Setup, Authentication, etc.
-  - Shared Widgets: Forms, Layouts, Modals, Custom Components
+  - **Features**: Authentication, Profile Setup, Home, Calendar, Cycles, Stories.
+  - **Shared Widgets**: Forms, Layouts, Modals, Custom Components.
 
 - 💿 **Data Layer** (`data/`): Models, repositories, and services
 
@@ -38,14 +37,15 @@ The app follows a clean architecture pattern with clear separation of concerns:
 
 - **State Management**: `flutter_bloc`
 - **Navigation**: `go_router`
-- **Backend**: Firebase (Auth, Firestore, Storage, Analytics, Sentry)
+- **Backend**: Firebase (Auth, Firestore, Storage, Analytics), Sentry for error monitoring.
 - **Local Storage**: `hive_ce_flutter`
 - **Dependency Injection**: `get_it` + `injectable`
-- **UI**: `table_calendar`, `cached_network_image`
+- **UI**: `super_editor`, `table_calendar`, `paged_vertical_calendar`, `cached_network_image`, `skeletonizer`
+- **AI**: `firebase_ai` for generative features.
 
 ### 📝 License
 
-This project is licensed under the MIT License with Commons Clause, Copyright © 2025 Sun Adriann Envidiado. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License with Commons Clause. See the [LICENSE](LICENSE) file for details.
 
 ---
 
