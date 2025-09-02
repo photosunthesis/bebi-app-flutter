@@ -48,7 +48,7 @@ class _CyclePredictionsState extends State<CyclePredictions> {
 
   Widget _buildViewAllButton() {
     return BlocSelector<CyclesCubit, CyclesState, String?>(
-      selector: (state) => state.showCurrentUserCycleData
+      selector: (state) => state.isViewingCurrentUser
           ? state.userProfile?.userId
           : state.partnerProfile?.userId,
       builder: (context, userId) {
@@ -72,14 +72,13 @@ class _CyclePredictionsState extends State<CyclePredictions> {
   Widget _buildFertileWindowPredictions() {
     return BlocBuilder<CyclesCubit, CyclesState>(
       buildWhen: (previous, current) =>
-          current.showCurrentUserCycleData !=
-              previous.showCurrentUserCycleData ||
+          current.isViewingCurrentUser != previous.isViewingCurrentUser ||
           current.focusedDateInsights != previous.focusedDateInsights,
       builder: (context, state) {
         final fertileDays = state.focusedDateInsights?.fertileDays ?? [];
 
         late String description;
-        if (state.showCurrentUserCycleData) {
+        if (state.isViewingCurrentUser) {
           if (fertileDays.isNotEmpty) {
             description = context.l10n.fertileWindowDescription(
               fertileDays.first.toEEEEMMMMd(),
@@ -112,15 +111,14 @@ class _CyclePredictionsState extends State<CyclePredictions> {
   Widget _buildPeriodPredictions() {
     return BlocBuilder<CyclesCubit, CyclesState>(
       buildWhen: (previous, current) =>
-          current.showCurrentUserCycleData !=
-              previous.showCurrentUserCycleData ||
+          current.isViewingCurrentUser != previous.isViewingCurrentUser ||
           current.focusedDateInsights != previous.focusedDateInsights,
       builder: (context, state) {
         final nextPeriodDates =
             state.focusedDateInsights?.nextPeriodDates ?? [];
 
         late String description;
-        if (state.showCurrentUserCycleData) {
+        if (state.isViewingCurrentUser) {
           if (nextPeriodDates.isNotEmpty) {
             description = context.l10n.nextPeriodDescription(
               nextPeriodDates.first.toEEEEMMMMd(),

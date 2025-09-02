@@ -4,7 +4,7 @@ class CyclesState extends Equatable {
   const CyclesState({
     required this.focusedDate,
     this.cycleLogs = const [],
-    this.showCurrentUserCycleData = true,
+    this.isViewingCurrentUser = true,
     this.aiSummary,
     this.focusedDateInsights,
     this.userProfile,
@@ -16,7 +16,7 @@ class CyclesState extends Equatable {
 
   final DateTime focusedDate;
   final List<CycleLog> cycleLogs;
-  final bool showCurrentUserCycleData;
+  final bool isViewingCurrentUser;
   final String? aiSummary;
   final CycleDayInsights? focusedDateInsights;
   final UserProfile? userProfile;
@@ -31,7 +31,7 @@ class CyclesState extends Equatable {
   CyclesState copyWith({
     DateTime? focusedDate,
     List<CycleLog>? cycleLogs,
-    bool? showCurrentUserCycleData,
+    bool? isViewingCurrentUser,
     String? aiSummary,
     CycleDayInsights? focusedDateInsights,
     UserProfile? userProfile,
@@ -43,8 +43,7 @@ class CyclesState extends Equatable {
     return CyclesState(
       focusedDate: focusedDate ?? this.focusedDate,
       cycleLogs: cycleLogs ?? this.cycleLogs,
-      showCurrentUserCycleData:
-          showCurrentUserCycleData ?? this.showCurrentUserCycleData,
+      isViewingCurrentUser: isViewingCurrentUser ?? this.isViewingCurrentUser,
       aiSummary: aiSummary ?? this.aiSummary,
       focusedDateInsights: focusedDateInsights ?? this.focusedDateInsights,
       userProfile: userProfile ?? this.userProfile,
@@ -59,7 +58,7 @@ class CyclesState extends Equatable {
   List<Object?> get props => [
     focusedDate,
     cycleLogs,
-    showCurrentUserCycleData,
+    isViewingCurrentUser,
     aiSummary,
     focusedDateInsights,
     userProfile,

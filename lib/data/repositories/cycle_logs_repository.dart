@@ -53,15 +53,7 @@ class CycleLogsRepository {
         ? _firestore.collection(_collection).doc()
         : _firestore.collection(_collection).doc(cycleLog.id);
 
-    await docRef.set(
-      cycleLog
-          .copyWith(
-            date: cycleLog.date.toUtc(),
-            updatedAt: DateTime.now().toUtc(),
-            createdAt: cycleLog.createdAt.toUtc(),
-          )
-          .toFirestore(),
-    );
+    await docRef.set(cycleLog.toFirestore());
 
     final newCycleLog = cycleLog.copyWith(id: docRef.id);
     unawaited(_cycleLogBox.put(newCycleLog.id, newCycleLog));
@@ -74,12 +66,7 @@ class CycleLogsRepository {
 
     for (final cycleLog in cycleLogs) {
       final docRef = _firestore.collection(_collection).doc();
-      final newLog = cycleLog.copyWith(
-        id: docRef.id,
-        createdAt: DateTime.now().toUtc(),
-        updatedAt: DateTime.now().toUtc(),
-        date: cycleLog.date.toUtc(),
-      );
+      final newLog = cycleLog.copyWith(id: docRef.id);
       newLogs.add(newLog);
       batch.set(docRef, newLog.toFirestore());
     }
@@ -118,7 +105,7 @@ class CycleLogsRepository {
         .map(CycleLog.fromFirestore)
         .toList();
 
-    if (useCache && firestoreLogs.isNotEmpty) {
+    if (firestoreLogs.isNotEmpty) {
       final newLogsMap = {for (final log in firestoreLogs) log.id: log};
       await _cycleLogBox.putAll(newLogsMap);
     }

@@ -42,15 +42,7 @@ class CyclesCubit extends Cubit<CyclesState>
   static const _hasCycleProperty = 'has_cycle';
 
   Future<void> refreshData() async {
-    emit(
-      state.copyWith(
-        focusedDate: state.focusedDate,
-        showCurrentUserCycleData: state.showCurrentUserCycleData,
-        isLoading: true,
-        isInsightLoading: true,
-      ),
-    );
-
+    emit(state.copyWith(isLoading: true, isInsightLoading: true));
     await initialize(loadDataFromCache: false);
   }
 
@@ -59,54 +51,51 @@ class CyclesCubit extends Cubit<CyclesState>
       () async {
         emit(state.copyWith(isLoading: true));
 
-        final userProfileFromRepo = await _userProfileRepository.getByUserId(
-          _firebaseAuth.currentUser!.uid,
+        final currentUser = _firebaseAuth.currentUser!;
+
+        final userProfile = await _userProfileRepository.getByUserId(
+          currentUser.uid,
           useCache: loadDataFromCache,
         );
 
-        if (userProfileFromRepo == null) {
-          throw Exception(
-            l10n.userProfileNotFoundError(_firebaseAuth.currentUser!.uid),
-          );
-        }
+        var finalUserProfile = userProfile;
 
-        var userProfile = userProfileFromRepo;
-
-        if (!userProfile.didSetUpCycles) {
-          userProfile = userProfile.copyWith(
+        if (!userProfile!.didSetUpCycles) {
+          finalUserProfile = userProfile.copyWith(
             hasCycle: false,
             didSetUpCycles: true,
           );
-          await _userProfileRepository.createOrUpdate(userProfile);
+          await _userProfileRepository.createOrUpdate(finalUserProfile);
           setUserProperty(name: _hasCycleProperty, value: 'false');
         }
 
-        emit(state.copyWith(userProfile: userProfile));
-
         final partnership = await _userPartnershipsRepository.getByUserId(
-          _firebaseAuth.currentUser!.uid,
+          currentUser.uid,
           useCache: loadDataFromCache,
         );
 
-        final partnerId = partnership!.users.firstWhere(
-          (userId) => userId != _firebaseAuth.currentUser!.uid,
+        final partnerId = partnership?.users.firstWhere(
+          (userId) => userId != currentUser.uid,
+          orElse: () => '',
         );
 
-        final partnerProfile = await _userProfileRepository.getByUserId(
-          partnerId,
-          useCache: loadDataFromCache,
+        UserProfile? partnerProfile;
+
+        if (partnerId != null && partnerId.isNotEmpty) {
+          partnerProfile = await _userProfileRepository.getByUserId(
+            partnerId,
+            useCache: loadDataFromCache,
+          );
+        }
+
+        emit(
+          state.copyWith(
+            userProfile: finalUserProfile,
+            partnerProfile: partnerProfile,
+          ),
         );
 
-        emit(state.copyWith(partnerProfile: partnerProfile));
-
-        if (!userProfile.hasCycle) return;
-
-        await _loadCycleData(
-          userProfile: userProfile,
-          partnerProfile: partnerProfile!,
-          showCurrentUserCycleData: state.showCurrentUserCycleData,
-          useCache: loadDataFromCache,
-        );
+        await _loadDataForActiveProfile(useCache: loadDataFromCache);
       },
       onError: (error, _) =>
           emit(state.copyWith(error: error.toString(), isLoading: false)),
@@ -127,19 +116,18 @@ class CyclesCubit extends Cubit<CyclesState>
           state.cycleLogs,
         );
 
-        emit(state.copyWith(focusedDateInsights: insights));
-
         final aiSummary = await _cycleDayInsightsService.generateAiInsights(
           insights,
-          isCurrentUser: state.showCurrentUserCycleData,
+          isCurrentUser: state.isViewingCurrentUser,
           locale: l10n.localeName,
         );
 
-        emit(state.copyWith(aiSummary: aiSummary));
+        emit(
+          state.copyWith(focusedDateInsights: insights, aiSummary: aiSummary),
+        );
       },
       onError: (error, _) => emit(state.copyWith(error: error.toString())),
-      onComplete: () =>
-          emit(state.copyWith(isLoading: false, isInsightLoading: false)),
+      onComplete: () => emit(state.copyWith(isInsightLoading: false)),
     );
   }
 
@@ -147,49 +135,24 @@ class CyclesCubit extends Cubit<CyclesState>
     await guard(
       () async {
         if (state.partnerProfile?.isSharingCycleWithPartner != true) {
-          throw Exception(l10n.partnerCycleSharingNotEnabledError);
+          throw Exception('Partner has not enabled cycle sharing.');
         }
 
-        final newShowCurrentUser = !state.showCurrentUserCycleData;
-
-        emit(state.copyWith(isLoading: true));
-
-        final targetProfile = newShowCurrentUser
-            ? state.userProfile
-            : state.partnerProfile;
-
-        if (targetProfile?.hasCycle != true) {
-          emit(
-            state.copyWith(
-              cycleLogs: [],
-              showCurrentUserCycleData: newShowCurrentUser,
-            ),
-          );
-
-          logEvent(
-            name: _userProfileSwitchedEvent,
-            parameters: {
-              'user_id': _firebaseAuth.currentUser!.uid,
-              if (state.partnerProfile != null)
-                'partner_id': state.partnerProfile!.userId,
-            },
-          );
-          return;
-        }
-
-        await _loadCycleData(
-          userProfile: state.userProfile!,
-          partnerProfile: state.partnerProfile!,
-          showCurrentUserCycleData: newShowCurrentUser,
-          useCache: true,
+        emit(
+          state.copyWith(
+            isLoading: true,
+            isViewingCurrentUser: !state.isViewingCurrentUser,
+          ),
         );
+
+        await _loadDataForActiveProfile(useCache: true);
 
         logEvent(
           name: _userProfileSwitchedEvent,
           parameters: {
-            'user_id': _firebaseAuth.currentUser!.uid,
-            if (state.partnerProfile != null)
-              'partner_id': state.partnerProfile!.userId,
+            'user_id': state.userProfile!.userId,
+            'partner_id': state.partnerProfile!.userId,
+            'viewing': state.isViewingCurrentUser ? 'current_user' : 'partner',
           },
         );
       },
@@ -200,18 +163,18 @@ class CyclesCubit extends Cubit<CyclesState>
     );
   }
 
-  Future<void> _loadCycleData({
-    required UserProfile userProfile,
-    required UserProfile partnerProfile,
-    required bool showCurrentUserCycleData,
-    required bool useCache,
-  }) async {
-    final userId = showCurrentUserCycleData
-        ? userProfile.userId
-        : partnerProfile.userId;
+  Future<void> _loadDataForActiveProfile({required bool useCache}) async {
+    final activeProfile = state.isViewingCurrentUser
+        ? state.userProfile
+        : state.partnerProfile;
+
+    if (activeProfile?.hasCycle != true) {
+      emit(state.copyWith(cycleLogs: []));
+      return;
+    }
 
     final cycleLogs = await _cycleLogsRepository.getCycleLogsByUserId(
-      userId,
+      activeProfile!.userId,
       useCache: useCache,
     );
 
@@ -227,22 +190,19 @@ class CyclesCubit extends Cubit<CyclesState>
       allLogs,
     );
 
-    emit(
-      state.copyWith(
-        cycleLogs: allLogs,
-        showCurrentUserCycleData: showCurrentUserCycleData,
-        focusedDateInsights: insights,
-        isLoading: false,
-      ),
-    );
-
     final aiSummary = await _cycleDayInsightsService.generateAiInsights(
       insights,
-      isCurrentUser: showCurrentUserCycleData,
+      isCurrentUser: state.isViewingCurrentUser,
       locale: l10n.localeName,
       useCache: useCache,
     );
 
-    emit(state.copyWith(aiSummary: aiSummary, isInsightLoading: false));
+    emit(
+      state.copyWith(
+        cycleLogs: allLogs,
+        focusedDateInsights: insights,
+        aiSummary: aiSummary,
+      ),
+    );
   }
 }

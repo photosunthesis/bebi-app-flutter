@@ -75,26 +75,19 @@ class CalendarEventsRepository {
   }
 
   Future<CalendarEvent> createOrUpdate(CalendarEvent event) async {
-    final updatedEvent = event.copyWith(
-      startDate: event.startDate.toUtc(),
-      endDate: event.endDate?.toUtc(),
-      createdAt: event.createdAt.toUtc(),
-      updatedAt: DateTime.now().toUtc(),
-    );
-
     final eventsCollection = _firestore.collection(_collection);
     final eventDoc = event.id.isEmpty
         ? eventsCollection.doc()
         : eventsCollection.doc(event.id);
 
     await eventDoc.set(
-      updatedEvent.toFirestore(),
+      event.toFirestore(),
       SetOptions(merge: event.id.isEmpty),
     );
 
     final returnedEvent = event.id.isEmpty
-        ? updatedEvent.copyWith(id: eventDoc.id)
-        : updatedEvent;
+        ? event.copyWith(id: eventDoc.id)
+        : event;
 
     unawaited(_cacheEvents(<CalendarEvent>[returnedEvent]));
 

@@ -172,8 +172,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
   Widget _buildAccountSwitcher() {
     return BlocBuilder<CyclesCubit, CyclesState>(
       buildWhen: (previous, current) =>
-          previous.showCurrentUserCycleData !=
-              current.showCurrentUserCycleData ||
+          previous.isViewingCurrentUser != current.isViewingCurrentUser ||
           previous.userProfile != current.userProfile ||
           previous.partnerProfile != current.partnerProfile,
       builder: (context, state) {
@@ -189,7 +188,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                   child: Transform.translate(
                     offset: const Offset(16, 0),
                     child: _buildProfileAvatar(
-                      state.showCurrentUserCycleData
+                      state.isViewingCurrentUser
                           ? state.partnerProfile
                           : state.userProfile,
                     ),
@@ -198,10 +197,10 @@ class _CyclesScreenState extends State<CyclesScreen> {
                 AnimatedSwitcher(
                   duration: 120.milliseconds,
                   child: _buildProfileAvatar(
-                    state.showCurrentUserCycleData
+                    state.isViewingCurrentUser
                         ? state.userProfile
                         : state.partnerProfile,
-                    key: ValueKey(state.showCurrentUserCycleData),
+                    key: ValueKey(state.isViewingCurrentUser),
                   ),
                 ),
               ],
@@ -250,7 +249,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
     return BlocSelector<CyclesCubit, CyclesState, bool>(
       selector: (state) {
         if (state.isLoading || state.isInsightLoading) return true;
-        if (!state.showCurrentUserCycleData) return true;
+        if (!state.isViewingCurrentUser) return true;
         if (state.userProfile?.hasCycle == true) return true;
         return false;
       },

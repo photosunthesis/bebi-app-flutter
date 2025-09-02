@@ -51,6 +51,10 @@ class LogIntimacyCubit extends Cubit<LogIntimacyState>
           partnership!.users.firstWhere((user) => user != _currentUserId),
         );
 
+        final users = logForPartner || userProfile!.isSharingCycleWithPartner
+            ? partnership.users
+            : [_currentUserId];
+
         await _cycleLogsRepository.createOrUpdate(
           CycleLog.intimacy(
             id: cycleLogId ?? '',
@@ -58,9 +62,7 @@ class LogIntimacyCubit extends Cubit<LogIntimacyState>
             intimacyType: intimacyType,
             createdBy: _currentUserId,
             ownedBy: logForPartner ? partnerProfile!.userId : _currentUserId,
-            users: userProfile!.isSharingCycleWithPartner == true
-                ? partnership.users
-                : [_currentUserId],
+            users: users,
           ),
         );
 
@@ -80,9 +82,6 @@ class LogIntimacyCubit extends Cubit<LogIntimacyState>
       onError: (error, _) {
         emit(LogIntimacyErrorState(error.toString()));
       },
-      onComplete: () {
-        emit(const LogIntimmacyLoadedState());
-      },
     );
   }
 
@@ -90,16 +89,11 @@ class LogIntimacyCubit extends Cubit<LogIntimacyState>
     await guard(
       () async {
         emit(const LogIntimacyLoadingState());
-
         await _cycleLogsRepository.deleteById(cycleLogId);
-
         emit(const LogIntimacySuccessState());
       },
       onError: (error, _) {
         emit(LogIntimacyErrorState(error.toString()));
-      },
-      onComplete: () {
-        emit(const LogIntimmacyLoadedState());
       },
     );
   }

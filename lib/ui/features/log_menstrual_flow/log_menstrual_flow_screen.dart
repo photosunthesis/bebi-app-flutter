@@ -196,11 +196,16 @@ class _LogMenstrualFlowScreenState extends State<LogMenstrualFlowScreen> {
   Widget _buildDeleteButton(bool loading) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
-      child: OutlinedButton(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: context.colorScheme.primary,
-          minimumSize: const Size(double.infinity, 44),
-        ),
+      child: ElevatedButton(
+        style:
+            ElevatedButton.styleFrom(
+              foregroundColor: context.colorScheme.primary,
+              minimumSize: const Size.fromHeight(40),
+            ).copyWith(
+              backgroundColor: WidgetStatePropertyAll(
+                context.colorScheme.surface,
+              ),
+            ),
         onPressed: loading
             ? null
             : () async => await context.read<LogMenstrualFlowCubit>().delete(

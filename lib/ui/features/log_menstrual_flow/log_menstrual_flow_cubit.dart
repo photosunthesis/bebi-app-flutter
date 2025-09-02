@@ -53,15 +53,17 @@ class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState>
           partnership!.users.firstWhere((user) => user != _currentUserId!),
         );
 
+        final users = logForPartner || userProfile!.isSharingCycleWithPartner
+            ? partnership.users
+            : [_currentUserId!];
+
         final cycleLog = CycleLog.period(
           id: cycleLogId ?? '',
           date: date,
           flow: flowIntensity,
           createdBy: _currentUserId!,
           ownedBy: logForPartner ? partnerProfile!.userId : _currentUserId!,
-          users: userProfile!.isSharingCycleWithPartner == true
-              ? partnership.users
-              : [_currentUserId!],
+          users: users,
         );
 
         final previousLogs = await _cycleLogsRepository.getByUserIdAndDateRange(
@@ -101,9 +103,6 @@ class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState>
       onError: (error, _) {
         emit(LogMenstrualFlowErrorState(error.toString()));
       },
-      onComplete: () {
-        emit(const LogMenstrualFlowLoadedState());
-      },
     );
   }
 
@@ -120,9 +119,6 @@ class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState>
       },
       onError: (error, _) {
         emit(LogMenstrualFlowErrorState(error.toString()));
-      },
-      onComplete: () {
-        emit(const LogMenstrualFlowLoadedState());
       },
     );
   }

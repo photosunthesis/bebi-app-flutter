@@ -45,11 +45,9 @@ class _CycleLogsState extends State<CycleLogs> {
   Widget _buildPeriodSection() {
     return BlocBuilder<CyclesCubit, CyclesState>(
       buildWhen: (previous, current) =>
-          current.showCurrentUserCycleData !=
-              previous.showCurrentUserCycleData ||
+          current.isViewingCurrentUser != previous.isViewingCurrentUser ||
           current.focusedDateLogs != previous.focusedDateLogs,
       builder: (context, state) {
-        final showCurrentUserCycleData = state.showCurrentUserCycleData;
         final periodLog = state.focusedDateLogs.firstWhereOrNull(
           (e) => e.type == LogType.period,
         );
@@ -71,7 +69,7 @@ class _CycleLogsState extends State<CycleLogs> {
                 final shouldRefresh = await context.pushNamed(
                   AppRoutes.logMenstrualCycle,
                   queryParameters: {
-                    'logForPartner': '${!showCurrentUserCycleData}',
+                    'logForPartner': '${!state.isViewingCurrentUser}',
                     'date': state.focusedDate.toIso8601String(),
                     'averagePeriodDurationInDays': state
                         .focusedDateInsights!
@@ -161,7 +159,7 @@ class _CycleLogsState extends State<CycleLogs> {
                 title: context.l10n.symptomsTitle,
                 routeName: AppRoutes.logSymptoms,
                 getDisplayText: (log) => _getSymptomDisplayText(log),
-                getRouteParams: (log) => {
+                routeParams: (log) => {
                   'cycleLogId': log.id,
                   'symptoms': log.symptoms!.join(','),
                 },
@@ -179,7 +177,7 @@ class _CycleLogsState extends State<CycleLogs> {
                 routeName: AppRoutes.logIntimacy,
                 getDisplayText: (log) =>
                     context.l10n.intimacySex(log.intimacyType!.label),
-                getRouteParams: (log) => {
+                routeParams: (log) => {
                   'cycleLogId': log.id,
                   'intimacyType': log.intimacyType!.name,
                 },
@@ -196,7 +194,7 @@ class _CycleLogsState extends State<CycleLogs> {
     required String title,
     required String routeName,
     required String Function(CycleLog) getDisplayText,
-    required Map<String, String> Function(CycleLog) getRouteParams,
+    required Map<String, String> Function(CycleLog) routeParams,
   }) {
     return BlocBuilder<CyclesCubit, CyclesState>(
       buildWhen: (previous, current) =>
@@ -207,7 +205,7 @@ class _CycleLogsState extends State<CycleLogs> {
         );
 
         return InkWell(
-          onTap: () => _handleLogTap(state, routeName, log, getRouteParams),
+          onTap: () => _handleLogTap(state, routeName, log, routeParams),
           child: Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
@@ -255,14 +253,14 @@ class _CycleLogsState extends State<CycleLogs> {
     CyclesState state,
     String routeName,
     CycleLog? log,
-    Map<String, String> Function(CycleLog) getRouteParams,
+    Map<String, String> Function(CycleLog) routeParams,
   ) async {
     final shouldRefresh = await context.pushNamed(
       routeName,
       queryParameters: {
-        'logForPartner': '!${state.showCurrentUserCycleData}',
+        'logForPartner': '${!state.isViewingCurrentUser}',
         'date': state.focusedDate.toIso8601String(),
-        if (log != null) ...getRouteParams(log),
+        if (log != null) ...routeParams(log),
       },
     );
 

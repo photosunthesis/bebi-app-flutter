@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:bebi_app/app/theme/app_colors.dart';
+import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
@@ -18,7 +19,7 @@ class CycleLog extends Equatable {
     required DateTime updatedAt,
     this.users = const [],
     this.isPrediction = false,
-  }) : _date = date.toUtc(),
+  }) : _date = date.noTime(),
        _createdAt = createdAt.toUtc(),
        _updatedAt = updatedAt.toUtc();
 
@@ -55,12 +56,12 @@ class CycleLog extends Equatable {
   }) {
     return CycleLog(
       id: id,
-      date: date.toUtc(),
+      date: date,
       type: LogType.period,
       ownedBy: ownedBy,
       createdBy: createdBy,
-      createdAt: DateTime.now().toUtc(),
-      updatedAt: DateTime.now().toUtc(),
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
       flow: flow,
       users: users,
       isPrediction: isPrediction,
@@ -77,12 +78,12 @@ class CycleLog extends Equatable {
   }) {
     return CycleLog(
       id: id,
-      date: date.toUtc(),
+      date: date,
       type: LogType.ovulation,
       ownedBy: ownedBy,
       createdBy: createdBy,
-      createdAt: DateTime.now().toUtc(),
-      updatedAt: DateTime.now().toUtc(),
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
       users: users,
       isPrediction: isPrediction,
     );
@@ -99,12 +100,12 @@ class CycleLog extends Equatable {
   }) {
     return CycleLog(
       id: id,
-      date: date.toUtc(),
+      date: date,
       type: LogType.symptom,
       ownedBy: ownedBy,
       createdBy: createdBy,
-      createdAt: DateTime.now().toUtc(),
-      updatedAt: DateTime.now().toUtc(),
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
       symptoms: symptoms,
       users: users,
       isPrediction: isPrediction,
@@ -122,12 +123,12 @@ class CycleLog extends Equatable {
   }) {
     return CycleLog(
       id: id,
-      date: date.toUtc(),
+      date: date,
       type: LogType.intimacy,
       ownedBy: ownedBy,
       createdBy: createdBy,
-      createdAt: DateTime.now().toUtc(),
-      updatedAt: DateTime.now().toUtc(),
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
       intimacyType: intimacyType,
       users: users,
       isPrediction: isPrediction,
@@ -174,7 +175,7 @@ class CycleLog extends Equatable {
   }) {
     return CycleLog(
       id: id ?? this.id,
-      date: date ?? this.date,
+      date: date?.noTime() ?? this.date,
       type: type ?? this.type,
       flow: flow ?? this.flow,
       symptoms: symptoms ?? this.symptoms,

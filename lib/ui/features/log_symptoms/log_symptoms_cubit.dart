@@ -56,6 +56,10 @@ class LogSymptomsCubit extends Cubit<LogSymptomsState>
           partnership!.users.firstWhere((user) => user != _currentUserId),
         );
 
+        final users = logForPartner || userProfile!.isSharingCycleWithPartner
+            ? partnership.users
+            : [_currentUserId];
+
         if (symptoms.isEmpty) {
           await _cycleLogsRepository.deleteById(cycleLogId!);
         } else {
@@ -66,9 +70,7 @@ class LogSymptomsCubit extends Cubit<LogSymptomsState>
               symptoms: symptoms,
               createdBy: _currentUserId,
               ownedBy: logForPartner ? partnerProfile!.userId : _currentUserId,
-              users: userProfile!.isSharingCycleWithPartner == true
-                  ? partnership.users
-                  : [_currentUserId],
+              users: users,
             ),
           );
         }
