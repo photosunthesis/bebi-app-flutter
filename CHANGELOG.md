@@ -8,6 +8,10 @@ All notable changes to this project will be documented in this file.
 
 - Added a LICENSE file with the MIT + Commons Clause license (see LICENSE for details) 
 
+### Changed
+
+- Updated error messages on sign in to be friendlier and more informative 🛠️
+
 ### Fixed
 
 - Fixed issue with cycle events being stored with incorrect dates 📅
