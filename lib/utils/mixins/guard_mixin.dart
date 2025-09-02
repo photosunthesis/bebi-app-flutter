@@ -9,12 +9,15 @@ mixin GuardMixin {
     FutureOr<T> Function() body, {
     void Function(Object error, StackTrace stackTrace)? onError,
     void Function()? onComplete,
+    bool Function(Object error, StackTrace stackTrace)? logWhen,
     bool disableLogging = false,
   }) async {
     try {
       return await body();
     } catch (e, s) {
-      if ((kDebugMode && kIsTest) || disableLogging) {
+      if ((kDebugMode && kIsTest) ||
+          disableLogging ||
+          (logWhen != null && !logWhen(e, s))) {
         debugPrint('Error caught by guard: $e\n$s');
       } else {
         unawaited(Sentry.captureException(e, stackTrace: s));

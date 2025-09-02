@@ -15,6 +15,9 @@
   "forgotPasswordText": "Forgot password? ",
   "forgotPasswordLink": "Tap here to reset.",
   "resetPasswordNotImplemented": "Reset password feature is not implemented yet.",
+  "wrongPasswordError": "That password doesn't look right. Please double-check and try again.",
+  "invalidEmailError": "The email address is not valid.",
+  "userNotFoundError": "No account found for that email. Please check and try again.",
   "profileSetupTitle": "Set up your profile",
   "profileSetupSubtitle": "Add a photo and name to personalize your profile. These details will be visible on your account.",
   "displayNameLabel": "Display name",
@@ -255,7 +258,7 @@
   "mediumFlow": "Medium",
   "heavyFlow": "Heavy",
   "serverError": "There was an issue with the server. Please try again later.",
-  "signInError": "There was an issue with the sign-in process.",
+  "signInError": "Something went wrong during sign-in. Please try again.",
   "unexpectedError": "An unexpected error occurred. Please try again later.",
   "selectDate": "Select date",
   "selectItem": "Select item",
@@ -330,10 +333,7 @@
       }
     }
   },
-  "partnerCycleSharingNotEnabledError": "Looks like your partner hasn't enabled cycle sharing yet. You can ask them to turn it on in their profile settings.",
-  "@partnerCycleSharingNotEnabledError": {
-    "description": "Error message when partner hasn't enabled cycle sharing"
-  },
+  "partnerCycleSharingNotEnabledError": "You can't view your partner's cycle data because they haven't enabled cycle sharing yet.",
   "partnershipNotFoundError": "Partnership not found for user: {userId}",
   "@partnershipNotFoundError": {
     "description": "Error message when partnership is not found for a user",

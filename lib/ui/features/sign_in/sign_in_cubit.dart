@@ -34,25 +34,18 @@ class SignInCubit extends Cubit<SignInState>
           },
         );
       },
+      logWhen: (error, _) => error is! FirebaseAuthException,
       onError: (error, _) {
         final errorMessage = switch (error) {
-          FirebaseAuthException(:final String? message) =>
-            message ?? l10n.signInError,
-          _ => l10n.unexpectedError,
+          FirebaseAuthException() when error.code == 'wrong-password' =>
+            l10n.wrongPasswordError,
+          FirebaseAuthException() when error.code == 'invalid-email' =>
+            l10n.invalidEmailError,
+          FirebaseAuthException() when error.code == 'user-not-found' =>
+            l10n.userNotFoundError,
+          _ => l10n.signInError,
         };
-
         emit(SignInErrorState(errorMessage));
-
-        logEvent(
-          name: 'sign_in_failed',
-          parameters: {
-            'email': email,
-            'error_type': error is FirebaseAuthException
-                ? error.code
-                : 'unknown',
-            'login_method': 'email',
-          },
-        );
       },
     );
   }

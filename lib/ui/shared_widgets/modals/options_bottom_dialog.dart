@@ -167,6 +167,7 @@ class OptionsBottomDialog<T> extends StatelessWidget {
         buttonStyle = ElevatedButton.styleFrom(
           backgroundColor: context.colorScheme.error,
           foregroundColor: context.colorScheme.surface,
+          side: BorderSide.none,
         );
         break;
     }
@@ -177,9 +178,7 @@ class OptionsBottomDialog<T> extends StatelessWidget {
         vertical: 2,
       ),
       child: ElevatedButton(
-        style: buttonStyle.copyWith(
-          minimumSize: const WidgetStatePropertyAll(Size(double.infinity, 44)),
-        ),
+        style: buttonStyle,
         onPressed: () {
           if (option.onTap != null) {
             option.onTap!();

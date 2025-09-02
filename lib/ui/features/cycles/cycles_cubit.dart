@@ -135,7 +135,7 @@ class CyclesCubit extends Cubit<CyclesState>
     await guard(
       () async {
         if (state.partnerProfile?.isSharingCycleWithPartner != true) {
-          throw Exception('Partner has not enabled cycle sharing.');
+          throw UnsupportedError(l10n.partnerCycleSharingNotEnabledError);
         }
 
         emit(
@@ -156,6 +156,7 @@ class CyclesCubit extends Cubit<CyclesState>
           },
         );
       },
+      logWhen: (error, _) => error is! UnsupportedError,
       onError: (error, _) =>
           emit(state.copyWith(error: error.toString(), isLoading: false)),
       onComplete: () =>
@@ -168,7 +169,7 @@ class CyclesCubit extends Cubit<CyclesState>
         ? state.userProfile
         : state.partnerProfile;
 
-    if (activeProfile?.hasCycle != true) {
+    if (state.isViewingCurrentUser && (activeProfile?.hasCycle != true)) {
       emit(state.copyWith(cycleLogs: []));
       return;
     }
