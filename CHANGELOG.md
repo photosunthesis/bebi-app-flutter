@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.5] - 2025-09-02
+
+### Added
+
+- Added a LICENSE file with the MIT + Commons Clause license (see LICENSE for details) 
+
+### Fixed
+
+- Fixed issue with cycle events being stored with incorrect dates 📅
+- Fixed issue where cycle event data would not refresh after logging 🔄
+
 ## [0.4.4] - 2025-09-01
 
 ### Changed
