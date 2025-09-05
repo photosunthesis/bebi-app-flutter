@@ -4,6 +4,7 @@ import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:bebi_app/utils/extensions/color_extensions.dart';
+import 'package:bebi_app/utils/extensions/string_extensions.dart';
 import 'package:flutter/material.dart';
 
 abstract class CalendarEvents {
@@ -145,12 +146,12 @@ class _EventCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(right: 24),
       child: Text(
-        event.notes!,
+        event.notes!.stripMarkdown(),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: context.textTheme.bodyMedium?.copyWith(
           color: event.color.darken(),
         ),
-        overflow: TextOverflow.ellipsis,
-        maxLines: 1,
       ),
     );
   }

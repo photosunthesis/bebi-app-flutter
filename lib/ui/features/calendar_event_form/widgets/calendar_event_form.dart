@@ -330,7 +330,7 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
       selector: (state) => state is CalendarEventFormLoadingState,
       builder: (context, loading) {
         return ElevatedButton(
-          onPressed: widget.onSave,
+          onPressed: loading ? null : widget.onSave,
           child: Text(
             (loading ? context.l10n.savingButton : context.l10n.saveButton)
                 .toUpperCase(),

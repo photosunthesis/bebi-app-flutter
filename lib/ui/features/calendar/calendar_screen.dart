@@ -45,26 +45,28 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<CalendarCubit, CalendarState>(
-      listener: (context, state) {
-        if (state.error != null) context.showSnackbar(state.error!);
-      },
-      builder: (context, state) => Scaffold(
-        appBar: _buildAppBar(),
-        body: RefreshIndicator.adaptive(
-          onRefresh: () async => _cubit.loadCalendarEvents(useCache: false),
-          child: CustomScrollView(
-            slivers: [
-              const SliverPersistentHeader(
-                delegate: CalendarSliverDelegate(),
-                pinned: true,
-              ),
-              (state.focusedDayEvents.isNotEmpty)
-                  ? CalendarEvents.buildList(state.focusedDayEvents)
-                  : CalendarEvents.buildEmptyPlaceholder(context),
-            ],
-          ),
-        ),
+      listenWhen: (previous, current) => previous.events != current.events,
+      listener: (context, state) => state.events.map(
+        error: (error) =>
+            context.showSnackbar(error.toString(), type: SnackbarType.error),
+        orElse: () {},
       ),
+      builder: (context, state) {
+        return Scaffold(
+          appBar: _buildAppBar(),
+          body: RefreshIndicator.adaptive(
+            onRefresh: () async => _cubit.loadCalendarEvents(useCache: false),
+            child: CustomScrollView(
+              slivers: [
+                const SliverToBoxAdapter(child: Calendar()),
+                (state.focusedDayEvents.isNotEmpty)
+                    ? CalendarEvents.buildList(state.focusedDayEvents)
+                    : CalendarEvents.buildEmptyPlaceholder(context),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

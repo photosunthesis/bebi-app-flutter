@@ -53,4 +53,11 @@ extension StringExtensions on String {
         )
         .join(' ');
   }
+
+  String stripMarkdown() {
+    return replaceAll(
+      RegExp(r'(\*|_|`|#|\>|!|\[|\])'),
+      '',
+    ).replaceAll(RegExp(r'\n{2,}'), ' ').replaceAll('\n', ' ').trim();
+  }
 }

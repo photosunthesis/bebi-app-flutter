@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bebi_app/data/models/async_value.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/data/repositories/calendar_events_repository.dart';
 import 'package:bebi_app/data/services/recurring_calendar_events_service.dart';
@@ -34,7 +35,7 @@ class CalendarCubit extends Cubit<CalendarState>
   Future<void> loadCalendarEvents({bool useCache = true}) async {
     await guard(
       () async {
-        emit(state.copyWith(isLoading: true));
+        emit(state.copyWith(events: const AsyncLoading()));
 
         _windowStart = state.focusedDay.subtract(_defaultTimeWindow);
         _windowEnd = state.focusedDay.add(_defaultTimeWindow);
@@ -51,29 +52,24 @@ class CalendarCubit extends Cubit<CalendarState>
               _windowEnd!,
             );
 
-        final allEvents = [...events, ...recurringEvents];
-
-        final focusedDayEvents = allEvents
-            .where((e) => e.startDate.isSameDay(state.focusedDay))
-            .toList();
-
         emit(
-          state.copyWith(events: allEvents, focusedDayEvents: focusedDayEvents),
+          state.copyWith(events: AsyncData([...events, ...recurringEvents])),
         );
 
         logEvent(
           name: 'calendar_events_loaded',
           parameters: {
             'user_id': _firebaseAuth.currentUser!.uid,
-            'total_events': allEvents.length,
-            'focused_day_events': focusedDayEvents.length,
+            'total_events': state.events.asData()!.length,
+            'focused_day_events': state.focusedDayEvents.length,
             'used_cache': useCache,
             'window_days': _defaultTimeWindow.inDays,
           },
         );
       },
-      onError: (error, _) => emit(state.copyWith(error: error.toString())),
-      onComplete: () => emit(state.copyWith(isLoading: false)),
+      onError: (error, _) {
+        emit(state.copyWith(events: AsyncError(error)));
+      },
     );
   }
 
@@ -94,24 +90,13 @@ class CalendarCubit extends Cubit<CalendarState>
 
     if (needsExpansion) return await _expandTimeRange(date);
 
-    final dayEvents = state.events
-        .where((e) => e.startDate.isSameDay(date))
-        .toList();
-
-    emit(
-      state.copyWith(
-        events: state.events,
-        focusedDayEvents: dayEvents,
-        focusedDay: date,
-      ),
-    );
+    emit(state.copyWith(focusedDay: date));
 
     logEvent(
       name: 'calendar_date_selected',
       parameters: {
         'user_id': _firebaseAuth.currentUser!.uid,
         'selected_date': date.toIso8601String(),
-        'events_count': dayEvents.length,
         'is_today': date.isSameDay(DateTime.now()),
         'days_from_today': date.difference(DateTime.now()).inDays,
       },
@@ -135,23 +120,18 @@ class CalendarCubit extends Cubit<CalendarState>
 
   Future<void> _loadMoreEvents(DateTime rangeStart, DateTime rangeEnd) async {
     await guard(() async {
-      emit(state.copyWith(isLoading: true));
+      final events = state.events.asData()!;
+
+      emit(state.copyWith(events: const AsyncLoading()));
 
       final newRecurringEvents = _recurringCalendarEventsService
-          .generateRecurringEventsInWindow(state.events, rangeStart, rangeEnd);
+          .generateRecurringEventsInWindow(events, rangeStart, rangeEnd);
 
       _windowStart = _windowStart?.earlierDate(rangeStart) ?? rangeStart;
       _windowEnd = _windowEnd?.laterDate(rangeEnd) ?? rangeEnd;
 
-      final allEvents = [...state.events, ...newRecurringEvents];
-
       emit(
-        state.copyWith(
-          events: allEvents,
-          focusedDayEvents: allEvents
-              .where((e) => e.startDate.isSameDay(state.focusedDay))
-              .toList(),
-        ),
+        state.copyWith(events: AsyncData([...events, ...newRecurringEvents])),
       );
     });
   }

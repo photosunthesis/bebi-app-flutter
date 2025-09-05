@@ -8,29 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-class CalendarSliverDelegate extends SliverPersistentHeaderDelegate {
-  const CalendarSliverDelegate();
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) => const _Calendar();
-
-  @override
-  double get maxExtent => 344;
-
-  @override
-  double get minExtent => 344;
-
-  @override
-  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) =>
-      false;
-}
-
-class _Calendar extends StatelessWidget {
-  const _Calendar();
+class Calendar extends StatelessWidget {
+  const Calendar({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +32,11 @@ class _Calendar extends StatelessWidget {
           child: TableCalendar<CalendarEvent>(
             availableGestures: AvailableGestures.horizontalSwipe,
             focusedDay: state.focusedDay,
-            eventLoader: (day) => state.events,
+            eventLoader: (day) => state.events.map(
+              data: (events) => events,
+              orElse: () => <CalendarEvent>[],
+            ),
+            sixWeekMonthsEnforced: true,
             headerVisible: false,
             currentDay: DateTime.now(),
             // TODO Make first and last days dynamic
@@ -63,7 +46,6 @@ class _Calendar extends StatelessWidget {
             daysOfWeekHeight: 32,
             availableCalendarFormats: {
               CalendarFormat.month: context.l10n.monthFormat,
-              CalendarFormat.week: context.l10n.weekFormat,
             },
             daysOfWeekStyle: _dayOfWeekStyle(context),
             calendarBuilders: CalendarBuilders(
