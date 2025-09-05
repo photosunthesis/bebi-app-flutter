@@ -5,6 +5,7 @@ import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/ui/features/cycles/cycles_cubit.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:bebi_app/utils/extensions/color_extensions.dart';
+import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
 // ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -44,12 +45,13 @@ class _CycleLogsState extends State<CycleLogs> {
 
   Widget _buildPeriodSection() {
     return BlocBuilder<CyclesCubit, CyclesState>(
-      buildWhen: (previous, current) =>
-          current.isViewingCurrentUser != previous.isViewingCurrentUser ||
-          current.focusedDateLogs != previous.focusedDateLogs,
       builder: (context, state) {
-        final periodLog = state.focusedDateLogs.firstWhereOrNull(
-          (e) => e.type == LogType.period,
+        final periodLog = state.cycleLogs.map(
+          data: (data) => data.firstWhereOrNull(
+            (e) =>
+                e.type == LogType.period && e.date.isSameDay(state.focusedDate),
+          ),
+          orElse: () => null,
         );
 
         return Column(
@@ -71,8 +73,8 @@ class _CycleLogsState extends State<CycleLogs> {
                   queryParameters: {
                     'logForPartner': '${!state.isViewingCurrentUser}',
                     'date': state.focusedDate.toIso8601String(),
-                    'averagePeriodDurationInDays': state
-                        .focusedDateInsights!
+                    'averagePeriodDurationInDays': state.insights
+                        .asData()!
                         .averagePeriodDurationInDays
                         .toString(),
                     if (periodLog != null) ...{
@@ -82,7 +84,9 @@ class _CycleLogsState extends State<CycleLogs> {
                   },
                 );
 
-                if (shouldRefresh == true) await _cubit.refreshData();
+                if (shouldRefresh == true) {
+                  await _cubit.initialize(useCache: false);
+                }
               },
               child: Container(
                 padding: const EdgeInsets.all(12),
@@ -105,10 +109,7 @@ class _CycleLogsState extends State<CycleLogs> {
                     ),
                     if (periodLog != null)
                       Text(
-                        state.focusedDateLogs
-                            .firstWhere((e) => e.type == LogType.period)
-                            .flow!
-                            .label,
+                        periodLog.flow!.label,
                         style: context.textTheme.bodyMedium?.copyWith(
                           color: AppColors.red.darken(0.15),
                           fontWeight: FontWeight.w600,
@@ -197,11 +198,12 @@ class _CycleLogsState extends State<CycleLogs> {
     required Map<String, String> Function(CycleLog) routeParams,
   }) {
     return BlocBuilder<CyclesCubit, CyclesState>(
-      buildWhen: (previous, current) =>
-          current.focusedDateLogs != previous.focusedDateLogs,
       builder: (context, state) {
-        final log = state.focusedDateLogs.firstWhereOrNull(
-          (e) => e.type == logType,
+        final log = state.cycleLogs.map(
+          data: (data) => data.firstWhereOrNull(
+            (e) => e.type == logType && e.date.isSameDay(state.focusedDate),
+          ),
+          orElse: () => null,
         );
 
         return InkWell(
@@ -264,6 +266,6 @@ class _CycleLogsState extends State<CycleLogs> {
       },
     );
 
-    if (shouldRefresh == true) await _cubit.refreshData();
+    if (shouldRefresh == true) await _cubit.initialize(useCache: false);
   }
 }

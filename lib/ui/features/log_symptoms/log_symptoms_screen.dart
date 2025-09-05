@@ -180,10 +180,12 @@ class _LogSymptomsScreenState extends State<LogSymptomsScreen> {
                   symptoms: _symptoms,
                 ),
           child: Text(
-            (loading
-                    ? context.l10n.loggingSymptomsButton
-                    : context.l10n.logSymptomsButton)
-                .toUpperCase(),
+            switch ((loading, widget.cycleLogId != null)) {
+              (true, true) => context.l10n.updatingSymptomsButton,
+              (true, false) => context.l10n.loggingSymptomsButton,
+              (false, true) => context.l10n.updateSymptomsButton,
+              (false, false) => context.l10n.loggingSymptomsButton,
+            }.toUpperCase(),
           ),
         ),
       ),

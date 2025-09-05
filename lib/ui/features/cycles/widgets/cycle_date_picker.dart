@@ -102,7 +102,10 @@ class _CycleDatePickerState extends State<CycleDatePicker> {
 
   Widget _buildDayItem({required DateTime date}) {
     return BlocSelector<CyclesCubit, CyclesState, List<CycleLog>>(
-      selector: (state) => state.cycleLogs,
+      selector: (state) => state.cycleLogs.map(
+        data: (value) => value,
+        orElse: () => <CycleLog>[],
+      ),
       builder: (context, cycleLogs) {
         final [periodLog, ovulationLog, symptomLog, intimacyLog] = LogType
             .values

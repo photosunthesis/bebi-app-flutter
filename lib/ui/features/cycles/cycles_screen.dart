@@ -45,8 +45,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
   Widget build(BuildContext context) {
     return BlocListener<CyclesCubit, CyclesState>(
       listenWhen: (previous, current) =>
-          previous.focusedDate != current.focusedDate ||
-          previous.error != current.error,
+          previous.focusedDate != current.focusedDate,
       listener: (context, state) {
         if (!_isAnimating) {
           _isAnimating = true;
@@ -55,8 +54,8 @@ class _CyclesScreenState extends State<CyclesScreen> {
               .then((_) => _isAnimating = false);
         }
 
-        if (state.error != null) {
-          context.showSnackbar(state.error!, duration: 6.seconds);
+        if (state.errorMessage != null) {
+          context.showSnackbar(state.errorMessage!, duration: 6.seconds);
         }
       },
       child: Scaffold(
@@ -64,7 +63,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
         body: Stack(
           children: [
             RefreshIndicator.adaptive(
-              onRefresh: _cubit.refreshData,
+              onRefresh: () async => _cubit.initialize(useCache: false),
               child: ListView(
                 controller: _scrollController,
                 children: [
@@ -189,8 +188,8 @@ class _CyclesScreenState extends State<CyclesScreen> {
                     offset: const Offset(16, 0),
                     child: _buildProfileAvatar(
                       state.isViewingCurrentUser
-                          ? state.partnerProfile
-                          : state.userProfile,
+                          ? state.partnerProfile.asData()
+                          : state.userProfile.asData(),
                     ),
                   ),
                 ),
@@ -198,8 +197,8 @@ class _CyclesScreenState extends State<CyclesScreen> {
                   duration: 120.milliseconds,
                   child: _buildProfileAvatar(
                     state.isViewingCurrentUser
-                        ? state.userProfile
-                        : state.partnerProfile,
+                        ? state.userProfile.asData()
+                        : state.partnerProfile.asData(),
                     key: ValueKey(state.isViewingCurrentUser),
                   ),
                 ),
@@ -248,9 +247,9 @@ class _CyclesScreenState extends State<CyclesScreen> {
   Widget _buildCyclesSetupPrompt() {
     return BlocSelector<CyclesCubit, CyclesState, bool>(
       selector: (state) {
-        if (state.isLoading || state.isInsightLoading) return true;
+        if (state.cycleLogs.isLoading || state.insights.isLoading) return true;
         if (!state.isViewingCurrentUser) return true;
-        if (state.userProfile?.hasCycle == true) return true;
+        if (state.userProfile.asData()?.hasCycle == true) return true;
         return false;
       },
       builder: (context, hidePrompt) {
@@ -308,7 +307,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                             AppRoutes.cyclesSetup,
                           );
                           if (shouldReinitialize == true) {
-                            await _cubit.refreshData();
+                            await _cubit.initialize(useCache: false);
                           }
                         },
                         child: Text(

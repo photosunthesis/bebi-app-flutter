@@ -3,68 +3,67 @@ part of 'cycles_cubit.dart';
 class CyclesState extends Equatable {
   const CyclesState({
     required this.focusedDate,
-    this.cycleLogs = const [],
     this.isViewingCurrentUser = true,
-    this.aiSummary,
-    this.focusedDateInsights,
-    this.userProfile,
-    this.partnerProfile,
-    this.isLoading = false,
-    this.isInsightLoading = false,
-    this.error,
+    this.aiSummary = const AsyncData(''),
+    this.cycleLogs = const AsyncData([]),
+    this.insights = const AsyncData(null),
+    this.userProfile = const AsyncData(null),
+    this.partnerProfile = const AsyncData(null),
   });
 
   final DateTime focusedDate;
-  final List<CycleLog> cycleLogs;
   final bool isViewingCurrentUser;
-  final String? aiSummary;
-  final CycleDayInsights? focusedDateInsights;
-  final UserProfile? userProfile;
-  final UserProfile? partnerProfile;
-  final bool isLoading;
-  final bool isInsightLoading;
-  final String? error;
+  final AsyncValue<String> aiSummary;
+  final AsyncValue<List<CycleLog>> cycleLogs;
+  final AsyncValue<CycleDayInsights?> insights;
+  final AsyncValue<UserProfile?> userProfile;
+  final AsyncValue<UserProfile?> partnerProfile;
 
-  List<CycleLog> get focusedDateLogs =>
-      cycleLogs.where((e) => e.date.isSameDay(focusedDate)).toList();
+  String? get errorMessage {
+    return switch ([
+      cycleLogs,
+      insights,
+      aiSummary,
+      userProfile,
+      partnerProfile,
+    ]) {
+      [AsyncError(:final error), ...] => error.toString(),
+      [_, AsyncError(:final error), ...] => error.toString(),
+      [_, _, AsyncError(:final error), ...] => error.toString(),
+      [_, _, _, AsyncError(:final error), ...] => error.toString(),
+      [_, _, _, _, AsyncError(:final error)] => error.toString(),
+      _ => null,
+    };
+  }
 
   CyclesState copyWith({
     DateTime? focusedDate,
-    List<CycleLog>? cycleLogs,
     bool? isViewingCurrentUser,
-    String? aiSummary,
-    CycleDayInsights? focusedDateInsights,
-    UserProfile? userProfile,
-    UserProfile? partnerProfile,
-    bool? isLoading,
-    bool? isInsightLoading,
-    String? error,
+    AsyncValue<String>? aiSummary,
+    AsyncValue<List<CycleLog>>? cycleLogs,
+    AsyncValue<CycleDayInsights?>? insights,
+    AsyncValue<UserProfile?>? userProfile,
+    AsyncValue<UserProfile?>? partnerProfile,
   }) {
     return CyclesState(
       focusedDate: focusedDate ?? this.focusedDate,
-      cycleLogs: cycleLogs ?? this.cycleLogs,
       isViewingCurrentUser: isViewingCurrentUser ?? this.isViewingCurrentUser,
       aiSummary: aiSummary ?? this.aiSummary,
-      focusedDateInsights: focusedDateInsights ?? this.focusedDateInsights,
+      cycleLogs: cycleLogs ?? this.cycleLogs,
+      insights: insights ?? this.insights,
       userProfile: userProfile ?? this.userProfile,
       partnerProfile: partnerProfile ?? this.partnerProfile,
-      isLoading: isLoading ?? this.isLoading,
-      isInsightLoading: isInsightLoading ?? this.isInsightLoading,
-      error: error ?? this.error,
     );
   }
 
   @override
   List<Object?> get props => [
     focusedDate,
-    cycleLogs,
     isViewingCurrentUser,
     aiSummary,
-    focusedDateInsights,
+    cycleLogs,
+    insights,
     userProfile,
     partnerProfile,
-    isLoading,
-    isInsightLoading,
-    error,
   ];
 }

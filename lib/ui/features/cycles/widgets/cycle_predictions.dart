@@ -49,8 +49,8 @@ class _CyclePredictionsState extends State<CyclePredictions> {
   Widget _buildViewAllButton() {
     return BlocSelector<CyclesCubit, CyclesState, String?>(
       selector: (state) => state.isViewingCurrentUser
-          ? state.userProfile?.userId
-          : state.partnerProfile?.userId,
+          ? state.userProfile.asData()?.userId
+          : state.partnerProfile.asData()?.userId,
       builder: (context, userId) {
         return OutlinedButton(
           onPressed: () async {
@@ -73,9 +73,9 @@ class _CyclePredictionsState extends State<CyclePredictions> {
     return BlocBuilder<CyclesCubit, CyclesState>(
       buildWhen: (previous, current) =>
           current.isViewingCurrentUser != previous.isViewingCurrentUser ||
-          current.focusedDateInsights != previous.focusedDateInsights,
+          current.insights != previous.insights,
       builder: (context, state) {
-        final fertileDays = state.focusedDateInsights?.fertileDays ?? [];
+        final fertileDays = state.insights.asData()?.fertileDays ?? [];
 
         late String description;
         if (state.isViewingCurrentUser) {
@@ -112,10 +112,9 @@ class _CyclePredictionsState extends State<CyclePredictions> {
     return BlocBuilder<CyclesCubit, CyclesState>(
       buildWhen: (previous, current) =>
           current.isViewingCurrentUser != previous.isViewingCurrentUser ||
-          current.focusedDateInsights != previous.focusedDateInsights,
+          current.insights != previous.insights,
       builder: (context, state) {
-        final nextPeriodDates =
-            state.focusedDateInsights?.nextPeriodDates ?? [];
+        final nextPeriodDates = state.insights.asData()?.nextPeriodDates ?? [];
 
         late String description;
         if (state.isViewingCurrentUser) {

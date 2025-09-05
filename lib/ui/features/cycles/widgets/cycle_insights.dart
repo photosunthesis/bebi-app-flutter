@@ -1,4 +1,5 @@
 import 'package:bebi_app/constants/ui_constants.dart';
+import 'package:bebi_app/data/models/async_value.dart';
 import 'package:bebi_app/ui/features/cycles/cycles_cubit.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:bebi_app/utils/extensions/int_extensions.dart';
@@ -33,9 +34,10 @@ class CycleInsights extends StatelessWidget {
                   effect: SoldColorEffect(
                     color: context.colorScheme.secondary.withAlpha(40),
                   ),
-                  enabled: state.isInsightLoading || state.aiSummary == null,
+                  enabled:
+                      state.insights.isLoading || state.aiSummary is! AsyncData,
                   child: MarkdownBody(
-                    data: state.aiSummary ?? _getSkeletonFakeData(),
+                    data: state.aiSummary.asData() ?? _getSkeletonFakeData(),
                     styleSheet: MarkdownStyleSheet(
                       p: context.textTheme.bodyMedium?.copyWith(height: 1.4),
                       strong: context.textTheme.bodyMedium?.copyWith(
