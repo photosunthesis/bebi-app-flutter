@@ -36,13 +36,7 @@ class AddPartnerCubit extends Cubit<AddPartnerState>
 
         emit(AddPartnerLoadedState(userProfile!.code));
 
-        logEvent(
-          name: 'add_partner_screen_opened',
-          parameters: {
-            'user_id': _firebaseAuth.currentUser!.uid,
-            'user_code': userProfile.code,
-          },
-        );
+        logEvent(name: 'add_partner_screen_opened');
       },
       onError: (e, _) {
         emit(AddPartnerErrorState(e.toString()));
@@ -55,11 +49,11 @@ class AddPartnerCubit extends Cubit<AddPartnerState>
       () async {
         emit(const AddPartnerLoadingState());
 
+        final existingPartnership = await _userPartnershipsRepository
+            .getByUserId(_firebaseAuth.currentUser!.uid);
+
         if (partnerCode?.isEmpty ?? true) {
           // Check if someone has already used current user's code to pair
-          final existingPartnership = await _userPartnershipsRepository
-              .getByUserId(_firebaseAuth.currentUser!.uid);
-
           if (existingPartnership == null) {
             throw ArgumentError(l10n.partnerNotFoundForIntimateActivities);
           }
@@ -72,13 +66,7 @@ class AddPartnerCubit extends Cubit<AddPartnerState>
         );
 
         if (partnerProfile == null) {
-          logEvent(
-            name: 'partner_code_invalid',
-            parameters: {
-              'user_id': _firebaseAuth.currentUser!.uid,
-              'attempted_code': partnerCode,
-            },
-          );
+          logEvent(name: 'partner_code_invalid');
           throw ArgumentError(l10n.partnerCodeNotFound);
         }
 
@@ -100,14 +88,10 @@ class AddPartnerCubit extends Cubit<AddPartnerState>
         logEvent(
           name: 'partner_added_successfully',
           parameters: {
-            'user_id': _firebaseAuth.currentUser!.uid,
-            'partner_id': partnerProfile.userId,
             'connection_method': 'partner_code',
+            'has_existing_partnership': existingPartnership != null,
           },
         );
-
-        setUserProperty(name: 'has_partner', value: 'true');
-        setUserProperty(name: 'partner_id', value: partnerProfile.userId);
       },
       onError: (e, _) {
         emit(AddPartnerErrorState(e.toString()));
