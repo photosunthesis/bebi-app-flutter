@@ -326,15 +326,7 @@
   "unableToDetermineCycleError": "Unable to determine current cycle period for the selected date. Please ensure you have logged period data.",
   "noPeriodDataForCycleError": "No period data available to determine cycle information.",
   "aiInsightsGenerationError": "We had trouble generating AI insights. Please try again in a moment.",
-  "userProfileNotFoundError": "User profile not found for user: {userId}",
-  "@userProfileNotFoundError": {
-    "placeholders": {
-      "userId": {
-        "type": "String",
-        "description": "The user ID that was not found"
-      }
-    }
-  },
+  "userProfileNotFoundError": "User profile not found.",
   "partnerCycleSharingNotEnabledError": "You can't view your partner's cycle data because they haven't enabled cycle sharing yet.",
   "partnershipNotFoundError": "Partnership not found for user: {userId}",
   "@partnershipNotFoundError": {
