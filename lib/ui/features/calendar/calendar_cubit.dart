@@ -7,7 +7,6 @@ import 'package:bebi_app/data/services/recurring_calendar_events_service.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
 import 'package:bebi_app/utils/extensions/int_extensions.dart';
 import 'package:bebi_app/utils/mixins/analytics_mixin.dart';
-import 'package:bebi_app/utils/mixins/guard_mixin.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -15,8 +14,7 @@ import 'package:injectable/injectable.dart';
 part 'calendar_state.dart';
 
 @injectable
-class CalendarCubit extends Cubit<CalendarState>
-    with GuardMixin, AnalyticsMixin {
+class CalendarCubit extends Cubit<CalendarState> with AnalyticsMixin {
   CalendarCubit(
     this._calendarEventsRepository,
     this._recurringCalendarEventsService,
@@ -33,47 +31,67 @@ class CalendarCubit extends Cubit<CalendarState>
   static const _defaultTimeWindow = Duration(days: 90);
 
   Future<void> loadCalendarEvents({bool useCache = true}) async {
-    await guard(
-      () async {
-        emit(state.copyWith(events: const AsyncLoading()));
-
-        _windowStart = state.focusedDay.subtract(_defaultTimeWindow);
-        _windowEnd = state.focusedDay.add(_defaultTimeWindow);
-
-        final events = await _calendarEventsRepository.getByUserId(
-          userId: _firebaseAuth.currentUser!.uid,
-          useCache: useCache,
-        );
-
-        final recurringEvents = _recurringCalendarEventsService
-            .generateRecurringEventsInWindow(
-              events,
-              _windowStart!,
-              _windowEnd!,
-            );
-
-        emit(
-          state.copyWith(events: AsyncData([...events, ...recurringEvents])),
-        );
-
-        logEvent(
-          name: 'calendar_events_loaded',
-          parameters: {
-            'total_events': state.events.asData()!.length,
-            'focused_day_events': state.focusedDayEvents.length,
-            'used_cache': useCache,
-            'window_days': _defaultTimeWindow.inDays,
-          },
-        );
-      },
-      onError: (error, _) {
-        emit(state.copyWith(events: AsyncError(error)));
-      },
+    emit(
+      state.copyWith(
+        events: const AsyncLoading(),
+        baseEvents: const AsyncLoading(),
+      ),
     );
+
+    _windowStart = state.focusedDay.subtract(_defaultTimeWindow);
+    _windowEnd = state.focusedDay.add(_defaultTimeWindow);
+
+    // Clear the recurring events cache to ensure fresh generation
+    _recurringCalendarEventsService.clearCache();
+
+    final result = await AsyncValue.guard(() async {
+      final baseEvents = await _calendarEventsRepository.getByUserId(
+        userId: _firebaseAuth.currentUser!.uid,
+        useCache: useCache,
+      );
+
+      final recurringEvents = _recurringCalendarEventsService
+          .generateRecurringEventsInWindow(
+            baseEvents,
+            _windowStart!,
+            _windowEnd!,
+          );
+
+      // Only include base events that are not recurring, since recurring events
+      // are generated separately and include the original occurrence
+      final nonRecurringBaseEvents = baseEvents
+          .where((e) => !e.isRecurring)
+          .toList();
+      final allEvents = [...nonRecurringBaseEvents, ...recurringEvents];
+
+      logEvent(
+        name: 'calendar_events_loaded',
+        parameters: {
+          'total_events': allEvents.length,
+          'focused_day_events': allEvents
+              .where((e) => e.startDate.isSameDay(state.focusedDay))
+              .length,
+          'used_cache': useCache,
+          'window_days': _defaultTimeWindow.inDays,
+        },
+      );
+
+      return allEvents;
+    });
+
+    if (result is AsyncData<List<CalendarEvent>>) {
+      final baseEvents = await _calendarEventsRepository.getByUserId(
+        userId: _firebaseAuth.currentUser!.uid,
+        useCache: useCache,
+      );
+      emit(state.copyWith(events: result, baseEvents: AsyncData(baseEvents)));
+    } else {
+      emit(state.copyWith(events: result, baseEvents: result));
+    }
   }
 
   Future<void> fetchLatestEventsFromServer() async {
-    await guard(() async {
+    await AsyncValue.guard(() async {
       await _calendarEventsRepository.getByUserId(
         userId: _firebaseAuth.currentUser!.uid,
         useCache: false,
@@ -117,20 +135,24 @@ class CalendarCubit extends Cubit<CalendarState>
   }
 
   Future<void> _loadMoreEvents(DateTime rangeStart, DateTime rangeEnd) async {
-    await guard(() async {
-      final events = state.events.asData()!;
+    final baseEvents = state.baseEvents.asData() ?? [];
 
-      emit(state.copyWith(events: const AsyncLoading()));
+    emit(state.copyWith(events: const AsyncLoading()));
 
-      final newRecurringEvents = _recurringCalendarEventsService
-          .generateRecurringEventsInWindow(events, rangeStart, rangeEnd);
+    final result = await AsyncValue.guard(() async {
+      final recurringEvents = _recurringCalendarEventsService
+          .generateRecurringEventsInWindow(baseEvents, rangeStart, rangeEnd);
 
       _windowStart = _windowStart?.earlierDate(rangeStart) ?? rangeStart;
       _windowEnd = _windowEnd?.laterDate(rangeEnd) ?? rangeEnd;
 
-      emit(
-        state.copyWith(events: AsyncData([...events, ...newRecurringEvents])),
-      );
+      // Only include base events that are not recurring
+      final nonRecurringBaseEvents = baseEvents
+          .where((e) => !e.isRecurring)
+          .toList();
+      return [...nonRecurringBaseEvents, ...recurringEvents];
     });
+
+    emit(state.copyWith(events: result));
   }
 }

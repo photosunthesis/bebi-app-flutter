@@ -16,6 +16,8 @@ class AppDateTimePicker extends StatefulWidget {
     this.allDay = false,
     this.minDate,
     this.maxDate,
+    this.onPickerStateChanged,
+    this.forceClose,
     super.key,
   });
 
@@ -25,6 +27,8 @@ class AppDateTimePicker extends StatefulWidget {
   final bool allDay;
   final DateTime? minDate;
   final DateTime? maxDate;
+  final ValueChanged<bool>? onPickerStateChanged;
+  final bool? forceClose;
 
   @override
   State<AppDateTimePicker> createState() => _AppDateTimePickerState();
@@ -35,6 +39,45 @@ class _AppDateTimePickerState extends State<AppDateTimePicker> {
   bool _showCalendarPicker = false;
   bool _showTimePicker = false;
   Timer? _timePickerTimer;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(AppDateTimePicker oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.forceClose == true && oldWidget.forceClose != true) {
+      _closeAllPickers();
+    }
+  }
+
+  void _closeAllPickers() {
+    if (_showCalendarPicker || _showTimePicker) {
+      setState(() {
+        _showCalendarPicker = false;
+        _showTimePicker = false;
+      });
+      widget.onPickerStateChanged?.call(false);
+    }
+  }
+
+  void _toggleCalendarPicker() {
+    setState(() {
+      if (_showTimePicker) _showTimePicker = false;
+      _showCalendarPicker = !_showCalendarPicker;
+    });
+    widget.onPickerStateChanged?.call(_showCalendarPicker);
+  }
+
+  void _toggleTimePicker() {
+    setState(() {
+      if (_showCalendarPicker) _showCalendarPicker = false;
+      _showTimePicker = !_showTimePicker;
+    });
+    widget.onPickerStateChanged?.call(_showTimePicker);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,10 +91,7 @@ class _AppDateTimePickerState extends State<AppDateTimePicker> {
               Text(widget.label, style: context.textTheme.bodyMedium),
               const Spacer(),
               InkWell(
-                onTap: () => setState(() {
-                  if (_showTimePicker) _showTimePicker = false;
-                  _showCalendarPicker = !_showCalendarPicker;
-                }),
+                onTap: _toggleCalendarPicker,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 6,
@@ -72,10 +112,7 @@ class _AppDateTimePickerState extends State<AppDateTimePicker> {
               if (!widget.allDay) ...[
                 const SizedBox(width: 4),
                 InkWell(
-                  onTap: () => setState(() {
-                    if (_showCalendarPicker) _showCalendarPicker = false;
-                    _showTimePicker = !_showTimePicker;
-                  }),
+                  onTap: _toggleTimePicker,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 6,
@@ -94,28 +131,21 @@ class _AppDateTimePickerState extends State<AppDateTimePicker> {
                   ),
                 ),
               ],
-
-              AnimatedContainer(
-                duration: 300.milliseconds,
-                child: AnimatedOpacity(
-                  opacity: _showCalendarPicker ? 1 : 0,
-                  duration: 300.milliseconds,
-                  child: _showCalendarPicker
-                      ? _buildCalendar()
-                      : const SizedBox.shrink(key: Key('hidden-calendar')),
-                ),
-              ),
-              AnimatedContainer(
-                duration: 300.milliseconds,
-                child: AnimatedOpacity(
-                  opacity: _showTimePicker ? 1 : 0,
-                  duration: 300.milliseconds,
-                  child: _showTimePicker
-                      ? _buildTimePicker()
-                      : const SizedBox.shrink(key: Key('hidden-time')),
-                ),
-              ),
             ],
+          ),
+          AnimatedSize(
+            duration: 240.milliseconds,
+            alignment: Alignment.topCenter,
+            child: _showCalendarPicker
+                ? _buildCalendar()
+                : const SizedBox.shrink(key: Key('hidden-calendar')),
+          ),
+          AnimatedSize(
+            duration: 240.milliseconds,
+            alignment: Alignment.topCenter,
+            child: _showTimePicker
+                ? _buildTimePicker()
+                : const SizedBox.shrink(key: Key('hidden-time')),
           ),
         ],
       ),
@@ -125,8 +155,8 @@ class _AppDateTimePickerState extends State<AppDateTimePicker> {
   Widget _buildCalendar() {
     return Container(
       key: const Key('calendar'),
-      margin: const EdgeInsets.symmetric(vertical: 8),
       height: 240,
+      margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(UiConstants.borderRadiusValue),
         border: Border.all(
@@ -134,72 +164,75 @@ class _AppDateTimePickerState extends State<AppDateTimePicker> {
           width: UiConstants.borderWidth,
         ),
       ),
-      child: TableCalendar(
-        availableGestures: AvailableGestures.horizontalSwipe,
-        shouldFillViewport: true,
-        enabledDayPredicate: (day) {
-          if (widget.minDate != null) {
-            // Check if day is before minDate
-            if (day.isBefore(widget.minDate!) &&
-                !day.isSameDay(widget.minDate!)) {
-              return false;
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(UiConstants.borderRadiusValue),
+        child: TableCalendar(
+          availableGestures: AvailableGestures.horizontalSwipe,
+          shouldFillViewport: true,
+          enabledDayPredicate: (day) {
+            if (widget.minDate != null) {
+              // Check if day is before minDate
+              if (day.isBefore(widget.minDate!) &&
+                  !day.isSameDay(widget.minDate!)) {
+                return false;
+              }
             }
-          }
 
-          if (widget.maxDate != null) {
-            // Check if day is after maxDate
-            if (day.isAfter(widget.maxDate!) &&
-                !day.isSameDay(widget.maxDate!)) {
-              return false;
+            if (widget.maxDate != null) {
+              // Check if day is after maxDate
+              if (day.isAfter(widget.maxDate!) &&
+                  !day.isSameDay(widget.maxDate!)) {
+                return false;
+              }
             }
-          }
 
-          return true;
-        },
-        headerVisible: false,
-        focusedDay: _selectedDate,
-        currentDay: DateTime.now(),
-        firstDay: widget.minDate ?? DateTime.now().subtract(365.days),
-        lastDay: widget.maxDate ?? DateTime.now().add(365.days),
-        selectedDayPredicate: _selectedDate.isSameDay,
-        daysOfWeekHeight: 32,
-        calendarBuilders: CalendarBuilders(
-          selectedBuilder: (context, day, focusedDay) =>
-              _buildDayCell(context, day, focusedDay, isSelected: true),
-          todayBuilder: (context, day, focusedDay) =>
-              _buildDayCell(context, day, focusedDay, isToday: true),
-          dowBuilder: _buildDayOfWeek,
-          defaultBuilder: (context, day, focusedDay) =>
-              _buildDayCell(context, day, focusedDay),
-          disabledBuilder: (context, day, focusedDay) =>
-              _buildDayCell(context, day, focusedDay, isDisabled: true),
-          outsideBuilder: (context, day, focusedDay) =>
-              _buildDayCell(context, day, focusedDay, isDisabled: true),
-        ),
-        daysOfWeekStyle: DaysOfWeekStyle(
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(
-                color: context.colorScheme.outline,
-                width: UiConstants.borderWidth,
+            return true;
+          },
+          headerVisible: false,
+          focusedDay: _selectedDate,
+          currentDay: DateTime.now(),
+          firstDay: widget.minDate ?? DateTime.now().subtract(365.days),
+          lastDay: widget.maxDate ?? DateTime.now().add(365.days),
+          selectedDayPredicate: _selectedDate.isSameDay,
+          daysOfWeekHeight: 32,
+          calendarBuilders: CalendarBuilders(
+            selectedBuilder: (context, day, focusedDay) =>
+                _buildDayCell(context, day, focusedDay, isSelected: true),
+            todayBuilder: (context, day, focusedDay) =>
+                _buildDayCell(context, day, focusedDay, isToday: true),
+            dowBuilder: _buildDayOfWeek,
+            defaultBuilder: (context, day, focusedDay) =>
+                _buildDayCell(context, day, focusedDay),
+            disabledBuilder: (context, day, focusedDay) =>
+                _buildDayCell(context, day, focusedDay, isDisabled: true),
+            outsideBuilder: (context, day, focusedDay) =>
+                _buildDayCell(context, day, focusedDay, isDisabled: true),
+          ),
+          daysOfWeekStyle: DaysOfWeekStyle(
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: context.colorScheme.outline,
+                  width: UiConstants.borderWidth,
+                ),
               ),
             ),
           ),
+          onDaySelected: (selectedDay, focusedDay) {
+            final date = DateTime(
+              selectedDay.year,
+              selectedDay.month,
+              selectedDay.day,
+              _selectedDate.hour,
+              _selectedDate.minute,
+            );
+            widget.onChanged(date);
+            setState(() {
+              _selectedDate = date;
+              _showCalendarPicker = false;
+            });
+          },
         ),
-        onDaySelected: (selectedDay, focusedDay) {
-          final date = DateTime(
-            selectedDay.year,
-            selectedDay.month,
-            selectedDay.day,
-            _selectedDate.hour,
-            _selectedDate.minute,
-          );
-          widget.onChanged(date);
-          setState(() {
-            _selectedDate = date;
-            _showCalendarPicker = false;
-          });
-        },
       ),
     );
   }
@@ -274,54 +307,65 @@ class _AppDateTimePickerState extends State<AppDateTimePicker> {
   }
 
   Widget _buildTimePicker() {
-    return SizedBox(
+    return Container(
       key: const Key('time'),
       height: 160,
-      child: CupertinoDatePicker(
-        mode: CupertinoDatePickerMode.time,
-        initialDateTime: _selectedDate,
-        minimumDate: widget.minDate,
-        maximumDate: widget.maxDate,
-        selectionOverlayBuilder:
-            (context, {required columnCount, required selectedIndex}) {
-              final isFirstColumn = selectedIndex == 0;
-              final isLastColumn = selectedIndex == columnCount - 1;
-              return Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
-                    topLeft: isFirstColumn
-                        ? const Radius.circular(UiConstants.borderRadiusValue)
-                        : Radius.zero,
-                    bottomLeft: isFirstColumn
-                        ? const Radius.circular(UiConstants.borderRadiusValue)
-                        : Radius.zero,
-                    topRight: isLastColumn
-                        ? const Radius.circular(UiConstants.borderRadiusValue)
-                        : Radius.zero,
-                    bottomRight: isLastColumn
-                        ? const Radius.circular(UiConstants.borderRadiusValue)
-                        : Radius.zero,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(UiConstants.borderRadiusValue),
+        border: Border.all(
+          color: context.colorScheme.outline,
+          width: UiConstants.borderWidth,
+        ),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(UiConstants.borderRadiusValue),
+        child: CupertinoDatePicker(
+          mode: CupertinoDatePickerMode.time,
+          initialDateTime: _selectedDate,
+          minimumDate: widget.minDate,
+          maximumDate: widget.maxDate,
+          selectionOverlayBuilder:
+              (context, {required columnCount, required selectedIndex}) {
+                final isFirstColumn = selectedIndex == 0;
+                final isLastColumn = selectedIndex == columnCount - 1;
+                return Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                      topLeft: isFirstColumn
+                          ? const Radius.circular(UiConstants.borderRadiusValue)
+                          : Radius.zero,
+                      bottomLeft: isFirstColumn
+                          ? const Radius.circular(UiConstants.borderRadiusValue)
+                          : Radius.zero,
+                      topRight: isLastColumn
+                          ? const Radius.circular(UiConstants.borderRadiusValue)
+                          : Radius.zero,
+                      bottomRight: isLastColumn
+                          ? const Radius.circular(UiConstants.borderRadiusValue)
+                          : Radius.zero,
+                    ),
+                    color: context.colorScheme.onSurface.withAlpha(20),
                   ),
-                  color: context.colorScheme.onSurface.withAlpha(20),
-                ),
-              );
-            },
-        onDateTimeChanged: (newDate) {
-          final date = DateTime(
-            _selectedDate.year,
-            _selectedDate.month,
-            _selectedDate.day,
-            newDate.hour,
-            newDate.minute,
-          );
-          widget.onChanged(date);
-          setState(() => _selectedDate = date);
-          _timePickerTimer?.cancel();
-          _timePickerTimer = Timer(
-            3.seconds,
-            () => setState(() => _showTimePicker = false),
-          );
-        },
+                );
+              },
+          onDateTimeChanged: (newDate) {
+            final date = DateTime(
+              _selectedDate.year,
+              _selectedDate.month,
+              _selectedDate.day,
+              newDate.hour,
+              newDate.minute,
+            );
+            widget.onChanged(date);
+            setState(() => _selectedDate = date);
+            _timePickerTimer?.cancel();
+            _timePickerTimer = Timer(
+              3.seconds,
+              () => setState(() => _showTimePicker = false),
+            );
+          },
+        ),
       ),
     );
   }

@@ -375,7 +375,9 @@
   "eventColorOrange": "Orange",
   "eventColorRed": "Red",
   "eventNotesHint": "Event notes (optional)",
+  "setEventDate": "Set event date",
   "repeats": "Repeats",
+  "repeatUntil": "Repeat until",
   "repeatDaily": "Daily",
   "repeatWeekly": "Weekly",
   "repeatMonthly": "Monthly",
@@ -389,5 +391,6 @@
         "description": "Number of occurrences"
       }
     }
-  }
+  },
+  "done": "Done"
 }

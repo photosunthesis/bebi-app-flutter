@@ -79,11 +79,8 @@ class RecurringCalendarEventsService {
     final events = <CalendarEvent>[];
     final seenDates = <DateTime>{};
 
-    var currentDate = getNextOccurrence(
-      baseEvent.startDate,
-      baseEvent.repeatRule,
-    );
-    var occurrenceCount = 1;
+    var currentDate = baseEvent.startDate;
+    var occurrenceCount = 0;
 
     while (currentDate.isBefore(windowEnd) &&
         occurrenceCount < _maxOccurrences &&
@@ -107,8 +104,8 @@ class RecurringCalendarEventsService {
         );
       }
 
-      currentDate = getNextOccurrence(currentDate, baseEvent.repeatRule);
       occurrenceCount++;
+      currentDate = getNextOccurrence(currentDate, baseEvent.repeatRule);
 
       if (_shouldStopRepeating(
         baseEvent.repeatRule,

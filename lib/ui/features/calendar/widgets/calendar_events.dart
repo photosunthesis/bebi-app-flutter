@@ -6,6 +6,7 @@ import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:bebi_app/utils/extensions/color_extensions.dart';
 import 'package:bebi_app/utils/extensions/string_extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 abstract class CalendarEvents {
   static final _kaomoji = Kaomojis.getRandomFromHappySet();
@@ -120,13 +121,23 @@ class _EventCard extends StatelessWidget {
   }
 
   Widget _buildTitle(BuildContext context) {
-    return Text(
-      event.title,
-      style: context.primaryTextTheme.titleLarge?.copyWith(
-        color: event.color.darken(0.3),
-        fontWeight: FontWeight.w500,
-      ),
-      overflow: TextOverflow.ellipsis,
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            event.title,
+            style: context.primaryTextTheme.titleLarge?.copyWith(
+              color: event.color.darken(0.3),
+              fontWeight: FontWeight.w500,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        if (event.isRecurring) ...[
+          const SizedBox(width: 4),
+          Icon(Symbols.repeat, size: 16, color: event.color.darken(0.3)),
+        ],
+      ],
     );
   }
 

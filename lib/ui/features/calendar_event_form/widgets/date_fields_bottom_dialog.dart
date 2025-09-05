@@ -70,6 +70,14 @@ class DateFieldsBottomDialog<T> extends StatefulWidget {
 class _DateFieldsBottomDialogState<T> extends State<DateFieldsBottomDialog<T>> {
   late RepeatFrequency _repeatFrequency = widget.repeatRule.frequency;
   late bool _allDay = widget.allDay;
+  String? _activePickerId;
+
+  void _onPickerStateChanged(String pickerId, bool isOpen) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() => _activePickerId = isOpen ? pickerId : null);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -103,14 +111,14 @@ class _DateFieldsBottomDialogState<T> extends State<DateFieldsBottomDialog<T>> {
                 horizontal: UiConstants.padding,
               ),
               child: Text(
-                'Set event date',
+                context.l10n.setEventDate,
                 style: context.primaryTextTheme.titleLarge,
               ),
             ),
             const SizedBox(height: 18),
-            _buildFields(context),
+            _buildFields(),
             const SizedBox(height: 16),
-            _buildDoneButton(context),
+            _buildDoneButton(),
             const SafeArea(child: SizedBox(height: 12)),
           ],
         ),
@@ -118,7 +126,7 @@ class _DateFieldsBottomDialogState<T> extends State<DateFieldsBottomDialog<T>> {
     );
   }
 
-  Widget _buildFields(BuildContext context) {
+  Widget _buildFields() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
       decoration: BoxDecoration(
@@ -133,24 +141,13 @@ class _DateFieldsBottomDialogState<T> extends State<DateFieldsBottomDialog<T>> {
         children: [
           _buildAllDaySection(),
           _buildDivider(),
-          AppDateTimePicker(
-            label: _allDay ? context.l10n.dateHint : context.l10n.startDateHint,
-            value: widget.startDate,
-            onChanged: widget.onStartDateChanged,
-            allDay: _allDay,
-          ),
+          _buildStartDatePicker(),
           _buildDivider(),
-          if (!_allDay) ...[
-            AppDateTimePicker(
-              label: context.l10n.endDateHint,
-              value: widget.endDate,
-              onChanged: widget.onEndDateChanged,
-            ),
-            _buildDivider(),
-          ],
+          ..._buildEndDatePicker(),
+          ..._buildRepeatUntilPicker(),
           Padding(
             padding: const EdgeInsets.all(12),
-            child: _buildRepeatSection(context),
+            child: _buildRepeatSection(),
           ),
         ],
       ),
@@ -176,12 +173,12 @@ class _DateFieldsBottomDialogState<T> extends State<DateFieldsBottomDialog<T>> {
     );
   }
 
-  Widget _buildDoneButton(BuildContext context) {
+  Widget _buildDoneButton() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
       child: ElevatedButton(
         onPressed: context.pop,
-        child: Text('Done'.toUpperCase()),
+        child: Text(context.l10n.done.toUpperCase()),
       ),
     );
   }
@@ -196,7 +193,7 @@ class _DateFieldsBottomDialogState<T> extends State<DateFieldsBottomDialog<T>> {
     );
   }
 
-  Widget _buildRepeatSection(BuildContext context) {
+  Widget _buildRepeatSection() {
     return Row(
       children: [
         Text(context.l10n.repeats, style: context.textTheme.bodyMedium),
@@ -244,5 +241,52 @@ class _DateFieldsBottomDialogState<T> extends State<DateFieldsBottomDialog<T>> {
         const Icon(Symbols.keyboard_arrow_down),
       ],
     );
+  }
+
+  Widget _buildStartDatePicker() {
+    const pickerId = 'start_date';
+    return AppDateTimePicker(
+      label: _allDay ? context.l10n.dateHint : context.l10n.startDateHint,
+      value: widget.startDate,
+      onChanged: widget.onStartDateChanged,
+      allDay: _allDay,
+      onPickerStateChanged: (isOpen) => _onPickerStateChanged(pickerId, isOpen),
+      forceClose: _activePickerId != null && _activePickerId != pickerId,
+    );
+  }
+
+  List<Widget> _buildEndDatePicker() {
+    if (_allDay) return [];
+
+    const pickerId = 'end_date';
+    return [
+      AppDateTimePicker(
+        label: context.l10n.endDateHint,
+        value: widget.endDate,
+        onChanged: widget.onEndDateChanged,
+        onPickerStateChanged: (isOpen) =>
+            _onPickerStateChanged(pickerId, isOpen),
+        forceClose: _activePickerId != null && _activePickerId != pickerId,
+      ),
+      _buildDivider(),
+    ];
+  }
+
+  List<Widget> _buildRepeatUntilPicker() {
+    if (_repeatFrequency == RepeatFrequency.doNotRepeat || !_allDay) return [];
+
+    const pickerId = 'repeat_until';
+    return [
+      AppDateTimePicker(
+        label: context.l10n.repeatUntil,
+        value: widget.endDate,
+        onChanged: widget.onEndDateChanged,
+        allDay: true,
+        onPickerStateChanged: (isOpen) =>
+            _onPickerStateChanged(pickerId, isOpen),
+        forceClose: _activePickerId != null && _activePickerId != pickerId,
+      ),
+      _buildDivider(),
+    ];
   }
 }
