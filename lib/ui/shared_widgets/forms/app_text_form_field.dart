@@ -1,12 +1,9 @@
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:bebi_app/utils/extensions/int_extensions.dart';
-import 'package:bebi_app/utils/extensions/string_extensions.dart';
 import 'package:bebi_app/utils/mixins/analytics_mixin.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get_it/get_it.dart';
 
 class AppTextFormField extends StatefulWidget {
   const AppTextFormField({
@@ -97,23 +94,9 @@ class _AppTextFormFieldState extends State<AppTextFormField>
 
   String? _validator(String? value) {
     final error = widget.validator?.call(value);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      setState(() => _errorText = error);
-
-      if (error != null) {
-        logEvent(
-          name: 'form_validation_error',
-          parameters: {
-            'user_id': GetIt.I<FirebaseAuth>().currentUser?.uid ?? 'anonymous',
-            'field_label':
-                (widget.labelText ?? widget.hintText)?.toSnakeCase() ??
-                'unknown_field',
-            'error_message': error,
-            'field_type': widget.keyboardType?.toString() ?? 'text',
-          },
-        );
-      }
-    });
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => setState(() => _errorText = error),
+    );
     return error;
   }
 
