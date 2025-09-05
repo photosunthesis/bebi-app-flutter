@@ -48,12 +48,6 @@ Future<void> _configureSentry() async {
   if (sentryDsn.isNotEmpty || !kDebugMode) {
     await SentryFlutter.init((options) {
       options.dsn = sentryDsn;
-      options.sendDefaultPii = true;
-      options.enableLogs = true;
-      options.tracesSampleRate = 1.0;
-      options.profilesSampleRate = 1.0;
-      options.replay.sessionSampleRate = 0.1;
-      options.replay.onErrorSampleRate = 1.0;
     });
   }
 }
@@ -106,7 +100,7 @@ Future<void> _configureHighRefreshScreen() async {
       await FlutterRefreshRateControl().requestHighRefreshRate();
     }
   } catch (_) {
-    // If this fails... oh well :D
+    // No worries if this fails
   }
 }
 
