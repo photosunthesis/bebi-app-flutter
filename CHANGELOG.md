@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.6] - 2025-09-05
+
+### Changed
+
+- Removed personally identifiable information from analytics 🔒
+
+### Fixed
+
+- Fixed issue with creating recurring calendar events 🗓️
+
 ## [0.4.5] - 2025-09-02
 
 ### Added
