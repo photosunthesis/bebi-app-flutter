@@ -12,6 +12,7 @@ import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/data/models/user_partnership.dart';
 import 'package:bebi_app/data/models/user_profile.dart';
+import 'package:bebi_app/utils/extensions/int_extensions.dart';
 import 'package:bebi_app/utils/platform/platform_utils.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
@@ -37,36 +38,35 @@ void main() {
 
     await configureDependencies();
     await _clearLocalStorageOnNewVersion();
-    await _configureSentry();
 
-    runApp(await _getSentryWidget());
+    runApp(await _configureSentryAndGetWidget());
   });
 }
 
-Future<void> _configureSentry() async {
+Future<Widget> _configureSentryAndGetWidget() async {
   final sentryDsn = await _getSentryDsn();
-  if (sentryDsn.isNotEmpty || !kDebugMode) {
+
+  if (sentryDsn.isNotEmpty) {
     await SentryFlutter.init((options) {
       options.dsn = sentryDsn;
     });
-  }
-}
 
-Future<Widget> _getSentryWidget() async {
-  final sentryDsn = await _getSentryDsn();
-  return sentryDsn.isNotEmpty || !kDebugMode
-      ? SentryWidget(child: const App())
-      : const App();
+    return SentryWidget(child: const App());
+  }
+
+  return const App();
 }
 
 Future<String> _getSentryDsn() async {
   try {
+    if (kDebugMode) return '';
+
     final remoteConfig = FirebaseRemoteConfig.instance;
 
     await remoteConfig.setConfigSettings(
       RemoteConfigSettings(
-        fetchTimeout: const Duration(minutes: 1),
-        minimumFetchInterval: const Duration(hours: 1),
+        fetchTimeout: 1.minutes,
+        minimumFetchInterval: 1.hours,
       ),
     );
 
