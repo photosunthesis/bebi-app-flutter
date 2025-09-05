@@ -23,17 +23,45 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
     this._calendarEventsRepository,
     this._userPartnershipsRepository,
     this._firebaseAuth,
-  ) : super(const CalendarEventFormLoadingState());
+  ) : super(
+        CalendarEventFormState(
+          title: '',
+          startDate: DateTime.now(),
+          endDate: DateTime.now().add(10.minutes),
+          allDay: false,
+          eventColor: EventColor.black,
+          repeatRule: const RepeatRule(frequency: RepeatFrequency.doNotRepeat),
+          notes: '',
+          currentUserId: '',
+        ),
+      );
 
   final CalendarEventsRepository _calendarEventsRepository;
   final UserPartnershipsRepository _userPartnershipsRepository;
   final FirebaseAuth _firebaseAuth;
 
-  void initialize(CalendarEvent? calendarEvent) {
+  void initialize(CalendarEvent? calendarEvent, DateTime? selectedDate) {
+    final currentUserId = _firebaseAuth.currentUser!.uid;
+    final now = DateTime.now();
+    final defaultStart = selectedDate ?? now;
+
     emit(
-      CalendarEventFormLoadedState(
-        calendarEvent,
-        _firebaseAuth.currentUser!.uid,
+      state.copyWith(
+        title: calendarEvent?.title ?? '',
+        startDate: calendarEvent?.startDate ?? defaultStart,
+        endDate: calendarEvent?.endDate ?? defaultStart.add(10.minutes),
+        allDay: calendarEvent?.allDay ?? false,
+        eventColor: calendarEvent?.eventColor ?? EventColor.black,
+        repeatRule:
+            calendarEvent?.repeatRule ??
+            const RepeatRule(frequency: RepeatFrequency.doNotRepeat),
+        notes: calendarEvent?.notes ?? '',
+        currentUserId: currentUserId,
+        originalEvent: calendarEvent,
+        isInitialized: true,
+        // ignore: avoid_redundant_argument_values
+        error: null,
+        saveSuccessful: false,
       ),
     );
 
@@ -46,28 +74,47 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
     );
   }
 
+  void updateTitle(String title) {
+    emit(state.copyWith(title: title));
+  }
+
+  void updateStartDate(DateTime startDate) {
+    emit(state.copyWith(startDate: startDate));
+  }
+
+  void updateEndDate(DateTime endDate) {
+    emit(state.copyWith(endDate: endDate));
+  }
+
+  void updateAllDay(bool allDay) {
+    emit(state.copyWith(allDay: allDay));
+  }
+
+  void updateEventColor(EventColor eventColor) {
+    emit(state.copyWith(eventColor: eventColor));
+  }
+
+  void updateRepeatRule(RepeatRule repeatRule) {
+    emit(state.copyWith(repeatRule: repeatRule));
+  }
+
+  void updateNotes(String notes) {
+    emit(state.copyWith(notes: notes));
+  }
+
   Future<void> save({
     SaveChangesDialogOptions? saveOption,
-    required String title,
-    required DateTime startDate,
-    required bool allDay,
-    required EventColor eventColor,
-    required RepeatRule repeatRule,
-    DateTime? endDate,
-    String? notes,
-    DateTime? endRepeatDate,
     DateTime? instanceDate,
   }) async {
-    final calendarEvent = (state as CalendarEventFormLoadedState).calendarEvent;
-
     await guard(
       () async {
-        emit(const CalendarEventFormLoadingState());
+        // ignore: avoid_redundant_argument_values
+        emit(state.copyWith(isLoading: true, error: null));
 
-        final isExistingEvent = calendarEvent?.id.isNotEmpty ?? false;
-        final isRecurringEvent = calendarEvent?.isRecurring ?? false;
+        final isExistingEvent = state.originalEvent?.id.isNotEmpty ?? false;
+        final isRecurringEvent = state.originalEvent?.isRecurring ?? false;
         final partnership = await _userPartnershipsRepository.getByUserId(
-          _firebaseAuth.currentUser!.uid,
+          state.currentUserId,
         );
 
         if (isExistingEvent && isRecurringEvent && instanceDate != null) {
@@ -76,29 +123,13 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
             'saveOption must not be null when handling recurring events',
           );
           await _handleRecurringSave(
-            baseEvent: calendarEvent!,
+            baseEvent: state.originalEvent!,
             saveOption: saveOption!,
-            title: title,
-            startDate: startDate,
-            endDate: endDate,
-            allDay: allDay,
-            eventColor: eventColor,
-            repeatRule: repeatRule,
-            notes: notes,
             instanceDate: instanceDate,
             partnership: partnership!,
           );
         } else {
-          await _handleRegularSave(
-            title: title,
-            startDate: startDate,
-            endDate: endDate,
-            allDay: allDay,
-            eventColor: eventColor,
-            repeatRule: repeatRule,
-            notes: notes,
-            partnership: partnership!,
-          );
+          await _handleRegularSave(partnership: partnership!);
         }
 
         logEvent(
@@ -106,55 +137,40 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
               ? 'calendar_event_updated'
               : 'calendar_event_created',
           parameters: {
-            'event_type': allDay ? 'all_day' : 'timed',
-            'has_repeat': repeatRule.frequency != RepeatFrequency.doNotRepeat,
-            'repeat_frequency': repeatRule.frequency.name,
-            'has_notes': notes?.isNotEmpty == true,
-            'event_color': eventColor.name,
+            'event_type': state.allDay ? 'all_day' : 'timed',
+            'has_repeat':
+                state.repeatRule.frequency != RepeatFrequency.doNotRepeat,
+            'repeat_frequency': state.repeatRule.frequency.name,
+            'has_notes': state.notes.isNotEmpty,
+            'event_color': state.eventColor.name,
           },
         );
 
-        emit(const CalendarEventFormSuccessState());
+        emit(state.copyWith(isLoading: false, saveSuccessful: true));
       },
       onError: (error, _) {
-        emit(CalendarEventFormErrorState(error.toString()));
-      },
-      onComplete: () {
-        emit(
-          CalendarEventFormLoadedState(
-            calendarEvent,
-            _firebaseAuth.currentUser!.uid,
-          ),
-        );
+        emit(state.copyWith(isLoading: false, error: error.toString()));
       },
     );
   }
 
   Future<void> _handleRegularSave({
-    CalendarEvent? calendarEvent,
-    required String title,
-    required DateTime startDate,
-    DateTime? endDate,
-    required bool allDay,
-    required EventColor eventColor,
-    required RepeatRule repeatRule,
-    String? notes,
     required UserPartnership partnership,
   }) async {
     await _calendarEventsRepository.createOrUpdate(
       CalendarEvent(
-        id: calendarEvent?.id ?? '',
-        title: title,
-        startDate: startDate,
-        endDate: allDay ? null : endDate,
-        allDay: allDay,
-        notes: notes,
-        repeatRule: repeatRule,
-        eventColor: eventColor,
-        createdBy: calendarEvent?.createdBy ?? _firebaseAuth.currentUser!.uid,
-        updatedBy: _firebaseAuth.currentUser!.uid,
+        id: state.originalEvent?.id ?? '',
+        title: state.title,
+        startDate: state.startDate,
+        endDate: state.allDay ? null : state.endDate,
+        allDay: state.allDay,
+        notes: state.notes.isEmpty ? null : state.notes,
+        repeatRule: state.repeatRule,
+        eventColor: state.eventColor,
+        createdBy: state.originalEvent?.createdBy ?? state.currentUserId,
+        updatedBy: state.currentUserId,
         users: partnership.users,
-        createdAt: calendarEvent?.createdAt ?? DateTime.now(),
+        createdAt: state.originalEvent?.createdAt ?? DateTime.now(),
         updatedAt: DateTime.now(),
       ),
     );
@@ -163,38 +179,17 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
   Future<void> _handleRecurringSave({
     required CalendarEvent baseEvent,
     required SaveChangesDialogOptions saveOption,
-    required String title,
-    required DateTime startDate,
-    DateTime? endDate,
-    required bool allDay,
-    required EventColor eventColor,
-    required RepeatRule repeatRule,
-    String? notes,
     required DateTime instanceDate,
     required UserPartnership partnership,
   }) async {
     await switch (saveOption) {
       SaveChangesDialogOptions.onlyThisEvent => _handleSaveOnlyThisEvent(
         baseEvent: baseEvent,
-        title: title,
-        startDate: startDate,
-        endDate: endDate,
-        allDay: allDay,
-        eventColor: eventColor,
-        repeatRule: repeatRule,
-        notes: notes,
         instanceDate: instanceDate,
         partnership: partnership,
       ),
       SaveChangesDialogOptions.allFutureEvents => _handleSaveAllFutureEvents(
         baseEvent: baseEvent,
-        title: title,
-        startDate: startDate,
-        endDate: endDate,
-        allDay: allDay,
-        eventColor: eventColor,
-        repeatRule: repeatRule,
-        notes: notes,
         instanceDate: instanceDate,
         partnership: partnership,
       ),
@@ -204,13 +199,6 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
 
   Future<void> _handleSaveOnlyThisEvent({
     required CalendarEvent baseEvent,
-    required String title,
-    required DateTime startDate,
-    DateTime? endDate,
-    required bool allDay,
-    required EventColor eventColor,
-    required RepeatRule repeatRule,
-    String? notes,
     required DateTime instanceDate,
     required UserPartnership partnership,
   }) async {
@@ -245,15 +233,15 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
 
     final newSingleEvent = CalendarEvent(
       id: '',
-      title: title,
-      startDate: startDate,
-      endDate: allDay ? null : endDate,
-      allDay: allDay,
-      notes: notes,
+      title: state.title,
+      startDate: state.startDate,
+      endDate: state.allDay ? null : state.endDate,
+      allDay: state.allDay,
+      notes: state.notes.isEmpty ? null : state.notes,
       repeatRule: const RepeatRule(frequency: RepeatFrequency.doNotRepeat),
-      eventColor: eventColor,
-      createdBy: _firebaseAuth.currentUser!.uid,
-      updatedBy: _firebaseAuth.currentUser!.uid,
+      eventColor: state.eventColor,
+      createdBy: state.currentUserId,
+      updatedBy: state.currentUserId,
       users: partnership.users,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
@@ -264,13 +252,6 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
 
   Future<void> _handleSaveAllFutureEvents({
     required CalendarEvent baseEvent,
-    required String title,
-    required DateTime startDate,
-    DateTime? endDate,
-    required bool allDay,
-    required EventColor eventColor,
-    required RepeatRule repeatRule,
-    String? notes,
     required DateTime instanceDate,
     required UserPartnership partnership,
   }) async {
@@ -287,15 +268,15 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
 
     final newRecurringEvent = CalendarEvent(
       id: '',
-      title: title,
-      startDate: startDate,
-      endDate: allDay ? null : endDate,
-      allDay: allDay,
-      notes: notes,
-      repeatRule: repeatRule,
-      eventColor: eventColor,
-      createdBy: _firebaseAuth.currentUser!.uid,
-      updatedBy: _firebaseAuth.currentUser!.uid,
+      title: state.title,
+      startDate: state.startDate,
+      endDate: state.allDay ? null : state.endDate,
+      allDay: state.allDay,
+      notes: state.notes.isEmpty ? null : state.notes,
+      repeatRule: state.repeatRule,
+      eventColor: state.eventColor,
+      createdBy: state.currentUserId,
+      updatedBy: state.currentUserId,
       users: partnership.users,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),

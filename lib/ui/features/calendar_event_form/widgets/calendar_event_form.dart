@@ -1,8 +1,9 @@
-import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/data/models/repeat_rule.dart';
+import 'package:bebi_app/data/models/save_changes_dialog_options.dart';
 import 'package:bebi_app/ui/features/calendar_event_form/calendar_event_form_cubit.dart';
 import 'package:bebi_app/ui/features/calendar_event_form/widgets/date_fields_bottom_dialog.dart';
 import 'package:bebi_app/ui/shared_widgets/forms/app_text_form_field.dart';
+import 'package:bebi_app/ui/shared_widgets/modals/options_bottom_dialog.dart';
 import 'package:bebi_app/ui/shared_widgets/specialized/sticky_markdown_toolbar.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:bebi_app/utils/extensions/color_extensions.dart';
@@ -15,60 +16,24 @@ import 'package:super_editor/super_editor.dart';
 import 'package:super_editor_markdown/super_editor_markdown.dart';
 
 class CalendarEventForm extends StatefulWidget {
-  const CalendarEventForm({
-    required this.formKey,
-    required this.title,
-    required this.onTitleChanged,
-    required this.startDate,
-    required this.endDate,
-    required this.repeatRule,
-    required this.onStartDateChanged,
-    required this.onEndDateChanged,
-    required this.onRepeatRuleChanged,
-    required this.notes,
-    required this.onNotesChanged,
-    required this.allDay,
-    required this.onAllDayChanged,
-    required this.selectedColor,
-    required this.onSave,
-    super.key,
-  });
+  const CalendarEventForm({required this.formKey, super.key});
 
   final GlobalKey<FormState> formKey;
-  final String title;
-  final ValueChanged<String> onTitleChanged;
-  final DateTime startDate;
-  final DateTime endDate;
-  final RepeatRule repeatRule;
-  final ValueChanged<DateTime> onStartDateChanged;
-  final ValueChanged<DateTime> onEndDateChanged;
-  final ValueChanged<RepeatRule> onRepeatRuleChanged;
-  final String notes;
-  final ValueChanged<String> onNotesChanged;
-  final bool allDay;
-  final ValueChanged<bool> onAllDayChanged;
-  final EventColor selectedColor;
-  final VoidCallback onSave;
 
   @override
   State<CalendarEventForm> createState() => _CalendarEventFormState();
 }
 
 class _CalendarEventFormState extends State<CalendarEventForm> {
-  late final _startDate = widget.startDate;
-  late final _endDate = widget.endDate;
   final _docChangeSignal = SignalNotifier();
   final _docLayoutKey = GlobalKey();
   final _composer = MutableDocumentComposer();
-  late final _titleController = TextEditingController(text: widget.title);
+  late final _titleController = TextEditingController();
   late final _docEditor = createDefaultDocumentEditor(
     document: _doc,
     composer: _composer,
   );
-  late final _doc = deserializeMarkdownToDocument(
-    widget.notes,
-    syntax: MarkdownSyntax.normal,
-  );
+  late final _doc = MutableDocument.empty();
   late final _docOps = CommonEditorOperations(
     editor: _docEditor,
     document: _doc,
@@ -84,7 +49,7 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
       FunctionalEditListener((changeList) {
         _docChangeSignal.notifyListeners();
         final markdown = serializeDocumentToMarkdown(_doc);
-        widget.onNotesChanged(markdown);
+        context.read<CalendarEventFormCubit>().updateNotes(markdown);
       }),
     );
   }
@@ -98,33 +63,44 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: widget.formKey,
-      child: Stack(
-        children: [
-          CustomScrollView(
-            slivers: [
-              _buildTitleField(),
-              _buildDateField(),
-              _buildNotesSection(),
-              SliverFillRemaining(
-                hasScrollBody: false,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 22),
-                  child: Column(
-                    children: [
-                      const Spacer(),
-                      const SizedBox(height: 200),
-                      _buildSaveButton(),
-                      const SafeArea(child: SizedBox(height: 12)),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          _buildStickyMarkdownToolbar(),
-        ],
+    return BlocListener<CalendarEventFormCubit, CalendarEventFormState>(
+      listenWhen: (previous, current) =>
+          previous.title != current.title || previous.notes != current.notes,
+      listener: (context, state) {
+        if (_titleController.text != state.title) {
+          _titleController.text = state.title;
+        }
+
+        final currentMarkdown = serializeDocumentToMarkdown(_doc);
+        if (currentMarkdown != state.notes) {
+          final newDoc = deserializeMarkdownToDocument(
+            state.notes,
+            syntax: MarkdownSyntax.normal,
+          );
+          // Replace document content
+          while (_doc.isNotEmpty) {
+            _doc.deleteNodeAt(0);
+          }
+          for (var i = 0; i < newDoc.length; i++) {
+            _doc.insertNodeAt(i, newDoc.getNodeAt(i)!);
+          }
+        }
+      },
+      child: Form(
+        key: widget.formKey,
+        child: Stack(
+          children: [
+            CustomScrollView(
+              slivers: [
+                _buildTitleField(),
+                _buildDateField(),
+                _buildNotesSection(),
+                _buildSaveButtonSection(),
+              ],
+            ),
+            _buildStickyMarkdownToolbar(),
+          ],
+        ),
       ),
     );
   }
@@ -135,25 +111,30 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
       sliver: SliverToBoxAdapter(
         child: Column(
           children: [
-            AppTextFormField(
-              autofocus: true,
-              inputBorder: InputBorder.none,
-              controller: _titleController,
-              hintText: context.l10n.newEventHint,
-              textInputAction: TextInputAction.done,
-              visualDensity: VisualDensity.compact,
-              contentPadding: EdgeInsets.zero,
-              inputStyle: context.primaryTextTheme.headlineMedium?.copyWith(
-                color: widget.selectedColor.color.darken(0.15),
-              ),
-              onChanged: widget.onTitleChanged,
-              maxLines: 3,
-              minLines: 1,
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return context.l10n.titleRequired;
-                }
-                return null;
+            BlocBuilder<CalendarEventFormCubit, CalendarEventFormState>(
+              builder: (context, state) {
+                return AppTextFormField(
+                  autofocus: true,
+                  inputBorder: InputBorder.none,
+                  controller: _titleController,
+                  hintText: context.l10n.newEventHint,
+                  textInputAction: TextInputAction.done,
+                  visualDensity: VisualDensity.compact,
+                  contentPadding: EdgeInsets.zero,
+                  inputStyle: context.primaryTextTheme.headlineMedium?.copyWith(
+                    color: state.eventColor.color.darken(0.15),
+                  ),
+                  onChanged: (value) =>
+                      context.read<CalendarEventFormCubit>().updateTitle(value),
+                  maxLines: 3,
+                  minLines: 1,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return context.l10n.titleRequired;
+                    }
+                    return null;
+                  },
+                );
               },
             ),
           ],
@@ -164,60 +145,70 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
 
   Widget _buildDateField() {
     return SliverToBoxAdapter(
-      child: InkWell(
-        splashFactory: NoSplash.splashFactory,
-        onTap: () {
-          FocusManager.instance.primaryFocus?.unfocus();
-          DateFieldsBottomDialog.show(
-            context,
-            startDate: _startDate,
-            endDate: _endDate,
-            allDay: widget.allDay,
-            onAllDayChanged: widget.onAllDayChanged,
-            repeatRule: widget.repeatRule,
-            onStartDateChanged: widget.onStartDateChanged,
-            onEndDateChanged: widget.onEndDateChanged,
-            onRepeatRuleChanged: widget.onRepeatRuleChanged,
+      child: BlocBuilder<CalendarEventFormCubit, CalendarEventFormState>(
+        builder: (context, state) {
+          return InkWell(
+            splashFactory: NoSplash.splashFactory,
+            onTap: () {
+              FocusManager.instance.primaryFocus?.unfocus();
+              DateFieldsBottomDialog.show(
+                context,
+                startDate: state.startDate,
+                endDate: state.endDate,
+                allDay: state.allDay,
+                onAllDayChanged: (value) =>
+                    context.read<CalendarEventFormCubit>().updateAllDay(value),
+                repeatRule: state.repeatRule,
+                onStartDateChanged: (value) => context
+                    .read<CalendarEventFormCubit>()
+                    .updateStartDate(value),
+                onEndDateChanged: (value) =>
+                    context.read<CalendarEventFormCubit>().updateEndDate(value),
+                onRepeatRuleChanged: (value) => context
+                    .read<CalendarEventFormCubit>()
+                    .updateRepeatRule(value),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Symbols.edit_calendar,
+                    size: 18,
+                    color: state.eventColor.color.darken(0.2),
+                  ),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: AnimatedSize(
+                      alignment: Alignment.centerLeft,
+                      duration: 120.milliseconds,
+                      child: Text(
+                        _buildDateFieldText(state),
+                        style: context.textTheme.bodyMedium,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           );
         },
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(
-                Symbols.edit_calendar,
-                size: 18,
-                color: widget.selectedColor.color.darken(0.2),
-              ),
-              const SizedBox(width: 6),
-              Flexible(
-                child: AnimatedSize(
-                  alignment: Alignment.centerLeft,
-                  duration: 120.milliseconds,
-                  child: Text(
-                    _buildDateFieldText(),
-                    style: context.textTheme.bodyMedium,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
 
-  String _buildDateFieldText() {
-    final date = widget.allDay
-        ? _startDate.toEEEEMMMMdyyyy()
-        : _startDate.toDateRange(_endDate);
+  String _buildDateFieldText(CalendarEventFormState state) {
+    final date = state.allDay
+        ? state.startDate.toEEEEMMMMdyyyy()
+        : state.startDate.toDateRange(state.endDate);
 
-    if (widget.repeatRule.frequency == RepeatFrequency.doNotRepeat) {
+    if (state.repeatRule.frequency == RepeatFrequency.doNotRepeat) {
       return date;
     }
 
-    return '$date - ${context.l10n.repeats} ${widget.repeatRule.frequency.label.toLowerCase()}';
+    return '$date - ${context.l10n.repeats} ${state.repeatRule.frequency.label.toLowerCase()}';
   }
 
   Widget _buildNotesSection() {
@@ -310,6 +301,23 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
     );
   }
 
+  Widget _buildSaveButtonSection() {
+    return SliverFillRemaining(
+      hasScrollBody: false,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 22),
+        child: Column(
+          children: [
+            const Spacer(),
+            const SizedBox(height: 200),
+            _buildSaveButton(),
+            const SafeArea(child: SizedBox(height: 12)),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildStickyMarkdownToolbar() {
     return MultiListenableBuilder(
       listenables: {_docChangeSignal, _composer.selectionNotifier},
@@ -326,17 +334,59 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
   }
 
   Widget _buildSaveButton() {
-    return BlocSelector<CalendarEventFormCubit, CalendarEventFormState, bool>(
-      selector: (state) => state is CalendarEventFormLoadingState,
-      builder: (context, loading) {
+    return BlocBuilder<CalendarEventFormCubit, CalendarEventFormState>(
+      builder: (context, state) {
         return ElevatedButton(
-          onPressed: loading ? null : widget.onSave,
+          onPressed: state.isLoading
+              ? null
+              : () async {
+                  if (widget.formKey.currentState?.validate() ?? false) {
+                    SaveChangesDialogOptions? saveOption;
+
+                    if (state.originalEvent?.isRecurring == true) {
+                      saveOption = await _showConfirmSaveDialog();
+                      if (saveOption == SaveChangesDialogOptions.cancel) return;
+                    }
+
+                    await context.read<CalendarEventFormCubit>().save(
+                      saveOption: saveOption,
+                    );
+                  }
+                },
           child: Text(
-            (loading ? context.l10n.savingButton : context.l10n.saveButton)
+            (state.isLoading
+                    ? context.l10n.savingButton
+                    : context.l10n.saveButton)
                 .toUpperCase(),
           ),
         );
       },
     );
+  }
+
+  Future<SaveChangesDialogOptions> _showConfirmSaveDialog() async {
+    final result = await OptionsBottomDialog.show(
+      context,
+      title: context.l10n.saveChangesToEventTitle,
+      description: context.l10n.saveChangesToEventMessage,
+      options: [
+        Option(
+          text: context.l10n.saveOnlyThisEvent,
+          value: SaveChangesDialogOptions.onlyThisEvent,
+          style: OptionStyle.primary,
+        ),
+        Option(
+          text: context.l10n.saveAllFutureEvents,
+          value: SaveChangesDialogOptions.allFutureEvents,
+          style: OptionStyle.primary,
+        ),
+        Option(
+          text: context.l10n.cancelButton,
+          value: SaveChangesDialogOptions.cancel,
+        ),
+      ],
+    );
+
+    return result ?? SaveChangesDialogOptions.cancel;
   }
 }

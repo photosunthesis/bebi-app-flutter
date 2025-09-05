@@ -1,26 +1,70 @@
 part of 'calendar_event_form_cubit.dart';
 
-sealed class CalendarEventFormState {
-  const CalendarEventFormState();
-}
+class CalendarEventFormState {
+  const CalendarEventFormState({
+    required this.title,
+    required this.startDate,
+    required this.endDate,
+    required this.allDay,
+    required this.eventColor,
+    required this.repeatRule,
+    required this.notes,
+    required this.currentUserId,
+    this.originalEvent,
+    this.isLoading = false,
+    this.isInitialized = false,
+    this.error,
+    this.saveSuccessful = false,
+  });
 
-class CalendarEventFormLoadingState extends CalendarEventFormState {
-  const CalendarEventFormLoadingState();
-}
-
-class CalendarEventFormLoadedState extends CalendarEventFormState {
-  const CalendarEventFormLoadedState(this.calendarEvent, this.currentUserId);
-  final CalendarEvent? calendarEvent;
+  final String title;
+  final DateTime startDate;
+  final DateTime endDate;
+  final bool allDay;
+  final EventColor eventColor;
+  final RepeatRule repeatRule;
+  final String notes;
   final String currentUserId;
+  final CalendarEvent? originalEvent;
+  final bool isLoading;
+  final bool isInitialized;
+  final String? error;
+  final bool saveSuccessful;
+
   bool get eventWasCreatedByCurrentUser =>
-      calendarEvent == null || calendarEvent?.createdBy == currentUserId;
-}
+      originalEvent == null || originalEvent?.createdBy == currentUserId;
 
-class CalendarEventFormErrorState extends CalendarEventFormState {
-  const CalendarEventFormErrorState(this.error);
-  final String error;
-}
+  bool get isEditing => originalEvent != null;
 
-class CalendarEventFormSuccessState extends CalendarEventFormState {
-  const CalendarEventFormSuccessState();
+  CalendarEventFormState copyWith({
+    String? title,
+    DateTime? startDate,
+    DateTime? endDate,
+    bool? allDay,
+    EventColor? eventColor,
+    RepeatRule? repeatRule,
+    String? notes,
+    String? currentUserId,
+    CalendarEvent? originalEvent,
+    bool? isLoading,
+    bool? isInitialized,
+    String? error,
+    bool? saveSuccessful,
+  }) {
+    return CalendarEventFormState(
+      title: title ?? this.title,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      allDay: allDay ?? this.allDay,
+      eventColor: eventColor ?? this.eventColor,
+      repeatRule: repeatRule ?? this.repeatRule,
+      notes: notes ?? this.notes,
+      currentUserId: currentUserId ?? this.currentUserId,
+      originalEvent: originalEvent ?? this.originalEvent,
+      isLoading: isLoading ?? this.isLoading,
+      isInitialized: isInitialized ?? this.isInitialized,
+      error: error,
+      saveSuccessful: saveSuccessful ?? this.saveSuccessful,
+    );
+  }
 }
