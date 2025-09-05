@@ -4,49 +4,47 @@
 
 # Bebi App
 
-A simple couples app I made for me and my girlfriend to keep track of stuff and share moments together <3
+A couples app I built for me and my girlfriend to keep track of things and share moments together. Built with **Flutter**. 💙
 
 ## What it does
 
-- 📅 **Shared Calendar**: Keep track of important dates, events, and appointments together.
-- 📸 **Stories**: Instantly share candid photos with your partner (🚧 in progress).
-- 🌸 **Cycle Tracking**: Monitor menstrual cycles, log symptoms, and view shared insights and predictions.
-- 📍 **Location Sharing**: Share your location with your partner when needed (🚧 in progress).
+- 📅 **Shared Calendar**: Keep track of our dates, events, and appointments together.
+- 📸 **Stories**: Share daily candid photos with each other (work-in-progress).
+- 🌸 **Cycle Tracking**: Log menstruation events and symptoms, and access AI-powered insights.
+- 📍 **Location Sharing**: Optionally share location with your partner when it's useful (work-in-progress).
 
-## App Architecture & Tech Stack
+## 🛠️ Architecture & Tech Stack
 
-### 🏗️ Architecture
+Clean architecture with feature-based organization:
 
-The app follows a clean architecture pattern with clear separation of concerns:
-
-- 🎨 **UI Layer** (`ui/`): Feature-based organization with shared widgets
-  - **Features**: Authentication, Profile Setup, Home, Calendar, Cycles, Stories.
-  - **Shared Widgets**: Forms, Layouts, Modals, Custom Components.
-
-- 💿 **Data Layer** (`data/`): Models, repositories, and services
-
-  - Models: User profiles, calendar events, cycle logs, symptoms
-  - Repositories: Data access abstraction for Firebase and local storage
-  - Services: Business logic for cycle predictions, recurring events, app updates
-
-- 📱 **App Layer** (`app/`): Routing, theming, and app-level configuration
-- ⚙️ **Config** (`config/`): Dependency injection, Firebase setup, Hive boxes
-- 🛠️ **Utils** (`utils/`): Extensions, formatters, analytics, and helper functions
-
-### 🛠️ Tech Stack
-
+**Technologies:**
 - **State Management**: `flutter_bloc`
-- **Navigation**: `go_router`
-- **Backend**: Firebase (Auth, Firestore, Storage, Analytics), Sentry for error monitoring.
+- **Navigation**: `go_router` 
+- **Backend**: Firebase (Auth, Firestore, Storage, Analytics), Sentry
 - **Local Storage**: `hive_ce_flutter`
-- **Dependency Injection**: `get_it` + `injectable`
-- **UI**: `super_editor`, `table_calendar`, `paged_vertical_calendar`, `cached_network_image`, `skeletonizer`
-- **AI**: `firebase_ai` for generative features.
+- **DI**: `get_it` + `injectable`
+- **AI**: `firebase_ai`
+
+**Structure:**
+```
+/ - Root
+  ├── lib/                    # Main app code
+  │   ├── ui/                 # Features and shared widgets
+  │   │   ├── features/       # Individual app features (Home, Calendar, etc.)
+  │   │   └── shared_widgets/ # Reusable UI components
+  │   ├── data/               # Models, repositories, and business logic services
+  │   ├── app/                # Routing, theming, and configuration
+  │   ├── config/             # DI, Firebase setup, Hive boxes
+  │   └── utils/              # Extensions, formatters, analytics
+  ├── assets/                 # Static assets like images and fonts
+  │   ├── app_logo/           # App logos for different platforms
+  │   └── fonts/              # Custom fonts
+  ├── android/                # Android-specific code
+  ├── ios/                    # iOS-specific code
+  ├── web/                    # Web-specific code
+  └── test/                   # Unit and widget tests
+```
 
 ### 📝 License
 
-This project is licensed under the MIT License with Commons Clause. See the [LICENSE](LICENSE) file for details.
-
----
-
-_This project is under active development. Core features are functional with new capabilities being added regularly._
+This repository includes an MIT + Commons Clause license. See the [LICENSE](LICENSE) file for details.
