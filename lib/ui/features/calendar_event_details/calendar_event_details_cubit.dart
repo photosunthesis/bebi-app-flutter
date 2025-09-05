@@ -26,7 +26,9 @@ class CalendarEventDetailsCubit extends Cubit<CalendarEventDetailsState>
     this._partnershipsRepository,
     this._profileRepository,
     this._firebaseAuth,
-  ) : super(const CalendarEventDetailsLoadingState());
+  ) : super(const CalendarEventDetailsLoadingState()) {
+    logScreenViewed(screenName: 'calendar_event_details_screen');
+  }
 
   final CalendarEventsRepository _calendarEventsRepository;
   final RecurringCalendarEventsService _recurringCalendarEventsService;
@@ -82,12 +84,9 @@ class CalendarEventDetailsCubit extends Cubit<CalendarEventDetailsState>
 
         emit(const CalendarEventDetailsDeleteSuccessState());
 
-        logEvent(
-          name: 'calendar_event_deleted',
-          parameters: {
-            'delete_type': deleteAllEvents ? 'all_events' : 'single_event',
-            'is_recurring_event': baseEvent.isRecurring,
-          },
+        logUserAction(
+          action: 'calendar_event_deleted',
+          parameters: {'delete_all_events': deleteAllEvents},
         );
       },
       onError: (error, _) {

@@ -12,7 +12,9 @@ part 'cycle_calendar_state.dart';
 class CycleCalendarCubit extends Cubit<CycleCalendarState>
     with GuardMixin, AnalyticsMixin {
   CycleCalendarCubit(this._cycleLogsRepository, this._cyclePredictionsService)
-    : super(const CycleCalendarLoadedState([]));
+    : super(const CycleCalendarLoadedState([])) {
+    logScreenViewed(screenName: 'cycle_calendar_screen');
+  }
 
   final CycleLogsRepository _cycleLogsRepository;
   final CyclePredictionsService _cyclePredictionsService;
@@ -32,11 +34,11 @@ class CycleCalendarCubit extends Cubit<CycleCalendarState>
         final sortedLogs = [...cycleLogs, ...predictions]
           ..sort((a, b) => b.date.compareTo(a.date));
 
-        logEvent(
-          name: 'cycle_calendar_screen_opened',
+        logDataLoaded(
+          dataType: 'cycle_logs',
           parameters: {
-            'cycle_logs_count': cycleLogs.length,
-            'predictions_count': predictions.length,
+            'log_count': cycleLogs.length,
+            'predicted_count': predictions.length,
           },
         );
 

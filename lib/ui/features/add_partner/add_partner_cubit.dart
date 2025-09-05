@@ -19,7 +19,9 @@ class AddPartnerCubit extends Cubit<AddPartnerState>
     this._userPartnershipsRepository,
     this._userProfileRepository,
     this._firebaseAuth,
-  ) : super(const AddPartnerLoadingState());
+  ) : super(const AddPartnerLoadingState()) {
+    logScreenViewed(screenName: 'add_partner_screen');
+  }
 
   final UserPartnershipsRepository _userPartnershipsRepository;
   final UserProfileRepository _userProfileRepository;
@@ -35,8 +37,6 @@ class AddPartnerCubit extends Cubit<AddPartnerState>
         );
 
         emit(AddPartnerLoadedState(userProfile!.code));
-
-        logEvent(name: 'add_partner_screen_opened');
       },
       onError: (e, _) {
         emit(AddPartnerErrorState(e.toString()));
@@ -58,6 +58,11 @@ class AddPartnerCubit extends Cubit<AddPartnerState>
             throw ArgumentError(l10n.partnerNotFoundForIntimateActivities);
           }
 
+          logUserAction(
+            action: 'partner_added',
+            parameters: {'connection_method': 'existing_partnership'},
+          );
+
           return emit(const AddPartnerSuccessState());
         }
 
@@ -66,7 +71,6 @@ class AddPartnerCubit extends Cubit<AddPartnerState>
         );
 
         if (partnerProfile == null) {
-          logEvent(name: 'partner_code_invalid');
           throw ArgumentError(l10n.partnerCodeNotFound);
         }
 
@@ -85,14 +89,15 @@ class AddPartnerCubit extends Cubit<AddPartnerState>
 
         emit(const AddPartnerSuccessState());
 
-        logEvent(
-          name: 'partner_added_successfully',
+        logUserAction(
+          action: 'partner_added',
           parameters: {
             'connection_method': 'partner_code',
             'has_existing_partnership': existingPartnership != null,
           },
         );
       },
+      logWhen: (e, _) => e is! ArgumentError,
       onError: (e, _) {
         emit(AddPartnerErrorState(e.toString()));
       },

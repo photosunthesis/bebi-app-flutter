@@ -14,7 +14,9 @@ part 'confirm_email_state.dart';
 class ConfirmEmailCubit extends Cubit<ConfirmEmailState>
     with GuardMixin, AnalyticsMixin, LocalizationsMixin {
   ConfirmEmailCubit(this._firebaseAuth)
-    : super(const ConfirmEmailLoadingState());
+    : super(const ConfirmEmailLoadingState()) {
+    logScreenViewed(screenName: 'confirm_email_screen');
+  }
 
   final FirebaseAuth _firebaseAuth;
 
@@ -33,7 +35,7 @@ class ConfirmEmailCubit extends Cubit<ConfirmEmailState>
           if (_firebaseAuth.currentUser?.emailVerified == true) {
             timer.cancel();
             emit(const ConfirmEmailSuccessState());
-            logEvent(name: 'email_verified');
+            logUserAction(action: 'email_confirmed');
           }
         });
       },
@@ -61,7 +63,7 @@ class ConfirmEmailCubit extends Cubit<ConfirmEmailState>
           _canResendVerification = true;
         });
 
-        logEvent(name: 'verification_email_sent');
+        logUserAction(action: 'verification_email_sent');
       },
       onError: (error, _) {
         emit(ConfirmEmailErrorState(error.toString()));

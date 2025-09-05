@@ -34,7 +34,9 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
           notes: '',
           currentUserId: '',
         ),
-      );
+      ) {
+    logScreenViewed(screenName: 'calendar_event_form_screen');
+  }
 
   final CalendarEventsRepository _calendarEventsRepository;
   final UserPartnershipsRepository _userPartnershipsRepository;
@@ -65,11 +67,12 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
       ),
     );
 
-    logEvent(
-      name: 'calendar_event_form_opened',
+    logDataLoaded(
+      dataType: 'calendar_event_form',
       parameters: {
         'is_editing': calendarEvent != null,
         'is_recurring_event': calendarEvent?.isRecurring ?? false,
+        'selected_date_provided': selectedDate != null,
       },
     );
   }
@@ -132,8 +135,10 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
           await _handleRegularSave(partnership: partnership!);
         }
 
-        logEvent(
-          name: isExistingEvent
+        emit(state.copyWith(isLoading: false, saveSuccessful: true));
+
+        logUserAction(
+          action: isExistingEvent
               ? 'calendar_event_updated'
               : 'calendar_event_created',
           parameters: {
@@ -145,8 +150,6 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
             'event_color': state.eventColor.name,
           },
         );
-
-        emit(state.copyWith(isLoading: false, saveSuccessful: true));
       },
       onError: (error, _) {
         emit(state.copyWith(isLoading: false, error: error.toString()));

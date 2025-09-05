@@ -6,11 +6,53 @@ import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 
 mixin AnalyticsMixin {
-  void logEvent({required String name, Map<String, Object>? parameters}) {
-    if (kIsTest || kDebugMode) return;
+  void logScreenViewed({
+    required String screenName,
+    String? screenClassOverride,
+  }) {
+    if (kDebugMode || kIsTest) return;
 
     unawaited(
-      GetIt.I<FirebaseAnalytics>().logEvent(name: name, parameters: parameters),
+      GetIt.I<FirebaseAnalytics>().logScreenView(screenName: screenName),
+    );
+  }
+
+  void logUserAction({
+    required String action,
+    Map<String, Object>? parameters,
+  }) {
+    if (kDebugMode || kIsTest) return;
+
+    unawaited(
+      GetIt.I<FirebaseAnalytics>().logEvent(
+        name: 'user_action_$action',
+        parameters: parameters,
+      ),
+    );
+  }
+
+  void logAppAction({required String action, Map<String, Object>? parameters}) {
+    if (kDebugMode || kIsTest) return;
+
+    unawaited(
+      GetIt.I<FirebaseAnalytics>().logEvent(
+        name: 'app_action_$action',
+        parameters: parameters,
+      ),
+    );
+  }
+
+  void logDataLoaded({
+    required String dataType,
+    Map<String, Object>? parameters,
+  }) {
+    if (kDebugMode || kIsTest) return;
+
+    unawaited(
+      GetIt.I<FirebaseAnalytics>().logEvent(
+        name: 'data_loaded_$dataType',
+        parameters: parameters,
+      ),
     );
   }
 
@@ -18,7 +60,7 @@ mixin AnalyticsMixin {
     required String loginMethod,
     Map<String, Object>? parameters,
   }) {
-    if (kIsTest || kDebugMode) return;
+    if (kDebugMode || kIsTest) return;
 
     unawaited(
       GetIt.I<FirebaseAnalytics>().logLogin(
@@ -34,7 +76,7 @@ mixin AnalyticsMixin {
     required String itemId,
     Map<String, Object>? parameters,
   }) {
-    if (kIsTest || kDebugMode) return;
+    if (kDebugMode || kIsTest) return;
 
     unawaited(
       GetIt.I<FirebaseAnalytics>().logShare(

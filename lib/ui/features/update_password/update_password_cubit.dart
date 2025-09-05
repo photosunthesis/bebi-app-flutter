@@ -11,7 +11,9 @@ part 'update_password_state.dart';
 class UpdatePasswordCubit extends Cubit<UpdatePasswordState>
     with GuardMixin, AnalyticsMixin, LocalizationsMixin {
   UpdatePasswordCubit(this._firebaseAuth)
-    : super(const UpdatePasswordLoadedState());
+    : super(const UpdatePasswordLoadedState()) {
+    logScreenViewed(screenName: 'update_password_screen');
+  }
 
   final FirebaseAuth _firebaseAuth;
 
@@ -30,8 +32,9 @@ class UpdatePasswordCubit extends Cubit<UpdatePasswordState>
       await user.updatePassword(newPassword);
       emit(const UpdatePasswordSuccessState());
 
-      logEvent(name: 'password_updated');
+      logUserAction(action: 'password_updated');
     },
+    logWhen: (error, _) => error is! FirebaseAuthException,
     onError: (error, _) {
       emit(
         UpdatePasswordErrorState(

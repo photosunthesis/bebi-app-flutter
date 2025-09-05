@@ -20,7 +20,9 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState>
     this._userProfileRepository,
     this._firebaseAuth,
     this._imagePicker,
-  ) : super(const ProfileSetupLoadedState());
+  ) : super(const ProfileSetupLoadedState()) {
+    logScreenViewed(screenName: 'profile_setup_screen');
+  }
 
   final UserProfileRepository _userProfileRepository;
   final FirebaseAuth _firebaseAuth;
@@ -56,14 +58,13 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState>
     if (pickedFile != null) {
       emit(ProfileSetupLoadedState(photo: pickedFile.path));
 
-      logEvent(name: 'profile_picture_selected');
+      logUserAction(action: 'profile_picture_selected');
     }
   }
 
   void removeProfilePicture() {
     emit(const ProfileSetupLoadedState());
-
-    logEvent(name: 'profile_picture_removed');
+    logUserAction(action: 'profile_picture_removed');
   }
 
   Future<void> updateUserProfile(String displayName, DateTime birthDate) async {
@@ -99,8 +100,8 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState>
 
         emit(const ProfileSetupSuccessState());
 
-        logEvent(
-          name: 'profile_setup_completed',
+        logUserAction(
+          action: 'profile_setup_completed',
           parameters: {
             'has_profile_picture': photoUrl != null,
             'display_name_length': displayName.length,

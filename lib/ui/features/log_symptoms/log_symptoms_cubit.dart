@@ -21,7 +21,9 @@ class LogSymptomsCubit extends Cubit<LogSymptomsState>
     this._userProfileRepository,
     this._userPartnershipsRepository,
     this._firebaseAuth,
-  ) : super(const LogSymptomsLoadedState());
+  ) : super(const LogSymptomsLoadedState()) {
+    logScreenViewed(screenName: 'log_symptoms_screen');
+  }
 
   final CycleLogsRepository _cycleLogsRepository;
   final UserProfileRepository _userProfileRepository;
@@ -77,8 +79,8 @@ class LogSymptomsCubit extends Cubit<LogSymptomsState>
 
         emit(const LogSymptomsSuccessState());
 
-        logEvent(
-          name: symptoms.isEmpty ? 'symptoms_deleted' : 'symptoms_logged',
+        logUserAction(
+          action: symptoms.isEmpty ? 'symptoms_deleted' : 'symptoms_logged',
           parameters: {
             'symptoms_count': symptoms.length,
             'log_for_partner': logForPartner,

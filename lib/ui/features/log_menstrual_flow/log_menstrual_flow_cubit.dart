@@ -21,7 +21,9 @@ class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState>
     this._userProfileRepository,
     this._userPartnershipsRepository,
     this._firebaseAuth,
-  ) : super(const LogMenstrualFlowLoadedState());
+  ) : super(const LogMenstrualFlowLoadedState()) {
+    logScreenViewed(screenName: 'log_menstrual_flow_screen');
+  }
 
   final CycleLogsRepository _cycleLogsRepository;
   final UserProfileRepository _userProfileRepository;
@@ -86,8 +88,8 @@ class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState>
 
         emit(const LogMenstrualFlowSuccessState());
 
-        logEvent(
-          name: 'menstrual_flow_logged',
+        logUserAction(
+          action: 'menstrual_flow_logged',
           parameters: {
             'flow_intensity': flowIntensity.name,
             'log_for_partner': logForPartner,
@@ -111,7 +113,7 @@ class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState>
         emit(const LogMenstrualFlowLoadingState());
         await _cycleLogsRepository.deleteById(cycleLogId);
         emit(const LogMenstrualFlowSuccessState());
-        logEvent(name: 'menstrual_flow_deleted');
+        logUserAction(action: 'menstrual_flow_deleted');
       },
       onError: (error, _) {
         emit(LogMenstrualFlowErrorState(error.toString()));

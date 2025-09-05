@@ -19,7 +19,9 @@ class CalendarCubit extends Cubit<CalendarState> with AnalyticsMixin {
     this._calendarEventsRepository,
     this._recurringCalendarEventsService,
     this._firebaseAuth,
-  ) : super(CalendarState(focusedDay: DateTime.now()));
+  ) : super(CalendarState(focusedDay: DateTime.now())) {
+    logScreenViewed(screenName: 'calendar_screen');
+  }
 
   final CalendarEventsRepository _calendarEventsRepository;
   final RecurringCalendarEventsService _recurringCalendarEventsService;
@@ -64,18 +66,6 @@ class CalendarCubit extends Cubit<CalendarState> with AnalyticsMixin {
           .toList();
       final allEvents = [...nonRecurringBaseEvents, ...recurringEvents];
 
-      logEvent(
-        name: 'calendar_events_loaded',
-        parameters: {
-          'total_events': allEvents.length,
-          'focused_day_events': allEvents
-              .where((e) => e.startDate.isSameDay(state.focusedDay))
-              .length,
-          'used_cache': useCache,
-          'window_days': _defaultTimeWindow.inDays,
-        },
-      );
-
       return allEvents;
     });
 
@@ -88,15 +78,14 @@ class CalendarCubit extends Cubit<CalendarState> with AnalyticsMixin {
     } else {
       emit(state.copyWith(events: result, baseEvents: result));
     }
-  }
 
-  Future<void> fetchLatestEventsFromServer() async {
-    await AsyncValue.guard(() async {
-      await _calendarEventsRepository.getByUserId(
-        userId: _firebaseAuth.currentUser!.uid,
-        useCache: false,
-      );
-    });
+    logDataLoaded(
+      dataType: 'calendar_events',
+      parameters: {
+        'from_cache': useCache,
+        'item_count': result.asData()?.length ?? 0,
+      },
+    );
   }
 
   Future<void> setFocusedDay(DateTime date) async {
@@ -109,8 +98,8 @@ class CalendarCubit extends Cubit<CalendarState> with AnalyticsMixin {
 
     emit(state.copyWith(focusedDay: date));
 
-    logEvent(
-      name: 'calendar_date_selected',
+    logUserAction(
+      action: 'changed_calendar_focused_day',
       parameters: {
         'is_today': date.isSameDay(DateTime.now()),
         'days_from_today': date.difference(DateTime.now()).inDays,
@@ -132,6 +121,17 @@ class CalendarCubit extends Cubit<CalendarState> with AnalyticsMixin {
     }
 
     await _loadMoreEvents(newStart, newEnd);
+
+    logDataLoaded(
+      dataType: 'calendar_events_expanded',
+      parameters: {
+        'new_window_start_days_from_focus': focusDate
+            .difference(newStart)
+            .inDays,
+        'new_window_end_days_from_focus': newEnd.difference(focusDate).inDays,
+        'focused_day_is_today': focusDate.isSameDay(DateTime.now()),
+      },
+    );
   }
 
   Future<void> _loadMoreEvents(DateTime rangeStart, DateTime rangeEnd) async {

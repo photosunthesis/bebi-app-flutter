@@ -12,7 +12,9 @@ part 'sign_in_state.dart';
 @injectable
 class SignInCubit extends Cubit<SignInState>
     with GuardMixin, AnalyticsMixin, LocalizationsMixin {
-  SignInCubit(this._firebaseAuth) : super(const SignInLoadedState());
+  SignInCubit(this._firebaseAuth) : super(const SignInLoadedState()) {
+    logScreenViewed(screenName: 'sign_in_screen');
+  }
 
   final FirebaseAuth _firebaseAuth;
 

@@ -20,7 +20,9 @@ class LogIntimacyCubit extends Cubit<LogIntimacyState>
     this._userProfileRepository,
     this._userPartnershipsRepository,
     this._firebaseAuth,
-  ) : super(const LogIntimmacyLoadedState());
+  ) : super(const LogIntimmacyLoadedState()) {
+    logScreenViewed(screenName: 'log_intimacy_screen');
+  }
 
   final CycleLogsRepository _cycleLogsRepository;
   final UserProfileRepository _userProfileRepository;
@@ -68,8 +70,8 @@ class LogIntimacyCubit extends Cubit<LogIntimacyState>
 
         emit(const LogIntimacySuccessState());
 
-        logEvent(
-          name: 'intimacy_logged',
+        logUserAction(
+          action: 'intimacy_logged',
           parameters: {
             'intimacy_type': intimacyType.name,
             'log_for_partner': logForPartner,

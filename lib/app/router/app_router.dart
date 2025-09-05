@@ -32,7 +32,6 @@ import 'package:bebi_app/ui/features/update_password/update_password_cubit.dart'
 import 'package:bebi_app/ui/features/update_password/update_password_screen.dart';
 import 'package:bebi_app/ui/shared_widgets/layouts/main_scaffold.dart';
 import 'package:bebi_app/ui/shared_widgets/modals/bottom_sheet_page.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -48,7 +47,7 @@ part 'app_routes.dart';
 @module
 abstract class AppRouter {
   @singleton
-  GoRouter instance(FirebaseAnalytics firebaseAnalytics) => GoRouter(
+  GoRouter get instance => GoRouter(
     routes: [
       GoRoute(
         path: '/sign-in',
@@ -266,10 +265,7 @@ abstract class AppRouter {
         ),
       ),
     ],
-    observers: [
-      if (!kDebugMode) FirebaseAnalyticsObserver(analytics: firebaseAnalytics),
-      if (kDebugMode) _DebugNavigatorObserver(),
-    ],
+    observers: [if (kDebugMode) _DebugNavigatorObserver()],
     redirect: (context, state) {
       final signedIn = GetIt.I<FirebaseAuth>().currentUser is User;
       final route = state.uri.toString();

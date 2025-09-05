@@ -21,7 +21,9 @@ class CycleSetupCubit extends Cubit<CycleSetupState>
     this._cycleLogsRepository,
     this._userPartnershipsRepository,
     this._firebaseAuth,
-  ) : super(const CycleSetupInitialState());
+  ) : super(const CycleSetupInitialState()) {
+    logScreenViewed(screenName: 'cycle_setup_screen');
+  }
 
   final UserProfileRepository _userProfileRepository;
   final CycleLogsRepository _cycleLogsRepository;
@@ -69,12 +71,11 @@ class CycleSetupCubit extends Cubit<CycleSetupState>
 
         emit(const CycleSetupSuccessState());
 
-        logEvent(
-          name: 'cycle_setup_completed',
+        logDataLoaded(
+          dataType: 'cycle_logs',
           parameters: {
-            'period_duration_days': periodDurationInDays,
-            'sharing_with_partner': shouldShareWithPartner,
-            'has_partner': partnership != null,
+            'period_duration_in_days': periodDurationInDays,
+            'shared_with_partner': shouldShareWithPartner,
           },
         );
       },

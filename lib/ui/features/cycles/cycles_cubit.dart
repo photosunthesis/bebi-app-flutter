@@ -29,7 +29,9 @@ class CyclesCubit extends Cubit<CyclesState>
     this._userProfileRepository,
     this._userPartnershipsRepository,
     this._firebaseAuth,
-  ) : super(CyclesState(focusedDate: DateTime.now()));
+  ) : super(CyclesState(focusedDate: DateTime.now())) {
+    logScreenViewed(screenName: 'cycles_screen');
+  }
 
   final CycleLogsRepository _cycleLogsRepository;
   final CyclePredictionsService _cyclePredictionsService;
@@ -65,7 +67,10 @@ class CyclesCubit extends Cubit<CyclesState>
           didSetUpCycles: true,
         );
         await _userProfileRepository.createOrUpdate(finalUserProfile);
-        logEvent(name: 'user_profile_cycles_setup_skipped');
+        logUserAction(
+          action: 'skipped_cycle_setup',
+          parameters: {'user_has_cycle': finalUserProfile.hasCycle},
+        );
       }
     });
 
@@ -141,8 +146,8 @@ class CyclesCubit extends Cubit<CyclesState>
 
     await _loadDataForActiveProfile(useCache: true);
 
-    logEvent(
-      name: 'user_profile_switched',
+    logUserAction(
+      action: 'switched_cycle_profile_view',
       parameters: {
         'viewing': state.isViewingCurrentUser ? 'current_user' : 'partner',
       },
@@ -213,10 +218,12 @@ class CyclesCubit extends Cubit<CyclesState>
       );
     }
 
-    logEvent(
-      name: 'cycle_data_loaded',
+    logDataLoaded(
+      dataType: 'cycle_logs',
       parameters: {
-        'viewing': state.isViewingCurrentUser ? 'current_user' : 'partner',
+        'cycle_log_owner': state.isViewingCurrentUser
+            ? 'current_user'
+            : 'partner',
         'cycle_logs_count': state.cycleLogs.asData()?.length ?? 0,
       },
     );
