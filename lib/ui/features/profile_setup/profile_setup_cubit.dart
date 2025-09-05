@@ -56,23 +56,14 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState>
     if (pickedFile != null) {
       emit(ProfileSetupLoadedState(photo: pickedFile.path));
 
-      logEvent(
-        name: 'profile_picture_selected',
-        parameters: {
-          'user_id': _firebaseAuth.currentUser!.uid,
-          'image_source': 'gallery',
-        },
-      );
+      logEvent(name: 'profile_picture_selected');
     }
   }
 
   void removeProfilePicture() {
     emit(const ProfileSetupLoadedState());
 
-    logEvent(
-      name: 'profile_picture_removed',
-      parameters: {'user_id': _firebaseAuth.currentUser!.uid},
-    );
+    logEvent(name: 'profile_picture_removed');
   }
 
   Future<void> updateUserProfile(String displayName, DateTime birthDate) async {
@@ -111,7 +102,6 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState>
         logEvent(
           name: 'profile_setup_completed',
           parameters: {
-            'user_id': _firebaseAuth.currentUser!.uid,
             'has_profile_picture': photoUrl != null,
             'display_name_length': displayName.length,
             'age_years': DateTime.now().difference(birthDate).inDays ~/ 365,

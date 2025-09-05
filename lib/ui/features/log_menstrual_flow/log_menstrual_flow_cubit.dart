@@ -89,13 +89,12 @@ class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState>
         logEvent(
           name: 'menstrual_flow_logged',
           parameters: {
-            'user_id': _currentUserId!,
-            'event_date': date.toIso8601String(),
             'flow_intensity': flowIntensity.name,
             'log_for_partner': logForPartner,
             'is_update': cycleLogId != null,
+            'is_sharing_with_partner': userProfile!.isSharingCycleWithPartner,
             'auto_generated_days': previousLogs.isEmpty && cycleLogId == null
-                ? 5
+                ? averagePeriodDurationInDays
                 : 1,
           },
         );
@@ -112,10 +111,7 @@ class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState>
         emit(const LogMenstrualFlowLoadingState());
         await _cycleLogsRepository.deleteById(cycleLogId);
         emit(const LogMenstrualFlowSuccessState());
-        logEvent(
-          name: 'menstrual_flow_deleted',
-          parameters: {'user_id': _currentUserId!, 'cycle_log_id': cycleLogId},
-        );
+        logEvent(name: 'menstrual_flow_deleted');
       },
       onError: (error, _) {
         emit(LogMenstrualFlowErrorState(error.toString()));

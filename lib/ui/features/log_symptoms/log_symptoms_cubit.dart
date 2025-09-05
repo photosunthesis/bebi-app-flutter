@@ -80,13 +80,11 @@ class LogSymptomsCubit extends Cubit<LogSymptomsState>
         logEvent(
           name: symptoms.isEmpty ? 'symptoms_deleted' : 'symptoms_logged',
           parameters: {
-            'user_id': _currentUserId,
-            'event_date': date.toIso8601String(),
             'symptoms_count': symptoms.length,
-            'symptoms': symptoms.join(','),
             'log_for_partner': logForPartner,
             'is_update': cycleLogId != null,
             'is_deletion': symptoms.isEmpty,
+            'is_sharing_with_partner': userProfile!.isSharingCycleWithPartner,
           },
         );
       },

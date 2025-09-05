@@ -26,13 +26,7 @@ class SignInCubit extends Cubit<SignInState>
         );
         emit(const SignInSuccessState());
 
-        logLogin(
-          loginMethod: 'email',
-          parameters: {
-            'email': email,
-            'user_id': _firebaseAuth.currentUser!.uid,
-          },
-        );
+        logLogin(loginMethod: 'email');
       },
       logWhen: (error, _) => error is! FirebaseAuthException,
       onError: (error, _) {

@@ -34,7 +34,10 @@ class CycleCalendarCubit extends Cubit<CycleCalendarState>
 
         logEvent(
           name: 'cycle_calendar_screen_opened',
-          parameters: {'user_id': userId},
+          parameters: {
+            'cycle_logs_count': cycleLogs.length,
+            'predictions_count': predictions.length,
+          },
         );
 
         emit(CycleCalendarLoadedState(sortedLogs));

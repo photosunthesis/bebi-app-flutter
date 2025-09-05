@@ -59,7 +59,6 @@ class CalendarCubit extends Cubit<CalendarState>
         logEvent(
           name: 'calendar_events_loaded',
           parameters: {
-            'user_id': _firebaseAuth.currentUser!.uid,
             'total_events': state.events.asData()!.length,
             'focused_day_events': state.focusedDayEvents.length,
             'used_cache': useCache,
@@ -95,10 +94,9 @@ class CalendarCubit extends Cubit<CalendarState>
     logEvent(
       name: 'calendar_date_selected',
       parameters: {
-        'user_id': _firebaseAuth.currentUser!.uid,
-        'selected_date': date.toIso8601String(),
         'is_today': date.isSameDay(DateTime.now()),
         'days_from_today': date.difference(DateTime.now()).inDays,
+        'is_future_date': date.isAfter(DateTime.now()),
       },
     );
   }

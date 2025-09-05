@@ -33,15 +33,7 @@ class ConfirmEmailCubit extends Cubit<ConfirmEmailState>
           if (_firebaseAuth.currentUser?.emailVerified == true) {
             timer.cancel();
             emit(const ConfirmEmailSuccessState());
-            logEvent(
-              name: 'email_verified',
-              parameters: {
-                'user_id': _firebaseAuth.currentUser!.uid,
-                'email': _firebaseAuth.currentUser!.email!,
-                'timestamp': DateTime.now().toIso8601String(),
-                'success': true,
-              },
-            );
+            logEvent(name: 'email_verified');
           }
         });
       },
@@ -69,15 +61,7 @@ class ConfirmEmailCubit extends Cubit<ConfirmEmailState>
           _canResendVerification = true;
         });
 
-        logEvent(
-          name: 'verification_email_sent',
-          parameters: {
-            'user_id': _firebaseAuth.currentUser!.uid,
-            'email': _firebaseAuth.currentUser!.email!,
-            'timestamp': DateTime.now().toIso8601String(),
-            'success': true,
-          },
-        );
+        logEvent(name: 'verification_email_sent');
       },
       onError: (error, _) {
         emit(ConfirmEmailErrorState(error.toString()));

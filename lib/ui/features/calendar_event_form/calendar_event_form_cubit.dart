@@ -40,7 +40,6 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
     logEvent(
       name: 'calendar_event_form_opened',
       parameters: {
-        'user_id': _firebaseAuth.currentUser!.uid,
         'is_editing': calendarEvent != null,
         'is_recurring_event': calendarEvent?.isRecurring ?? false,
       },
@@ -107,7 +106,6 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
               ? 'calendar_event_updated'
               : 'calendar_event_created',
           parameters: {
-            'user_id': _firebaseAuth.currentUser!.uid,
             'event_type': allDay ? 'all_day' : 'timed',
             'has_repeat': repeatRule.frequency != RepeatFrequency.doNotRepeat,
             'repeat_frequency': repeatRule.frequency.name,

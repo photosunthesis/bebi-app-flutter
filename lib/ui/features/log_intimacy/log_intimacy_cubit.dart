@@ -71,11 +71,10 @@ class LogIntimacyCubit extends Cubit<LogIntimacyState>
         logEvent(
           name: 'intimacy_logged',
           parameters: {
-            'user_id': _currentUserId,
-            'event_date': date.toIso8601String(),
             'intimacy_type': intimacyType.name,
             'log_for_partner': logForPartner,
             'is_update': cycleLogId != null,
+            'is_sharing_with_partner': userProfile!.isSharingCycleWithPartner,
           },
         );
       },

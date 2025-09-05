@@ -48,10 +48,7 @@ class HomeCubit extends Cubit<HomeState> with GuardMixin, AnalyticsMixin {
 
         if (_firebaseAuth.currentUser?.emailVerified != true) {
           emit(const HomeShouldConfirmEmailState());
-          logEvent(
-            name: 'user_redirected_to_confirm_email',
-            parameters: {'user_id': _firebaseAuth.currentUser!.uid},
-          );
+          logEvent(name: 'user_redirected_to_confirm_email');
           return;
         }
 
@@ -61,10 +58,7 @@ class HomeCubit extends Cubit<HomeState> with GuardMixin, AnalyticsMixin {
 
         if (userProfile == null) {
           emit(const HomeShouldSetUpProfileState());
-          logEvent(
-            name: 'user_redirected_to_profile_setup',
-            parameters: {'userId': _firebaseAuth.currentUser!.uid},
-          );
+          logEvent(name: 'user_redirected_to_profile_setup');
           return;
         }
 
@@ -74,10 +68,7 @@ class HomeCubit extends Cubit<HomeState> with GuardMixin, AnalyticsMixin {
 
         if (userPartnership == null) {
           emit(const HomeShouldAddPartnerState());
-          logEvent(
-            name: 'user_redirected_to_add_partner',
-            parameters: {'user_id': _firebaseAuth.currentUser!.uid},
-          );
+          logEvent(name: 'user_redirected_to_add_partner');
           return;
         }
 
@@ -88,7 +79,6 @@ class HomeCubit extends Cubit<HomeState> with GuardMixin, AnalyticsMixin {
           logEvent(
             name: 'user_redirected_to_update_app',
             parameters: {
-              'user_id': _firebaseAuth.currentUser!.uid,
               'old_version': updateInfo.oldVersion,
               'new_version': updateInfo.newVersion,
             },
@@ -99,9 +89,9 @@ class HomeCubit extends Cubit<HomeState> with GuardMixin, AnalyticsMixin {
         logEvent(
           name: 'home_screen_loaded',
           parameters: {
-            'user_id': _firebaseAuth.currentUser!.uid,
             'has_partner': true,
             'has_cycle': userProfile.hasCycle,
+            'email_verified': _firebaseAuth.currentUser!.emailVerified,
           },
         );
       },
@@ -116,10 +106,7 @@ class HomeCubit extends Cubit<HomeState> with GuardMixin, AnalyticsMixin {
       () async {
         emit(const HomeLoadingState());
 
-        logEvent(
-          name: 'user_signed_out',
-          parameters: {'userId': _firebaseAuth.currentUser!.uid},
-        );
+        logEvent(name: 'user_signed_out');
 
         await Future.wait([
           _firebaseAuth.signOut(),

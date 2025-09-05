@@ -72,9 +72,9 @@ class CycleSetupCubit extends Cubit<CycleSetupState>
         logEvent(
           name: 'cycle_setup_completed',
           parameters: {
-            'user_id': _firebaseAuth.currentUser!.uid,
             'period_duration_days': periodDurationInDays,
             'sharing_with_partner': shouldShareWithPartner,
+            'has_partner': partnership != null,
           },
         );
       },
