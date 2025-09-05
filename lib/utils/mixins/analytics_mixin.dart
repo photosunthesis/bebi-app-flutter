@@ -28,14 +28,6 @@ mixin AnalyticsMixin {
     );
   }
 
-  void setUserProperty({required String name, required String value}) {
-    if (kIsTest || kDebugMode) return;
-
-    unawaited(
-      GetIt.I<FirebaseAnalytics>().setUserProperty(name: name, value: value),
-    );
-  }
-
   void logShare({
     required String method,
     required String contentType,
