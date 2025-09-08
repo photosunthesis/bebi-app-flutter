@@ -17,10 +17,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - uses: subosito/flutter-action@v2
+      - name: Prepare Flutter project
+        uses: ./.github/actions/flutter-prepare
         with:
-          flutter-version: 3.35.2 # Must be the same with the one in pubspec.yaml
-          cache: true
+          flutter_version: 3.35.3
+          firebase_project: bebi-app
+          firebase_platforms: none
 
       - name: Cache Flutter dependencies
         uses: actions/cache@v4
@@ -34,11 +36,6 @@ jobs:
 
       - name: Download dependencies
         run: flutter pub get
-
-      - name: Generate build runner files and localizations
-        run: |
-          flutter pub run build_runner build --delete-conflicting-outputs
-          flutter gen-l10n
 
       - name: Create firebase options stub
         run: |

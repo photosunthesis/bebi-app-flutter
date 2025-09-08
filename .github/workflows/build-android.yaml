@@ -22,13 +22,13 @@ jobs:
 
       - uses: actions/setup-java@v4
         with:
-          distribution: "zulu"
-          java-version: "17"
+          distribution: "temurin"
+          java-version: "21"
 
       - name: Prepare Flutter project
         uses: ./.github/actions/flutter-prepare
         with:
-          flutter_version: 3.35.2
+          flutter_version: 3.35.3
           firebase_project: bebi-app
           firebase_token: ${{ secrets.FIREBASE_CI_TOKEN }}
           firebase_platforms: android

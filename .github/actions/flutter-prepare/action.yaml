@@ -9,7 +9,7 @@ inputs:
     required: true
   firebase_token:
     description: Firebase CI token
-    required: true
+    required: false
   firebase_platforms:
     description: Platforms to configure for flutterfire (android,ios,web)
     required: true
@@ -48,6 +48,7 @@ runs:
           firebase-cli-${{ runner.os }}-
 
     - name: Configure firebase
+      if: ${{ inputs.firebase_token != '' && inputs.firebase_token != null }}
       shell: bash
       run: |
         if ! command -v firebase &> /dev/null; then
