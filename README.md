@@ -20,9 +20,9 @@ Clean architecture with feature-based organization:
 **Technologies:**
 - **State Management**: `flutter_bloc`
 - **Navigation**: `go_router` 
-- **Backend**: Firebase (Auth, Firestore, Storage, Analytics), Sentry
+- **Backend**: Firebase (Auth, Firestore, Storage, Analytics, Crashlytics)
 - **Local Storage**: `hive_ce_flutter`
-- **DI**: `get_it` + `injectable`
+- **Dependency Injection**: `get_it` + `injectable`
 - **AI**: `firebase_ai`
 
 **Structure:**
