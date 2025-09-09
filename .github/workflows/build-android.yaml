@@ -69,6 +69,12 @@ jobs:
           --build-number=${{ steps.build_number.outputs.number }} \
           --split-per-abi
 
+      - name: Upload debug symbols to Crashlytics
+        run: |
+          firebase crashlytics:symbols:upload \
+          --app=${{ secrets.FIREBASE_ANDROID_APP_ID }} \
+          build/app/outputs/symbols
+
       - name: Rename APK files with user-friendly names
         uses: ./.github/actions/rename-artifacts
         with:
