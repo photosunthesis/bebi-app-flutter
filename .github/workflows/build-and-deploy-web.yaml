@@ -47,12 +47,6 @@ jobs:
       - name: Build Web
         run: flutter build web --release --wasm --source-maps --build-number=${{ inputs.build_number || github.run_number }}
 
-      - name: Upload debug symbols to Sentry
-        shell: bash
-        run: flutter pub run sentry_dart_plugin
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:

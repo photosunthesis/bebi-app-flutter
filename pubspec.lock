@@ -489,30 +489,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.0"
-  firebase_remote_config:
+  firebase_crashlytics:
     dependency: "direct main"
     description:
-      name: firebase_remote_config
-      sha256: "5bb53899709f4b45495635d5e66f38b23ae00b115a5592d8328cc468f71ccc6c"
+      name: firebase_crashlytics
+      sha256: f2e175a967712ee1f616ab8843390891a315428ba497ce3d256d4c46f32db6f8
       url: "https://pub.dev"
     source: hosted
-    version: "6.0.1"
-  firebase_remote_config_platform_interface:
+    version: "5.0.1"
+  firebase_crashlytics_platform_interface:
     dependency: transitive
     description:
-      name: firebase_remote_config_platform_interface
-      sha256: d7d8ac26e2bdd01e30ccb7a22aedf3150288f72ce71d26697c14d2d5295a1871
+      name: firebase_crashlytics_platform_interface
+      sha256: b49b90af4a1fd8f30b58abd90af88371969bea51b62838a4f4e737c2098b725e
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.2"
-  firebase_remote_config_web:
-    dependency: transitive
-    description:
-      name: firebase_remote_config_web
-      sha256: "44e623ffcd7380b779d90f5a26c801d2ac913c57fa9f5a8f1fa4055ee2657516"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.8.11"
+    version: "3.8.12"
   firebase_storage:
     dependency: "direct main"
     description:
@@ -717,14 +709,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.3"
-  globbing:
-    dependency: transitive
-    description:
-      name: globbing
-      sha256: "4f89cfaf6fa74c9c1740a96259da06bd45411ede56744e28017cc534a12b6e2d"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.0"
   go_router:
     dependency: "direct main"
     description:
@@ -893,14 +877,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.8.1"
-  injector:
-    dependency: transitive
-    description:
-      name: injector
-      sha256: ed389bed5b48a699d5b9561c985023d0d5cc88dd5ff2237aadcce5a5ab433e4e
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.0"
   intl:
     dependency: "direct main"
     description:
@@ -925,14 +901,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.2+1"
-  jni:
-    dependency: transitive
-    description:
-      name: jni
-      sha256: d2c361082d554d4593c3012e26f6b188f902acd291330f13d6427641a92b3da1
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.14.2"
   js:
     dependency: transitive
     description:
@@ -1205,22 +1173,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.3"
-  process:
-    dependency: transitive
-    description:
-      name: process
-      sha256: c6248e4526673988586e8c00bb22a49210c258dc91df5227d5da9748ecf79744
-      url: "https://pub.dev"
-    source: hosted
-    version: "5.0.5"
-  properties:
-    dependency: transitive
-    description:
-      name: properties
-      sha256: "333f427dd4ed07bdbe8c75b9ff864a1e70b5d7a8426a2e8bdd457b65ae5ac598"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.1.1"
   provider:
     dependency: transitive
     description:
@@ -1261,30 +1213,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.28.0"
-  sentry:
-    dependency: transitive
-    description:
-      name: sentry
-      sha256: d9f3dcf1ecdd600cf9ce134f622383adde5423ecfdaf0ca9b20fbc1c44849337
-      url: "https://pub.dev"
-    source: hosted
-    version: "9.6.0"
-  sentry_dart_plugin:
-    dependency: "direct dev"
-    description:
-      name: sentry_dart_plugin
-      sha256: "8c0c9fe19368890381101f5000759b2ae203a0bf6158a25584b55d197e847f53"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.1.1"
-  sentry_flutter:
-    dependency: "direct main"
-    description:
-      name: sentry_flutter
-      sha256: "37deb4ef8837d10b5c1f527ec18591f8d2d2da9c34f19b3d97ccbbe7f84077c0"
-      url: "https://pub.dev"
-    source: hosted
-    version: "9.6.0"
   shelf:
     dependency: transitive
     description:
@@ -1498,14 +1426,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.4.0"
-  system_info2:
-    dependency: transitive
-    description:
-      name: system_info2
-      sha256: "65206bbef475217008b5827374767550a5420ce70a04d2d7e94d1d2253f3efc9"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.0.0"
   table_calendar:
     dependency: "direct main"
     description:

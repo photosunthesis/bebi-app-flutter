@@ -1,8 +1,9 @@
 import 'dart:async';
 
 import 'package:bebi_app/utils/platform/platform_utils.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:get_it/get_it.dart';
 
 mixin GuardMixin {
   FutureOr<T?> guard<T>(
@@ -20,7 +21,7 @@ mixin GuardMixin {
           (logWhen != null && !logWhen(e, s))) {
         debugPrint('Error caught by guard: $e\n$s');
       } else {
-        unawaited(Sentry.captureException(e, stackTrace: s));
+        unawaited(GetIt.I<FirebaseCrashlytics>().recordError(e, s));
       }
       onError?.call(e, s);
       return null;

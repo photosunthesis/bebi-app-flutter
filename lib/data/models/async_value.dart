@@ -2,8 +2,9 @@ import 'dart:async';
 
 import 'package:bebi_app/utils/platform/platform_utils_io.dart';
 import 'package:equatable/equatable.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:get_it/get_it.dart';
 
 sealed class AsyncValue<T> extends Equatable {
   const AsyncValue();
@@ -37,7 +38,7 @@ sealed class AsyncValue<T> extends Equatable {
       if ((kDebugMode && kIsTest) || disableLogging) {
         debugPrint('Error caught by guard: $err\n$stack');
       } else {
-        unawaited(Sentry.captureException(err, stackTrace: stack));
+        unawaited(GetIt.I<FirebaseCrashlytics>().recordError(err, stack));
       }
 
       return AsyncError(err, stack);

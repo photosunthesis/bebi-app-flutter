@@ -74,12 +74,6 @@ jobs:
         with:
           platform: android
 
-      - name: Upload debug symbols to Sentry
-        shell: bash
-        run: flutter pub run sentry_dart_plugin
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-
       - name: Upload Android build artifacts
         uses: actions/upload-artifact@v4
         with:
