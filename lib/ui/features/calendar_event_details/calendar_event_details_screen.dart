@@ -4,7 +4,7 @@ import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/data/models/repeat_rule.dart';
 import 'package:bebi_app/data/models/save_changes_dialog_options.dart';
 import 'package:bebi_app/ui/features/calendar_event_details/calendar_event_details_cubit.dart';
-import 'package:bebi_app/ui/features/calendar_event_details/widgets/delete_event_bottom_dialog.dart';
+import 'package:bebi_app/ui/features/calendar_event_details/components/delete_event_bottom_dialog.dart';
 import 'package:bebi_app/ui/shared_widgets/layouts/main_app_bar.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:bebi_app/utils/extensions/color_extensions.dart';

@@ -1,8 +1,8 @@
 import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/ui/features/calendar/calendar_cubit.dart';
-import 'package:bebi_app/ui/features/calendar/widgets/calendar.dart';
-import 'package:bebi_app/ui/features/calendar/widgets/calendar_events.dart';
+import 'package:bebi_app/ui/features/calendar/components/calendar.dart';
+import 'package:bebi_app/ui/features/calendar/components/calendar_events.dart';
 import 'package:bebi_app/ui/shared_widgets/layouts/main_app_bar.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
