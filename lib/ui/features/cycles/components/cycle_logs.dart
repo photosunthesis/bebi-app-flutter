@@ -46,7 +46,7 @@ class _CycleLogsState extends State<CycleLogs> {
   Widget _buildPeriodSection() {
     return BlocBuilder<CyclesCubit, CyclesState>(
       builder: (context, state) {
-        final periodLog = state.cycleLogs.map(
+        final periodLog = state.cycleLogs.maybeMap(
           data: (data) => data.firstWhereOrNull(
             (e) =>
                 e.type == LogType.period && e.date.isSameDay(state.focusedDate),
@@ -199,7 +199,7 @@ class _CycleLogsState extends State<CycleLogs> {
   }) {
     return BlocBuilder<CyclesCubit, CyclesState>(
       builder: (context, state) {
-        final log = state.cycleLogs.map(
+        final log = state.cycleLogs.maybeMap(
           data: (data) => data.firstWhereOrNull(
             (e) => e.type == logType && e.date.isSameDay(state.focusedDate),
           ),

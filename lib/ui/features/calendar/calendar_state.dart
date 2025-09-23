@@ -13,7 +13,7 @@ class CalendarState {
 
   List<CalendarEvent> get focusedDayEvents {
     return events
-        .map(data: (data) => data, orElse: () => <CalendarEvent>[])
+        .maybeMap(data: (data) => data, orElse: () => <CalendarEvent>[])
         .where((event) => event.startDate.isSameDay(focusedDay))
         .toList();
   }

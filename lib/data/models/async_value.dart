@@ -9,21 +9,39 @@ import 'package:get_it/get_it.dart';
 sealed class AsyncValue<T> extends Equatable {
   const AsyncValue();
 
-  R map<R>({
+  R maybeMap<R>({
     R Function()? loading,
     R Function(T value)? data,
-    R Function(Object? error)? error,
+    R Function(Object? error, StackTrace? stackTrace)? error,
     required R Function() orElse,
   }) {
     return switch (this) {
       AsyncLoading<T>() => loading?.call() ?? orElse(),
       AsyncData<T>(:final value) => data?.call(value) ?? orElse(),
-      AsyncError<T>() => error?.call((this as AsyncError<T>).error) ?? orElse(),
+      AsyncError<T>() =>
+        error?.call(
+              (this as AsyncError<T>).error,
+              (this as AsyncError<T>).stackTrace,
+            ) ??
+            orElse(),
     };
   }
 
+  R map<R>({
+    required R Function() loading,
+    required R Function(T value) data,
+    required R Function(Object? error, StackTrace? stackTrace) error,
+  }) {
+    return maybeMap(
+      loading: loading,
+      data: data,
+      error: (err, stack) => error(err, stack),
+      orElse: () => throw UnimplementedError(),
+    );
+  }
+
   T? asData() {
-    return map(data: (value) => value, orElse: () => null);
+    return maybeMap(data: (value) => value, orElse: () => null);
   }
 
   bool get isLoading => this is AsyncLoading<T>;

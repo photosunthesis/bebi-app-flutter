@@ -102,7 +102,7 @@ class CyclesCubit extends Cubit<CyclesState>
 
     emit(state.copyWith(insights: const AsyncLoading(), focusedDate: date));
 
-    final cycleLogs = state.cycleLogs.map(
+    final cycleLogs = state.cycleLogs.maybeMap(
       orElse: () => <CycleLog>[],
       data: (value) => value,
     );

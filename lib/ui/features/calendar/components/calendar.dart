@@ -32,7 +32,7 @@ class Calendar extends StatelessWidget {
           child: TableCalendar<CalendarEvent>(
             availableGestures: AvailableGestures.horizontalSwipe,
             focusedDay: state.focusedDay,
-            eventLoader: (day) => state.events.map(
+            eventLoader: (day) => state.events.maybeMap(
               data: (events) => events,
               orElse: () => <CalendarEvent>[],
             ),

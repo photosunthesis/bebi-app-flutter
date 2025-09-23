@@ -46,8 +46,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Widget build(BuildContext context) {
     return BlocConsumer<CalendarCubit, CalendarState>(
       listenWhen: (previous, current) => previous.events != current.events,
-      listener: (context, state) => state.events.map(
-        error: (error) =>
+      listener: (context, state) => state.events.maybeMap(
+        error: (error, _) =>
             context.showSnackbar(error.toString(), type: SnackbarType.error),
         orElse: () {},
       ),
