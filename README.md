@@ -13,7 +13,7 @@ A couples app I built for me and my girlfriend to keep track of things and share
 - 🌸 **Cycle Tracking**: Log menstruation events and symptoms, and access AI-powered insights.
 - 📍 **Location Sharing**: Optionally share location with your partner when it's useful (work-in-progress).
 
-## 🛠️ Architecture & Tech Stack
+## 🛠️ Project Structure & Tech Stack
 
 Clean architecture with feature-based organization:
 
@@ -25,24 +25,31 @@ Clean architecture with feature-based organization:
 - **Dependency Injection**: `get_it` + `injectable`
 - **AI**: `firebase_ai`
 
-**Structure:**
+**Project Structure:**
 ```
 / - Root
   ├── lib/                    # Main app code
+  │   ├── main.dart           # App entrypoint
+  │   ├── app/                # Routing, theming and top-level app wiring
+  │   │   ├── app.dart
+  │   │   └── router/         # Route definitions and helpers
+  │   │   └── theme/          # Colors & ThemeData
+  │   ├── config/             # DI, Firebase setup, generated configs
+  │   ├── constants/          # Asset names, fonts, ids, UI constants
+  │   ├── data/               # Data sources and repositories
+  │   │   ├── models/         # Data models
+  │   │   ├── repositories/   # Data repositories
+  │   │   └── services/       # Data services
+  │   ├── localizations/      # Generated/localization files
   │   ├── ui/                 # Features and shared widgets
-  │   │   ├── features/       # Individual app features (Home, Calendar, etc.)
-  │   │   └── shared_widgets/ # Reusable UI components
-  │   ├── data/               # Models, repositories, and business logic services
-  │   ├── app/                # Routing, theming, and configuration
-  │   ├── config/             # DI, Firebase setup, Hive boxes
-  │   └── utils/              # Extensions, formatters, analytics
+  │   │   ├── features/       # Feature folders (calendar, stories, profile...)
+  │   │   └── shared_widgets/ # Reusable UI components (forms, pickers...)
+  │   └── utils/              # Extensions, formatters, platform utils
   ├── assets/                 # Static assets like images and fonts
-  │   ├── app_logo/           # App logos for different platforms
-  │   └── fonts/              # Custom fonts
   ├── android/                # Android-specific code
   ├── ios/                    # iOS-specific code
   ├── web/                    # Web-specific code
-  └── test/                   # Unit and widget tests
+  └── test/                   # Tests
 ```
 
 ### 📝 License
