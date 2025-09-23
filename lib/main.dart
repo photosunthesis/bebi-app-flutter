@@ -6,10 +6,12 @@ import 'package:bebi_app/config/firebase_options.dart';
 import 'package:bebi_app/data/hive_adapters/calendar_event_adapter.dart';
 import 'package:bebi_app/data/hive_adapters/cycle_log_adapter.dart';
 import 'package:bebi_app/data/hive_adapters/repeat_rule_adapter.dart';
+import 'package:bebi_app/data/hive_adapters/story_adapter.dart';
 import 'package:bebi_app/data/hive_adapters/user_partnership_adapter.dart';
 import 'package:bebi_app/data/hive_adapters/user_profile_adapter.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/data/models/cycle_log.dart';
+import 'package:bebi_app/data/models/story.dart';
 import 'package:bebi_app/data/models/user_partnership.dart';
 import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:bebi_app/utils/platform/platform_utils.dart';
@@ -80,7 +82,8 @@ Future<void> _configureHive() async {
     ..registerAdapter(RepeatRuleAdapter())
     ..registerAdapter(CycleLogAdapter())
     ..registerAdapter(UserProfileAdapter())
-    ..registerAdapter(UserPartnershipAdapter());
+    ..registerAdapter(UserPartnershipAdapter())
+    ..registerAdapter(StoryAdapter());
 }
 
 Future<void> _clearLocalStorageOnNewVersion() async {
@@ -93,6 +96,7 @@ Future<void> _clearLocalStorageOnNewVersion() async {
     await GetIt.I<Box<UserProfile>>().clear();
     await GetIt.I<Box<UserPartnership>>().clear();
     await GetIt.I<Box<String>>().clear();
+    await GetIt.I<Box<Story>>().clear();
     await box.put('version', packageVersion);
   }
 }

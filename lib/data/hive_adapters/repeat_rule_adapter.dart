@@ -1,9 +1,10 @@
+import 'package:bebi_app/constants/type_adapter_ids.dart';
 import 'package:bebi_app/data/models/repeat_rule.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
 class RepeatRuleAdapter extends TypeAdapter<RepeatRule> {
   @override
-  final int typeId = 2;
+  final int typeId = TypeAdapterIds.repeatRule;
 
   @override
   RepeatRule read(BinaryReader reader) {

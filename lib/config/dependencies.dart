@@ -1,6 +1,7 @@
 import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/data/models/cycle_log.dart';
+import 'package:bebi_app/data/models/story.dart';
 import 'package:bebi_app/data/models/user_partnership.dart';
 import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:bebi_app/utils/extensions/int_extensions.dart';
@@ -96,4 +97,7 @@ abstract class Dependencies {
   @preResolve
   Future<Box<String>> get aiInsightsBox async =>
       Hive.openBox<String>('ai_insights');
+
+  @preResolve
+  Future<Box<Story>> get storyBox async => Hive.openBox<Story>('stories');
 }

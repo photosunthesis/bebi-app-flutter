@@ -8,7 +8,9 @@ environment:
   flutter: "^3.35.3"
 
 dependencies:
+  blurhash_ffi: ^1.2.7
   cached_network_image: ^3.4.1
+  camera: ^0.11.2
   cloud_firestore: ^6.0.0
   cupertino_icons: ^1.0.8
   dio: ^5.9.0
@@ -30,12 +32,14 @@ dependencies:
   get_it: ^8.2.0
   go_router: ^16.1.0
   hive_ce_flutter: ^2.3.1
+  image: ^4.5.4
   image_picker: ^1.1.2
   injectable: ^2.5.1
   intl: ^0.20.2
   material_symbols_icons: ^4.2815.1
   package_info_plus: ^8.3.1
   paged_vertical_calendar: ^1.1.10
+  path_provider: ^2.1.5
   skeletonizer: ^2.1.0+1
   super_editor: ^0.3.0-dev.29
   super_editor_markdown: ^0.2.0

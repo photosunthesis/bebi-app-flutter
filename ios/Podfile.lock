@@ -1192,12 +1192,16 @@ PODS:
     - GoogleUtilities/Environment (~> 8.0)
     - GoogleUtilities/UserDefaults (~> 8.0)
     - PromisesObjC (~> 2.4)
+  - blurhash_ffi (0.0.1):
+    - Flutter
   - BoringSSL-GRPC (0.0.37):
     - BoringSSL-GRPC/Implementation (= 0.0.37)
     - BoringSSL-GRPC/Interface (= 0.0.37)
   - BoringSSL-GRPC/Implementation (0.0.37):
     - BoringSSL-GRPC/Interface (= 0.0.37)
   - BoringSSL-GRPC/Interface (0.0.37)
+  - camera_avfoundation (0.0.1):
+    - Flutter
   - cloud_firestore (6.0.1):
     - Firebase/Firestore (= 12.2.0)
     - firebase_core
@@ -1517,6 +1521,8 @@ PODS:
     - Flutter
 
 DEPENDENCIES:
+  - blurhash_ffi (from `.symlinks/plugins/blurhash_ffi/ios`)
+  - camera_avfoundation (from `.symlinks/plugins/camera_avfoundation/ios`)
   - cloud_firestore (from `.symlinks/plugins/cloud_firestore/ios`)
   - firebase_analytics (from `.symlinks/plugins/firebase_analytics/ios`)
   - firebase_app_check (from `.symlinks/plugins/firebase_app_check/ios`)
@@ -1571,6 +1577,10 @@ SPEC REPOS:
     - RecaptchaInterop
 
 EXTERNAL SOURCES:
+  blurhash_ffi:
+    :path: ".symlinks/plugins/blurhash_ffi/ios"
+  camera_avfoundation:
+    :path: ".symlinks/plugins/camera_avfoundation/ios"
   cloud_firestore:
     :path: ".symlinks/plugins/cloud_firestore/ios"
   firebase_analytics:
@@ -1609,7 +1619,9 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   abseil: a05cc83bf02079535e17169a73c5be5ba47f714b
   AppCheckCore: cc8fd0a3a230ddd401f326489c99990b013f0c4f
+  blurhash_ffi: 87aab623d744d4d6cd6057d285bd2258df904786
   BoringSSL-GRPC: dded2a44897e45f28f08ae87a55ee4bcd19bc508
+  camera_avfoundation: be3be85408cd4126f250386828e9b1dfa40ab436
   cloud_firestore: 15f49a9d824f4173238f15c2616dfc20ff9a0d0d
   Firebase: 26f6f8d460603af3df970ad505b16b15f5e2e9a1
   firebase_analytics: 111ff65791a430356bd6c7e4d7339537fc6a15ae

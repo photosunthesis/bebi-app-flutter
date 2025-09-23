@@ -28,6 +28,8 @@ import 'package:bebi_app/ui/features/profile_setup/profile_setup_cubit.dart';
 import 'package:bebi_app/ui/features/profile_setup/profile_setup_screen.dart';
 import 'package:bebi_app/ui/features/sign_in/sign_in_cubit.dart';
 import 'package:bebi_app/ui/features/sign_in/sign_in_screen.dart';
+import 'package:bebi_app/ui/features/stories/stories_cubit.dart';
+import 'package:bebi_app/ui/features/stories/stories_screen.dart';
 import 'package:bebi_app/ui/features/update_password/update_password_cubit.dart';
 import 'package:bebi_app/ui/features/update_password/update_password_screen.dart';
 import 'package:bebi_app/ui/shared_widgets/layouts/main_scaffold.dart';
@@ -113,11 +115,12 @@ abstract class AppRouter {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                // TODO
                 path: '/stories',
                 name: AppRoutes.stories,
-                builder: (_, _) =>
-                    const Scaffold(body: Center(child: Text('Stories Screen'))),
+                builder: (_, _) => BlocProvider(
+                  create: (context) => GetIt.I<StoriesCubit>(),
+                  child: const StoriesScreen(),
+                ),
               ),
             ],
           ),
