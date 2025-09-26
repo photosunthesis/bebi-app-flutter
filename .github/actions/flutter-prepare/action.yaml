@@ -40,7 +40,6 @@ runs:
       uses: actions/cache@v4
       with:
         path: |
-          ~/.cache/firebase
           ~/.pub-cache/bin
           ~/.pub-cache/global_packages
         key: firebase-cli-${{ runner.os }}-v1
