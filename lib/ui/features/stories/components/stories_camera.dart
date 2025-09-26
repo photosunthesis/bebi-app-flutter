@@ -1,13 +1,14 @@
+import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/ui/features/stories/stories_cubit.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:bebi_app/utils/extensions/int_extensions.dart';
 import 'package:bebi_app/utils/mixins/guard_mixin.dart';
-import 'package:bebi_app/utils/platform/platform_utils.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
@@ -18,11 +19,10 @@ class StoriesCamera extends StatefulWidget {
   State<StoriesCamera> createState() => _StoriesCameraState();
 }
 
-class _StoriesCameraState extends State<StoriesCamera> with GuardMixin {
+class _StoriesCameraState extends State<StoriesCamera>
+    with GuardMixin, SingleTickerProviderStateMixin {
   static const _minZoom = 1.0;
   static const _maxZoom = 10.0;
-  static const _ultrawideThreshold = 0.75;
-  static const _ultrawideDisplayZoom = 0.5;
 
   final _minZooms = <int, double>{};
   final _maxZooms = <int, double>{};
@@ -34,21 +34,38 @@ class _StoriesCameraState extends State<StoriesCamera> with GuardMixin {
   CameraController? _cameraController;
   int _currentCameraIndex = 0;
   double _currentZoom = _minZoom;
-  bool _useFlash = false;
   double _baseZoom = _minZoom;
+  bool _useFlash = false;
   bool _captureInProgress = false;
   bool _switchingCamera = false;
-  int? _primaryBackIndex;
-  int? _ultrawideBackIndex;
+  // Tap-to-focus overlay state
+  Offset? _focusOffset;
+  AnimationController? _focusController;
+  Timer? _focusHideTimer;
+  Timer? _focusUnlockTimer;
+  bool _isManualFocusActive = false;
 
   @override
   void initState() {
     super.initState();
     _initializeCamera();
+    _focusController = AnimationController(
+      vsync: this,
+      duration: 200.milliseconds,
+    );
+
+    _focusController!.addStatusListener((status) {
+      if (status == AnimationStatus.dismissed) {
+        setState(() => _focusOffset = null);
+      }
+    });
   }
 
   @override
   void dispose() {
+    _focusHideTimer?.cancel();
+    _focusUnlockTimer?.cancel();
+    _focusController?.dispose();
     _disposePendingControllers();
     _disposeCurrentController();
     super.dispose();
@@ -80,7 +97,15 @@ class _StoriesCameraState extends State<StoriesCamera> with GuardMixin {
             duration: 300.milliseconds,
             switchInCurve: Curves.easeIn,
             switchOutCurve: Curves.easeOut,
-            child: _buildCameraContent(),
+            child: BlocBuilder<StoriesCubit, StoriesState>(
+              builder: (context, state) {
+                if (state.image != null) {
+                  return _buildCapturedImagePreview(state.image!);
+                }
+
+                return _buildCameraPreviewOrPlaceholder();
+              },
+            ),
           ),
         ),
       ),
@@ -98,17 +123,6 @@ class _StoriesCameraState extends State<StoriesCamera> with GuardMixin {
     );
   }
 
-  Widget _buildCameraContent() {
-    return BlocBuilder<StoriesCubit, StoriesState>(
-      builder: (context, state) {
-        if (state.image != null) {
-          return _buildCapturedImagePreview(state.image!);
-        }
-        return _buildCameraPreviewOrPlaceholder();
-      },
-    );
-  }
-
   Widget _buildCameraPreviewOrPlaceholder() {
     return Builder(
       key: ValueKey(_cameraController?.value.isInitialized ?? false),
@@ -116,6 +130,7 @@ class _StoriesCameraState extends State<StoriesCamera> with GuardMixin {
         if (!_isCameraReady()) {
           return _buildCameraPlaceholder();
         }
+
         return _buildCameraPreviewWithController();
       },
     );
@@ -141,6 +156,7 @@ class _StoriesCameraState extends State<StoriesCamera> with GuardMixin {
         if (state.image != null) {
           return const SizedBox(width: 48);
         }
+
         return IconButton(
           onPressed: _toggleFlash,
           icon: Icon(_useFlash ? Symbols.flash_off : Symbols.flash_on),
@@ -172,9 +188,7 @@ class _StoriesCameraState extends State<StoriesCamera> with GuardMixin {
           );
         }
         return IconButton(
-          onPressed: _canSwitchCamera() && !_switchingCamera
-              ? _switchCamera
-              : null,
+          onPressed: _canSwitchCamera() ? _switchCamera : null,
           icon: const Icon(Symbols.flip_camera_ios),
           iconSize: 32,
           color: context.colorScheme.onSurface,
@@ -218,12 +232,15 @@ class _StoriesCameraState extends State<StoriesCamera> with GuardMixin {
       future: file.readAsBytes(),
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done ||
-            snapshot.hasError ||
             !snapshot.hasData) {
-          return _buildCameraPlaceholder();
+          return _buildCameraPreviewWithController();
         }
+
+        if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        }
+
         return SizedBox.expand(
-          key: const ValueKey('captured_image'),
           child: Image.memory(snapshot.data!, fit: BoxFit.cover),
         );
       },
@@ -232,33 +249,143 @@ class _StoriesCameraState extends State<StoriesCamera> with GuardMixin {
 
   Widget _buildCameraPlaceholder() {
     return ColoredBox(
-      key: const ValueKey('camera_placeholder'),
       color: context.colorScheme.secondary.withAlpha(100),
       child: const Center(child: CircularProgressIndicator.adaptive()),
     );
   }
 
   Widget _buildCameraPreviewWithController() {
-    return GestureDetector(
-      key: const ValueKey('camera_preview'),
-      onScaleStart: _handleScaleStart,
-      onScaleUpdate: _handleScaleUpdate,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [_buildCameraPreview(), _buildZoomIndicator()],
+    return Builder(
+      builder: (context) {
+        return GestureDetector(
+          onScaleStart: _handleScaleStart,
+          onScaleUpdate: _handleScaleUpdate,
+          onTapDown: (details) async {
+            final box = context.findRenderObject() as RenderBox;
+            final offset = box.globalToLocal(details.globalPosition);
+            final size = box.size;
+            final dx = offset.dx / size.width;
+            final dy = offset.dy / size.height;
+
+            await guard(() async {
+              // Cancel any existing timers and stop any running animations
+              _focusHideTimer?.cancel();
+              _focusUnlockTimer?.cancel();
+              _focusController?.stop();
+              _focusController?.reset();
+
+              // If we're currently in manual focus, reset to auto first
+              if (_isManualFocusActive) {
+                await _cameraController?.setFocusMode(FocusMode.auto);
+                await Future.delayed(100.milliseconds);
+              }
+
+              // Clear the old focus indicator immediately
+              setState(() {
+                _focusOffset = null;
+                _isManualFocusActive = false;
+              });
+
+              // Small delay to ensure the UI updates
+              await Future.delayed(1.milliseconds);
+
+              // Set focus and exposure points
+              await _cameraController?.setFocusPoint(Offset(dx, dy));
+              await _cameraController?.setExposurePoint(Offset(dx, dy));
+              await _cameraController?.setFocusMode(FocusMode.locked);
+
+              // Show new focus indicator at the tapped position
+              setState(() {
+                _focusOffset = offset;
+                _isManualFocusActive = true;
+              });
+
+              // Start the animation
+              await _focusController?.forward();
+
+              // Timer to hide the ring after 4 seconds
+              _focusHideTimer = Timer(4.seconds, () async {
+                if (_isManualFocusActive) {
+                  await _focusController?.reverse();
+                }
+              });
+
+              // Timer to unlock focus after 8 seconds total
+              _focusUnlockTimer = Timer(8.seconds, () async {
+                if (_isManualFocusActive) {
+                  await guard(() async {
+                    await _cameraController?.setFocusMode(FocusMode.auto);
+                    setState(() => _isManualFocusActive = false);
+                  });
+                }
+              });
+            });
+          },
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              _buildCameraPreview(),
+              _buildFocusIndicator(),
+              _buildZoomIndicator(),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildFocusIndicator() {
+    if (_focusOffset == null || _focusController == null) {
+      return const SizedBox.shrink();
+    }
+
+    final animation = CurvedAnimation(
+      parent: _focusController!,
+      curve: Curves.easeOut,
+    );
+    final scaleAnimation = Tween<double>(
+      begin: 1.1,
+      end: 1.0,
+    ).animate(animation);
+
+    const ringSize = 60.0;
+
+    final left = _focusOffset!.dx - ringSize / 2;
+    final top = _focusOffset!.dy - ringSize / 2;
+
+    return Positioned(
+      left: left,
+      top: top,
+      width: ringSize,
+      height: ringSize,
+      child: IgnorePointer(
+        child: FadeTransition(
+          opacity: animation,
+          child: ScaleTransition(
+            scale: scaleAnimation,
+            child: CustomPaint(
+              size: const Size.square(ringSize),
+              painter: _FocusRingPainter(
+                ringColor: context.colorScheme.onPrimary,
+                ringWidth: 2.0,
+                shadowWidth: 8.0,
+                shadowColor: context.colorScheme.shadow.withAlpha(10),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
 
   Widget _buildCameraPreview() {
-    final controller = _cameraController!;
     return ClipRect(
       child: FittedBox(
         fit: BoxFit.cover,
         child: SizedBox(
-          width: controller.value.previewSize!.height,
-          height: controller.value.previewSize!.width,
-          child: CameraPreview(controller),
+          width: _cameraController!.value.previewSize!.height,
+          height: _cameraController!.value.previewSize!.width,
+          child: CameraPreview(_cameraController!),
         ),
       ),
     );
@@ -275,7 +402,7 @@ class _StoriesCameraState extends State<StoriesCamera> with GuardMixin {
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
-          '${_displayZoom.toStringAsFixed(1)}x',
+          '${_currentZoom.toStringAsFixed(1)}x',
           style: context.textTheme.bodySmall?.copyWith(
             color: context.colorScheme.onSurface,
             fontWeight: FontWeight.w600,
@@ -286,26 +413,18 @@ class _StoriesCameraState extends State<StoriesCamera> with GuardMixin {
   }
 
   void _handleScaleStart(ScaleStartDetails details) {
+    if (_captureInProgress) return;
     _baseZoom = _currentZoom;
   }
 
   Future<void> _handleScaleUpdate(ScaleUpdateDetails details) async {
+    if (_captureInProgress) return;
     await guard(() async {
-      // Use the raw (unclamped) zoom value to decide camera switching so we
-      // can detect values < 1.0 and switch to the ultrawide when appropriate.
+      // Apply pinch-to-zoom using base zoom and scale. Clamp using known
+      // device limits (if available) or overall min/max.
       final rawNewZoom = _baseZoom * details.scale;
-
-      if (_shouldSwitchToUltrawide(rawNewZoom)) {
-        await _switchToUltrawideCamera();
-      } else if (_shouldSwitchToPrimary(rawNewZoom)) {
-        // When switching back to primary, pass the raw value so the target
-        // zoom can be applied after switching. The setter will clamp it.
-        await _switchToPrimaryCamera(rawNewZoom);
-      } else {
-        // Clamp before applying to the controller to respect device limits.
-        final newZoom = rawNewZoom.clamp(_minZoom, _maxZoom);
-        await _setZoomLevel(newZoom);
-      }
+      final newZoom = rawNewZoom.clamp(_minZoom, _maxZoom);
+      await _setZoomLevel(newZoom);
     });
   }
 
@@ -319,20 +438,8 @@ class _StoriesCameraState extends State<StoriesCamera> with GuardMixin {
   Future<void> _initializeCamera() async {
     await guard(() async {
       _cameras = await availableCameras();
-
-      if (_cameras?.isNotEmpty == true) {
-        // First camera is usually the primary back
-        _primaryBackIndex = 0;
-
-        // If there's more than one camera, assume the last is ultrawide back
-        _ultrawideBackIndex = _cameras!.length > 1
-            ? _cameras!.length - 1
-            : null;
-
-        _currentCameraIndex = _primaryBackIndex ?? 0;
-
-        await _createControllerForIndex(_currentCameraIndex);
-      }
+      _currentCameraIndex = 0;
+      await _createControllerForIndex(_currentCameraIndex);
       setState(() {});
     }, onError: _handleError);
   }
@@ -341,10 +448,12 @@ class _StoriesCameraState extends State<StoriesCamera> with GuardMixin {
     await _disposeCurrentControllerAsync();
 
     final desc = _cameras![index];
+
     final controller = CameraController(
       desc,
-      ResolutionPreset.high,
+      ResolutionPreset.veryHigh,
       enableAudio: false,
+      imageFormatGroup: ImageFormatGroup.jpeg,
     );
 
     _cameraController = controller;
@@ -385,46 +494,23 @@ class _StoriesCameraState extends State<StoriesCamera> with GuardMixin {
   }
 
   Future<void> _updateZoomLimits(CameraController controller, int index) async {
-    try {
-      final min = await controller.getMinZoomLevel();
-      final max = await controller.getMaxZoomLevel();
-      _minZooms[index] = min;
-      _maxZooms[index] = max;
-    } catch (_) {}
+    final min = await controller.getMinZoomLevel();
+    final max = await controller.getMaxZoomLevel();
+    _minZooms[index] = min;
+    _maxZooms[index] = max;
   }
 
   Future<void> _switchCamera() async {
     if (!_canSwitchCamera() || _switchingCamera) return;
     _switchingCamera = true;
-    final newIndex = (_currentCameraIndex + 1) % _cameras!.length;
-    await _switchToCameraIndex(newIndex);
+
+    if (_cameras == null || _cameras!.length < 2) {
+      _switchingCamera = false;
+      return;
+    }
+
+    await _createControllerForIndex(_currentCameraIndex == 0 ? 1 : 0);
     _switchingCamera = false;
-  }
-
-  Future<void> _switchToCameraIndex(int index) async {
-    if (_cameras?.isEmpty != false) return;
-    final normalized = index % _cameras!.length;
-    await _createControllerForIndex(normalized);
-  }
-
-  Future<void> _switchToUltrawideCamera() async {
-    if (_ultrawideBackIndex == null ||
-        _currentCameraIndex == _ultrawideBackIndex) {
-      return;
-    }
-
-    await _switchToCameraIndex(_ultrawideBackIndex!);
-    final targetZoom = _minZooms[_ultrawideBackIndex!] ?? _ultrawideDisplayZoom;
-    await _setZoomLevel(targetZoom);
-  }
-
-  Future<void> _switchToPrimaryCamera(double newZoom) async {
-    if (_primaryBackIndex == null || _currentCameraIndex == _primaryBackIndex) {
-      return;
-    }
-
-    await _switchToCameraIndex(_primaryBackIndex!);
-    await _setZoomLevel(newZoom);
   }
 
   Future<void> _setZoomLevel(double zoom) async {
@@ -471,6 +557,7 @@ class _StoriesCameraState extends State<StoriesCamera> with GuardMixin {
     if (_shouldUseFrontFlash()) {
       return await _captureWithFrontFlash();
     }
+
     return await _cameraController!.takePicture();
   }
 
@@ -485,20 +572,15 @@ class _StoriesCameraState extends State<StoriesCamera> with GuardMixin {
   }
 
   Future<XFile?> _tryFlashMode(FlashMode mode) async {
-    try {
-      await _cameraController!.setFlashMode(mode);
+    await _cameraController!.setFlashMode(mode);
 
-      if (mode == FlashMode.torch) {
-        await Future.delayed(100.milliseconds);
-      }
-
-      final image = await _cameraController!.takePicture();
-      await _safelySetFlashMode(_cameraController!, FlashMode.off);
-      return image;
-    } catch (_) {
-      await _safelySetFlashMode(_cameraController!, FlashMode.off);
-      return null;
+    if (mode == FlashMode.torch) {
+      await Future.delayed(100.milliseconds);
     }
+
+    final image = await _cameraController!.takePicture();
+    await _safelySetFlashMode(_cameraController!, FlashMode.off);
+    return image;
   }
 
   Future<XFile> _captureWithScreenFlash() async {
@@ -522,7 +604,9 @@ class _StoriesCameraState extends State<StoriesCamera> with GuardMixin {
   }
 
   bool _canSwitchCamera() {
-    return (_cameras?.length ?? 0) > 1;
+    return (_cameras?.length ?? 0) > 1 &&
+        !_switchingCamera &&
+        !_captureInProgress;
   }
 
   bool _isBackCamera() {
@@ -536,70 +620,76 @@ class _StoriesCameraState extends State<StoriesCamera> with GuardMixin {
             CameraLensDirection.front;
   }
 
-  bool _shouldSwitchToUltrawide(double newZoom) {
-    return newZoom <= _ultrawideThreshold &&
-        _ultrawideBackIndex != null &&
-        _currentCameraIndex != _ultrawideBackIndex;
-  }
-
-  bool _shouldSwitchToPrimary(double newZoom) {
-    return newZoom > _ultrawideThreshold &&
-        _primaryBackIndex != null &&
-        _currentCameraIndex != _primaryBackIndex;
-  }
-
-  double get _displayZoom {
-    if (_cameras?.isEmpty != false) return _currentZoom;
-
-    if (_isUltrawideCamera) {
-      return _calculateUltrawideDisplayZoom();
-    }
-
-    return _currentZoom;
-  }
-
-  bool get _isUltrawideCamera {
-    return _ultrawideBackIndex != null &&
-        _currentCameraIndex == _ultrawideBackIndex;
-  }
-
-  double _calculateUltrawideDisplayZoom() {
-    // TODO Improve this calculation
-    return kIsAndroid ? 0.6 : 0.5;
-  }
-
   void _disposePendingControllers() {
     for (final controller in _pendingDisposals) {
-      try {
-        controller.dispose();
-      } catch (_) {}
+      controller.dispose();
     }
+
     _pendingDisposals.clear();
   }
 
   void _disposeCurrentController() {
-    try {
-      _cameraController?.dispose();
-    } catch (_) {}
+    _cameraController?.dispose();
   }
 
   Future<void> _safelyDisposeController(CameraController controller) async {
-    try {
-      await controller.setFlashMode(FlashMode.off);
-      await controller.dispose();
-    } catch (_) {}
+    await controller.setFlashMode(FlashMode.off);
+    await controller.dispose();
   }
 
   Future<void> _safelySetFlashMode(
     CameraController controller,
     FlashMode mode,
   ) async {
-    try {
-      await controller.setFlashMode(mode);
-    } catch (_) {}
+    await controller.setFlashMode(mode);
   }
 
   void _handleError(Object error, StackTrace stackTrace) {
     context.showSnackbar(error.toString());
+  }
+}
+
+class _FocusRingPainter extends CustomPainter {
+  _FocusRingPainter({
+    required this.ringColor,
+    required this.ringWidth,
+    required this.shadowWidth,
+    required this.shadowColor,
+  });
+
+  final Color ringColor;
+  final double ringWidth;
+  final double shadowWidth;
+  final Color shadowColor;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (math.min(size.width, size.height) - ringWidth) / 2;
+
+    // Shadow stroke (blurred stroked circle) to create a ring-shaped shadow.
+    final shadowPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = ringWidth + shadowWidth
+      ..color = shadowColor
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, shadowWidth);
+
+    canvas.drawCircle(center, radius, shadowPaint);
+
+    // Foreground ring stroke
+    final ringPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = ringWidth
+      ..color = ringColor;
+
+    canvas.drawCircle(center, radius, ringPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _FocusRingPainter oldDelegate) {
+    return oldDelegate.ringColor != ringColor ||
+        oldDelegate.ringWidth != ringWidth ||
+        oldDelegate.shadowWidth != shadowWidth ||
+        oldDelegate.shadowColor != shadowColor;
   }
 }
