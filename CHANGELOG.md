@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.7] - 2025-09-24
+
+### Changed
+
+- Updated Flutter version to 3.35.4 🚀
+
 ## [0.4.6] - 2025-09-05
 
 ### Changed
