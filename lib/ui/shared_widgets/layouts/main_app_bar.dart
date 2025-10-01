@@ -12,7 +12,7 @@ abstract class MainAppBar {
     bool autoImplementLeading = true,
     Widget? flexibleSpace,
     PreferredSize? bottom,
-    double? toolbarHeight,
+    double toolbarHeight = 48,
   }) {
     return AppBar(
       automaticallyImplyLeading: autoImplementLeading,
@@ -35,7 +35,7 @@ abstract class MainAppBar {
             ),
           ),
       flexibleSpace: flexibleSpace,
-      toolbarHeight: toolbarHeight ?? kToolbarHeight,
+      toolbarHeight: toolbarHeight,
     );
   }
 }
