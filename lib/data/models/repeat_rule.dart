@@ -45,7 +45,6 @@ class RepeatRule extends Equatable {
 
   RepeatRule copyWith({
     RepeatFrequency? frequency,
-    DateTime? endDate,
     int? occurrences,
     List<DateTime>? excludedDates,
   }) {

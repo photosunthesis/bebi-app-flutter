@@ -9,7 +9,12 @@ class ProfileSetupLoadingState extends ProfileSetupState {
 }
 
 class ProfileSetupLoadedState extends ProfileSetupState {
-  const ProfileSetupLoadedState({this.photo, this.displayName, this.birthDate, this.userIsLoggedIn = false});
+  const ProfileSetupLoadedState({
+    this.photo,
+    this.displayName,
+    this.birthDate,
+    this.userIsLoggedIn = false,
+  });
   final String? photo;
   final String? displayName;
   final DateTime? birthDate;

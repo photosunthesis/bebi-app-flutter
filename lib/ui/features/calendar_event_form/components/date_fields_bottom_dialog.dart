@@ -13,7 +13,7 @@ class DateFieldsBottomDialog<T> extends StatefulWidget {
     super.key,
     required this.startDate,
     required this.onStartDateChanged,
-    required this.endDate,
+    this.endDate,
     required this.onEndDateChanged,
     required this.repeatRule,
     required this.onRepeatRuleChanged,
@@ -23,8 +23,8 @@ class DateFieldsBottomDialog<T> extends StatefulWidget {
 
   final DateTime startDate;
   final ValueChanged<DateTime> onStartDateChanged;
-  final DateTime endDate;
-  final ValueChanged<DateTime> onEndDateChanged;
+  final DateTime? endDate;
+  final ValueChanged<DateTime?> onEndDateChanged;
   final RepeatRule repeatRule;
   final ValueChanged<RepeatRule> onRepeatRuleChanged;
   final bool allDay;
@@ -34,8 +34,8 @@ class DateFieldsBottomDialog<T> extends StatefulWidget {
     BuildContext context, {
     required DateTime startDate,
     required ValueChanged<DateTime> onStartDateChanged,
-    required DateTime endDate,
-    required ValueChanged<DateTime> onEndDateChanged,
+    DateTime? endDate,
+    required ValueChanged<DateTime?> onEndDateChanged,
     required RepeatRule repeatRule,
     required ValueChanged<RepeatRule> onRepeatRuleChanged,
     required bool allDay,
@@ -70,6 +70,8 @@ class DateFieldsBottomDialog<T> extends StatefulWidget {
 class _DateFieldsBottomDialogState<T> extends State<DateFieldsBottomDialog<T>> {
   late RepeatFrequency _repeatFrequency = widget.repeatRule.frequency;
   late bool _allDay = widget.allDay;
+
+  late bool _endRepeat = widget.endDate != null;
   String? _activePickerId;
 
   void _onPickerStateChanged(String pickerId, bool isOpen) {
@@ -144,11 +146,9 @@ class _DateFieldsBottomDialogState<T> extends State<DateFieldsBottomDialog<T>> {
           _buildStartDatePicker(),
           _buildDivider(),
           ..._buildEndDatePicker(),
+          ..._buildRepeatSection(),
+          ..._buildEndRepeatOnDateToggle(),
           ..._buildRepeatUntilPicker(),
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: _buildRepeatSection(),
-          ),
         ],
       ),
     );
@@ -193,54 +193,60 @@ class _DateFieldsBottomDialogState<T> extends State<DateFieldsBottomDialog<T>> {
     );
   }
 
-  Widget _buildRepeatSection() {
-    return Row(
-      children: [
-        Text(context.l10n.repeats, style: context.textTheme.bodyMedium),
-        const Spacer(),
-        PopupMenuButton<RepeatFrequency>(
-          initialValue: _repeatFrequency,
-          splashRadius: 0,
-          color: context.colorScheme.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: UiConstants.borderRadius,
-            side: BorderSide(
-              color: context.colorScheme.outline,
-              width: UiConstants.borderWidth,
-            ),
-          ),
-          onSelected: (value) {
-            setState(() => _repeatFrequency = value);
-            widget.onRepeatRuleChanged(
-              widget.repeatRule.copyWith(frequency: value),
-            );
-          },
-          elevation: 0,
-          itemBuilder: (context) => RepeatFrequency.values
-              .map(
-                (e) => PopupMenuItem(
-                  value: e,
-                  height: 36,
-                  padding: const EdgeInsets.only(left: 12, right: 8),
-                  child: Text(
-                    e.label,
-                    style: context.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+  List<Widget> _buildRepeatSection() {
+    return [
+      Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            Text(context.l10n.repeats, style: context.textTheme.bodyMedium),
+            const Spacer(),
+            PopupMenuButton<RepeatFrequency>(
+              initialValue: _repeatFrequency,
+              splashRadius: 0,
+              color: context.colorScheme.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: UiConstants.borderRadius,
+                side: BorderSide(
+                  color: context.colorScheme.outline,
+                  width: UiConstants.borderWidth,
                 ),
-              )
-              .toList(),
-          child: Text(
-            _repeatFrequency.label,
-            style: context.textTheme.bodyMedium!.copyWith(
-              fontWeight: FontWeight.w500,
+              ),
+              onSelected: (value) {
+                setState(() => _repeatFrequency = value);
+                widget.onRepeatRuleChanged(
+                  widget.repeatRule.copyWith(frequency: value),
+                );
+              },
+              elevation: 0,
+              itemBuilder: (context) => RepeatFrequency.values
+                  .map(
+                    (e) => PopupMenuItem(
+                      value: e,
+                      height: 36,
+                      padding: const EdgeInsets.only(left: 12, right: 8),
+                      child: Text(
+                        e.label,
+                        style: context.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(),
+              child: Text(
+                _repeatFrequency.label,
+                style: context.textTheme.bodyMedium!.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
-          ),
+            const Icon(Symbols.keyboard_arrow_down),
+          ],
         ),
-        const Icon(Symbols.keyboard_arrow_down),
-      ],
-    );
+      ),
+      _buildDivider(),
+    ];
   }
 
   Widget _buildStartDatePicker() {
@@ -262,7 +268,7 @@ class _DateFieldsBottomDialogState<T> extends State<DateFieldsBottomDialog<T>> {
     return [
       AppDateTimePicker(
         label: context.l10n.endDateHint,
-        value: widget.endDate,
+        value: widget.endDate ?? widget.startDate.add(1.hours),
         onChanged: widget.onEndDateChanged,
         onPickerStateChanged: (isOpen) =>
             _onPickerStateChanged(pickerId, isOpen),
@@ -273,18 +279,57 @@ class _DateFieldsBottomDialogState<T> extends State<DateFieldsBottomDialog<T>> {
   }
 
   List<Widget> _buildRepeatUntilPicker() {
-    if (_repeatFrequency == RepeatFrequency.doNotRepeat || !_allDay) return [];
+    if (_repeatFrequency == RepeatFrequency.doNotRepeat || !_endRepeat) {
+      return [];
+    }
 
     const pickerId = 'repeat_until';
     return [
       AppDateTimePicker(
         label: context.l10n.repeatUntil,
-        value: widget.endDate,
+        value:
+            widget.endDate ??
+            (_allDay
+                ? widget.startDate.add(1.days)
+                : widget.startDate.add(1.hours)),
         onChanged: widget.onEndDateChanged,
-        allDay: true,
+        allDay: _allDay,
         onPickerStateChanged: (isOpen) =>
             _onPickerStateChanged(pickerId, isOpen),
         forceClose: _activePickerId != null && _activePickerId != pickerId,
+      ),
+      _buildDivider(),
+    ];
+  }
+
+  List<Widget> _buildEndRepeatOnDateToggle() {
+    if (_repeatFrequency == RepeatFrequency.doNotRepeat) return [];
+    return [
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(context.l10n.endRepeat, style: context.textTheme.bodyMedium),
+            AppSwitch(
+              value: _endRepeat,
+              onChanged: (value) {
+                setState(() => _endRepeat = value);
+                if (_endRepeat) {
+                  // If no end date exists yet, provide a sensible default
+                  final defaultEnd =
+                      widget.endDate ??
+                      (_allDay
+                          ? widget.startDate.add(1.days)
+                          : widget.startDate.add(1.hours));
+                  widget.onEndDateChanged(defaultEnd);
+                } else {
+                  widget.onEndDateChanged(null);
+                }
+              },
+            ),
+          ],
+        ),
       ),
       _buildDivider(),
     ];

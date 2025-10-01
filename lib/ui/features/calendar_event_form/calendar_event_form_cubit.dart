@@ -85,8 +85,8 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
     emit(state.copyWith(startDate: startDate));
   }
 
-  void updateEndDate(DateTime endDate) {
-    emit(state.copyWith(endDate: endDate));
+  void updateEndDate(DateTime? endDate) {
+    emit(state.copyWith(endDate: endDate, endDateChanged: true));
   }
 
   void updateAllDay(bool allDay) {
@@ -165,7 +165,7 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
         id: state.originalEvent?.id ?? '',
         title: state.title,
         startDate: state.startDate,
-        endDate: state.allDay ? null : state.endDate,
+        endDate: state.endDate,
         allDay: state.allDay,
         notes: state.notes.isEmpty ? null : state.notes,
         repeatRule: state.repeatRule,
@@ -238,7 +238,7 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
       id: '',
       title: state.title,
       startDate: state.startDate,
-      endDate: state.allDay ? null : state.endDate,
+      endDate: state.endDate,
       allDay: state.allDay,
       notes: state.notes.isEmpty ? null : state.notes,
       repeatRule: const RepeatRule(frequency: RepeatFrequency.doNotRepeat),
@@ -260,9 +260,7 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
   }) async {
     if (!baseEvent.startDate.isSameDay(instanceDate)) {
       final updatedBaseEvent = baseEvent.copyWith(
-        repeatRule: baseEvent.repeatRule.copyWith(
-          endDate: instanceDate.subtract(1.days),
-        ),
+        endDate: instanceDate.subtract(1.days),
       );
       await _calendarEventsRepository.createOrUpdate(updatedBaseEvent);
     } else {
@@ -273,7 +271,7 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
       id: '',
       title: state.title,
       startDate: state.startDate,
-      endDate: state.allDay ? null : state.endDate,
+      endDate: state.endDate,
       allDay: state.allDay,
       notes: state.notes.isEmpty ? null : state.notes,
       repeatRule: state.repeatRule,

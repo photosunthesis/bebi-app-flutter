@@ -8,6 +8,11 @@ import 'package:injectable/injectable.dart';
 class RecurringCalendarEventsService {
   RecurringCalendarEventsService();
 
+  /// When true, an instance that occurs exactly at [endDate] is allowed
+  /// (endDate is inclusive). When false, occurrences on or after [endDate]
+  /// are not allowed (endDate is exclusive).
+  final bool endDateInclusive = true;
+
   final Map<DateTime, List<CalendarEvent>> _cache = {};
   final Map<String, CalendarEvent> _baseEventCache = {};
   final Map<String, Set<String>> _generatedWindowsPerEvent = {};
@@ -89,10 +94,17 @@ class RecurringCalendarEventsService {
           currentDate,
           occurrenceCount,
           baseEvent.endDate,
+          baseEvent.allDay,
         )) {
       final dateKey = _startOfDay(currentDate);
+      // Normalize window inclusion check for all-day events by comparing
+      // start-of-day values. For timed events use the full DateTime.
+      final inWindow = baseEvent.allDay
+          ? !_startOfDay(currentDate).isBefore(_startOfDay(windowStart)) &&
+                !_startOfDay(currentDate).isAfter(_startOfDay(windowEnd))
+          : _isDateInWindow(currentDate, windowStart, windowEnd);
 
-      if (_isDateInWindow(currentDate, windowStart, windowEnd) &&
+      if (inWindow &&
           !_isExcludedDate(currentDate, baseEvent.repeatRule) &&
           !seenDates.contains(dateKey)) {
         seenDates.add(dateKey);
@@ -112,6 +124,7 @@ class RecurringCalendarEventsService {
         currentDate,
         occurrenceCount,
         baseEvent.endDate,
+        baseEvent.allDay,
       )) {
         break;
       }
@@ -147,13 +160,32 @@ class RecurringCalendarEventsService {
     DateTime currentDate,
     int occurrenceCount,
     DateTime? endDate,
+    bool allDay,
   ) {
-    if (endDate != null && currentDate.isAfter(endDate)) {
-      return true;
+    if (endDate != null) {
+      if (allDay) {
+        // Compare start-of-day for all-day events
+        final cd = _startOfDay(currentDate);
+        final ed = _startOfDay(endDate);
+        if (endDateInclusive) {
+          if (cd.isAfter(ed)) return true;
+        } else {
+          if (!cd.isBefore(ed)) return true; // cd >= ed -> stop
+        }
+      } else {
+        if (endDateInclusive) {
+          if (currentDate.isAfter(endDate)) return true;
+        } else {
+          if (!currentDate.isBefore(endDate))
+            return true; // current >= endDate -> stop
+        }
+      }
     }
+
     if (rule.occurrences != null && occurrenceCount >= rule.occurrences!) {
       return true;
     }
+
     return false;
   }
 

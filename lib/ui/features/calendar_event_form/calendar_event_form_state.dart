@@ -4,12 +4,12 @@ class CalendarEventFormState {
   const CalendarEventFormState({
     required this.title,
     required this.startDate,
-    required this.endDate,
     required this.allDay,
     required this.eventColor,
     required this.repeatRule,
     required this.notes,
     required this.currentUserId,
+    this.endDate,
     this.originalEvent,
     this.isLoading = false,
     this.isInitialized = false,
@@ -19,7 +19,7 @@ class CalendarEventFormState {
 
   final String title;
   final DateTime startDate;
-  final DateTime endDate;
+  final DateTime? endDate;
   final bool allDay;
   final EventColor eventColor;
   final RepeatRule repeatRule;
@@ -40,6 +40,7 @@ class CalendarEventFormState {
     String? title,
     DateTime? startDate,
     DateTime? endDate,
+    bool endDateChanged = false,
     bool? allDay,
     EventColor? eventColor,
     RepeatRule? repeatRule,
@@ -54,7 +55,7 @@ class CalendarEventFormState {
     return CalendarEventFormState(
       title: title ?? this.title,
       startDate: startDate ?? this.startDate,
-      endDate: endDate ?? this.endDate,
+      endDate: endDateChanged ? endDate : (endDate ?? this.endDate),
       allDay: allDay ?? this.allDay,
       eventColor: eventColor ?? this.eventColor,
       repeatRule: repeatRule ?? this.repeatRule,
