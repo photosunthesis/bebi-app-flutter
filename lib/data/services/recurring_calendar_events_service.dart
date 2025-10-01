@@ -176,8 +176,9 @@ class RecurringCalendarEventsService {
         if (endDateInclusive) {
           if (currentDate.isAfter(endDate)) return true;
         } else {
-          if (!currentDate.isBefore(endDate))
+          if (!currentDate.isBefore(endDate)) {
             return true; // current >= endDate -> stop
+          }
         }
       }
     }
