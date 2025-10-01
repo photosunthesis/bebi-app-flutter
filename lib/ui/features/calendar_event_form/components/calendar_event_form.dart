@@ -202,7 +202,9 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
   String _buildDateFieldText(CalendarEventFormState state) {
     final date = state.allDay
         ? state.startDate.toEEEEMMMMdyyyy()
-        : state.startDate.toDateRange(state.endDate);
+        : state.startDate.toDateRange(
+            state.endDate ?? state.startDate.add(1.hours),
+          );
 
     if (state.repeatRule.frequency == RepeatFrequency.doNotRepeat) {
       return date;

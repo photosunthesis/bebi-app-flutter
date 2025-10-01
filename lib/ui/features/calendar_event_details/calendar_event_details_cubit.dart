@@ -107,9 +107,7 @@ class CalendarEventDetailsCubit extends Cubit<CalendarEventDetailsState>
       );
     } else {
       final updatedBaseEvent = baseEvent.copyWith(
-        repeatRule: baseEvent.repeatRule.copyWith(
-          endDate: instanceDate.subtract(1.days),
-        ),
+        endDate: instanceDate.subtract(1.days),
       );
 
       await _calendarEventsRepository.createOrUpdate(updatedBaseEvent);

@@ -44,8 +44,6 @@ class _CyclesScreenState extends State<CyclesScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<CyclesCubit, CyclesState>(
-      listenWhen: (previous, current) =>
-          previous.focusedDate != current.focusedDate,
       listener: (context, state) {
         if (!_isAnimating) {
           _isAnimating = true;
@@ -177,6 +175,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
       builder: (context, state) {
         return InkWell(
           onTap: _cubit.switchUserProfile,
+          borderRadius: BorderRadius.circular(60),
           splashFactory: NoSplash.splashFactory,
           child: Padding(
             padding: const EdgeInsets.only(right: 12),

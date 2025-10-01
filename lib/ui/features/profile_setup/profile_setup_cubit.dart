@@ -41,6 +41,7 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState>
           photo: userProfile?.photoUrl,
           displayName: userProfile?.displayName,
           birthDate: userProfile?.birthDate,
+          userIsLoggedIn: _firebaseAuth.currentUser != null,
         ),
       );
     });

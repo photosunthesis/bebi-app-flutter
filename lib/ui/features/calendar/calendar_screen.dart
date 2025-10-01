@@ -8,7 +8,6 @@ import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
 import 'package:bebi_app/utils/extensions/int_extensions.dart';
-import 'package:bebi_app/utils/platform/platform_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -74,7 +73,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return MainAppBar.build(
       context,
       flexibleSpace: Center(child: _buildTitle()),
-      toolbarHeight: 40 * ((kIsPwa && kIsWebiOS) || kIsAndroid ? 1.2 : 1),
       bottom: const PreferredSize(
         preferredSize: Size.fromHeight(0),
         child: SizedBox.shrink(),

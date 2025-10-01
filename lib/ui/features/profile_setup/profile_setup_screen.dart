@@ -60,21 +60,20 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         }
       },
       builder: (context, state) {
-        final isEditing =
-            state is ProfileSetupLoadedState &&
-            state.displayName != null &&
-            state.birthDate != null;
+        final userIsLoggedIn =
+            state is ProfileSetupLoadedState && state.userIsLoggedIn;
         return KeyboardDismissOnTap(
           dismissOnCapturedTaps: true,
           child: Form(
-            canPop: isEditing,
+            canPop: userIsLoggedIn,
             key: _formKey,
             child: Scaffold(
               resizeToAvoidBottomInset: true,
-              appBar: isEditing ? MainAppBar.build(context) : null,
+              appBar: userIsLoggedIn ? MainAppBar.build(context) : null,
+
               body: ListView(
                 children: [
-                  isEditing
+                  userIsLoggedIn
                       ? const SizedBox(height: UiConstants.padding)
                       : const SafeArea(
                           child: SizedBox(height: UiConstants.padding),

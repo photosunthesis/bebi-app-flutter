@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/ui/features/cycles/cycles_cubit.dart';
@@ -8,6 +10,7 @@ import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
 import 'package:bebi_app/utils/extensions/int_extensions.dart';
 // ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -30,6 +33,9 @@ class _CycleDatePickerState extends State<CycleDatePicker> {
   static const _daysToShow = 7;
 
   bool _isTransitioning = false;
+  Timer? _debounceTimer;
+  int? _pendingIndex;
+  final Duration _debounceDuration = 350.milliseconds;
 
   @override
   void initState() {
@@ -39,6 +45,7 @@ class _CycleDatePickerState extends State<CycleDatePicker> {
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _pageController.dispose();
     super.dispose();
   }
@@ -82,10 +89,20 @@ class _CycleDatePickerState extends State<CycleDatePicker> {
         child: PageView.builder(
           controller: _pageController,
           onPageChanged: (index) {
+            // Debounce page changes so we don't trigger loads while the user
+            // is swiping quickly. We cancel and restart the timer on every
+            // page change; when the user pauses (or finishes the swipe) the
+            // timer fires and we update the focused date. This prevents
+            // unnecessary loads while remaining responsive for slow swipes.
             if (index < _dates.length) {
-              Future.delayed(200.milliseconds, () {
-                if (mounted && _pageController.page?.round() == index) {
-                  _cubit.setFocusedDate(_dates[index]);
+              _pendingIndex = index;
+              _debounceTimer?.cancel();
+              _debounceTimer = Timer(_debounceDuration, () {
+                if (!mounted) return;
+                // Ensure the controller actually settled on the same page
+                // before sending the update.
+                if (_pageController.page?.round() == _pendingIndex) {
+                  _cubit.setFocusedDate(_dates[_pendingIndex!]);
                 }
               });
             }

@@ -72,6 +72,7 @@ class CyclesCubit extends Cubit<CyclesState>
           parameters: {'user_has_cycle': finalUserProfile.hasCycle},
         );
       }
+      return finalUserProfile;
     });
 
     emit(state.copyWith(userProfile: userProfile));
@@ -99,6 +100,11 @@ class CyclesCubit extends Cubit<CyclesState>
 
   Future<void> setFocusedDate(DateTime date) async {
     if (state.focusedDate.isSameDay(date)) return;
+
+    if (state.isViewingCurrentUser &&
+        state.userProfile.asData()?.hasCycle != true) {
+      return;
+    }
 
     emit(state.copyWith(insights: const AsyncLoading(), focusedDate: date));
 

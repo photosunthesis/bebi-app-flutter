@@ -392,5 +392,6 @@
       }
     }
   },
-  "done": "Done"
+  "done": "Done",
+  "endRepeat": "End repeat"
 }
