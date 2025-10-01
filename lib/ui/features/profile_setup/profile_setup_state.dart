@@ -9,10 +9,11 @@ class ProfileSetupLoadingState extends ProfileSetupState {
 }
 
 class ProfileSetupLoadedState extends ProfileSetupState {
-  const ProfileSetupLoadedState({this.photo, this.displayName, this.birthDate});
+  const ProfileSetupLoadedState({this.photo, this.displayName, this.birthDate, this.userIsLoggedIn = false});
   final String? photo;
   final String? displayName;
   final DateTime? birthDate;
+  final bool userIsLoggedIn;
   bool get isPhotoUrl => photo?.startsWith('http') ?? false;
 }
 
