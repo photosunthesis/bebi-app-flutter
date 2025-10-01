@@ -2,56 +2,45 @@
   <img src="assets/app_logo/app_logo_readme.png" alt="The Bebi App Logo" width="120" height="120" style="filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));">
 </div>
 
-# Bebi App
+An app I made for me and my girlfriend to keep track of stuff and share moments together. Built with **Flutter**. 💙
 
-A couples app I built for me and my girlfriend to keep track of things and share moments together. Built with **Flutter**. 💙
+## What we use it for
 
-## What it does
+- 📅 **Shared Calendar**: Keep track of important dates and events together
+- 📸 **Stories**: Daily photo dumps of random stuff (🚧 WIP)
+- 🌸 **Cycle Tracking**: Track periods and symptoms with AI-generated insights
+- 📍 **Location Sharing**: See where the other person is when needed (🚧 WIP)
 
-- 📅 **Shared Calendar**: Keep track of our dates, events, and appointments together.
-- 📸 **Stories**: Share daily candid photos with each other (work-in-progress).
-- 🌸 **Cycle Tracking**: Log menstruation events and symptoms, and access AI-powered insights.
-- 📍 **Location Sharing**: Optionally share location with your partner when it's useful (work-in-progress).
+More features coming soon-ish (depending on what else we'll need from this app)
 
-## 🛠️ Project Structure & Tech Stack
+## Architecture
 
-Clean architecture with feature-based organization:
+Built with Flutter and Firebase, using BLoC for state management and dependency injection via `get_it` + `injectable`. The AI insights are powered by Gemini through the `firebase_ai` package. Other notable packages include `go_router` for navigation, `hive` for local storage, and `super_editor` for rich text editing.
 
-**Technologies:**
-- **State Management**: `flutter_bloc`
-- **Navigation**: `go_router` 
-- **Backend**: Firebase (Auth, Firestore, Storage, Analytics, Crashlytics)
-- **Local Storage**: `hive_ce_flutter`
-- **Dependency Injection**: `get_it` + `injectable`
-- **AI**: `firebase_ai`
-
-**Project Structure:**
+Here is the project's structure:
 ```
-/ - Root
-  ├── lib/                    # Main app code
-  │   ├── main.dart           # App entrypoint
-  │   ├── app/                # Routing, theming and top-level app wiring
-  │   │   ├── app.dart
-  │   │   └── router/         # Route definitions and helpers
-  │   │   └── theme/          # Colors & ThemeData
-  │   ├── config/             # DI, Firebase setup, generated configs
-  │   ├── constants/          # Asset names, fonts, ids, UI constants
-  │   ├── data/               # Data sources and repositories
-  │   │   ├── models/         # Data models
-  │   │   ├── repositories/   # Data repositories
-  │   │   └── services/       # Data services
-  │   ├── localizations/      # Generated/localization files
-  │   ├── ui/                 # Features and shared widgets
-  │   │   ├── features/       # Feature folders (calendar, stories, profile...)
-  │   │   └── shared_widgets/ # Reusable UI components (forms, pickers...)
-  │   └── utils/              # Extensions, formatters, platform utils
-  ├── assets/                 # Static assets like images and fonts
-  ├── android/                # Android-specific code
-  ├── ios/                    # iOS-specific code
-  ├── web/                    # Web-specific code
-  └── test/                   # Tests
+lib/
+├── main.dart
+├── app/
+│   ├── app.dart
+│   ├── router/                 # go_router setup
+│   └── theme/                  # app theming
+├── config/
+│   ├── dependencies.dart       # get_it + injectable DI
+│   └── firebase_options.dart
+├── constants/
+├── data/
+│   ├── models/                 # data models (calendar events, cycles, stories)
+│   ├── repositories/           # data layer abstractions
+│   └── services/               # business logic (AI insights, predictions)
+├── localizations/              # i18n support
+├── ui/
+│   ├── features/               # feature modules with BLoC
+│   └── shared_widgets/         # reusable components
+└── utils/                      # extensions, formatters, mixins
 ```
 
-### 📝 License
+## License
 
-This repository includes an MIT + Commons Clause license. See the [LICENSE](LICENSE) file for details.
+MIT with Commons Clause — free to use and modify, just not for commercial use. See [LICENSE](LICENSE) for details.
+
