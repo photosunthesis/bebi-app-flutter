@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.8] - 2025-10-01
+
+### Fixed
+
+- Fixed AppBar not displaying properly on the profile update screen
+- Fixed current user avatar not appearing on the cycles screen
+- Fixed repeating calendar events not being created as expected
+
+### Changed
+
+- Replaced the calendar with a simple date picker for selecting dates when creating calendar events 📅
+
 ## [0.4.7] - 2025-09-24
 
 ### Changed
