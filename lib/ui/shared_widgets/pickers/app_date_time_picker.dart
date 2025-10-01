@@ -6,7 +6,6 @@ import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
 import 'package:bebi_app/utils/extensions/int_extensions.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:table_calendar/table_calendar.dart';
 
 class AppDateTimePicker extends StatefulWidget {
   const AppDateTimePicker({
@@ -51,6 +50,12 @@ class _AppDateTimePickerState extends State<AppDateTimePicker> {
     if (widget.forceClose == true && oldWidget.forceClose != true) {
       _closeAllPickers();
     }
+  }
+
+  @override
+  void dispose() {
+    _timePickerTimer?.cancel();
+    super.dispose();
   }
 
   void _closeAllPickers() {
@@ -154,8 +159,7 @@ class _AppDateTimePickerState extends State<AppDateTimePicker> {
 
   Widget _buildCalendar() {
     return Container(
-      key: const Key('calendar'),
-      height: 240,
+      height: 160,
       margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(UiConstants.borderRadiusValue),
@@ -166,141 +170,29 @@ class _AppDateTimePickerState extends State<AppDateTimePicker> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(UiConstants.borderRadiusValue),
-        child: TableCalendar(
-          availableGestures: AvailableGestures.horizontalSwipe,
-          shouldFillViewport: true,
-          enabledDayPredicate: (day) {
-            if (widget.minDate != null) {
-              // Check if day is before minDate
-              if (day.isBefore(widget.minDate!) &&
-                  !day.isSameDay(widget.minDate!)) {
-                return false;
-              }
-            }
-
-            if (widget.maxDate != null) {
-              // Check if day is after maxDate
-              if (day.isAfter(widget.maxDate!) &&
-                  !day.isSameDay(widget.maxDate!)) {
-                return false;
-              }
-            }
-
-            return true;
-          },
-          headerVisible: false,
-          focusedDay: _selectedDate,
-          currentDay: DateTime.now(),
-          firstDay: widget.minDate ?? DateTime.now().subtract(365.days),
-          lastDay: widget.maxDate ?? DateTime.now().add(365.days),
-          selectedDayPredicate: _selectedDate.isSameDay,
-          daysOfWeekHeight: 32,
-          calendarBuilders: CalendarBuilders(
-            selectedBuilder: (context, day, focusedDay) =>
-                _buildDayCell(context, day, focusedDay, isSelected: true),
-            todayBuilder: (context, day, focusedDay) =>
-                _buildDayCell(context, day, focusedDay, isToday: true),
-            dowBuilder: _buildDayOfWeek,
-            defaultBuilder: (context, day, focusedDay) =>
-                _buildDayCell(context, day, focusedDay),
-            disabledBuilder: (context, day, focusedDay) =>
-                _buildDayCell(context, day, focusedDay, isDisabled: true),
-            outsideBuilder: (context, day, focusedDay) =>
-                _buildDayCell(context, day, focusedDay, isDisabled: true),
-          ),
-          daysOfWeekStyle: DaysOfWeekStyle(
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
-                  color: context.colorScheme.outline,
-                  width: UiConstants.borderWidth,
-                ),
-              ),
-            ),
-          ),
-          onDaySelected: (selectedDay, focusedDay) {
+        child: CupertinoDatePicker(
+          mode: CupertinoDatePickerMode.date,
+          initialDateTime: _selectedDate,
+          minimumDate: widget.minDate,
+          maximumDate: widget.maxDate,
+          onDateTimeChanged: (newDate) {
+            // Preserve existing time of day when changing the date
             final date = DateTime(
-              selectedDay.year,
-              selectedDay.month,
-              selectedDay.day,
+              newDate.year,
+              newDate.month,
+              newDate.day,
               _selectedDate.hour,
               _selectedDate.minute,
             );
             widget.onChanged(date);
-            setState(() {
-              _selectedDate = date;
-              _showCalendarPicker = false;
-            });
+            setState(() => _selectedDate = date);
+            // Auto-close after a short delay so users can see selection feedback
+            _timePickerTimer?.cancel();
+            _timePickerTimer = Timer(
+              500.milliseconds,
+              () => setState(() => _showCalendarPicker = false),
+            );
           },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDayCell(
-    BuildContext context,
-    DateTime day,
-    DateTime focusedDay, {
-    bool isSelected = false,
-    bool isToday = false,
-    bool isDisabled = false,
-  }) {
-    BoxDecoration? decoration;
-    Color textColor;
-
-    if (isSelected) {
-      decoration = BoxDecoration(
-        color: context.colorScheme.primary,
-        shape: BoxShape.circle,
-      );
-      textColor = context.colorScheme.onPrimary;
-    } else if (isToday) {
-      decoration = BoxDecoration(
-        color: day.isSameDay(focusedDay) ? context.colorScheme.primary : null,
-        border: Border.all(color: context.colorScheme.primary, width: 0.6),
-        shape: BoxShape.circle,
-      );
-      textColor = day.isSameDay(focusedDay)
-          ? context.colorScheme.onPrimary
-          : context.colorScheme.onSurface;
-    } else {
-      textColor = context.colorScheme.onSurface;
-    }
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: context.colorScheme.outline,
-            width: UiConstants.borderWidth,
-          ),
-        ),
-      ),
-      child: Container(
-        margin: const EdgeInsets.all(5),
-        decoration: decoration,
-        child: Center(
-          child: Opacity(
-            opacity: isDisabled ? 0.2 : 1,
-            child: Text(
-              day.day.toString(),
-              style: context.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: textColor,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDayOfWeek(BuildContext context, DateTime day) {
-    return Center(
-      child: Text(
-        day.weekDayInitial,
-        style: context.textTheme.bodySmall?.copyWith(
-          color: context.colorScheme.secondary,
         ),
       ),
     );
@@ -308,7 +200,6 @@ class _AppDateTimePickerState extends State<AppDateTimePicker> {
 
   Widget _buildTimePicker() {
     return Container(
-      key: const Key('time'),
       height: 160,
       margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
