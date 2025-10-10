@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- Updated Flutter version to 3.35.6 🚀
+- Updated Flutter version to 3.35.5 🚀
 
 ### Fixed
 
