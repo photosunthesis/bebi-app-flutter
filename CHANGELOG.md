@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.9] - 2025-10-10
+
+### Changed
+
+- Updated Flutter version to 3.35.6 🚀
+
+### Fixed
+
+- Fixed issue when loading cycle data 🐛
+
 ## [0.4.8] - 2025-10-01
 
 ### Fixed
