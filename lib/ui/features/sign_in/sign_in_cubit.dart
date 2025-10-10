@@ -33,10 +33,13 @@ class SignInCubit extends Cubit<SignInState>
       logWhen: (error, _) => error is! FirebaseAuthException,
       onError: (error, _) {
         final errorMessage = switch (error) {
-          FirebaseAuthException() when error.code == 'wrong-password' =>
-            l10n.wrongPasswordError,
-          FirebaseAuthException() when error.code == 'invalid-email' =>
-            l10n.invalidEmailError,
+          FirebaseAuthException()
+              when [
+                'wrong-password',
+                'invalid-credential',
+                'invalid-email',
+              ].contains(error.code) =>
+            l10n.invalidCredentialsError,
           FirebaseAuthException() when error.code == 'user-not-found' =>
             l10n.userNotFoundError,
           _ => l10n.signInError,
