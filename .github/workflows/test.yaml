@@ -20,7 +20,7 @@ jobs:
       - name: Prepare Flutter project
         uses: ./.github/actions/flutter-prepare
         with:
-          flutter_version: 3.35.4
+          flutter_version: 3.35.6
           firebase_project: bebi-app
           firebase_platforms: none
 
