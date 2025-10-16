@@ -140,14 +140,11 @@ class _CycleCalendarScreenState extends State<CycleCalendarScreen> {
         AnimatedSwitcher(
           duration: 200.milliseconds,
           child: _showTodayButton
-              ? Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  child: SizedBox(
-                    width: 60,
-                    child: OutlinedButton(
-                      onPressed: _scrollToToday,
-                      child: Text(context.l10n.todayButton.toUpperCase()),
-                    ),
+              ? SizedBox(
+                  width: 60,
+                  child: OutlinedButton(
+                    onPressed: _scrollToToday,
+                    child: Text(context.l10n.todayButton.toUpperCase()),
                   ),
                 )
               : const SizedBox.shrink(),
