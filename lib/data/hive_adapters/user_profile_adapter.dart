@@ -1,9 +1,10 @@
+import 'package:bebi_app/constants/type_adapter_ids.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import '../models/user_profile.dart';
 
 class UserProfileAdapter extends TypeAdapter<UserProfile> {
   @override
-  final int typeId = 4;
+  final int typeId = TypeAdapterIds.userProfile;
 
   @override
   UserProfile read(BinaryReader reader) {

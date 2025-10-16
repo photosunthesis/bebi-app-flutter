@@ -7,4 +7,7 @@ abstract class UiConstants {
   static const borderRadius = BorderRadius.all(
     Radius.circular(borderRadiusValue),
   );
+  static const biggerBorderRadius = BorderRadius.all(
+    Radius.circular(borderRadiusValue * 4),
+  );
 }

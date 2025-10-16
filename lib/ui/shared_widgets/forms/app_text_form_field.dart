@@ -158,6 +158,7 @@ class _AppTextFormFieldState extends State<AppTextFormField>
               errorText: '',
               errorStyle: const TextStyle(fontSize: 0),
             ),
+            cursorColor: context.colorScheme.primary,
           ),
           AnimatedOpacity(
             duration: 300.milliseconds,

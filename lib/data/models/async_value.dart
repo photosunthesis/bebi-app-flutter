@@ -6,7 +6,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 
-sealed class AsyncValue<T> extends Equatable {
+sealed class AsyncValue<T> with EquatableMixin {
   const AsyncValue();
 
   R maybeMap<R>({
@@ -62,28 +62,26 @@ sealed class AsyncValue<T> extends Equatable {
       return AsyncError(err, stack);
     }
   }
+
+  @override
+  List<Object?> get props => switch (this) {
+    AsyncLoading<T>() => [],
+    AsyncData<T>(:final value) => [value],
+    AsyncError<T>(:final error, :final stackTrace) => [error, stackTrace],
+  };
 }
 
 class AsyncLoading<T> extends AsyncValue<T> {
   const AsyncLoading();
-
-  @override
-  List<Object?> get props => [];
 }
 
 class AsyncData<T> extends AsyncValue<T> {
   const AsyncData(this.value);
   final T value;
-
-  @override
-  List<Object?> get props => [value];
 }
 
 class AsyncError<T> extends AsyncValue<T> {
   const AsyncError(this.error, [this.stackTrace]);
   final Object? error;
   final StackTrace? stackTrace;
-
-  @override
-  List<Object?> get props => [error, stackTrace];
 }

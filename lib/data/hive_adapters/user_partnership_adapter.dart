@@ -1,9 +1,10 @@
+import 'package:bebi_app/constants/type_adapter_ids.dart';
 import 'package:bebi_app/data/models/user_partnership.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
 class UserPartnershipAdapter extends TypeAdapter<UserPartnership> {
   @override
-  final int typeId = 3;
+  final int typeId = TypeAdapterIds.userPartnership;
 
   @override
   UserPartnership read(BinaryReader reader) {

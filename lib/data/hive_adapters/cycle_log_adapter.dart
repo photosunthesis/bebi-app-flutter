@@ -1,9 +1,10 @@
+import 'package:bebi_app/constants/type_adapter_ids.dart';
 import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
 class CycleLogAdapter extends TypeAdapter<CycleLog> {
   @override
-  final int typeId = 1;
+  final int typeId = TypeAdapterIds.cycleLog;
 
   @override
   CycleLog read(BinaryReader reader) {
