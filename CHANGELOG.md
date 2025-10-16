@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0] - 2025-10-16
+
+### Added
+
+- Added Stories feature: Share moments and updates with your partner through photos and text 📸📝
+
+### Changed
+
+- Updated Flutter version to 3.35.6 🚀
+
+### Fixed
+
+- Fixed small UI issue with the "Today" button on the cycle calendar screen 🐛
+
 ## [0.4.9] - 2025-10-10
 
 ### Changed
