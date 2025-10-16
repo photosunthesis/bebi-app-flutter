@@ -249,8 +249,8 @@ class _StoriesScreenState extends State<StoriesScreen> with GuardMixin {
       builder: (context, profiles) {
         final isCurrentUserStory = story.createdBy == profiles.$1?.userId;
         final displayName = isCurrentUserStory
-            ? 'You'
-            : profiles.$2?.displayName ?? 'Unknown';
+            ? context.l10n.you
+            : profiles.$2?.displayName ?? context.l10n.user;
 
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

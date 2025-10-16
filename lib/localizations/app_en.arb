@@ -392,5 +392,9 @@
     }
   },
   "done": "Done",
-  "endRepeat": "End repeat"
+  "endRepeat": "End repeat",
+  "addMessageHint": "Add message",
+  "noStoriesYetMessage": "No stories yet.",
+  "you": "You",
+  "user": "User"
 }

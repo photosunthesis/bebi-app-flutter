@@ -61,7 +61,7 @@ class _StoriesCameraState extends State<StoriesCamera>
     if (!mounted) return;
 
     final text = _titleController.text.isEmpty
-        ? 'Add message'
+        ? context.l10n.addMessageHint
         : _titleController.text;
     final style =
         context.textTheme.bodyLarge?.copyWith(
@@ -289,7 +289,7 @@ class _StoriesCameraState extends State<StoriesCamera>
               ),
               filled: true,
               fillColor: context.colorScheme.surface.withAlpha(180),
-              hintText: 'Add message',
+              hintText: context.l10n.addMessageHint,
               hintStyle: context.textTheme.bodyLarge?.copyWith(
                 color: context.colorScheme.onSurface.withAlpha(140),
               ),
