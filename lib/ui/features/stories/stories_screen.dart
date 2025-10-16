@@ -1,17 +1,21 @@
 import 'package:bebi_app/constants/kaomojis.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/data/models/story.dart';
+import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:bebi_app/ui/features/stories/components/stories_camera.dart';
 import 'package:bebi_app/ui/features/stories/stories_cubit.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
+import 'package:bebi_app/utils/extensions/int_extensions.dart';
+import 'package:bebi_app/utils/extensions/string_extensions.dart';
 import 'package:bebi_app/utils/mixins/guard_mixin.dart';
 import 'package:blurhash_ffi/blurhashffi_image.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_keyboard_visibility_temp_fork/flutter_keyboard_visibility_temp_fork.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 class StoriesScreen extends StatefulWidget {
   const StoriesScreen({super.key});
@@ -23,6 +27,7 @@ class StoriesScreen extends StatefulWidget {
 class _StoriesScreenState extends State<StoriesScreen> with GuardMixin {
   static final _kaomoji = Kaomojis.getRandomFromHappySet();
   final _pageController = PageController();
+  int _currentPage = 0;
   int _previousStoriesLength = 0;
   bool _didInitialize = false;
 
@@ -30,6 +35,12 @@ class _StoriesScreenState extends State<StoriesScreen> with GuardMixin {
   void initState() {
     super.initState();
     context.read<StoriesCubit>().initialize(useCache: false);
+    _pageController.addListener(() {
+      final page = _pageController.page ?? 0;
+      if (page.round() != _currentPage) {
+        setState(() => _currentPage = page.round());
+      }
+    });
   }
 
   @override
@@ -41,14 +52,12 @@ class _StoriesScreenState extends State<StoriesScreen> with GuardMixin {
   @override
   Widget build(BuildContext context) {
     return KeyboardDismissOnTap(
-      dismissOnCapturedTaps: true,
       child: Scaffold(
         backgroundColor: context.colorScheme.surface,
         body: BlocConsumer<StoriesCubit, StoriesState>(
           listener: _listener,
           builder: (context, state) {
             final stories = state.stories.asData() ?? [];
-
             return RefreshIndicator.adaptive(
               onRefresh: () async =>
                   context.read<StoriesCubit>().initialize(useCache: false),
@@ -66,6 +75,20 @@ class _StoriesScreenState extends State<StoriesScreen> with GuardMixin {
             );
           },
         ),
+        floatingActionButtonLocation:
+            FloatingActionButtonLocation.miniCenterFloat,
+        floatingActionButton: _currentPage == 0
+            ? null
+            : FloatingActionButton(
+                foregroundColor: context.colorScheme.onPrimary,
+                backgroundColor: context.colorScheme.primary,
+                onPressed: () async => _pageController.animateToPage(
+                  0,
+                  duration: 350.milliseconds,
+                  curve: Curves.easeInOutQuart,
+                ),
+                child: const Icon(Symbols.arrow_upward),
+              ),
       ),
     );
   }
@@ -86,16 +109,13 @@ class _StoriesScreenState extends State<StoriesScreen> with GuardMixin {
       context.showSnackbar(state.errorMessage!);
     }
 
-    // When stories are refreshed and the list grows, jump to the newest
     final stories = state.stories.asData();
     final currentLength = stories?.length ?? 0;
 
-    // If the list increased compared to previous, animate to page 1
     if (currentLength > _previousStoriesLength) {
-      // page 0 is camera, page 1 is the newest story
       _pageController.animateToPage(
         1,
-        duration: const Duration(milliseconds: 350),
+        duration: 350.milliseconds,
         curve: Curves.easeOut,
       );
     }
@@ -128,29 +148,41 @@ class _StoriesScreenState extends State<StoriesScreen> with GuardMixin {
 
   Widget _buildImageCard(BuildContext context, Story story) {
     return Center(
-      child: Container(
-        margin: const EdgeInsets.all(UiConstants.padding),
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(18)),
-          color: context.colorScheme.surfaceContainerHighest,
-          border: Border.all(
-            color: context.colorScheme.outline.withAlpha(80),
-            width: UiConstants.borderWidth,
-          ),
-        ),
-        child: ClipRRect(
-          borderRadius: UiConstants.biggerBorderRadius,
-          child: AspectRatio(
-            aspectRatio: 1.0,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                _buildStoryImage(story),
-                _buildStoryDateOverlay(story),
-              ],
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            margin: const EdgeInsets.all(UiConstants.padding),
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.all(Radius.circular(18)),
+              color: context.colorScheme.surfaceContainerHighest,
+              border: Border.all(
+                color: context.colorScheme.outline.withAlpha(80),
+                width: UiConstants.borderWidth,
+              ),
+            ),
+            child: ClipRRect(
+              borderRadius: UiConstants.biggerBorderRadius,
+              child: AspectRatio(
+                aspectRatio: 1.0,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    _buildStoryImage(story),
+                    _buildTitleOverlay(story),
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: UiConstants.padding,
+            ),
+            child: _buildStoryDetails(story),
+          ),
+        ],
       ),
     );
   }
@@ -206,21 +238,78 @@ class _StoriesScreenState extends State<StoriesScreen> with GuardMixin {
     );
   }
 
-  Widget _buildStoryDateOverlay(Story story) {
+  Widget _buildStoryDetails(Story story) {
+    return BlocSelector<
+      StoriesCubit,
+      StoriesState,
+      (UserProfile?, UserProfile?)
+    >(
+      selector: (state) =>
+          (state.userProfile.asData(), state.partnerProfile.asData()),
+      builder: (context, profiles) {
+        final isCurrentUserStory = story.createdBy == profiles.$1?.userId;
+        final displayName = isCurrentUserStory
+            ? 'You'
+            : profiles.$2?.displayName ?? 'Unknown';
+
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: context.colorScheme.surface.withAlpha(180),
+            borderRadius: UiConstants.borderRadius,
+          ),
+          child: RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: displayName.toTitleCase(),
+                  style: context.textTheme.bodyLarge?.copyWith(
+                    color: context.colorScheme.onSurface,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                TextSpan(
+                  text: ' - ${story.createdAt.toTimeAgo()}',
+                  style: context.textTheme.bodyLarge?.copyWith(
+                    color: context.colorScheme.onSurface.withAlpha(
+                      128,
+                    ), // Translucent date
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildTitleOverlay(Story story) {
+    if (story.title.trim().isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return Positioned(
-      top: 16,
-      left: 16,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: context.colorScheme.surface.withAlpha(230),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          story.createdAt.toMMMMd(),
-          style: context.textTheme.bodySmall?.copyWith(
-            color: context.colorScheme.onSurface,
-            fontWeight: FontWeight.w500,
+      bottom: 8,
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width - (UiConstants.padding * 2),
+        child: Align(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            decoration: BoxDecoration(
+              color: context.colorScheme.surface.withAlpha(180),
+              borderRadius: UiConstants.borderRadius,
+            ),
+            child: Text(
+              story.title,
+              style: context.textTheme.bodyLarge?.copyWith(
+                color: context.colorScheme.onSurface,
+                fontWeight: FontWeight.w500,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ),
       ),

@@ -11,11 +11,13 @@ extension DatetimeExtensions on DateTime {
 
   String toEEEEMMMd() => DateFormat('EEEE, MMM d').format(this);
 
+  String toEEEMMMd() => DateFormat('EEE, MMM d').format(this);
+
   String toMMMMd() => DateFormat('MMMM d').format(this);
 
   String toEEEEMMMMdyyyy() => DateFormat('EEEE MMMM d, yyyy').format(this);
 
-  String toEEEEMMMdyyyy() => DateFormat('EEE, MMM d, yyyy').format(this);
+  String toEEEEMMMdyyyy() => DateFormat('EEE MMM d, yyyy').format(this);
 
   String toEEEEMMMMdyyyyhhmma() =>
       DateFormat('EEEE MMMM d, yyyy h:mm a').format(this);
@@ -48,6 +50,23 @@ extension DatetimeExtensions on DateTime {
   String get weekDayInitial => DateFormat('E').format(this).split('').first;
 
   String toEEE() => DateFormat('EEE').format(this);
+
+  String toTimeAgo() {
+    final now = DateTime.now();
+    final difference = now.difference(this);
+
+    if (difference.inSeconds < 60) {
+      return 'Just now';
+    } else if (difference.inMinutes < 60) {
+      return '${difference.inMinutes}m ago';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours}h ago';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays}d ago';
+    } else {
+      return toMMMdyyyy();
+    }
+  }
 
   String get dayOfWeek => DateFormat('EEEE').format(this);
 

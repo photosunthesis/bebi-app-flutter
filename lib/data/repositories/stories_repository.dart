@@ -33,6 +33,7 @@ class StoriesRepository {
     final querySnapshot = await _firestore
         .collection(_collection)
         .where('users', arrayContains: userId)
+        .orderBy('created_at', descending: true)
         .get();
 
     final stories = querySnapshot.docs.map(Story.fromFirestore).toList();
@@ -51,7 +52,12 @@ class StoriesRepository {
     required List<String> users,
     required XFile imageFile,
   }) async {
-    final blurHash = await BlurhashFFI.encode(XFileImage(imageFile));
+    final blurHash = await BlurhashFFI.encode(
+      XFileImage(imageFile),
+      componentX: 2,
+      componentY: 2,
+    );
+
     final storageObjectName = await _r2ObjectsService.uploadFile(
       imageFile,
       path: _collection,

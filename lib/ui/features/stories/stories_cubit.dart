@@ -2,8 +2,11 @@ import 'dart:async';
 
 import 'package:bebi_app/data/models/async_value.dart';
 import 'package:bebi_app/data/models/story.dart';
+import 'package:bebi_app/data/models/user_partnership.dart';
+import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:bebi_app/data/repositories/stories_repository.dart';
 import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
+import 'package:bebi_app/data/repositories/user_profile_repository.dart';
 import 'package:bebi_app/utils/mixins/guard_mixin.dart';
 import 'package:camera/camera.dart';
 import 'package:equatable/equatable.dart';
@@ -19,15 +22,30 @@ class StoriesCubit extends Cubit<StoriesState> with GuardMixin {
   StoriesCubit(
     this._firebaseAuth,
     this._storiesRepository,
+    this._userProfileRepository,
     this._userPartnershipsRepository,
   ) : super(const StoriesState());
 
   final FirebaseAuth _firebaseAuth;
   final StoriesRepository _storiesRepository;
+  final UserProfileRepository _userProfileRepository;
   final UserPartnershipsRepository _userPartnershipsRepository;
 
+  UserPartnership? _partnership;
+
   Future<void> initialize({bool useCache = true}) async {
-    emit(state.copyWith(stories: const AsyncLoading()));
+    emit(
+      state.copyWith(
+        stories: const AsyncLoading(),
+        userProfile: const AsyncLoading(),
+        partnerProfile: const AsyncLoading(),
+      ),
+    );
+
+    _partnership ??= (await _userPartnershipsRepository.getByUserId(
+      _firebaseAuth.currentUser!.uid,
+    ))!;
+
     emit(
       state.copyWith(
         stories: await AsyncValue.guard(
@@ -35,6 +53,14 @@ class StoriesCubit extends Cubit<StoriesState> with GuardMixin {
             _firebaseAuth.currentUser!.uid,
             useCache: useCache,
           ),
+        ),
+        userProfile: await AsyncValue.guard(
+          () async =>
+              _userProfileRepository.getByUserId(_partnership!.users.first),
+        ),
+        partnerProfile: await AsyncValue.guard(
+          () async =>
+              _userProfileRepository.getByUserId(_partnership!.users.last),
         ),
       ),
     );
@@ -52,10 +78,6 @@ class StoriesCubit extends Cubit<StoriesState> with GuardMixin {
     emit(
       state.copyWith(
         createStory: await AsyncValue.guard(() async {
-          final partnership = await _userPartnershipsRepository.getByUserId(
-            _firebaseAuth.currentUser!.uid,
-          );
-
           final imageFile = flipHorizontally
               ? XFile.fromData(
                   img.encodeJpg(
@@ -72,7 +94,7 @@ class StoriesCubit extends Cubit<StoriesState> with GuardMixin {
           await _storiesRepository.createStory(
             createdBy: _firebaseAuth.currentUser!.uid,
             title: title,
-            users: partnership!.users,
+            users: _partnership!.users,
             imageFile: imageFile,
           );
 

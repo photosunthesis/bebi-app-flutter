@@ -25,9 +25,11 @@ class CycleCalendarScreen extends StatefulWidget {
 }
 
 class _CycleCalendarScreenState extends State<CycleCalendarScreen> {
+  final _now = DateTime.now();
   late final _scrollController = ScrollController();
+  late DateTime _currentVisibleMonth = _now;
+
   bool _showTodayButton = false;
-  DateTime _currentVisibleMonth = DateTime.now();
 
   @override
   void initState() {
@@ -39,10 +41,9 @@ class _CycleCalendarScreenState extends State<CycleCalendarScreen> {
   }
 
   void _onScroll() {
-    final today = DateTime.now();
     final isAwayFromToday =
-        _currentVisibleMonth.month != today.month ||
-        _currentVisibleMonth.year != today.year;
+        _currentVisibleMonth.month != _now.month ||
+        _currentVisibleMonth.year != _now.year;
 
     if (isAwayFromToday != _showTodayButton) {
       setState(() => _showTodayButton = isAwayFromToday);
@@ -50,8 +51,7 @@ class _CycleCalendarScreenState extends State<CycleCalendarScreen> {
   }
 
   void _scrollToToday() {
-    final today = DateTime.now();
-    final todayOffset = _calculateOffsetForDate(today);
+    final todayOffset = _calculateOffsetForDate(_now);
     _scrollController.animateTo(
       todayOffset,
       duration: 300.milliseconds,

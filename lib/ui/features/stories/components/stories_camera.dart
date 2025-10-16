@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bebi_app/constants/ui_constants.dart';
+import 'package:bebi_app/data/models/async_value.dart';
 import 'package:bebi_app/ui/features/stories/stories_cubit.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
@@ -28,6 +29,7 @@ class _StoriesCameraState extends State<StoriesCamera>
 
   late final _cubit = context.read<StoriesCubit>();
   final _titleController = TextEditingController();
+  double _titleFieldWidth = 110.0;
 
   CameraController? _cameraController;
   List<CameraDescription> _cameras = [];
@@ -43,14 +45,48 @@ class _StoriesCameraState extends State<StoriesCamera>
   @override
   void initState() {
     super.initState();
+    _titleController.addListener(_updateTitleFieldWidth);
     _initializeCamera();
   }
 
   @override
   void dispose() {
+    _titleController.removeListener(_updateTitleFieldWidth);
     _titleController.dispose();
     _cameraController?.dispose();
     super.dispose();
+  }
+
+  void _updateTitleFieldWidth() {
+    if (!mounted) return;
+
+    final text = _titleController.text.isEmpty
+        ? 'Add message'
+        : _titleController.text;
+    final style =
+        context.textTheme.bodyLarge?.copyWith(
+          color: context.colorScheme.onSurface,
+          fontWeight: FontWeight.w500,
+        ) ??
+        const TextStyle(fontSize: 16);
+
+    final tp = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: Directionality.of(context),
+      maxLines: 1,
+    );
+
+    // Limit measurement to a reasonable max (80% of screen)
+    final maxWidth = MediaQuery.of(context).size.width * 0.8;
+    tp.layout(maxWidth: maxWidth);
+
+    // Add horizontal padding from the TextField decoration (contentPadding) and a small buffer
+    const horizontalPadding = 12.0 * 2; // left + right
+    final newWidth = (tp.width + horizontalPadding + 8).clamp(80.0, maxWidth);
+
+    if ((newWidth - _titleFieldWidth).abs() > 1.0) {
+      setState(() => _titleFieldWidth = newWidth);
+    }
   }
 
   @override
@@ -110,17 +146,17 @@ class _StoriesCameraState extends State<StoriesCamera>
   }
 
   Widget _buildCameraControls() {
-    return BlocSelector<StoriesCubit, StoriesState, bool>(
-      selector: (state) => state.captureImage.asData() != null,
-      builder: (context, didCaptureImage) {
+    return BlocSelector<StoriesCubit, StoriesState, AsyncValue<XFile?>>(
+      selector: (state) => state.captureImage,
+      builder: (context, captureImage) {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildFlashButton(didCaptureImage),
-              _buildMainButton(didCaptureImage),
-              _buildRefreshOrSwitchCameraButton(didCaptureImage),
+              _buildFlashButton(captureImage.asData() != null),
+              _buildMainButton(captureImage),
+              _buildRefreshOrSwitchCameraButton(captureImage.asData() != null),
             ],
           ),
         );
@@ -139,7 +175,8 @@ class _StoriesCameraState extends State<StoriesCamera>
     );
   }
 
-  Widget _buildMainButton(bool didCaptureImage) {
+  Widget _buildMainButton(AsyncValue<XFile?> captureImage) {
+    final didCaptureImage = captureImage.asData() != null;
     return GestureDetector(
       onTap: _processingImage
           ? null // if capturing image, disable button
@@ -151,18 +188,26 @@ class _StoriesCameraState extends State<StoriesCamera>
         height: 70,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: context.colorScheme.onSurface, width: 3),
-          color: didCaptureImage || !_processingImage
-              ? context.colorScheme.onSurface
+          border: Border.all(color: context.colorScheme.primary, width: 3),
+          color: didCaptureImage || _processingImage
+              ? context.colorScheme.primary
               : Colors.transparent,
         ),
         child: Center(
-          child:
-              _processingImage // Show loading indicator if capturing image
-              ? const SizedBox(
+          // Show loading indicator if capturing image or uploading
+          child: _processingImage || captureImage.isLoading
+              ? SizedBox(
                   width: 28,
                   height: 28,
-                  child: CircularProgressIndicator.adaptive(),
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      valueColor: AlwaysStoppedAnimation(
+                        // use onPrimary so it contrasts with the button background
+                        context.colorScheme.onPrimary,
+                      ),
+                    ),
+                  ),
                 )
               : didCaptureImage // Show send icon if image captured
               ? Icon(
@@ -175,7 +220,7 @@ class _StoriesCameraState extends State<StoriesCamera>
                   margin: const EdgeInsets.all(3),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: context.colorScheme.onSurface,
+                    color: context.colorScheme.primary,
                   ),
                 ),
         ),
@@ -228,46 +273,38 @@ class _StoriesCameraState extends State<StoriesCamera>
 
   Widget _buildStoryTitleTextBox() {
     return Positioned(
-      left: 24,
-      right: 24,
-      bottom: -40,
-      child: TextField(
-        maxLength: 54,
-        textInputAction: TextInputAction.done,
-        decoration: InputDecoration(
-          fillColor: Colors.transparent,
-          errorBorder: InputBorder.none,
-          focusedBorder: InputBorder.none,
-          focusedErrorBorder: InputBorder.none,
-          disabledBorder: InputBorder.none,
-          enabledBorder: InputBorder.none,
-          border: InputBorder.none,
-          hintText: 'Add message',
-          hintStyle: context.textTheme.titleMedium?.copyWith(
-            color: context.colorScheme.onPrimary.withAlpha(140),
-            shadows: [
-              Shadow(
-                color: context.colorScheme.shadow.withAlpha(100),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
+      bottom: 8,
+      left: 0,
+      right: 0,
+      child: Center(
+        child: SizedBox(
+          width: _titleFieldWidth,
+          child: TextField(
+            textInputAction: TextInputAction.done,
+            decoration: InputDecoration(
+              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 6,
+                vertical: 6,
               ),
-            ],
+              filled: true,
+              fillColor: context.colorScheme.surface.withAlpha(180),
+              hintText: 'Add message',
+              hintStyle: context.textTheme.bodyLarge?.copyWith(
+                color: context.colorScheme.onSurface.withAlpha(140),
+              ),
+              border: const OutlineInputBorder(borderSide: BorderSide.none),
+              counterText: '',
+            ),
+            controller: _titleController,
+            style: context.textTheme.bodyLarge?.copyWith(
+              color: context.colorScheme.onSurface,
+              fontWeight: FontWeight.w500,
+            ),
+            cursorColor: context.colorScheme.onSurface,
+            textAlign: TextAlign.center,
           ),
         ),
-        controller: _titleController,
-        style: context.textTheme.titleMedium?.copyWith(
-          color: context.colorScheme.onPrimary,
-          shadows: [
-            Shadow(
-              color: context.colorScheme.shadow.withAlpha(120),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        cursorColor: context.colorScheme.onPrimary,
-        textAlign: TextAlign.center,
-        maxLines: 2,
       ),
     );
   }
