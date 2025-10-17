@@ -6,7 +6,7 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-const ONE_HOUR_IN_SECONDS = 3600;
+const EXPIRES_IN_SECONDS = 7 * 24 * 60 * 60; // 7 days × 24 hours × 60 minutes × 60 seconds
 const r2Endpoint = params.defineString("R2_ENDPOINT");
 const r2AccessKey = params.defineString("R2_ACCESS_KEY");
 const r2SecretKey = params.defineSecret("R2_SECRET_KEY");
@@ -42,7 +42,7 @@ export const getPresignedUrl = https.onCall(
     });
 
     const url = await getSignedUrl(s3Client, command, {
-      expiresIn: ONE_HOUR_IN_SECONDS,
+      expiresIn: EXPIRES_IN_SECONDS,
     });
 
     return { url };
@@ -69,7 +69,7 @@ export const getStoryUploadUrl = https.onCall(
     });
 
     const uploadUrl = await getSignedUrl(s3Client, command, {
-      expiresIn: ONE_HOUR_IN_SECONDS,
+      expiresIn: EXPIRES_IN_SECONDS,
     });
 
     return { uploadUrl, key };
