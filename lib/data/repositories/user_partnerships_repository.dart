@@ -1,13 +1,21 @@
 import 'dart:async';
 
+import 'package:bebi_app/config/firebase_providers.dart';
+import 'package:bebi_app/config/hive_providers.dart';
 import 'package:bebi_app/data/models/user_partnership.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 // ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
-import 'package:injectable/injectable.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-@injectable
+final userPartnershipsRepositoryProvider = Provider.autoDispose(
+  (ref) => UserPartnershipsRepository(
+    ref.read(firebaseFirestoreProvider),
+    ref.read(userPartnershipBoxProvider),
+  ),
+);
+
 class UserPartnershipsRepository {
   const UserPartnershipsRepository(this._firestore, this._userPartnershipBox);
 

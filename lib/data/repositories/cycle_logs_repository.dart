@@ -1,11 +1,19 @@
 import 'dart:async';
 
+import 'package:bebi_app/config/firebase_providers.dart';
+import 'package:bebi_app/config/hive_providers.dart';
 import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
-import 'package:injectable/injectable.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-@injectable
+final cycleLogsRepositoryProvider = Provider.autoDispose(
+  (ref) => CycleLogsRepository(
+    ref.read(firebaseFirestoreProvider),
+    ref.read(cycleLogBoxProvider),
+  ),
+);
+
 class CycleLogsRepository {
   const CycleLogsRepository(this._firestore, this._cycleLogBox);
 

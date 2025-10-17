@@ -1,9 +1,9 @@
 import 'dart:async';
 
+import 'package:bebi_app/config/firebase_providers.dart';
+import 'package:bebi_app/config/utility_packages_provider.dart';
 import 'package:bebi_app/utils/platform/platform_utils.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
-import 'package:get_it/get_it.dart';
 
 mixin GuardMixin {
   FutureOr<void> guard<T>(
@@ -21,7 +21,9 @@ mixin GuardMixin {
           (logWhen != null && !logWhen(e, s))) {
         debugPrint('Error caught by guard: $e\n$s');
       } else {
-        unawaited(GetIt.I<FirebaseCrashlytics>().recordError(e, s));
+        unawaited(
+          globalContainer.read(firebaseCrashlyticsProvider).recordError(e, s),
+        );
       }
       onError?.call(e, s);
       return;

@@ -1,23 +1,20 @@
-part of 'add_partner_cubit.dart';
+import 'package:bebi_app/config/firebase_providers.dart';
+import 'package:bebi_app/data/repositories/user_profile_repository.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-sealed class AddPartnerState {
-  const AddPartnerState();
-}
+mixin class AddPartnerState {
+  Future<String> fetchUserCode(WidgetRef ref) async {
+    final firebaseAuth = ref.read(firebaseAuthProvider);
+    final userProfileRepository = ref.read(userProfileRepositoryProvider);
 
-class AddPartnerLoadingState extends AddPartnerState {
-  const AddPartnerLoadingState();
-}
+    final userProfile = await userProfileRepository.getByUserId(
+      firebaseAuth.currentUser!.uid,
+    );
 
-class AddPartnerLoadedState extends AddPartnerState {
-  const AddPartnerLoadedState(this.currentUserCode);
-  final String currentUserCode;
-}
+    if (userProfile == null) {
+      throw ArgumentError('User profile not found.');
+    }
 
-class AddPartnerSuccessState extends AddPartnerState {
-  const AddPartnerSuccessState();
-}
-
-class AddPartnerErrorState extends AddPartnerState {
-  const AddPartnerErrorState(this.error);
-  final String error;
+    return userProfile.code;
+  }
 }

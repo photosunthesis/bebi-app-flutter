@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:bebi_app/config/firebase_providers.dart';
+import 'package:bebi_app/config/hive_providers.dart';
 import 'package:bebi_app/data/models/story.dart';
 import 'package:blurhash_ffi/blurhash.dart';
 import 'package:camera/camera.dart';
@@ -8,16 +10,24 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:cross_file_image/cross_file_image.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart' as http;
-import 'package:injectable/injectable.dart';
 
-@injectable
+final storiesRepositoryProvider = Provider.autoDispose(
+  (ref) => StoriesRepository(
+    ref.read(firebaseFirestoreProvider),
+    ref.read(firebaseFunctionsProvider),
+    ref.read(storyBoxProvider),
+    ref.read(storyImageUrlBoxProvider),
+  ),
+);
+
 class StoriesRepository {
   StoriesRepository(
     this._firestore,
     this._functions,
     this._storiesBox,
-    @Named('story_image_url_box') this._storyImageUrlBox,
+    this._storyImageUrlBox,
   );
 
   final FirebaseFirestore _firestore;

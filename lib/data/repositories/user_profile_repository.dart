@@ -1,27 +1,28 @@
 import 'dart:async';
+import 'package:bebi_app/config/firebase_providers.dart';
+import 'package:bebi_app/config/hive_providers.dart';
 import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 // ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:injectable/injectable.dart';
 
-@injectable
+final userProfileRepositoryProvider = Provider.autoDispose(
+  (ref) => UserProfileRepository(
+    ref.read(firebaseFirestoreProvider),
+    ref.read(userProfileBoxProvider),
+  ),
+);
+
 class UserProfileRepository {
-  const UserProfileRepository(
-    this._firestore,
-    this._storage,
-    this._userProfileBox,
-  );
+  const UserProfileRepository(this._firestore, this._userProfileBox);
 
   final FirebaseFirestore _firestore;
-  final FirebaseStorage _storage;
   final Box<UserProfile> _userProfileBox;
 
   static const _collection = 'user_profiles';
-  static const _profileImagePath = 'profile_images';
 
   Future<UserProfile?> getByUserId(
     String userId, {
@@ -99,10 +100,12 @@ class UserProfileRepository {
   }
 
   Future<String> uploadProfileImage(String userId, XFile imageFile) async {
-    final ref = _storage.ref().child('$_profileImagePath/$userId');
-    await ref.putData(await imageFile.readAsBytes());
-    final downloadUrl = await ref.getDownloadURL();
-    return downloadUrl;
+    // final ref = _storage.ref().child('$_profileImagePath/$userId');
+    // await ref.putData(await imageFile.readAsBytes());
+    // final downloadUrl = await ref.getDownloadURL();
+    // return downloadUrl;
+
+    throw UnimplementedError('Rework this');
   }
 
   Future<void> _cacheUserProfile(UserProfile userProfile) async {

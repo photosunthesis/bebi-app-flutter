@@ -1,14 +1,22 @@
 import 'dart:async';
 
+import 'package:bebi_app/config/firebase_providers.dart';
+import 'package:bebi_app/config/hive_providers.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 // ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
-import 'package:injectable/injectable.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-@injectable
+final calendarEventsRepositoryProvider = Provider.autoDispose(
+  (ref) => CalendarEventsRepository(
+    ref.read(firebaseFirestoreProvider),
+    ref.read(calendarBoxProvider),
+  ),
+);
+
 class CalendarEventsRepository {
   const CalendarEventsRepository(this._firestore, this._calendarEventBox);
 

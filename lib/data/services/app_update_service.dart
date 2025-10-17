@@ -1,14 +1,18 @@
 import 'dart:math' as math;
 
+import 'package:bebi_app/config/utility_packages_provider.dart';
 import 'package:bebi_app/data/models/app_update_info.dart';
 import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
 import 'package:bebi_app/utils/platform/platform_utils.dart';
 import 'package:flutter/foundation.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart' as http;
-import 'package:injectable/injectable.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
-@injectable
+final appUpdateServiceProvider = Provider.autoDispose(
+  (ref) => AppUpdateService(ref.read(packageInfoProvider)),
+);
+
 class AppUpdateService with LocalizationsMixin {
   const AppUpdateService(this._packageInfo);
 

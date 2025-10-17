@@ -1,8 +1,9 @@
 import 'dart:async';
 
 import 'package:bebi_app/app/app.dart';
-import 'package:bebi_app/config/dependencies.dart';
 import 'package:bebi_app/config/firebase_options.dart';
+import 'package:bebi_app/config/hive_providers.dart';
+import 'package:bebi_app/config/utility_packages_provider.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/data/models/hive_adapters/calendar_event_adapter.dart';
@@ -21,8 +22,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_refresh_rate_control/flutter_refresh_rate_control.dart';
-import 'package:get_it/get_it.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 void main() {
@@ -30,16 +31,38 @@ void main() {
     WidgetsFlutterBinding.ensureInitialized();
     _configureFontLicenses();
 
-    await Future.wait([
-      _configureFirebase(),
-      _configureHighRefreshScreen(),
-      _configureHive(),
-    ]);
+    await _configureFirebase();
+    await _configureHighRefreshScreen();
 
-    await configureDependencies();
-    await _clearLocalStorageOnNewVersion();
+    final packageInfo = await PackageInfo.fromPlatform();
+    final boxes = await _configureHive();
 
-    runApp(const App());
+    final hiveBoxOverrides = [
+      calendarBoxProvider.overrideWithValue(boxes[0] as Box<CalendarEvent>),
+      cycleLogBoxProvider.overrideWithValue(boxes[1] as Box<CycleLog>),
+      userProfileBoxProvider.overrideWithValue(boxes[2] as Box<UserProfile>),
+      userPartnershipBoxProvider.overrideWithValue(
+        boxes[3] as Box<UserPartnership>,
+      ),
+      aiInsightsBoxProvider.overrideWithValue(boxes[4] as Box<String>),
+      storyBoxProvider.overrideWithValue(boxes[5] as Box<Story>),
+      storyImageUrlBoxProvider.overrideWithValue(boxes[6] as Box<String>),
+    ];
+
+    await _clearLocalStorageOnNewVersion(boxes, packageInfo);
+
+    runApp(
+      UncontrolledProviderScope(
+        container: globalContainer,
+        child: ProviderScope(
+          overrides: [
+            ...hiveBoxOverrides,
+            packageInfoProvider.overrideWithValue(packageInfo),
+          ],
+          child: const App(),
+        ),
+      ),
+    );
   });
 }
 
@@ -75,7 +98,7 @@ Future<void> _configureHighRefreshScreen() async {
   }
 }
 
-Future<void> _configureHive() async {
+Future<List<Box>> _configureHive() async {
   await Hive.initFlutter();
   Hive
     ..registerAdapter(CalendarEventAdapter())
@@ -84,20 +107,33 @@ Future<void> _configureHive() async {
     ..registerAdapter(UserProfileAdapter())
     ..registerAdapter(UserPartnershipAdapter())
     ..registerAdapter(StoryAdapter());
+
+  final boxes = await Future.wait<Box>([
+    Hive.openBox<CalendarEvent>('calendar_events'),
+    Hive.openBox<CycleLog>('cycle_logs'),
+    Hive.openBox<UserProfile>('user_profiles'),
+    Hive.openBox<UserPartnership>('user_partnerships'),
+    Hive.openBox<String>('ai_insights_box'),
+    Hive.openBox<Story>('stories'),
+    Hive.openBox<String>('story_image_url_box'),
+  ]);
+
+  return boxes;
 }
 
-Future<void> _clearLocalStorageOnNewVersion() async {
-  final box = await Hive.openBox('settings');
-  final previousVersion = box.get('version', defaultValue: '');
-  final packageVersion = GetIt.I<PackageInfo>().version;
+Future<void> _clearLocalStorageOnNewVersion(
+  List<Box> boxes,
+  PackageInfo packageInfo,
+) async {
+  final settingsBox = await Hive.openBox('settings');
+  final previousVersion = settingsBox.get('version', defaultValue: '');
+  final packageVersion = packageInfo.version;
+
   if (previousVersion != packageVersion) {
-    await GetIt.I<Box<CalendarEvent>>().clear();
-    await GetIt.I<Box<CycleLog>>().clear();
-    await GetIt.I<Box<UserProfile>>().clear();
-    await GetIt.I<Box<UserPartnership>>().clear();
-    await GetIt.I<Box<String>>(instanceName: 'ai_insights_box').clear();
-    await GetIt.I<Box<String>>(instanceName: 'story_image_url_box').clear();
-    await GetIt.I<Box<Story>>().clear();
-    await box.put('version', packageVersion);
+    for (final box in boxes) {
+      await box.clear();
+    }
+
+    await settingsBox.put('version', packageVersion);
   }
 }

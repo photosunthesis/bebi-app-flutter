@@ -5,9 +5,12 @@ import 'package:bebi_app/utils/extensions/int_extensions.dart';
 import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
 // ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
-import 'package:injectable/injectable.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-@injectable
+final cyclePredictionsServiceProvider = Provider.autoDispose(
+  (ref) => const CyclePredictionsService(),
+);
+
 class CyclePredictionsService with LocalizationsMixin {
   const CyclePredictionsService();
 

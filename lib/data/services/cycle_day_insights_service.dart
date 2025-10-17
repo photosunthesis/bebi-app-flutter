@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:bebi_app/config/firebase_providers.dart';
+import 'package:bebi_app/config/hive_providers.dart';
 import 'package:bebi_app/data/models/cycle_day_insights.dart';
 import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
@@ -8,14 +10,17 @@ import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
 import 'package:collection/collection.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
-import 'package:injectable/injectable.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-@injectable
+final cycleDayInsightsServiceProvider = Provider.autoDispose(
+  (ref) => CycleDayInsightsService(
+    ref.read(generativeModelProvider),
+    ref.read(aiInsightsBoxProvider),
+  ),
+);
+
 class CycleDayInsightsService with LocalizationsMixin {
-  const CycleDayInsightsService(
-    this._generativeModel,
-    @Named('ai_insights_box') this._aiInsightsBox,
-  );
+  const CycleDayInsightsService(this._generativeModel, this._aiInsightsBox);
 
   final GenerativeModel _generativeModel;
   final Box<String> _aiInsightsBox;

@@ -2,9 +2,12 @@ import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/data/models/repeat_rule.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
 import 'package:bebi_app/utils/extensions/int_extensions.dart';
-import 'package:injectable/injectable.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-@injectable
+final recurringCalendarEventsServiceProvider = Provider.autoDispose(
+  (ref) => RecurringCalendarEventsService(),
+);
+
 class RecurringCalendarEventsService {
   RecurringCalendarEventsService();
 

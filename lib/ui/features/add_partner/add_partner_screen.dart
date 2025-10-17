@@ -1,98 +1,99 @@
 import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
-import 'package:bebi_app/ui/features/add_partner/add_partner_cubit.dart';
+import 'package:bebi_app/ui/features/add_partner/add_partner_event.dart';
+import 'package:bebi_app/ui/features/add_partner/add_partner_state.dart';
 import 'package:bebi_app/ui/shared_widgets/forms/app_text_form_field.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
-import 'package:bebi_app/utils/extensions/int_extensions.dart';
 import 'package:bebi_app/utils/formatters/user_code_formatter.dart';
 import 'package:bebi_app/utils/mixins/analytics_mixin.dart';
-import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_keyboard_visibility_temp_fork/flutter_keyboard_visibility_temp_fork.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class AddPartnerScreen extends StatefulWidget {
-  const AddPartnerScreen({super.key});
+class AddPartnerScreen extends HookConsumerWidget
+    with AddPartnerEvent, AddPartnerState, AnalyticsMixin {
+  AddPartnerScreen({super.key});
 
-  @override
-  State<AddPartnerScreen> createState() => _AddPartnerScreenState();
-}
-
-class _AddPartnerScreenState extends State<AddPartnerScreen>
-    with AnalyticsMixin, LocalizationsMixin {
-  late final _cubit = context.read<AddPartnerCubit>();
-  final _userCodeController = TextEditingController();
-  final _partnerCodeController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _cubit.initialize());
+  Future<void> _handleSubmit(
+    GlobalKey<FormState> formKey,
+    WidgetRef ref,
+    BuildContext context,
+  ) async {
+    if (formKey.currentState?.validate() ?? false) {
+      await connectWithPartner(ref)
+          .then((_) {
+            context.goNamed(AppRoutes.home);
+          })
+          .catchError((error) {
+            context.showSnackbar(switch (error) {
+              ArgumentError(:final message) =>
+                message ?? context.l10n.unexpectedError,
+              _ => context.l10n.unexpectedError,
+            });
+          });
+    }
   }
 
   @override
-  void dispose() {
-    _userCodeController.dispose();
-    _partnerCodeController.dispose();
-    super.dispose();
-  }
+  Widget build(BuildContext context, WidgetRef ref) {
+    final loading = useState(false);
+    final userCode = useState('');
+    final userCodeController = useTextEditingController();
+    final partnerCodeController = useTextEditingController();
+    final formKey = useMemoized(() => GlobalKey<FormState>());
 
-  @override
-  Widget build(BuildContext context) {
-    return PopScope(
+    useEffect(() {
+      fetchUserCode(ref).then((code) {
+        userCode.value = code;
+        userCodeController.text = code;
+      });
+      return null;
+    }, const []);
+
+    return Form(
+      key: formKey,
       canPop: false,
-      child: BlocListener<AddPartnerCubit, AddPartnerState>(
-        listener: (context, state) {
-          if (state is AddPartnerLoadedState) {
-            final code = state.currentUserCode;
-            final firstPart = code.substring(0, code.length ~/ 2);
-            final secondPart = code.substring(code.length ~/ 2);
-            _userCodeController.text = '$firstPart-$secondPart';
-          }
-
-          if (state is AddPartnerErrorState) {
-            context.showSnackbar(state.error, duration: 6.seconds);
-          }
-
-          if (state is AddPartnerSuccessState) context.goNamed(AppRoutes.home);
-        },
-        child: KeyboardDismissOnTap(
-          dismissOnCapturedTaps: true,
-          child: Scaffold(
-            resizeToAvoidBottomInset: true,
-            body: Form(
-              key: _formKey,
-              child: CustomScrollView(
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: Column(
-                      children: [
-                        const SafeArea(
-                          child: SizedBox(height: UiConstants.padding),
-                        ),
-                        _buildHeader(),
-                        const SizedBox(height: 18),
-                      ],
+      child: KeyboardDismissOnTap(
+        dismissOnCapturedTaps: true,
+        child: Scaffold(
+          resizeToAvoidBottomInset: true,
+          body: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: Column(
+                  children: [
+                    const SafeArea(
+                      child: SizedBox(height: UiConstants.padding),
                     ),
-                  ),
-                  SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: _buildCodeSections(),
-                  ),
-                ],
+                    _buildHeader(context),
+                    const SizedBox(height: 18),
+                  ],
+                ),
               ),
-            ),
-            bottomNavigationBar: _buildBottomBar(),
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: _buildCodeSections(
+                  context,
+                  userCodeController,
+                  partnerCodeController,
+                ),
+              ),
+            ],
+          ),
+          bottomNavigationBar: _buildBottomBar(
+            context,
+            handleSubmit: () => _handleSubmit(formKey, ref, context),
+            loading: loading.value,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
       child: Column(
@@ -116,13 +117,17 @@ class _AddPartnerScreenState extends State<AddPartnerScreen>
     );
   }
 
-  Widget _buildUserCodeSection() {
+  Widget _buildUserCodeSection(
+    BuildContext context,
+    TextEditingController userCodeController,
+  ) {
     return _buildCodeContainer(
+      context,
       title: context.l10n.shareCodeTitle,
       child: Stack(
         children: [
           AppTextFormField(
-            controller: _userCodeController,
+            controller: userCodeController,
             hintText: context.l10n.codeHint,
             readOnly: true,
           ),
@@ -133,26 +138,7 @@ class _AddPartnerScreenState extends State<AddPartnerScreen>
               style: OutlinedButton.styleFrom(
                 visualDensity: VisualDensity.compact,
               ),
-              onPressed: () async {
-                if (_userCodeController.text.isEmpty) return;
-
-                await Clipboard.setData(
-                  ClipboardData(
-                    text: _userCodeController.text.replaceAll('-', ''),
-                  ),
-                );
-
-                context.showSnackbar(
-                  context.l10n.codeCopied(_userCodeController.text),
-                  type: SnackbarType.secondary,
-                );
-
-                logShare(
-                  method: 'copy',
-                  contentType: 'user_code',
-                  itemId: _userCodeController.text.replaceAll('-', ''),
-                );
-              },
+              onPressed: () async => _onShare(context, userCodeController),
               child: Text(context.l10n.copyButton.toUpperCase()),
             ),
           ),
@@ -161,11 +147,37 @@ class _AddPartnerScreenState extends State<AddPartnerScreen>
     );
   }
 
-  Widget _buildPartnerCodeSection() {
+  Future<void> _onShare(
+    BuildContext context,
+    TextEditingController userCodeController,
+  ) async {
+    if (userCodeController.text.isEmpty) return;
+
+    await Clipboard.setData(
+      ClipboardData(text: userCodeController.text.replaceAll('-', '')),
+    );
+
+    context.showSnackbar(
+      context.l10n.codeCopied(userCodeController.text),
+      type: SnackbarType.secondary,
+    );
+
+    logShare(
+      method: 'copy',
+      contentType: 'user_code',
+      itemId: userCodeController.text.replaceAll('-', ''),
+    );
+  }
+
+  Widget _buildPartnerCodeSection(
+    BuildContext context,
+    TextEditingController partnerCodeController,
+  ) {
     return _buildCodeContainer(
+      context,
       title: context.l10n.enterCodeTitle,
       child: AppTextFormField(
-        controller: _partnerCodeController,
+        controller: partnerCodeController,
         hintText: context.l10n.codeHint,
         keyboardType: TextInputType.text,
         textInputAction: TextInputAction.done,
@@ -180,27 +192,35 @@ class _AddPartnerScreenState extends State<AddPartnerScreen>
     );
   }
 
-  Widget _buildCodeSections() {
+  Widget _buildCodeSections(
+    BuildContext context,
+    TextEditingController userCodeController,
+    TextEditingController partnerCodeController,
+  ) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: context.screenWidth * 0.16),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _buildUserCodeSection(),
+          _buildUserCodeSection(context, userCodeController),
           Text(
             context.l10n.orText,
             style: context.textTheme.bodyMedium,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 12),
-          _buildPartnerCodeSection(),
+          _buildPartnerCodeSection(context, partnerCodeController),
           SizedBox(height: context.screenHeight * 0.12),
         ],
       ),
     );
   }
 
-  Widget _buildCodeContainer({required String title, required Widget child}) {
+  Widget _buildCodeContainer(
+    BuildContext context, {
+    required String title,
+    required Widget child,
+  }) {
     return Padding(
       padding: const EdgeInsets.all(10),
       child: Column(
@@ -213,34 +233,22 @@ class _AddPartnerScreenState extends State<AddPartnerScreen>
     );
   }
 
-  Widget _buildBottomBar() {
+  Widget _buildBottomBar(
+    BuildContext context, {
+    required Function() handleSubmit,
+    required bool loading,
+  }) {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(UiConstants.padding),
-        child: BlocSelector<AddPartnerCubit, AddPartnerState, bool>(
-          selector: (state) => state is AddPartnerLoadingState,
-          builder: (context, loading) {
-            return ElevatedButton(
-              onPressed: loading
-                  ? null
-                  : () {
-                      if (_formKey.currentState?.validate() ?? false) {
-                        _cubit.submit(
-                          partnerCode: _partnerCodeController.text.isEmpty
-                              ? null
-                              : _partnerCodeController.text.replaceAll('-', ''),
-                        );
-                      }
-                    },
-
-              child: Text(
-                (loading
-                        ? context.l10n.connectingButton
-                        : context.l10n.finishConnectingButton)
-                    .toUpperCase(),
-              ),
-            );
-          },
+        child: ElevatedButton(
+          onPressed: loading ? null : handleSubmit,
+          child: Text(
+            (loading
+                    ? context.l10n.connectingButton
+                    : context.l10n.finishConnectingButton)
+                .toUpperCase(),
+          ),
         ),
       ),
     );
