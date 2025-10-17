@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 
 mixin GuardMixin {
-  FutureOr<T?> guard<T>(
+  FutureOr<void> guard<T>(
     FutureOr<T> Function() body, {
     void Function(Object error, StackTrace stackTrace)? onError,
     void Function()? onComplete,
@@ -14,7 +14,7 @@ mixin GuardMixin {
     bool disableLogging = false,
   }) async {
     try {
-      return await body();
+      await body();
     } catch (e, s) {
       if ((kDebugMode && kIsTest) ||
           disableLogging ||
@@ -24,7 +24,7 @@ mixin GuardMixin {
         unawaited(GetIt.I<FirebaseCrashlytics>().recordError(e, s));
       }
       onError?.call(e, s);
-      return null;
+      return;
     } finally {
       onComplete?.call();
     }

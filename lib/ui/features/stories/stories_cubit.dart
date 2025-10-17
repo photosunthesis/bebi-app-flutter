@@ -109,13 +109,8 @@ class StoriesCubit extends Cubit<StoriesState> with GuardMixin {
     late final String url;
 
     await guard(
-      () async {
-        url = await _storiesRepository.getStoryImageUrl(story);
-      },
-      onError: (e, s) {
-        print(e);
-        url = '';
-      },
+      () async => url = await _storiesRepository.getStoryImageUrl(story),
+      onError: (e, s) => url = '', // TODO Handle this better
     );
 
     return url;
