@@ -1,7 +1,5 @@
-import 'package:bebi_app/data/services/r2_objects_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
-import 'package:get_it/get_it.dart';
 
 class Story extends Equatable {
   Story({
@@ -36,9 +34,6 @@ class Story extends Equatable {
   final DateTime _createdAt;
 
   DateTime get createdAt => _createdAt.toLocal();
-
-  Future<String> getPhotoUrl() async =>
-      GetIt.I<R2ObjectsService>().getPresignedUrl(storageObjectName);
 
   Map<String, dynamic> toFirestore() {
     return {

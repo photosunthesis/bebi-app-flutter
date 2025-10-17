@@ -105,6 +105,22 @@ class StoriesCubit extends Cubit<StoriesState> with GuardMixin {
     );
   }
 
+  Future<String> getStoryImageUrl(Story story) async {
+    late final String url;
+
+    await guard(
+      () async {
+        url = await _storiesRepository.getStoryImageUrl(story);
+      },
+      onError: (e, s) {
+        print(e);
+        url = '';
+      },
+    );
+
+    return url;
+  }
+
   void clearCapturedImage() {
     emit(state.copyWith(captureImage: const AsyncData(null)));
   }

@@ -1,22 +1,19 @@
 import 'package:bebi_app/data/models/story.dart';
-import 'package:bebi_app/data/services/r2_objects_service.dart';
 import 'package:blurhash_ffi/blurhash.dart';
 import 'package:camera/camera.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:cross_file_image/cross_file_image.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'package:injectable/injectable.dart';
 
 @injectable
 class StoriesRepository {
-  const StoriesRepository(
-    this._firestore,
-    this._r2ObjectsService,
-    this._storiesBox,
-  );
+  const StoriesRepository(this._firestore, this._functions, this._storiesBox);
 
   final FirebaseFirestore _firestore;
-  final R2ObjectsService _r2ObjectsService;
+  final FirebaseFunctions _functions;
   final Box<Story> _storiesBox;
 
   static const _collection = 'stories';
@@ -54,18 +51,29 @@ class StoriesRepository {
   }) async {
     final blurHash = await BlurhashFFI.encode(
       XFileImage(imageFile),
-      componentX: 2,
+      componentX: 3,
       componentY: 2,
     );
 
-    final storageObjectName = await _r2ObjectsService.uploadFile(
-      imageFile,
-      path: _collection,
+    final (uploadUrl, objectName) = await _functions
+        .httpsCallable('getStoryUploadUrl')
+        .call({'fileName': imageFile.name, 'contentType': imageFile.mimeType})
+        .then((result) {
+          final data = result.data as Map<String, dynamic>;
+          return (data['uploadUrl'] as String, data['key'] as String);
+        });
+
+    await http.put(
+      Uri.parse(uploadUrl),
+      body: await imageFile.readAsBytes(),
+      headers: {
+        'Content-Type': imageFile.mimeType ?? 'application/octet-stream',
+      },
     );
 
     final story = Story(
       id: '', // Will be set after Firestore document creation
-      storageObjectName: storageObjectName,
+      storageObjectName: objectName,
       blurHash: blurHash,
       createdBy: createdBy,
       title: title,
@@ -85,5 +93,14 @@ class StoriesRepository {
   Future<void> deleteStory(String storyId) async {
     await _firestore.collection(_collection).doc(storyId).delete();
     await _storiesBox.delete(storyId);
+  }
+
+  Future<String> getStoryImageUrl(Story story) async {
+    final result = await _functions.httpsCallable('getPresignedUrl').call({
+      'filename': story.storageObjectName,
+    });
+
+    final data = result.data as Map<String, dynamic>;
+    return data['url'] as String;
   }
 }

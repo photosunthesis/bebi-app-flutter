@@ -3,16 +3,15 @@ import 'dart:math' as math;
 import 'package:bebi_app/data/models/app_update_info.dart';
 import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
 import 'package:bebi_app/utils/platform/platform_utils.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'package:injectable/injectable.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 @injectable
 class AppUpdateService with LocalizationsMixin {
-  const AppUpdateService(this._dio, this._packageInfo);
+  const AppUpdateService(this._packageInfo);
 
-  final Dio _dio;
   final PackageInfo _packageInfo;
 
   static const _owner = 'photosunthesis';
@@ -23,13 +22,14 @@ class AppUpdateService with LocalizationsMixin {
     try {
       if (kIsWeb) return null;
 
-      final response = await _dio.get(
-        '$_baseUrl/repos/$_owner/$_repo/releases/latest',
+      final client = http.Client();
+      final response = await client.get(
+        Uri.parse('$_baseUrl/repos/$_owner/$_repo/releases/latest'),
       );
 
       if (response.statusCode != 200) throw Exception(l10n.checkUpdateError);
 
-      return _parseReleaseData(response.data);
+      return _parseReleaseData(response.body as Map<String, dynamic>);
     } catch (_) {
       // On error we simply just not do anything 🤠
       return null;

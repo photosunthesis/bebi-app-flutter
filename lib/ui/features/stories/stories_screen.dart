@@ -189,21 +189,12 @@ class _StoriesScreenState extends State<StoriesScreen> with GuardMixin {
 
   Widget _buildStoryImage(Story story) {
     return FutureBuilder<String?>(
-      future: story.getPhotoUrl(),
+      future: context.read<StoriesCubit>().getStoryImageUrl(story),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting ||
-            snapshot.connectionState == ConnectionState.none) {
-          return SizedBox.expand(
-            child: Image(
-              image: BlurhashFfiImage(story.blurHash),
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: double.infinity,
-            ),
-          );
-        }
-
-        if (snapshot.hasError || snapshot.data == null) {
+            snapshot.connectionState == ConnectionState.none ||
+            snapshot.hasError ||
+            snapshot.data == null) {
           return SizedBox.expand(
             child: Image(
               image: BlurhashFfiImage(story.blurHash),

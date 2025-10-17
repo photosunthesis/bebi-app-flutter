@@ -4,15 +4,13 @@ import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/data/models/story.dart';
 import 'package:bebi_app/data/models/user_partnership.dart';
 import 'package:bebi_app/data/models/user_profile.dart';
-import 'package:bebi_app/utils/extensions/int_extensions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dio/dio.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
@@ -47,6 +45,10 @@ abstract class Dependencies {
   FirebaseCrashlytics get crashlytics => FirebaseCrashlytics.instance;
 
   @lazySingleton
+  FirebaseFunctions get functions =>
+      FirebaseFunctions.instanceFor(region: 'asia-east1');
+
+  @lazySingleton
   GenerativeModel get geminiModel => FirebaseAI.googleAI().generativeModel(
     model: 'gemini-2.5-flash-lite',
     safetySettings: [
@@ -62,21 +64,6 @@ abstract class Dependencies {
 
   @preResolve
   Future<PackageInfo> get packageInfo async => PackageInfo.fromPlatform();
-
-  Dio get dio =>
-      Dio(
-          BaseOptions(
-            connectTimeout: 5.seconds,
-            receiveTimeout: 5.seconds,
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json',
-            },
-          ),
-        )
-        ..interceptors.addAll([
-          if (kDebugMode) LogInterceptor(requestBody: true, responseBody: true),
-        ]);
 
   @preResolve
   Future<Box<CalendarEvent>> get calendarEventBox async =>
