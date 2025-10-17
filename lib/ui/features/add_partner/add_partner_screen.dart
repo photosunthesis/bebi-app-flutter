@@ -17,26 +17,6 @@ class AddPartnerScreen extends HookConsumerWidget
     with AddPartnerEvent, AddPartnerState, AnalyticsMixin {
   AddPartnerScreen({super.key});
 
-  Future<void> _handleSubmit(
-    GlobalKey<FormState> formKey,
-    WidgetRef ref,
-    BuildContext context,
-  ) async {
-    if (formKey.currentState?.validate() ?? false) {
-      await connectWithPartner(ref)
-          .then((_) {
-            context.goNamed(AppRoutes.home);
-          })
-          .catchError((error) {
-            context.showSnackbar(switch (error) {
-              ArgumentError(:final message) =>
-                message ?? context.l10n.unexpectedError,
-              _ => context.l10n.unexpectedError,
-            });
-          });
-    }
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final loading = useState(false);
@@ -85,12 +65,33 @@ class AddPartnerScreen extends HookConsumerWidget
           ),
           bottomNavigationBar: _buildBottomBar(
             context,
-            handleSubmit: () => _handleSubmit(formKey, ref, context),
+            handleSubmit: () => _handleSubmit(ref, context, formKey, loading),
             loading: loading.value,
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _handleSubmit(
+    WidgetRef ref,
+    BuildContext context,
+    GlobalKey<FormState> formKey,
+    ValueNotifier<bool> loadingNotifier,
+  ) async {
+    if (formKey.currentState?.validate() ?? false) {
+      loadingNotifier.value = true;
+      await connectWithPartner(ref)
+          .then((_) => context.goNamed(AppRoutes.home))
+          .whenComplete(() => loadingNotifier.value = false)
+          .catchError((error) {
+            context.showSnackbar(switch (error) {
+              ArgumentError(:final message) =>
+                message ?? context.l10n.unexpectedError,
+              _ => context.l10n.unexpectedError,
+            });
+          });
+    }
   }
 
   Widget _buildHeader(BuildContext context) {

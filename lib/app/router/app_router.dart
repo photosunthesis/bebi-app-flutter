@@ -189,7 +189,7 @@ final goRouterProvider = Provider((ref) {
       GoRoute(
         path: '/add-partner',
         name: AppRoutes.addPartner,
-        builder: (_, _) => const AddPartnerScreen(),
+        builder: (_, _) => AddPartnerScreen(),
       ),
     ],
     observers: [if (kDebugMode) _DebugNavigatorObserver()],
