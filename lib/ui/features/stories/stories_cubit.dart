@@ -7,6 +7,7 @@ import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:bebi_app/data/repositories/stories_repository.dart';
 import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
+import 'package:bebi_app/utils/mixins/analytics_mixin.dart';
 import 'package:bebi_app/utils/mixins/guard_mixin.dart';
 import 'package:camera/camera.dart';
 import 'package:equatable/equatable.dart';
@@ -18,13 +19,15 @@ import 'package:injectable/injectable.dart';
 part 'stories_state.dart';
 
 @injectable
-class StoriesCubit extends Cubit<StoriesState> with GuardMixin {
+class StoriesCubit extends Cubit<StoriesState> with GuardMixin, AnalyticsMixin {
   StoriesCubit(
     this._firebaseAuth,
     this._storiesRepository,
     this._userProfileRepository,
     this._userPartnershipsRepository,
-  ) : super(const StoriesState());
+  ) : super(const StoriesState()) {
+    logScreenViewed(screenName: 'stories_screen');
+  }
 
   final FirebaseAuth _firebaseAuth;
   final StoriesRepository _storiesRepository;
@@ -64,6 +67,11 @@ class StoriesCubit extends Cubit<StoriesState> with GuardMixin {
         ),
       ),
     );
+
+    logDataLoaded(
+      dataType: 'stories',
+      parameters: {'story_count': state.stories.asData()?.length ?? 0},
+    );
   }
 
   void setCapturedImage(XFile imageFile) {
@@ -100,6 +108,11 @@ class StoriesCubit extends Cubit<StoriesState> with GuardMixin {
 
           clearCapturedImage();
           await initialize();
+
+          logUserAction(
+            action: 'create_story',
+            parameters: {'has_title': title.trim().isNotEmpty},
+          );
         }),
       ),
     );
@@ -118,5 +131,6 @@ class StoriesCubit extends Cubit<StoriesState> with GuardMixin {
 
   void clearCapturedImage() {
     emit(state.copyWith(captureImage: const AsyncData(null)));
+    logUserAction(action: 'clear_captured_image');
   }
 }
