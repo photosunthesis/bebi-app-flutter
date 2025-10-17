@@ -17,9 +17,6 @@ inputs:
     description: Whether to run flutter gen-l10n
     required: false
     default: "false"
-  env_base64:
-    description: Base64-encoded .env contents (pass from workflow secrets)
-    required: false
 
 runs:
   using: composite
@@ -66,14 +63,6 @@ runs:
           --token=${{ inputs.firebase_token }} \
           --out=lib/config/firebase_options.dart \
           --yes
-
-    - name: Set up .env file
-      shell: bash
-      run: |
-        if [ -n "${{ inputs.env_base64 }}" ]; then
-          # Use printf to avoid adding a trailing newline or printing the secret
-          printf '%s' "${{ inputs.env_base64 }}" | base64 --decode > .env
-        fi
 
     - name: Download dependencies
       shell: bash

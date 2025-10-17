@@ -23,7 +23,6 @@ jobs:
           flutter_version: 3.35.6
           firebase_project: bebi-app
           firebase_platforms: none
-          env_base64: ${{ secrets.ENV_BASE64 }}
 
       - name: Cache Flutter dependencies
         uses: actions/cache@v4
