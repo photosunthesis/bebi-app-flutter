@@ -81,10 +81,16 @@ abstract class Dependencies {
   Future<Box<UserPartnership>> get userPartnershipBox async =>
       Hive.openBox<UserPartnership>('user_partnerships');
 
+  @Named('ai_insights_box')
   @preResolve
   Future<Box<String>> get aiInsightsBox async =>
       Hive.openBox<String>('ai_insights');
 
   @preResolve
   Future<Box<Story>> get storyBox async => Hive.openBox<Story>('stories');
+
+  @Named('story_image_url_box')
+  @preResolve
+  Future<Box<String>> get storyImageUrlBox async =>
+      Hive.openBox<String>('story_image_urls');
 }

@@ -206,6 +206,10 @@ class _StoriesScreenState extends State<StoriesScreen> with GuardMixin {
         }
 
         return CachedNetworkImage(
+          fadeInDuration: 240.milliseconds,
+          fadeInCurve: Curves.easeInQuart,
+          fadeOutDuration: 240.milliseconds,
+          fadeOutCurve: Curves.easeOutQuart,
           imageUrl: snapshot.data!,
           fit: BoxFit.cover,
           placeholder: (context, url) => SizedBox.expand(

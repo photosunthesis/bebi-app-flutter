@@ -27,7 +27,8 @@ class HomeCubit extends Cubit<HomeState> with GuardMixin, AnalyticsMixin {
     this._cycleLogBox,
     this._userProfileBox,
     this._userPartnershipBox,
-    this._aiSummaryAndInsightsBox,
+    @Named('ai_insights_box') this._aiSummaryAndInsightsBox,
+    @Named('story_image_url_box') this._storyImageUrlBox,
     this._appUpdateService,
   ) : super(const HomeLoadingState()) {
     logScreenViewed(screenName: 'home_screen');
@@ -41,6 +42,7 @@ class HomeCubit extends Cubit<HomeState> with GuardMixin, AnalyticsMixin {
   final Box<UserProfile> _userProfileBox;
   final Box<UserPartnership> _userPartnershipBox;
   final Box<String> _aiSummaryAndInsightsBox;
+  final Box<String> _storyImageUrlBox;
   final AppUpdateService _appUpdateService;
 
   Future<void> initialize() async {
@@ -110,14 +112,13 @@ class HomeCubit extends Cubit<HomeState> with GuardMixin, AnalyticsMixin {
 
         logUserAction(action: 'signed_out');
 
-        await Future.wait([
-          _firebaseAuth.signOut(),
-          _calendarEventBox.clear(),
-          _cycleLogBox.clear(),
-          _userProfileBox.clear(),
-          _userPartnershipBox.clear(),
-          _aiSummaryAndInsightsBox.clear(),
-        ]);
+        await _firebaseAuth.signOut();
+        await _calendarEventBox.clear();
+        await _cycleLogBox.clear();
+        await _userProfileBox.clear();
+        await _userPartnershipBox.clear();
+        await _aiSummaryAndInsightsBox.clear();
+        await _storyImageUrlBox.clear();
       },
       onError: (error, _) {
         emit(HomeErrorState(error.toString()));

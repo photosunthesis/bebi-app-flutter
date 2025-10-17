@@ -95,7 +95,8 @@ Future<void> _clearLocalStorageOnNewVersion() async {
     await GetIt.I<Box<CycleLog>>().clear();
     await GetIt.I<Box<UserProfile>>().clear();
     await GetIt.I<Box<UserPartnership>>().clear();
-    await GetIt.I<Box<String>>().clear();
+    await GetIt.I<Box<String>>(instanceName: 'ai_insights_box').clear();
+    await GetIt.I<Box<String>>(instanceName: 'story_image_url_box').clear();
     await GetIt.I<Box<Story>>().clear();
     await box.put('version', packageVersion);
   }

@@ -12,7 +12,10 @@ import 'package:injectable/injectable.dart';
 
 @injectable
 class CycleDayInsightsService with LocalizationsMixin {
-  const CycleDayInsightsService(this._generativeModel, this._aiInsightsBox);
+  const CycleDayInsightsService(
+    this._generativeModel,
+    @Named('ai_insights_box') this._aiInsightsBox,
+  );
 
   final GenerativeModel _generativeModel;
   final Box<String> _aiInsightsBox;

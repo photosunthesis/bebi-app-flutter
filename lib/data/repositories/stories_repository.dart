@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:bebi_app/data/models/story.dart';
 import 'package:blurhash_ffi/blurhash.dart';
 import 'package:camera/camera.dart';
@@ -10,11 +13,17 @@ import 'package:injectable/injectable.dart';
 
 @injectable
 class StoriesRepository {
-  const StoriesRepository(this._firestore, this._functions, this._storiesBox);
+  StoriesRepository(
+    this._firestore,
+    this._functions,
+    this._storiesBox,
+    @Named('story_image_url_box') this._storyImageUrlBox,
+  );
 
   final FirebaseFirestore _firestore;
   final FirebaseFunctions _functions;
   final Box<Story> _storiesBox;
+  final Box<String> _storyImageUrlBox;
 
   static const _collection = 'stories';
 
@@ -35,10 +44,9 @@ class StoriesRepository {
 
     final stories = querySnapshot.docs.map(Story.fromFirestore).toList();
 
-    await _storiesBox.clear();
-    for (final story in stories) {
-      await _storiesBox.put(story.id, story);
-    }
+    unawaited(
+      _storiesBox.putAll({for (final story in stories) story.id: story}),
+    );
 
     return stories;
   }
@@ -85,7 +93,7 @@ class StoriesRepository {
         .add(story.toFirestore());
 
     final newStory = story.copyWith(id: docRef.id);
-    await _storiesBox.put(newStory.id, newStory);
+    unawaited(_storiesBox.put(newStory.id, newStory));
 
     return newStory;
   }
@@ -95,12 +103,34 @@ class StoriesRepository {
     await _storiesBox.delete(storyId);
   }
 
-  Future<String> getStoryImageUrl(Story story) async {
-    final result = await _functions.httpsCallable('getPresignedUrl').call({
-      'filename': story.storageObjectName,
-    });
+  Future<String> getStoryImageUrl(Story story, {bool useCache = true}) async {
+    if (useCache && _storyImageUrlBox.containsKey(story.storageObjectName)) {
+      final cachedJson = _storyImageUrlBox.get(story.storageObjectName)!;
+      final cached = jsonDecode(cachedJson) as Map<String, dynamic>;
+      final fetchedAt = DateTime.parse(cached['fetchedAt'] as String);
+      final age = DateTime.now().difference(fetchedAt);
 
-    final data = result.data as Map<String, dynamic>;
-    return data['url'] as String;
+      // Consider presigned URL valid for 6 days
+      if (age.inDays < 6) return cached['imageUrl'] as String;
+    }
+
+    final storyImageUrl = await _functions
+        .httpsCallable('getPresignedUrl')
+        .call({'filename': story.storageObjectName})
+        .then(
+          (result) => (result.data as Map<String, dynamic>)['url'] as String,
+        );
+
+    unawaited(
+      _storyImageUrlBox.put(
+        story.storageObjectName,
+        jsonEncode({
+          'imageUrl': storyImageUrl,
+          'fetchedAt': DateTime.now().toIso8601String(),
+        }),
+      ),
+    );
+
+    return storyImageUrl;
   }
 }
