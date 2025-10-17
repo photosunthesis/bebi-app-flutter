@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.1] - 2025-10-17
+
+### Changed
+
+- Migrated from `minio` package and local `.env` secrets to Firebase Cloud Functions for Cloudflare R2 storage for improved security 🔒☁️
+
 ## [0.5.0] - 2025-10-16
 
 ### Added
@@ -58,7 +64,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-- Added a LICENSE file with the MIT + Commons Clause license (see LICENSE for details) 
+- Added a LICENSE file with the MIT + Commons Clause license (see LICENSE for details)
 
 ### Changed
 
