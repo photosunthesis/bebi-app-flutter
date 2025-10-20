@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.2] - 2025-10-20
+
+### Added
+
+- Added button to delete stories: Users can now remove unwanted stories from their collection 🗑️
+- Added button to download story images: Users can now save story images to their device 📥📸
+
 ## [0.5.1] - 2025-10-17
 
 ### Changed
