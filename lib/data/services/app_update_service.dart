@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:bebi_app/data/models/app_update_info.dart';
@@ -22,14 +23,14 @@ class AppUpdateService with LocalizationsMixin {
     try {
       if (kIsWeb) return null;
 
-      final client = http.Client();
-      final response = await client.get(
+      final response = await http.get(
         Uri.parse('$_baseUrl/repos/$_owner/$_repo/releases/latest'),
       );
 
       if (response.statusCode != 200) throw Exception(l10n.checkUpdateError);
 
-      return _parseReleaseData(response.body as Map<String, dynamic>);
+      final releaseJson = jsonDecode(response.body) as Map<String, dynamic>;
+      return _parseReleaseData(releaseJson);
     } catch (_) {
       // On error we simply just not do anything 🤠
       return null;
