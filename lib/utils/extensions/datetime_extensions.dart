@@ -64,6 +64,15 @@ extension DatetimeExtensions on DateTime {
     } else if (difference.inDays < 7) {
       return '${difference.inDays}d ago';
     } else {
+      final months = (now.year - year) * 12 + (now.month - month);
+      if (months > 0 && months < 12) {
+        return '${months}mo ago';
+      }
+
+      final years = months ~/ 12;
+
+      if (years > 0) return '${years}y ago';
+
       return toMMMdyyyy();
     }
   }

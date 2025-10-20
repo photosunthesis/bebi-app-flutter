@@ -13,6 +13,8 @@ import 'package:camera/camera.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gal/gal.dart';
+import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
 import 'package:injectable/injectable.dart';
 
@@ -132,5 +134,21 @@ class StoriesCubit extends Cubit<StoriesState> with GuardMixin, AnalyticsMixin {
   void clearCapturedImage() {
     emit(state.copyWith(captureImage: const AsyncData(null)));
     logUserAction(action: 'clear_captured_image');
+  }
+
+  Future<void> downloadStoryToGallery(Story story) async {
+    final imageUrl = await getStoryImageUrl(story);
+    final response = await http.get(Uri.parse(imageUrl));
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to download image.');
+    }
+
+    await Gal.putImageBytes(response.bodyBytes, name: 'story_${story.id}');
+  }
+
+  Future<void> deleteStory(Story story) async {
+    await _storiesRepository.deleteStory(story);
+    logUserAction(action: 'delete_story');
   }
 }

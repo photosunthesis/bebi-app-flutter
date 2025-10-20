@@ -98,9 +98,12 @@ class StoriesRepository {
     return newStory;
   }
 
-  Future<void> deleteStory(String storyId) async {
-    await _firestore.collection(_collection).doc(storyId).delete();
-    await _storiesBox.delete(storyId);
+  Future<void> deleteStory(Story story) async {
+    await _functions.httpsCallable('deleteStoryImage').call({
+      'key': story.storageObjectName,
+    });
+    await _firestore.collection(_collection).doc(story.id).delete();
+    await _storiesBox.delete(story.id);
   }
 
   Future<String> getStoryImageUrl(Story story, {bool useCache = true}) async {

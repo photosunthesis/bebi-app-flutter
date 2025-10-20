@@ -51,5 +51,9 @@
 		<string>This app needs camera access to capture images for your Stories</string>
 		<key>NSMicrophoneUsageDescription</key>
 		<string>This app needs microphone access to record audio for your Stories</string>
+		<key>NSPhotoLibraryAddUsageDescription</key>
+		<string>This app needs photo library access to save your Stories</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>This app needs photo library access to select images for your Stories</string>
 	</dict>
 </plist>

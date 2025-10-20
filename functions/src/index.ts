@@ -3,6 +3,7 @@ import {
   S3Client,
   GetObjectCommand,
   PutObjectCommand,
+  DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -73,5 +74,25 @@ export const getStoryUploadUrl = https.onCall(
     });
 
     return { uploadUrl, key };
+  }
+);
+
+export const deleteStoryImage = https.onCall(
+  {
+    region: "asia-east1",
+  },
+  async (request) => {
+    if (!request.auth) {
+      throw new https.HttpsError("unauthenticated", "User must be signed in");
+    }
+
+    const key = request.data.key;
+
+    const command = new DeleteObjectCommand({
+      Bucket: r2Bucket.value(),
+      Key: key,
+    });
+
+    await s3Client.send(command);
   }
 );

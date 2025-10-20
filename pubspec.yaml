@@ -30,6 +30,7 @@ dependencies:
     sdk: flutter
   flutter_markdown_plus: ^1.0.3
   flutter_refresh_rate_control: ^0.0.4+1
+  gal: ^2.3.2
   get_it: ^8.2.0
   go_router: ^16.1.0
   hive_ce_flutter: ^2.3.1

@@ -24,15 +24,17 @@ class OptionsBottomDialog<T> extends StatelessWidget {
   const OptionsBottomDialog._({
     super.key,
     required this.title,
+    required this.options,
+    this.horizontalButtons = false,
     this.description,
     this.descriptionMarkdown,
-    required this.options,
   });
 
   final String title;
   final String? description;
   final String? descriptionMarkdown;
   final List<Option<T>> options;
+  final bool horizontalButtons;
 
   static Future<T?> show<T>(
     BuildContext context, {
@@ -43,6 +45,7 @@ class OptionsBottomDialog<T> extends StatelessWidget {
     bool useRootNavigator = true,
     bool isDismissible = true,
     bool enableDrag = true,
+    bool horizontalButtons = false,
   }) {
     assert(
       !(description != null && descriptionMarkdown != null),
@@ -61,6 +64,7 @@ class OptionsBottomDialog<T> extends StatelessWidget {
         description: description,
         descriptionMarkdown: descriptionMarkdown,
         options: options,
+        horizontalButtons: horizontalButtons,
       ),
       useRootNavigator: useRootNavigator,
     );
@@ -140,7 +144,22 @@ class OptionsBottomDialog<T> extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 16),
-          ...options.map((option) => _buildOption(context, option)),
+          if (horizontalButtons)
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: UiConstants.padding,
+              ),
+              child: Row(
+                children: options
+                    .map(
+                      (option) =>
+                          Expanded(child: _buildOption(context, option)),
+                    )
+                    .toList(),
+              ),
+            )
+          else
+            ...options.map((option) => _buildOption(context, option)),
           const SafeArea(child: SizedBox(height: 12)),
         ],
       ),
@@ -165,8 +184,8 @@ class OptionsBottomDialog<T> extends StatelessWidget {
         break;
       case OptionStyle.destructive:
         buttonStyle = ElevatedButton.styleFrom(
-          backgroundColor: context.colorScheme.error,
-          foregroundColor: context.colorScheme.surface,
+          backgroundColor: context.colorScheme.surface,
+          foregroundColor: context.colorScheme.error,
           side: BorderSide.none,
         );
         break;

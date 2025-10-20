@@ -365,43 +365,47 @@ class _StoriesCameraState extends State<StoriesCamera>
   }
 
   Future<void> _initializeCamera() async {
-    await guard(() async {
-      setState(() => _cameraIsLoading = true);
+    await guard(
+      () async {
+        setState(() => _cameraIsLoading = true);
 
-      _cameras = await availableCameras().then((cameras) {
-        // Filter out ultra-wide cameras first.
-        final filtered = cameras
-            .where((e) => e.lensType != CameraLensType.ultraWide)
-            .toList();
+        _cameras = await availableCameras().then((cameras) {
+          // Filter out ultra-wide cameras first.
+          final filtered = cameras
+              .where((e) => e.lensType != CameraLensType.ultraWide)
+              .toList();
 
-        final front = filtered.firstWhereOrNull(
-          (c) => c.lensDirection == CameraLensDirection.front,
+          final front = filtered.firstWhereOrNull(
+            (c) => c.lensDirection == CameraLensDirection.front,
+          );
+          final back = filtered.firstWhereOrNull(
+            (c) => c.lensDirection == CameraLensDirection.back,
+          );
+
+          // Prefer returning front then back if both exist, otherwise fall back to what we have.
+          if (front != null && back != null) return [front, back];
+          if (front != null) return [front];
+          if (back != null) return [back];
+          return filtered;
+        });
+
+        _cameraController = CameraController(
+          _cameras.firstWhere(
+            (camera) => camera.lensDirection == CameraLensDirection.front,
+            orElse: () => _cameras.first,
+          ),
+          ResolutionPreset.veryHigh,
+          enableAudio: false,
         );
-        final back = filtered.firstWhereOrNull(
-          (c) => c.lensDirection == CameraLensDirection.back,
-        );
 
-        // Prefer returning front then back if both exist, otherwise fall back to what we have.
-        if (front != null && back != null) return [front, back];
-        if (front != null) return [front];
-        if (back != null) return [back];
-        return filtered;
-      });
+        await _cameraController?.initialize();
+        await _cameraController?.setFlashMode(FlashMode.off);
 
-      _cameraController = CameraController(
-        _cameras.firstWhere(
-          (camera) => camera.lensDirection == CameraLensDirection.front,
-          orElse: () => _cameras.first,
-        ),
-        ResolutionPreset.veryHigh,
-        enableAudio: false,
-      );
-
-      await _cameraController?.initialize();
-      await _cameraController?.setFlashMode(FlashMode.off);
-
-      setState(() => _cameraIsLoading = false);
-    }, onError: (e, _) => context.showSnackbar(e.toString()));
+        setState(() => _cameraIsLoading = false);
+      },
+      onError: (e, _) =>
+          context.showSnackbar(context.l10n.cameraInitializationError),
+    );
   }
 
   Future<void> _switchCamera() async {

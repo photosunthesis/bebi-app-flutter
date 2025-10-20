@@ -4,6 +4,7 @@ import 'package:bebi_app/data/models/story.dart';
 import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:bebi_app/ui/features/stories/components/stories_camera.dart';
 import 'package:bebi_app/ui/features/stories/stories_cubit.dart';
+import 'package:bebi_app/ui/shared_widgets/modals/options_bottom_dialog.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
@@ -26,15 +27,18 @@ class StoriesScreen extends StatefulWidget {
 
 class _StoriesScreenState extends State<StoriesScreen> with GuardMixin {
   static final _kaomoji = Kaomojis.getRandomFromHappySet();
+  late final _cubit = context.read<StoriesCubit>();
   final _pageController = PageController();
+
   int _currentPage = 0;
   int _previousStoriesLength = 0;
   bool _didInitialize = false;
+  bool _didDelete = false;
 
   @override
   void initState() {
     super.initState();
-    context.read<StoriesCubit>().initialize(useCache: false);
+    _cubit.initialize(useCache: false);
     _pageController.addListener(() {
       final page = _pageController.page ?? 0;
       if (page.round() != _currentPage) {
@@ -59,8 +63,7 @@ class _StoriesScreenState extends State<StoriesScreen> with GuardMixin {
           builder: (context, state) {
             final stories = state.stories.asData() ?? [];
             return RefreshIndicator.adaptive(
-              onRefresh: () async =>
-                  context.read<StoriesCubit>().initialize(useCache: false),
+              onRefresh: () async => _cubit.initialize(useCache: false),
               child: PageView.builder(
                 controller: _pageController,
                 scrollDirection: Axis.vertical,
@@ -77,23 +80,131 @@ class _StoriesScreenState extends State<StoriesScreen> with GuardMixin {
         ),
         floatingActionButtonLocation:
             FloatingActionButtonLocation.miniCenterFloat,
-        floatingActionButton: _currentPage == 0
-            ? null
-            : FloatingActionButton(
-                foregroundColor: context.colorScheme.onPrimary,
-                backgroundColor: context.colorScheme.primary,
-                onPressed: () async => _pageController.animateToPage(
-                  0,
-                  duration: 350.milliseconds,
-                  curve: Curves.easeInOutQuart,
-                ),
-                child: const Icon(Symbols.arrow_upward),
-              ),
+        floatingActionButton: _buildFloatingActionButtons(),
       ),
     );
   }
 
+  Widget _buildFloatingActionButtons() {
+    return BlocSelector<StoriesCubit, StoriesState, List<Story>>(
+      selector: (state) => state.stories.asData() ?? [],
+      builder: (context, stories) {
+        final currentStory = _currentPage > 0 && _currentPage <= stories.length
+            ? stories[_currentPage - 1]
+            : null;
+
+        return AnimatedSwitcher(
+          duration: 120.milliseconds,
+          child: _currentPage == 0
+              ? const SizedBox.shrink(key: ValueKey('fab_hidden'))
+              : Row(
+                  key: const ValueKey('fab_visible'),
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 20,
+                  children: [
+                    SizedBox(
+                      width: 30,
+                      height: 30,
+                      child: OutlinedButton(
+                        onPressed: currentStory == null
+                            ? null
+                            : () async => _onDeleteButtonTap(currentStory),
+                        style: OutlinedButton.styleFrom(
+                          shape: const CircleBorder(),
+                          foregroundColor: context.colorScheme.secondary,
+                          padding: EdgeInsets.zero,
+                          side: BorderSide(
+                            width: UiConstants.borderWidth,
+                            color: context.colorScheme.outline,
+                          ),
+                        ),
+                        child: const Icon(Symbols.delete, size: 20),
+                      ),
+                    ),
+                    FloatingActionButton(
+                      foregroundColor: context.colorScheme.onPrimary,
+                      backgroundColor: context.colorScheme.primary,
+                      onPressed: () async => _pageController.animateToPage(
+                        0,
+                        duration: 350.milliseconds,
+                        curve: Curves.easeInOutQuart,
+                      ),
+                      child: const Icon(Symbols.arrow_upward),
+                    ),
+                    SizedBox(
+                      width: 30,
+                      height: 30,
+                      child: OutlinedButton(
+                        onPressed: currentStory == null
+                            ? null
+                            : () async => _cubit
+                                  .downloadStoryToGallery(currentStory)
+                                  .then((_) {
+                                    context.showSnackbar(
+                                      context.l10n.storyDownloadedSnackbar,
+                                    );
+                                  }),
+                        style: OutlinedButton.styleFrom(
+                          shape: const CircleBorder(),
+                          foregroundColor: context.colorScheme.secondary,
+                          padding: EdgeInsets.zero,
+                          side: BorderSide(
+                            width: UiConstants.borderWidth,
+                            color: context.colorScheme.outline,
+                          ),
+                        ),
+                        child: const Icon(Symbols.download_2, size: 20),
+                      ),
+                    ),
+                  ],
+                ),
+        );
+      },
+    );
+  }
+
+  Future<void> _onDeleteButtonTap(Story currentStory) async {
+    final l10n = context.l10n;
+    final deleteSuccess = await OptionsBottomDialog.show(
+      context,
+      title: l10n.deleteStoryDialogTitle,
+      description: l10n.deleteStoryDialogDescription,
+      options: [
+        Option(
+          text: l10n.deleteStoryOption,
+          value: true,
+          style: OptionStyle.destructive,
+        ),
+        Option(
+          text: l10n.cancelButton,
+          value: false,
+          style: OptionStyle.primary,
+        ),
+      ],
+    );
+
+    if (deleteSuccess == true) {
+      _didDelete = true;
+      await _cubit.deleteStory(currentStory);
+      final previousPage = (_currentPage - 1).clamp(0, double.infinity).toInt();
+      await _pageController.animateToPage(
+        previousPage,
+        duration: 240.milliseconds,
+        curve: Curves.easeOut,
+      );
+      context.showSnackbar(l10n.storyDeletedSnackbar);
+      await Future.delayed(400.milliseconds);
+      await _cubit.initialize();
+    }
+  }
+
   void _listener(BuildContext context, StoriesState state) {
+    if (_didDelete) {
+      // Skip listener actions if we just deleted a story
+      _didDelete = false;
+      return;
+    }
+
     if (!_didInitialize &&
         state.stories.asData() != null &&
         !state.stories.isLoading) {
@@ -189,7 +300,7 @@ class _StoriesScreenState extends State<StoriesScreen> with GuardMixin {
 
   Widget _buildStoryImage(Story story) {
     return FutureBuilder<String?>(
-      future: context.read<StoriesCubit>().getStoryImageUrl(story),
+      future: _cubit.getStoryImageUrl(story),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting ||
             snapshot.connectionState == ConnectionState.none ||
@@ -281,7 +392,7 @@ class _StoriesScreenState extends State<StoriesScreen> with GuardMixin {
   }
 
   Widget _buildTitleOverlay(Story story) {
-    if (story.title.trim().isEmpty) {
+    if (story.title.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -295,6 +406,10 @@ class _StoriesScreenState extends State<StoriesScreen> with GuardMixin {
             decoration: BoxDecoration(
               color: context.colorScheme.surface.withAlpha(180),
               borderRadius: UiConstants.borderRadius,
+              border: Border.all(
+                color: context.colorScheme.outline.withAlpha(80),
+                width: UiConstants.borderWidth,
+              ),
             ),
             child: Text(
               story.title,

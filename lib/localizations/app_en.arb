@@ -395,6 +395,12 @@
   "endRepeat": "End repeat",
   "addMessageHint": "Add message",
   "noStoriesYetMessage": "No stories yet.",
+  "deleteStoryDialogTitle": "Delete this story?",
+  "deleteStoryDialogDescription": "The story will be deleted permanently. You won't be able to get it back.",
+  "deleteStoryOption": "Delete story",
+  "storyDeletedSnackbar": "Story was removed.",
+  "storyDownloadedSnackbar": "Story downloaded to your gallery.",
+  "cameraInitializationError": "Failed to initialize camera. Please ensure the app has permission to access the camera and try again.",
   "you": "You",
   "user": "User"
 }
