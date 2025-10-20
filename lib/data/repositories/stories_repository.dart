@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:bebi_app/data/models/story.dart';
 import 'package:blurhash_ffi/blurhash.dart';
@@ -135,5 +136,16 @@ class StoriesRepository {
     );
 
     return storyImageUrl;
+  }
+
+  Future<Uint8List> getStoryImageBytes(Story story) async {
+    final imageUrl = await getStoryImageUrl(story);
+    final response = await http.get(Uri.parse(imageUrl));
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to download image.');
+    }
+
+    return response.bodyBytes;
   }
 }
