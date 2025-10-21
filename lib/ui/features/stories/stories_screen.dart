@@ -34,6 +34,8 @@ class _StoriesScreenState extends State<StoriesScreen> with GuardMixin {
   int _previousStoriesLength = 0;
   bool _didInitialize = false;
   bool _didDelete = false;
+  bool _downloading = false;
+  bool _deleting = false;
 
   @override
   void initState() {
@@ -100,25 +102,24 @@ class _StoriesScreenState extends State<StoriesScreen> with GuardMixin {
               : Row(
                   key: const ValueKey('fab_visible'),
                   mainAxisSize: MainAxisSize.min,
-                  spacing: 20,
+                  spacing: 14,
                   children: [
                     SizedBox(
-                      width: 30,
-                      height: 30,
-                      child: OutlinedButton(
-                        onPressed: currentStory == null
+                      width: 36,
+                      height: 36,
+                      child: IconButton(
+                        visualDensity: VisualDensity.compact,
+                        onPressed: currentStory == null || _deleting
                             ? null
-                            : () async => _onDeleteButtonTap(currentStory),
-                        style: OutlinedButton.styleFrom(
-                          shape: const CircleBorder(),
+                            : () async {
+                                setState(() => _deleting = true);
+                                await _onDeleteButtonTap(currentStory);
+                                setState(() => _deleting = false);
+                              },
+                        style: IconButton.styleFrom(
                           foregroundColor: context.colorScheme.secondary,
-                          padding: EdgeInsets.zero,
-                          side: BorderSide(
-                            width: UiConstants.borderWidth,
-                            color: context.colorScheme.outline,
-                          ),
                         ),
-                        child: const Icon(Symbols.delete, size: 20),
+                        icon: const Icon(Symbols.delete, size: 20),
                       ),
                     ),
                     FloatingActionButton(
@@ -132,28 +133,27 @@ class _StoriesScreenState extends State<StoriesScreen> with GuardMixin {
                       child: const Icon(Symbols.arrow_upward),
                     ),
                     SizedBox(
-                      width: 30,
-                      height: 30,
-                      child: OutlinedButton(
-                        onPressed: currentStory == null
+                      width: 36,
+                      height: 36,
+                      child: IconButton(
+                        visualDensity: VisualDensity.compact,
+                        onPressed: currentStory == null || _downloading
                             ? null
-                            : () async => _cubit
-                                  .downloadStoryToGallery(currentStory)
-                                  .then((_) {
-                                    context.showSnackbar(
-                                      context.l10n.storyDownloadedSnackbar,
-                                    );
-                                  }),
-                        style: OutlinedButton.styleFrom(
-                          shape: const CircleBorder(),
+                            : () async {
+                                setState(() => _downloading = true);
+                                await _cubit
+                                    .downloadStoryToGallery(currentStory)
+                                    .then((_) {
+                                      context.showSnackbar(
+                                        context.l10n.storyDownloadedSnackbar,
+                                      );
+                                    });
+                                setState(() => _downloading = false);
+                              },
+                        style: IconButton.styleFrom(
                           foregroundColor: context.colorScheme.secondary,
-                          padding: EdgeInsets.zero,
-                          side: BorderSide(
-                            width: UiConstants.borderWidth,
-                            color: context.colorScheme.outline,
-                          ),
                         ),
-                        child: const Icon(Symbols.download_2, size: 20),
+                        icon: const Icon(Symbols.download_2, size: 20),
                       ),
                     ),
                   ],
