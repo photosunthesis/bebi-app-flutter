@@ -1,7 +1,7 @@
 import 'package:bebi_app/data/models/user_profile.dart';
 
-class UserProfileWithPictureDto extends UserProfile {
-  const UserProfileWithPictureDto._({
+class UserProfileView extends UserProfile {
+  const UserProfileView._({
     required super.userId,
     required super.code,
     required super.birthDate,
@@ -17,11 +17,11 @@ class UserProfileWithPictureDto extends UserProfile {
     this.profilePictureUrl,
   });
 
-  factory UserProfileWithPictureDto.fromUserProfile(
+  factory UserProfileView.fromUserProfile(
     UserProfile userProfile,
     String? profilePictureUrl,
   ) {
-    return UserProfileWithPictureDto._(
+    return UserProfileView._(
       userId: userProfile.userId,
       code: userProfile.code,
       birthDate: userProfile.birthDate,

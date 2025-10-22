@@ -10,13 +10,13 @@ class AppState {
     this.userIsSignedIn = false,
   });
 
-  final AsyncValue<UserProfileWithPictureDto?> userProfileAsync;
-  final AsyncValue<UserProfileWithPictureDto?> partnerProfileAsync;
+  final AsyncValue<UserProfileView?> userProfileAsync;
+  final AsyncValue<UserProfileView?> partnerProfileAsync;
   final bool userIsSignedIn;
 
   AppState copyWith({
-    AsyncValue<UserProfileWithPictureDto?>? userProfileAsync,
-    AsyncValue<UserProfileWithPictureDto?>? partnerProfileAsync,
+    AsyncValue<UserProfileView?>? userProfileAsync,
+    AsyncValue<UserProfileView?>? partnerProfileAsync,
     bool? userIsSignedIn,
   }) {
     return AppState(

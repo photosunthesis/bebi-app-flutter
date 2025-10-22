@@ -1,5 +1,5 @@
 import 'package:bebi_app/data/models/async_value.dart';
-import 'package:bebi_app/data/models/dto/user_profile_with_picture_dto.dart';
+import 'package:bebi_app/data/models/user_profile_view.dart';
 import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
 import 'package:bebi_app/data/repositories/user_profile_repository.dart';
 import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
@@ -55,7 +55,7 @@ class AppCubit extends Cubit<AppState> with LocalizationsMixin {
           final profilePictureUrl = await _userProfileRepository
               .getUserProfilePictureUrl(userProfile);
 
-          return UserProfileWithPictureDto.fromUserProfile(
+          return UserProfileView.fromUserProfile(
             userProfile,
             profilePictureUrl,
           );
@@ -87,7 +87,7 @@ class AppCubit extends Cubit<AppState> with LocalizationsMixin {
           final partnerProfilePictureUrl = await _userProfileRepository
               .getUserProfilePictureUrl(partnerProfile);
 
-          return UserProfileWithPictureDto.fromUserProfile(
+          return UserProfileView.fromUserProfile(
             partnerProfile,
             partnerProfilePictureUrl,
           );

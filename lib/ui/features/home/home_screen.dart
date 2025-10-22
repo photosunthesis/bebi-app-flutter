@@ -3,7 +3,7 @@ import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/constants/kaomojis.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/data/models/app_update_info.dart';
-import 'package:bebi_app/data/models/dto/user_profile_with_picture_dto.dart';
+import 'package:bebi_app/data/models/user_profile_view.dart';
 import 'package:bebi_app/ui/features/home/home_cubit.dart';
 import 'package:bebi_app/ui/shared_widgets/modals/options_bottom_dialog.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
@@ -75,7 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildHeader() {
     final now = DateTime.now();
-    return BlocSelector<AppCubit, AppState, UserProfileWithPictureDto?>(
+    return BlocSelector<AppCubit, AppState, UserProfileView?>(
       selector: (state) => state.userProfileAsync.maybeMap(
         orElse: () => null,
         data: (data) => data,
@@ -109,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildAccountMenu(UserProfileWithPictureDto? userProfile) {
+  Widget _buildAccountMenu(UserProfileView? userProfile) {
     return PopupMenuButton(
       splashRadius: 0,
       color: context.colorScheme.surface,

@@ -1,8 +1,8 @@
 import 'package:bebi_app/app/app_cubit.dart';
 import 'package:bebi_app/constants/kaomojis.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
-import 'package:bebi_app/data/models/dto/user_profile_with_picture_dto.dart';
 import 'package:bebi_app/data/models/story.dart';
+import 'package:bebi_app/data/models/user_profile_view.dart';
 import 'package:bebi_app/ui/features/stories/components/stories_camera.dart';
 import 'package:bebi_app/ui/features/stories/stories_cubit.dart';
 import 'package:bebi_app/ui/shared_widgets/modals/options_bottom_dialog.dart';
@@ -346,11 +346,7 @@ class _StoriesScreenState extends State<StoriesScreen> with GuardMixin {
   }
 
   Widget _buildStoryDetails(Story story) {
-    return BlocSelector<
-      AppCubit,
-      AppState,
-      (UserProfileWithPictureDto, UserProfileWithPictureDto)
-    >(
+    return BlocSelector<AppCubit, AppState, (UserProfileView, UserProfileView)>(
       selector: (state) => (
         state.userProfileAsync.asData()!,
         state.partnerProfileAsync.asData()!,

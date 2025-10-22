@@ -1,7 +1,7 @@
 import 'package:bebi_app/app/app_cubit.dart';
 import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
-import 'package:bebi_app/data/models/dto/user_profile_with_picture_dto.dart';
+import 'package:bebi_app/data/models/user_profile_view.dart';
 import 'package:bebi_app/ui/features/cycles/components/cycle_date_picker.dart';
 import 'package:bebi_app/ui/features/cycles/components/cycle_insights.dart';
 import 'package:bebi_app/ui/features/cycles/components/cycle_logs.dart';
@@ -168,11 +168,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
   }
 
   Widget _buildAccountSwitcher() {
-    return BlocSelector<
-      AppCubit,
-      AppState,
-      (UserProfileWithPictureDto, UserProfileWithPictureDto)
-    >(
+    return BlocSelector<AppCubit, AppState, (UserProfileView, UserProfileView)>(
       selector: (state) => (
         state.userProfileAsync.asData()!,
         state.partnerProfileAsync.asData()!,
@@ -222,7 +218,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
     );
   }
 
-  Widget _buildProfileAvatar(UserProfileWithPictureDto? profile, {Key? key}) {
+  Widget _buildProfileAvatar(UserProfileView? profile, {Key? key}) {
     return Container(
       key: key,
       width: 40,
@@ -257,11 +253,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
   }
 
   Widget _buildCyclesSetupPrompt() {
-    return BlocSelector<
-      AppCubit,
-      AppState,
-      (UserProfileWithPictureDto, UserProfileWithPictureDto)
-    >(
+    return BlocSelector<AppCubit, AppState, (UserProfileView, UserProfileView)>(
       selector: (state) => (
         state.userProfileAsync.asData()!,
         state.partnerProfileAsync.asData()!,

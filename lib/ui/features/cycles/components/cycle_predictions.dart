@@ -2,7 +2,7 @@ import 'package:bebi_app/app/app_cubit.dart';
 import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/app/theme/app_colors.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
-import 'package:bebi_app/data/models/dto/user_profile_with_picture_dto.dart';
+import 'package:bebi_app/data/models/user_profile_view.dart';
 import 'package:bebi_app/ui/features/cycles/cycles_cubit.dart';
 import 'package:bebi_app/ui/shared_widgets/specialized/angled_stripes_background.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
@@ -49,11 +49,7 @@ class _CyclePredictionsState extends State<CyclePredictions> {
   }
 
   Widget _buildViewAllButton() {
-    return BlocSelector<
-      AppCubit,
-      AppState,
-      (UserProfileWithPictureDto, UserProfileWithPictureDto)
-    >(
+    return BlocSelector<AppCubit, AppState, (UserProfileView, UserProfileView)>(
       selector: (state) => (
         state.userProfileAsync.asData()!,
         state.partnerProfileAsync.asData()!,
