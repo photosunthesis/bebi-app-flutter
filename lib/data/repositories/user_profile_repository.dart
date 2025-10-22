@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:bebi_app/data/models/user_profile.dart';
+import 'package:bebi_app/data/services/image_storage_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 // ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:injectable/injectable.dart';
@@ -12,16 +12,15 @@ import 'package:injectable/injectable.dart';
 class UserProfileRepository {
   const UserProfileRepository(
     this._firestore,
-    this._storage,
+    this._imageStorageService,
     this._userProfileBox,
   );
 
   final FirebaseFirestore _firestore;
-  final FirebaseStorage _storage;
+  final ImageStorageService _imageStorageService;
   final Box<UserProfile> _userProfileBox;
 
   static const _collection = 'user_profiles';
-  static const _profileImagePath = 'profile_images';
 
   Future<UserProfile?> getByUserId(
     String userId, {
@@ -98,11 +97,14 @@ class UserProfileRepository {
     return finalUserProfile;
   }
 
-  Future<String> uploadProfileImage(String userId, XFile imageFile) async {
-    final ref = _storage.ref().child('$_profileImagePath/$userId');
-    await ref.putData(await imageFile.readAsBytes());
-    final downloadUrl = await ref.getDownloadURL();
-    return downloadUrl;
+  Future<String> uploadProfilePictureFile(
+    String userId,
+    XFile imageFile,
+  ) async {
+    final profilePictureObjectName = await _imageStorageService
+        .uploadProfilePictureFile(imageFile);
+
+    return profilePictureObjectName;
   }
 
   Future<void> _cacheUserProfile(UserProfile userProfile) async {
@@ -112,6 +114,28 @@ class UserProfileRepository {
   UserProfile? _getCachedProfileByCode(String code) {
     return _userProfileBox.values.firstWhereOrNull(
       (profile) => profile.code == code,
+    );
+  }
+
+  Future<String?> getUserProfilePictureUrl(UserProfile userProfile) async {
+    if (userProfile.profilePictureStorageName == null) {
+      return null;
+    }
+
+    final imageUrl = await _imageStorageService.getImageUrlByObjectName(
+      userProfile.profilePictureStorageName!,
+    );
+
+    return imageUrl;
+  }
+
+  Future<void> deleteUserProfilePicture(UserProfile userProfile) async {
+    if (userProfile.profilePictureStorageName == null) {
+      return;
+    }
+
+    await _imageStorageService.deleteImageByObjectName(
+      userProfile.profilePictureStorageName!,
     );
   }
 }

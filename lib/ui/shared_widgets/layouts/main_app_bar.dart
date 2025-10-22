@@ -13,8 +13,10 @@ abstract class MainAppBar {
     Widget? flexibleSpace,
     PreferredSize? bottom,
     double toolbarHeight = 48,
+    Color? backgroundColor,
   }) {
     return AppBar(
+      backgroundColor: backgroundColor,
       automaticallyImplyLeading: autoImplementLeading,
       systemOverlayStyle: SystemUiOverlayStyle(
         statusBarIconBrightness: darkStatusBarIcons

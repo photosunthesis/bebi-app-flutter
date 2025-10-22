@@ -1,7 +1,8 @@
+import 'package:bebi_app/app/app_cubit.dart';
 import 'package:bebi_app/constants/kaomojis.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
+import 'package:bebi_app/data/models/dto/user_profile_with_picture_dto.dart';
 import 'package:bebi_app/data/models/story.dart';
-import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:bebi_app/ui/features/stories/components/stories_camera.dart';
 import 'package:bebi_app/ui/features/stories/stories_cubit.dart';
 import 'package:bebi_app/ui/shared_widgets/modals/options_bottom_dialog.dart';
@@ -247,7 +248,7 @@ class _StoriesScreenState extends State<StoriesScreen> with GuardMixin {
           ),
           const SizedBox(height: 8),
           Text(
-            'No stories yet',
+            context.l10n.noStoriesYetMessage,
             style: context.textTheme.bodyLarge?.copyWith(
               color: context.colorScheme.secondary.withAlpha(80),
             ),
@@ -346,17 +347,20 @@ class _StoriesScreenState extends State<StoriesScreen> with GuardMixin {
 
   Widget _buildStoryDetails(Story story) {
     return BlocSelector<
-      StoriesCubit,
-      StoriesState,
-      (UserProfile?, UserProfile?)
+      AppCubit,
+      AppState,
+      (UserProfileWithPictureDto, UserProfileWithPictureDto)
     >(
-      selector: (state) =>
-          (state.userProfile.asData(), state.partnerProfile.asData()),
-      builder: (context, profiles) {
-        final isCurrentUserStory = story.createdBy == profiles.$1?.userId;
+      selector: (state) => (
+        state.userProfileAsync.asData()!,
+        state.partnerProfileAsync.asData()!,
+      ),
+      builder: (context, userProfiles) {
+        final (userProfile, partnerProfile) = userProfiles;
+        final isCurrentUserStory = story.createdBy == userProfile.userId;
         final displayName = isCurrentUserStory
             ? context.l10n.you
-            : profiles.$2?.displayName ?? context.l10n.user;
+            : partnerProfile.displayName;
 
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

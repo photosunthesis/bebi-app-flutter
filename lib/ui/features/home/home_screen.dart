@@ -1,14 +1,15 @@
+import 'package:bebi_app/app/app_cubit.dart';
 import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/constants/kaomojis.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/data/models/app_update_info.dart';
+import 'package:bebi_app/data/models/dto/user_profile_with_picture_dto.dart';
 import 'package:bebi_app/ui/features/home/home_cubit.dart';
 import 'package:bebi_app/ui/shared_widgets/modals/options_bottom_dialog.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:bebi_app/utils/extensions/string_extensions.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -28,7 +29,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _cubit.initialize());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _cubit.initialize();
+      context.read<AppCubit>().loadUserProfiles();
+    });
   }
 
   @override
@@ -71,9 +75,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildHeader() {
     final now = DateTime.now();
-    return BlocSelector<HomeCubit, HomeState, User?>(
-      selector: (state) => state is HomeLoadedState ? state.currentUser : null,
-      builder: (context, user) {
+    return BlocSelector<AppCubit, AppState, UserProfileWithPictureDto?>(
+      selector: (state) => state.userProfileAsync.maybeMap(
+        orElse: () => null,
+        data: (data) => data,
+      ),
+      builder: (context, userProfile) {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
           child: Row(
@@ -88,13 +95,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         : now.hour < 17
                         ? context.l10n.afternoon
                         : context.l10n.evening,
-                    user?.displayName?.toTitleCase() ?? 'user',
+                    userProfile?.displayName.toTitleCase() ?? 'user',
                   ),
                   style: context.primaryTextTheme.headlineSmall,
                 ),
               ),
               const SizedBox(width: 20),
-              _buildAccountMenu(user),
+              _buildAccountMenu(userProfile),
             ],
           ),
         );
@@ -102,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildAccountMenu(User? user) {
+  Widget _buildAccountMenu(UserProfileWithPictureDto? userProfile) {
     return PopupMenuButton(
       splashRadius: 0,
       color: context.colorScheme.surface,
@@ -127,8 +134,9 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         child: CircleAvatar(
           backgroundColor: context.colorScheme.onTertiary,
-          backgroundImage: user != null
-              ? CachedNetworkImageProvider(user.photoURL ?? '')
+          backgroundImage:
+              userProfile != null && userProfile.profilePictureUrl != null
+              ? CachedNetworkImageProvider(userProfile.profilePictureUrl!)
               : null,
         ),
       ),
@@ -151,8 +159,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   child: CircleAvatar(
                     backgroundColor: context.colorScheme.onTertiary,
-                    backgroundImage: user?.photoURL != null
-                        ? CachedNetworkImageProvider(user!.photoURL!)
+                    backgroundImage: userProfile?.profilePictureUrl != null
+                        ? CachedNetworkImageProvider(
+                            userProfile!.profilePictureUrl!,
+                          )
                         : null,
                   ),
                 ),
@@ -161,15 +171,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      user?.displayName ?? 'user',
+                      userProfile?.displayName.toTitleCase() ?? 'user',
                       style: context.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    Text(
-                      user?.email ?? '',
-                      style: context.textTheme.bodySmall?.copyWith(
-                        color: context.colorScheme.onSurface.withAlpha(180),
                       ),
                     ),
                   ],

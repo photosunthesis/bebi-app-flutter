@@ -1,6 +1,8 @@
+import 'package:bebi_app/app/app_cubit.dart';
 import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/app/theme/app_colors.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
+import 'package:bebi_app/data/models/dto/user_profile_with_picture_dto.dart';
 import 'package:bebi_app/ui/features/cycles/cycles_cubit.dart';
 import 'package:bebi_app/ui/shared_widgets/specialized/angled_stripes_background.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
@@ -47,23 +49,38 @@ class _CyclePredictionsState extends State<CyclePredictions> {
   }
 
   Widget _buildViewAllButton() {
-    return BlocSelector<CyclesCubit, CyclesState, String?>(
-      selector: (state) => state.isViewingCurrentUser
-          ? state.userProfile.asData()?.userId
-          : state.partnerProfile.asData()?.userId,
-      builder: (context, userId) {
-        return OutlinedButton(
-          onPressed: () async {
-            final selectedDate = await context.pushNamed(
-              AppRoutes.cycleCalendar,
-              queryParameters: {'userId': userId},
-            );
+    return BlocSelector<
+      AppCubit,
+      AppState,
+      (UserProfileWithPictureDto, UserProfileWithPictureDto)
+    >(
+      selector: (state) => (
+        state.userProfileAsync.asData()!,
+        state.partnerProfileAsync.asData()!,
+      ),
+      builder: (context, userProfiles) {
+        final (userProfile, partnerProfile) = userProfiles;
+        return BlocSelector<CyclesCubit, CyclesState, String?>(
+          selector: (state) => state.isViewingCurrentUser
+              ? userProfile.userId
+              : partnerProfile.userId,
+          builder: (context, userId) {
+            return OutlinedButton(
+              onPressed: () async {
+                final selectedDate = await context.pushNamed(
+                  AppRoutes.cycleCalendar,
+                  queryParameters: {'userId': userId},
+                );
 
-            if (selectedDate is DateTime) {
-              await context.read<CyclesCubit>().setFocusedDate(selectedDate);
-            }
+                if (selectedDate is DateTime) {
+                  await context.read<CyclesCubit>().setFocusedDate(
+                    selectedDate,
+                  );
+                }
+              },
+              child: Text(context.l10n.viewAllButton.toUpperCase()),
+            );
           },
-          child: Text(context.l10n.viewAllButton.toUpperCase()),
         );
       },
     );

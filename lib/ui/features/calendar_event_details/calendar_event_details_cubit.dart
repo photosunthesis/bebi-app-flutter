@@ -2,16 +2,12 @@ import 'dart:async';
 
 import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/data/models/repeat_rule.dart';
-import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:bebi_app/data/repositories/calendar_events_repository.dart';
-import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
-import 'package:bebi_app/data/repositories/user_profile_repository.dart';
 import 'package:bebi_app/data/services/recurring_calendar_events_service.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
 import 'package:bebi_app/utils/extensions/int_extensions.dart';
 import 'package:bebi_app/utils/mixins/analytics_mixin.dart';
 import 'package:bebi_app/utils/mixins/guard_mixin.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
@@ -23,45 +19,12 @@ class CalendarEventDetailsCubit extends Cubit<CalendarEventDetailsState>
   CalendarEventDetailsCubit(
     this._calendarEventsRepository,
     this._recurringCalendarEventsService,
-    this._partnershipsRepository,
-    this._profileRepository,
-    this._firebaseAuth,
-  ) : super(const CalendarEventDetailsLoadingState()) {
+  ) : super(const CalendarEventDetailsLoadedState()) {
     logScreenViewed(screenName: 'calendar_event_details_screen');
   }
 
   final CalendarEventsRepository _calendarEventsRepository;
   final RecurringCalendarEventsService _recurringCalendarEventsService;
-  final UserPartnershipsRepository _partnershipsRepository;
-  final UserProfileRepository _profileRepository;
-  final FirebaseAuth _firebaseAuth;
-
-  Future<void> initialize() async {
-    await guard(
-      () async {
-        final partnership = await _partnershipsRepository.getByUserId(
-          _firebaseAuth.currentUser!.uid,
-        );
-
-        final profiles = await _profileRepository.getProfilesByIds(
-          partnership!.users,
-        );
-
-        final userProfile = profiles.firstWhere(
-          (e) => e.userId == _firebaseAuth.currentUser!.uid,
-        );
-
-        final partnerProfile = profiles.firstWhere(
-          (e) => e.userId != _firebaseAuth.currentUser!.uid,
-        );
-
-        emit(CalendarEventDetailsLoadedState(userProfile, partnerProfile));
-      },
-      onError: (error, _) {
-        emit(CalendarEventDetailsErrorState(error.toString()));
-      },
-    );
-  }
 
   Future<void> deleteCalendarEvent(
     String calendarEventId, {

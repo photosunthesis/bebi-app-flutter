@@ -12,26 +12,31 @@ class UserProfileAdapter extends TypeAdapter<UserProfile> {
     final code = reader.readString();
     final birthDate = DateTime.fromMillisecondsSinceEpoch(reader.readInt());
     final displayName = reader.readString();
-    final photoUrl = reader.readBool() ? reader.readString() : null;
+    final profilePictureStorageNameExists = reader.readBool();
+    final profilePictureStorageName = profilePictureStorageNameExists
+        ? reader.readString()
+        : null;
     final createdBy = reader.readString();
     final createdAt = DateTime.fromMillisecondsSinceEpoch(reader.readInt());
     final updatedAt = DateTime.fromMillisecondsSinceEpoch(reader.readInt());
     final didSetUpCycles = reader.readBool();
     final hasCycle = reader.readBool();
     final isSharingCycleWithPartner = reader.readBool();
+    final fcmTokens = List<String>.from(reader.readList());
 
     return UserProfile(
       userId: userId,
       code: code,
       birthDate: birthDate,
       displayName: displayName,
-      photoUrl: photoUrl,
       createdBy: createdBy,
       createdAt: createdAt,
       updatedAt: updatedAt,
+      profilePictureStorageName: profilePictureStorageName,
       didSetUpCycles: didSetUpCycles,
       hasCycle: hasCycle,
       isSharingCycleWithPartner: isSharingCycleWithPartner,
+      fcmTokens: fcmTokens,
     );
   }
 
@@ -41,13 +46,16 @@ class UserProfileAdapter extends TypeAdapter<UserProfile> {
     writer.writeString(obj.code);
     writer.writeInt(obj.birthDate.millisecondsSinceEpoch);
     writer.writeString(obj.displayName);
-    writer.writeBool(obj.photoUrl != null);
-    if (obj.photoUrl != null) writer.writeString(obj.photoUrl!);
+    writer.writeBool(obj.profilePictureStorageName != null);
+    if (obj.profilePictureStorageName != null) {
+      writer.writeString(obj.profilePictureStorageName!);
+    }
     writer.writeString(obj.createdBy);
     writer.writeInt(obj.createdAt.millisecondsSinceEpoch);
     writer.writeInt(obj.updatedAt.millisecondsSinceEpoch);
     writer.writeBool(obj.didSetUpCycles);
     writer.writeBool(obj.hasCycle);
     writer.writeBool(obj.isSharingCycleWithPartner);
+    writer.writeList(obj.fcmTokens);
   }
 }

@@ -1,3 +1,4 @@
+import 'package:bebi_app/app/app_cubit.dart';
 import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/ui/features/add_partner/add_partner_cubit.dart';
@@ -57,7 +58,10 @@ class _AddPartnerScreenState extends State<AddPartnerScreen>
             context.showSnackbar(state.error, duration: 6.seconds);
           }
 
-          if (state is AddPartnerSuccessState) context.goNamed(AppRoutes.home);
+          if (state is AddPartnerSuccessState) {
+            context.read<AppCubit>().loadUserProfiles();
+            context.goNamed(AppRoutes.home);
+          }
         },
         child: KeyboardDismissOnTap(
           dismissOnCapturedTaps: true,

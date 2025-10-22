@@ -1,32 +1,34 @@
 part of 'profile_setup_cubit.dart';
 
-sealed class ProfileSetupState {
-  const ProfileSetupState();
-}
-
-class ProfileSetupLoadingState extends ProfileSetupState {
-  const ProfileSetupLoadingState();
-}
-
-class ProfileSetupLoadedState extends ProfileSetupState {
-  const ProfileSetupLoadedState({
+class ProfileSetupState {
+  const ProfileSetupState({
     this.photo,
     this.displayName,
     this.birthDate,
     this.userIsLoggedIn = false,
+    this.updateProfileAsync = const AsyncData<bool>(false),
   });
+
   final String? photo;
   final String? displayName;
   final DateTime? birthDate;
   final bool userIsLoggedIn;
-  bool get isPhotoUrl => photo?.startsWith('http') ?? false;
-}
+  final AsyncValue<bool> updateProfileAsync;
 
-class ProfileSetupSuccessState extends ProfileSetupState {
-  const ProfileSetupSuccessState();
-}
-
-class ProfileSetupErrorState extends ProfileSetupState {
-  const ProfileSetupErrorState(this.error);
-  final String error;
+  ProfileSetupState copyWith({
+    String? photo,
+    bool photoChanged = false,
+    String? displayName,
+    DateTime? birthDate,
+    bool? userIsLoggedIn,
+    AsyncValue<bool>? updateProfileAsync,
+  }) {
+    return ProfileSetupState(
+      photo: photoChanged ? photo : this.photo,
+      displayName: displayName ?? this.displayName,
+      birthDate: birthDate ?? this.birthDate,
+      userIsLoggedIn: userIsLoggedIn ?? this.userIsLoggedIn,
+      updateProfileAsync: updateProfileAsync ?? this.updateProfileAsync,
+    );
+  }
 }

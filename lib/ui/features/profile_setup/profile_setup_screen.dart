@@ -1,7 +1,9 @@
 import 'dart:typed_data';
 
+import 'package:bebi_app/app/app_cubit.dart';
 import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
+import 'package:bebi_app/data/models/async_value.dart';
 import 'package:bebi_app/ui/features/profile_setup/profile_setup_cubit.dart';
 import 'package:bebi_app/ui/shared_widgets/forms/app_text_form_field.dart';
 import 'package:bebi_app/ui/shared_widgets/layouts/main_app_bar.dart';
@@ -27,7 +29,6 @@ class ProfileSetupScreen extends StatefulWidget {
 
 class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   late final _cubit = context.read<ProfileSetupCubit>();
-
   final _formKey = GlobalKey<FormState>();
   final _displayNameController = TextEditingController();
   final _birthdayController = TextEditingController();
@@ -35,106 +36,97 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _cubit.initialize());
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _cubit.initialize();
+      _displayNameController.text = _cubit.state.displayName ?? '';
+      _birthdayController.text = _cubit.state.birthDate?.toMMddyyyy() ?? '';
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<ProfileSetupCubit, ProfileSetupState>(
+    return BlocListener<ProfileSetupCubit, ProfileSetupState>(
       listener: (context, state) {
-        if (state is ProfileSetupSuccessState) {
-          context.goNamed(AppRoutes.home);
-        }
-
-        if (state is ProfileSetupErrorState) {
-          context.showSnackbar(state.error, type: SnackbarType.error);
-        }
-
-        if (state is ProfileSetupLoadedState) {
-          if (state.displayName != null) {
-            _displayNameController.text = state.displayName!;
-          }
-          if (state.birthDate != null) {
-            _birthdayController.text = state.birthDate!.toMMddyyyy();
-          }
-        }
-      },
-      builder: (context, state) {
-        final userIsLoggedIn =
-            state is ProfileSetupLoadedState && state.userIsLoggedIn;
-        return KeyboardDismissOnTap(
-          dismissOnCapturedTaps: true,
-          child: Form(
-            canPop: userIsLoggedIn,
-            key: _formKey,
-            child: Scaffold(
-              resizeToAvoidBottomInset: true,
-              appBar: userIsLoggedIn ? MainAppBar.build(context) : null,
-
-              body: ListView(
-                children: [
-                  userIsLoggedIn
-                      ? const SizedBox(height: UiConstants.padding)
-                      : const SafeArea(
-                          child: SizedBox(height: UiConstants.padding),
-                        ),
-                  _buildHeader(),
-                  const SizedBox(height: 32),
-                  _buildProfilePicture(),
-                  const SizedBox(height: 44),
-                  _buildDisplayNameField(),
-                  const SizedBox(height: 16),
-                  _buildBirthdateField(),
-                ],
-              ),
-              bottomNavigationBar: _buildBottomBar(),
-            ),
-          ),
+        state.updateProfileAsync.map(
+          data: (shouldRedirect) {
+            if (shouldRedirect == true) {
+              context.goNamed(AppRoutes.home);
+              context.read<AppCubit>().loadUserProfiles();
+            }
+          },
+          error: (error, stack) {
+            context.showSnackbar(error.toString(), type: SnackbarType.error);
+          },
+          loading: () {},
         );
       },
+      child: KeyboardDismissOnTap(
+        dismissOnCapturedTaps: true,
+        child: BlocSelector<ProfileSetupCubit, ProfileSetupState, bool>(
+          selector: (state) => state.userIsLoggedIn,
+          builder: (context, userIsLoggedIn) {
+            return Form(
+              canPop: userIsLoggedIn,
+              key: _formKey,
+              child: Scaffold(
+                resizeToAvoidBottomInset: true,
+                appBar: userIsLoggedIn ? MainAppBar.build(context) : null,
+
+                body: ListView(
+                  children: [
+                    userIsLoggedIn
+                        ? const SizedBox(height: UiConstants.padding)
+                        : const SafeArea(
+                            child: SizedBox(height: UiConstants.padding),
+                          ),
+                    _buildHeader(),
+                    const SizedBox(height: 32),
+                    _buildProfilePicture(),
+                    const SizedBox(height: 44),
+                    _buildDisplayNameField(),
+                    const SizedBox(height: 16),
+                    _buildBirthdateField(),
+                  ],
+                ),
+                bottomNavigationBar: _buildBottomBar(),
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 
   Widget _buildProfilePicture() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
-      child: BlocBuilder<ProfileSetupCubit, ProfileSetupState>(
-        buildWhen: (previous, current) => current is ProfileSetupLoadedState,
-        builder: (context, state) {
-          ImageProvider? backgroundImage;
+      child: BlocSelector<ProfileSetupCubit, ProfileSetupState, String?>(
+        selector: (state) => state.photo,
+        builder: (context, photo) {
+          if (photo != null && !photo.isValidUrl) {
+            return FutureBuilder<Uint8List>(
+              future: XFile(photo).readAsBytes(),
+              builder: (context, snapshot) {
+                final backgroundImage = snapshot.hasData
+                    ? MemoryImage(snapshot.data!) as ImageProvider?
+                    : null;
 
-          if (state is ProfileSetupLoadedState && state.photo != null) {
-            if (state.isPhotoUrl) {
-              backgroundImage = CachedNetworkImageProvider(state.photo!);
-            } else {
-              return FutureBuilder<Uint8List>(
-                future: XFile(state.photo!).readAsBytes(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    backgroundImage = MemoryImage(snapshot.data!);
-                  }
-
-                  return _buildProfilePictureWidget(
-                    context,
-                    state,
-                    backgroundImage,
-                  );
-                },
-              );
-            }
+                return _buildProfilePictureWidget(backgroundImage);
+              },
+            );
           }
 
-          return _buildProfilePictureWidget(context, state, backgroundImage);
+          final backgroundImage = photo != null && photo.isValidUrl
+              ? CachedNetworkImageProvider(photo) as ImageProvider?
+              : null;
+
+          return _buildProfilePictureWidget(backgroundImage);
         },
       ),
     );
   }
 
-  Widget _buildProfilePictureWidget(
-    BuildContext context,
-    ProfileSetupState state,
-    ImageProvider? backgroundImage,
-  ) {
+  Widget _buildProfilePictureWidget(ImageProvider? backgroundImage) {
     return Align(
       child: Stack(
         clipBehavior: Clip.none,
@@ -150,11 +142,10 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                 ),
               ),
               child: CircleAvatar(
-                key: ValueKey(state),
                 radius: 60,
                 backgroundColor: Colors.transparent,
                 backgroundImage: backgroundImage,
-                child: state is ProfileSetupLoadedState && state.photo == null
+                child: backgroundImage == null
                     ? Icon(
                         Symbols.face,
                         size: 50,
@@ -179,24 +170,22 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                 ],
               ),
               child: TextButton(
-                onPressed:
-                    state is ProfileSetupLoadedState && state.photo != null
-                    ? _cubit.removeProfilePicture
-                    : _cubit.setProfilePicture,
+                onPressed: backgroundImage == null
+                    ? _cubit.setProfilePicture
+                    : _cubit.removeProfilePicture,
                 style: IconButton.styleFrom(
                   backgroundColor: context.colorScheme.onPrimary,
-                  foregroundColor:
-                      state is ProfileSetupLoadedState && state.photo != null
+                  foregroundColor: backgroundImage != null
                       ? context.colorScheme.error
                       : context.colorScheme.primary,
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(14),
                   shape: const CircleBorder(),
                 ),
                 child: Icon(
-                  state is ProfileSetupLoadedState && state.photo != null
+                  backgroundImage != null
                       ? Symbols.delete
                       : Symbols.add_a_photo,
-                  size: 20,
+                  size: 18,
                 ),
               ),
             ),
@@ -297,8 +286,12 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       child: Padding(
         padding: const EdgeInsets.all(UiConstants.padding),
         child: BlocSelector<ProfileSetupCubit, ProfileSetupState, bool>(
-          selector: (state) => state is ProfileSetupLoadingState,
+          selector: (state) => state.updateProfileAsync is AsyncLoading,
           builder: (context, loading) {
+            final buttonLabel = loading
+                ? context.l10n.updatingProfileButton
+                : context.l10n.updateProfileButton;
+
             return ElevatedButton(
               onPressed: loading
                   ? null
@@ -310,13 +303,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                         );
                       }
                     },
-
-              child: Text(
-                (loading
-                        ? context.l10n.updatingProfileButton
-                        : context.l10n.updateProfileButton)
-                    .toUpperCase(),
-              ),
+              child: Text(buttonLabel.toUpperCase()),
             );
           },
         ),

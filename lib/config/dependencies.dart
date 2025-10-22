@@ -10,7 +10,6 @@ import 'package:firebase_ai/firebase_ai.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
@@ -34,9 +33,6 @@ abstract class Dependencies {
 
   @lazySingleton
   FirebaseFirestore get firestore => FirebaseFirestore.instance;
-
-  @lazySingleton
-  FirebaseStorage get storage => FirebaseStorage.instance;
 
   @lazySingleton
   FirebaseAnalytics get analytics => FirebaseAnalytics.instance;

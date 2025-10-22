@@ -7,8 +7,6 @@ class CyclesState extends Equatable {
     this.aiSummary = const AsyncData(''),
     this.cycleLogs = const AsyncData([]),
     this.insights = const AsyncData(null),
-    this.userProfile = const AsyncData(null),
-    this.partnerProfile = const AsyncData(null),
   });
 
   final DateTime focusedDate;
@@ -16,22 +14,12 @@ class CyclesState extends Equatable {
   final AsyncValue<String> aiSummary;
   final AsyncValue<List<CycleLog>> cycleLogs;
   final AsyncValue<CycleDayInsights?> insights;
-  final AsyncValue<UserProfile?> userProfile;
-  final AsyncValue<UserProfile?> partnerProfile;
 
   String? get errorMessage {
-    return switch ([
-      cycleLogs,
-      insights,
-      aiSummary,
-      userProfile,
-      partnerProfile,
-    ]) {
+    return switch ([cycleLogs, insights, aiSummary]) {
       [AsyncError(:final error), ...] => error.toString(),
       [_, AsyncError(:final error), ...] => error.toString(),
       [_, _, AsyncError(:final error), ...] => error.toString(),
-      [_, _, _, AsyncError(:final error), ...] => error.toString(),
-      [_, _, _, _, AsyncError(:final error)] => error.toString(),
       _ => null,
     };
   }
@@ -42,8 +30,6 @@ class CyclesState extends Equatable {
     AsyncValue<String>? aiSummary,
     AsyncValue<List<CycleLog>>? cycleLogs,
     AsyncValue<CycleDayInsights?>? insights,
-    AsyncValue<UserProfile?>? userProfile,
-    AsyncValue<UserProfile?>? partnerProfile,
   }) {
     return CyclesState(
       focusedDate: focusedDate ?? this.focusedDate,
@@ -51,8 +37,6 @@ class CyclesState extends Equatable {
       aiSummary: aiSummary ?? this.aiSummary,
       cycleLogs: cycleLogs ?? this.cycleLogs,
       insights: insights ?? this.insights,
-      userProfile: userProfile ?? this.userProfile,
-      partnerProfile: partnerProfile ?? this.partnerProfile,
     );
   }
 
@@ -63,7 +47,5 @@ class CyclesState extends Equatable {
     aiSummary,
     cycleLogs,
     insights,
-    userProfile,
-    partnerProfile,
   ];
 }

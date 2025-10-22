@@ -48,8 +48,6 @@ class HomeCubit extends Cubit<HomeState> with GuardMixin, AnalyticsMixin {
   Future<void> initialize() async {
     await guard(
       () async {
-        emit(HomeLoadedState(_firebaseAuth.currentUser!));
-
         if (_firebaseAuth.currentUser?.emailVerified != true) {
           emit(const HomeShouldConfirmEmailState());
           logAppAction(action: 'redirect_to_confirm_email');
@@ -65,6 +63,8 @@ class HomeCubit extends Cubit<HomeState> with GuardMixin, AnalyticsMixin {
           logAppAction(action: 'redirect_to_profile_setup');
           return;
         }
+
+        emit(const HomeLoadedState());
 
         final userPartnership = await _userPartnershipsRepository.getByUserId(
           _firebaseAuth.currentUser!.uid,

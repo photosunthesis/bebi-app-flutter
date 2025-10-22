@@ -60,4 +60,9 @@ extension StringExtensions on String {
       '',
     ).replaceAll(RegExp(r'\n{2,}'), ' ').replaceAll('\n', ' ').trim();
   }
+
+  bool get isValidUrl {
+    final uri = Uri.tryParse(this);
+    return uri != null && (uri.hasScheme && uri.hasAuthority);
+  }
 }

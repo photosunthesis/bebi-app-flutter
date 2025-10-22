@@ -9,9 +9,7 @@ class CalendarEventDetailsLoadingState extends CalendarEventDetailsState {
 }
 
 class CalendarEventDetailsLoadedState extends CalendarEventDetailsState {
-  const CalendarEventDetailsLoadedState(this.userProfile, this.partnerProfile);
-  final UserProfile userProfile;
-  final UserProfile partnerProfile;
+  const CalendarEventDetailsLoadedState();
 }
 
 class CalendarEventDetailsErrorState extends CalendarEventDetailsState {

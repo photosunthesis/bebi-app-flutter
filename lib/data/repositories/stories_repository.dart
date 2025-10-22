@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:bebi_app/data/models/story.dart';
+import 'package:bebi_app/data/services/image_storage_service.dart';
 import 'package:blurhash_ffi/blurhash.dart';
 import 'package:camera/camera.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:cross_file_image/cross_file_image.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
@@ -16,13 +16,13 @@ import 'package:injectable/injectable.dart';
 class StoriesRepository {
   StoriesRepository(
     this._firestore,
-    this._functions,
+    this._imageStorageService,
     this._storiesBox,
     @Named('story_image_url_box') this._storyImageUrlBox,
   );
 
   final FirebaseFirestore _firestore;
-  final FirebaseFunctions _functions;
+  final ImageStorageService _imageStorageService;
   final Box<Story> _storiesBox;
   final Box<String> _storyImageUrlBox;
 
@@ -64,20 +64,8 @@ class StoriesRepository {
       componentY: 2,
     );
 
-    final (uploadUrl, objectName) = await _functions
-        .httpsCallable('getStoryUploadUrl')
-        .call({'fileName': imageFile.name, 'contentType': imageFile.mimeType})
-        .then((result) {
-          final data = result.data as Map<String, dynamic>;
-          return (data['uploadUrl'] as String, data['key'] as String);
-        });
-
-    await http.put(
-      Uri.parse(uploadUrl),
-      body: await imageFile.readAsBytes(),
-      headers: {
-        'Content-Type': imageFile.mimeType ?? 'application/octet-stream',
-      },
+    final objectName = await _imageStorageService.uploadStoryImageFile(
+      imageFile,
     );
 
     final story = Story(
@@ -100,9 +88,7 @@ class StoriesRepository {
   }
 
   Future<void> deleteStory(Story story) async {
-    await _functions.httpsCallable('deleteStoryImage').call({
-      'key': story.storageObjectName,
-    });
+    await _imageStorageService.deleteImageByObjectName(story.storageObjectName);
     await _firestore.collection(_collection).doc(story.id).delete();
     await _storiesBox.delete(story.id);
   }
@@ -118,12 +104,9 @@ class StoriesRepository {
       if (age.inDays < 6) return cached['imageUrl'] as String;
     }
 
-    final storyImageUrl = await _functions
-        .httpsCallable('getPresignedUrl')
-        .call({'filename': story.storageObjectName})
-        .then(
-          (result) => (result.data as Map<String, dynamic>)['url'] as String,
-        );
+    final storyImageUrl = await _imageStorageService.getImageUrlByObjectName(
+      story.storageObjectName,
+    );
 
     unawaited(
       _storyImageUrlBox.put(

@@ -32,12 +32,14 @@ sealed class AsyncValue<T> with EquatableMixin {
     required R Function(T value) data,
     required R Function(Object? error, StackTrace? stackTrace) error,
   }) {
-    return maybeMap(
-      loading: loading,
-      data: data,
-      error: (err, stack) => error(err, stack),
-      orElse: () => throw UnimplementedError(),
-    );
+    return switch (this) {
+      AsyncLoading<T>() => loading.call(),
+      AsyncData<T>(:final value) => data.call(value),
+      AsyncError<T>() => error.call(
+        (this as AsyncError<T>).error,
+        (this as AsyncError<T>).stackTrace,
+      ),
+    };
   }
 
   T? asData() {

@@ -55,6 +55,10 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
         }
       },
       child: Scaffold(
+        // Use background color of BottomSheet if editing
+        backgroundColor: widget.calendarEvent != null
+            ? Colors.transparent
+            : null,
         appBar: _buildAppBar(),
         body: CalendarEventForm(formKey: _formKey),
       ),
@@ -64,6 +68,8 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
   AppBar _buildAppBar() {
     return MainAppBar.build(
       context,
+      backgroundColor: Colors.transparent,
+      leading: CloseButton(onPressed: () => context.pop()),
       actions: [_buildColorSwitcherMenu(), const SizedBox(width: 8)],
     );
   }
@@ -71,81 +77,83 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
   Widget _buildColorSwitcherMenu() {
     return BlocBuilder<CalendarEventFormCubit, CalendarEventFormState>(
       builder: (context, state) {
-        return PopupMenuButton<EventColor>(
-          splashRadius: 0,
-          color: context.colorScheme.surface,
-          padding: EdgeInsets.zero,
-          menuPadding: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            borderRadius: UiConstants.borderRadius,
-            side: BorderSide(
-              color: context.colorScheme.outline,
-              width: UiConstants.borderWidth,
+        return SizedBox(
+          child: PopupMenuButton<EventColor>(
+            splashRadius: 0,
+            color: context.colorScheme.surface,
+            padding: EdgeInsets.zero,
+            menuPadding: EdgeInsets.zero,
+            shape: RoundedRectangleBorder(
+              borderRadius: UiConstants.borderRadius,
+              side: BorderSide(
+                color: context.colorScheme.outline,
+                width: UiConstants.borderWidth,
+              ),
             ),
-          ),
-          elevation: 0,
-          offset: const Offset(0, 50),
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            width: 48,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: UiConstants.borderRadius,
-                border: Border.all(
-                  color: context.colorScheme.outline,
-                  width: UiConstants.borderWidth,
+            elevation: 0,
+            offset: const Offset(0, 50),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              width: 48,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: UiConstants.borderRadius,
+                  border: Border.all(
+                    color: context.colorScheme.outline,
+                    width: UiConstants.borderWidth,
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const SizedBox(width: 4),
+                    Container(
+                      width: 14,
+                      height: 14,
+                      decoration: BoxDecoration(
+                        color: state.eventColor.color,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const Icon(Symbols.keyboard_arrow_down, size: 20),
+                  ],
                 ),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const SizedBox(width: 4),
-                  Container(
-                    width: 14,
-                    height: 14,
-                    decoration: BoxDecoration(
-                      color: state.eventColor.color,
-                      shape: BoxShape.circle,
+            ),
+            onSelected: (value) =>
+                context.read<CalendarEventFormCubit>().updateEventColor(value),
+            itemBuilder: (_) => EventColor.values
+                .map(
+                  (e) => PopupMenuItem(
+                    value: e,
+                    height: 36,
+                    padding: const EdgeInsets.only(left: 12, right: 8),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 14,
+                          height: 14,
+                          decoration: BoxDecoration(
+                            color: e.color,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          e.label,
+                          style: context.textTheme.bodyMedium!.copyWith(
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const Spacer(),
+                        if (e == state.eventColor)
+                          const Icon(Symbols.check, size: 20),
+                      ],
                     ),
                   ),
-                  const Icon(Symbols.keyboard_arrow_down, size: 20),
-                ],
-              ),
-            ),
+                )
+                .toList(),
           ),
-          onSelected: (value) =>
-              context.read<CalendarEventFormCubit>().updateEventColor(value),
-          itemBuilder: (_) => EventColor.values
-              .map(
-                (e) => PopupMenuItem(
-                  value: e,
-                  height: 36,
-                  padding: const EdgeInsets.only(left: 12, right: 8),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 14,
-                        height: 14,
-                        decoration: BoxDecoration(
-                          color: e.color,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        e.label,
-                        style: context.textTheme.bodyMedium!.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const Spacer(),
-                      if (e == state.eventColor)
-                        const Icon(Symbols.check, size: 20),
-                    ],
-                  ),
-                ),
-              )
-              .toList(),
         );
       },
     );

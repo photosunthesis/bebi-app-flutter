@@ -1,6 +1,7 @@
+import 'package:bebi_app/app/app_cubit.dart';
 import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
-import 'package:bebi_app/data/models/user_profile.dart';
+import 'package:bebi_app/data/models/dto/user_profile_with_picture_dto.dart';
 import 'package:bebi_app/ui/features/cycles/components/cycle_date_picker.dart';
 import 'package:bebi_app/ui/features/cycles/components/cycle_insights.dart';
 import 'package:bebi_app/ui/features/cycles/components/cycle_logs.dart';
@@ -167,49 +168,61 @@ class _CyclesScreenState extends State<CyclesScreen> {
   }
 
   Widget _buildAccountSwitcher() {
-    return BlocBuilder<CyclesCubit, CyclesState>(
-      buildWhen: (previous, current) =>
-          previous.isViewingCurrentUser != current.isViewingCurrentUser ||
-          previous.userProfile != current.userProfile ||
-          previous.partnerProfile != current.partnerProfile,
-      builder: (context, state) {
-        return InkWell(
-          onTap: _cubit.switchUserProfile,
-          borderRadius: BorderRadius.circular(60),
-          splashFactory: NoSplash.splashFactory,
-          child: Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: Stack(
-              children: [
-                Opacity(
-                  opacity: 0.4,
-                  child: Transform.translate(
-                    offset: const Offset(16, 0),
-                    child: _buildProfileAvatar(
-                      state.isViewingCurrentUser
-                          ? state.partnerProfile.asData()
-                          : state.userProfile.asData(),
+    return BlocSelector<
+      AppCubit,
+      AppState,
+      (UserProfileWithPictureDto, UserProfileWithPictureDto)
+    >(
+      selector: (state) => (
+        state.userProfileAsync.asData()!,
+        state.partnerProfileAsync.asData()!,
+      ),
+      builder: (context, userProfiles) {
+        final (userProfile, partnerProfile) = userProfiles;
+
+        return BlocBuilder<CyclesCubit, CyclesState>(
+          buildWhen: (previous, current) =>
+              previous.isViewingCurrentUser != current.isViewingCurrentUser,
+          builder: (context, state) {
+            return InkWell(
+              onTap: _cubit.switchUserProfile,
+              borderRadius: BorderRadius.circular(60),
+              splashFactory: NoSplash.splashFactory,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: Stack(
+                  children: [
+                    Opacity(
+                      opacity: 0.4,
+                      child: Transform.translate(
+                        offset: const Offset(16, 0),
+                        child: _buildProfileAvatar(
+                          state.isViewingCurrentUser
+                              ? partnerProfile
+                              : userProfile,
+                        ),
+                      ),
                     ),
-                  ),
+                    AnimatedSwitcher(
+                      duration: 120.milliseconds,
+                      child: _buildProfileAvatar(
+                        state.isViewingCurrentUser
+                            ? userProfile
+                            : partnerProfile,
+                        key: ValueKey(state.isViewingCurrentUser),
+                      ),
+                    ),
+                  ],
                 ),
-                AnimatedSwitcher(
-                  duration: 120.milliseconds,
-                  child: _buildProfileAvatar(
-                    state.isViewingCurrentUser
-                        ? state.userProfile.asData()
-                        : state.partnerProfile.asData(),
-                    key: ValueKey(state.isViewingCurrentUser),
-                  ),
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
   }
 
-  Widget _buildProfileAvatar(UserProfile? profile, {Key? key}) {
+  Widget _buildProfileAvatar(UserProfileWithPictureDto? profile, {Key? key}) {
     return Container(
       key: key,
       width: 40,
@@ -223,8 +236,8 @@ class _CyclesScreenState extends State<CyclesScreen> {
       ),
       child: CircleAvatar(
         backgroundColor: context.colorScheme.onTertiary,
-        backgroundImage: profile != null
-            ? CachedNetworkImageProvider(profile.photoUrl!)
+        backgroundImage: profile != null && profile.profilePictureUrl != null
+            ? CachedNetworkImageProvider(profile.profilePictureUrl!)
             : null,
       ),
     );
@@ -244,79 +257,97 @@ class _CyclesScreenState extends State<CyclesScreen> {
   }
 
   Widget _buildCyclesSetupPrompt() {
-    return BlocSelector<CyclesCubit, CyclesState, bool>(
-      selector: (state) {
-        if (state.cycleLogs.isLoading || state.insights.isLoading) return true;
-        if (!state.isViewingCurrentUser) return true;
-        if (state.userProfile.asData()?.hasCycle == true) return true;
-        return false;
-      },
-      builder: (context, hidePrompt) {
-        return AnimatedSwitcher(
-          duration: 120.milliseconds,
-          child: hidePrompt
-              ? const SizedBox.shrink()
-              : Container(
-                  key: const ValueKey('no_cycle_data'),
-                  color: context.colorScheme.surface.withAlpha(200),
-                  width: double.infinity,
-                  height: double.infinity,
-                  padding: const EdgeInsets.all(32),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      DecoratedBox(
-                        decoration: BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                              color: context.colorScheme.surface.withAlpha(200),
-                              blurRadius: 12,
-                              spreadRadius: 1,
+    return BlocSelector<
+      AppCubit,
+      AppState,
+      (UserProfileWithPictureDto, UserProfileWithPictureDto)
+    >(
+      selector: (state) => (
+        state.userProfileAsync.asData()!,
+        state.partnerProfileAsync.asData()!,
+      ),
+      builder: (context, userProfiles) {
+        final userProfile = userProfiles.$1;
+
+        return BlocSelector<CyclesCubit, CyclesState, bool>(
+          selector: (state) => switch (state) {
+            final s when s.cycleLogs.isLoading || s.insights.isLoading => true,
+            final s when !s.isViewingCurrentUser => true,
+            _ when userProfile.hasCycle => true,
+            _ => false,
+          },
+          builder: (context, hidePrompt) {
+            return AnimatedSwitcher(
+              duration: 120.milliseconds,
+              child: hidePrompt
+                  ? const SizedBox.shrink()
+                  : Container(
+                      key: const ValueKey('no_cycle_data'),
+                      color: context.colorScheme.surface.withAlpha(200),
+                      width: double.infinity,
+                      height: double.infinity,
+                      padding: const EdgeInsets.all(32),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          DecoratedBox(
+                            decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                  color: context.colorScheme.surface.withAlpha(
+                                    200,
+                                  ),
+                                  blurRadius: 12,
+                                  spreadRadius: 1,
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        child: Text(
-                          context.l10n.welcomeToCycleTrackingTitle,
-                          style: context.primaryTextTheme.titleLarge,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      DecoratedBox(
-                        decoration: BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                              color: context.colorScheme.surface.withAlpha(200),
-                              blurRadius: 12,
-                              spreadRadius: 8,
+                            child: Text(
+                              context.l10n.welcomeToCycleTrackingTitle,
+                              style: context.primaryTextTheme.titleLarge,
                             ),
-                          ],
-                        ),
-                        child: Text(
-                          context.l10n.welcomeToCycleTrackingMessage,
-                          style: context.textTheme.bodyMedium?.copyWith(
-                            height: 1.4,
                           ),
-                        ),
+                          const SizedBox(height: 12),
+                          DecoratedBox(
+                            decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                  color: context.colorScheme.surface.withAlpha(
+                                    200,
+                                  ),
+                                  blurRadius: 12,
+                                  spreadRadius: 8,
+                                ),
+                              ],
+                            ),
+                            child: Text(
+                              context.l10n.welcomeToCycleTrackingMessage,
+                              style: context.textTheme.bodyMedium?.copyWith(
+                                height: 1.4,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 18),
+                          ElevatedButton(
+                            onPressed: () async {
+                              final shouldReinitialize = await context
+                                  .pushNamed(AppRoutes.cyclesSetup);
+                              if (shouldReinitialize == true) {
+                                await _cubit.initialize(useCache: false);
+                              }
+                            },
+                            child: Text(
+                              context.l10n.setupCycleTrackingButton
+                                  .toUpperCase(),
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+                        ],
                       ),
-                      const SizedBox(height: 18),
-                      ElevatedButton(
-                        onPressed: () async {
-                          final shouldReinitialize = await context.pushNamed(
-                            AppRoutes.cyclesSetup,
-                          );
-                          if (shouldReinitialize == true) {
-                            await _cubit.initialize(useCache: false);
-                          }
-                        },
-                        child: Text(
-                          context.l10n.setupCycleTrackingButton.toUpperCase(),
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-                    ],
-                  ),
-                ),
+                    ),
+            );
+          },
         );
       },
     );

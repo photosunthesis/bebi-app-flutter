@@ -1224,9 +1224,6 @@ PODS:
   - Firebase/Functions (12.4.0):
     - Firebase/CoreOnly
     - FirebaseFunctions (~> 12.4.0)
-  - Firebase/Storage (12.4.0):
-    - Firebase/CoreOnly
-    - FirebaseStorage (~> 12.4.0)
   - firebase_analytics (12.0.3):
     - firebase_core
     - FirebaseAnalytics (= 12.4.0)
@@ -1245,10 +1242,6 @@ PODS:
     - Flutter
   - firebase_crashlytics (5.0.3):
     - Firebase/Crashlytics (= 12.4.0)
-    - firebase_core
-    - Flutter
-  - firebase_storage (13.0.3):
-    - Firebase/Storage (= 12.4.0)
     - firebase_core
     - Flutter
   - FirebaseAnalytics (12.4.0):
@@ -1348,13 +1341,6 @@ PODS:
     - nanopb (~> 3.30910.0)
     - PromisesSwift (~> 2.1)
   - FirebaseSharedSwift (12.4.0)
-  - FirebaseStorage (12.4.0):
-    - FirebaseAppCheckInterop (~> 12.4.0)
-    - FirebaseAuthInterop (~> 12.4.0)
-    - FirebaseCore (~> 12.4.0)
-    - FirebaseCoreExtension (~> 12.4.0)
-    - GoogleUtilities/Environment (~> 8.1)
-    - GTMSessionFetcher/Core (< 6.0, >= 3.4)
   - Flutter (1.0.0)
   - flutter_keyboard_visibility_temp_fork (0.0.1):
     - Flutter
@@ -1550,7 +1536,6 @@ DEPENDENCIES:
   - firebase_auth (from `.symlinks/plugins/firebase_auth/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_crashlytics (from `.symlinks/plugins/firebase_crashlytics/ios`)
-  - firebase_storage (from `.symlinks/plugins/firebase_storage/ios`)
   - Flutter (from `Flutter`)
   - flutter_keyboard_visibility_temp_fork (from `.symlinks/plugins/flutter_keyboard_visibility_temp_fork/ios`)
   - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
@@ -1586,7 +1571,6 @@ SPEC REPOS:
     - FirebaseRemoteConfigInterop
     - FirebaseSessions
     - FirebaseSharedSwift
-    - FirebaseStorage
     - GoogleAdsOnDeviceConversion
     - GoogleAppMeasurement
     - GoogleDataTransport
@@ -1619,8 +1603,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/firebase_core/ios"
   firebase_crashlytics:
     :path: ".symlinks/plugins/firebase_crashlytics/ios"
-  firebase_storage:
-    :path: ".symlinks/plugins/firebase_storage/ios"
   Flutter:
     :path: Flutter
   flutter_keyboard_visibility_temp_fork:
@@ -1658,7 +1640,6 @@ SPEC CHECKSUMS:
   firebase_auth: c2b8be95d602d4e8a9148fae72333ef78e69cc20
   firebase_core: 744984dbbed8b3036abf34f0b98d80f130a7e464
   firebase_crashlytics: f3a9a4338ab99b67042f64e9e22e1bf349cb44ed
-  firebase_storage: 0ba617a05b24aec050395e4d5d3773c0d7518a15
   FirebaseAnalytics: 0fc2b20091f0ddd21bf73397cf8f0eb5346dc24f
   FirebaseAppCheck: 73721d98fa29cf199da6004e57715cbaddd49651
   FirebaseAppCheckInterop: f734c802f21fe1da0837708f0f9a27218c8a4ed0
@@ -1676,7 +1657,6 @@ SPEC CHECKSUMS:
   FirebaseRemoteConfigInterop: 1e31ec72b89c9924367c59bfb5ec9ab60d1d6766
   FirebaseSessions: ba7c7a7ca8696a8d540eb3fe3800fbe98c79786d
   FirebaseSharedSwift: 93426a1de92f19e1199fac5295a4f8df16458daa
-  FirebaseStorage: 20d6b56fb8a40ebaa03d6a2889fe33dac64adb73
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_keyboard_visibility_temp_fork: 95b2d534bacf6ac62e7fcbe5c2a9e2c2a17ce06f
   flutter_native_splash: c32d145d68aeda5502d5f543ee38c192065986cf

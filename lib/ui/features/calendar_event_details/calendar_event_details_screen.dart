@@ -29,14 +29,6 @@ class _CalendarEventDetailsScreenState
   late final CalendarEvent _event = widget.calendarEvent;
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => context.read<CalendarEventDetailsCubit>().initialize(),
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(appBar: _buildAppBar(), body: _buildBody());
   }
@@ -45,8 +37,9 @@ class _CalendarEventDetailsScreenState
     return MainAppBar.build(
       context,
       actions: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 14),
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          width: 50,
           child:
               BlocSelector<
                 CalendarEventDetailsCubit,
@@ -55,20 +48,17 @@ class _CalendarEventDetailsScreenState
               >(
                 selector: (state) => state is CalendarEventDetailsLoadingState,
                 builder: (context, loading) {
-                  return SizedBox(
-                    width: 50,
-                    child: OutlinedButton(
-                      onPressed: !loading
-                          ? () async {
-                              await context.pushNamed<CalendarEvent>(
-                                AppRoutes.updateCalendarEvent,
-                                extra: _event,
-                                pathParameters: {'id': _event.id},
-                              );
-                            }
-                          : null,
-                      child: Text(context.l10n.editButton.toUpperCase()),
-                    ),
+                  return OutlinedButton(
+                    onPressed: !loading
+                        ? () async {
+                            await context.pushNamed<CalendarEvent>(
+                              AppRoutes.updateCalendarEvent,
+                              extra: _event,
+                              pathParameters: {'id': _event.id},
+                            );
+                          }
+                        : null,
+                    child: Text(context.l10n.editButton.toUpperCase()),
                   );
                 },
               ),
@@ -140,35 +130,33 @@ class _CalendarEventDetailsScreenState
     return SliverPadding(
       padding: const EdgeInsets.fromLTRB(24, 14, 24, 0),
       sliver: SliverToBoxAdapter(
-        child: Expanded(
-          child: MarkdownBody(
-            data: _event.notes!,
-            styleSheet: MarkdownStyleSheet(
-              p: context.textTheme.bodyMedium,
-              h1: context.textTheme.headlineLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-              h2: context.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-              h3: context.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-              h4: context.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-              h5: context.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-              h6: context.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-              strong: context.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-              em: context.textTheme.bodyMedium?.copyWith(
-                fontStyle: FontStyle.italic,
-              ),
+        child: MarkdownBody(
+          data: _event.notes!,
+          styleSheet: MarkdownStyleSheet(
+            p: context.textTheme.bodyMedium,
+            h1: context.textTheme.headlineLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+            h2: context.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+            h3: context.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+            h4: context.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+            h5: context.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+            h6: context.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+            strong: context.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+            em: context.textTheme.bodyMedium?.copyWith(
+              fontStyle: FontStyle.italic,
             ),
           ),
         ),
