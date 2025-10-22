@@ -96,3 +96,50 @@ export const deleteStoryImage = https.onCall(
     await s3Client.send(command);
   }
 );
+
+export const getProfilePictureUploadUrl = https.onCall(
+  {
+    region: "asia-east1",
+  },
+  async (request) => {
+    if (!request.auth) {
+      throw new https.HttpsError("unauthenticated", "User must be signed in");
+    }
+
+    const filename = request.data.filename;
+    const contentType = request.data.contentType;
+    const key = `profile_pictures/${filename}`;
+
+    const command = new PutObjectCommand({
+      Bucket: r2Bucket.value(),
+      Key: key,
+      ContentType: contentType,
+    });
+
+    const uploadUrl = await getSignedUrl(s3Client, command, {
+      expiresIn: EXPIRES_IN_SECONDS,
+    });
+
+    return { uploadUrl, key };
+  }
+);
+
+export const deleteProfilePicture = https.onCall(
+  {
+    region: "asia-east1",
+  },
+  async (request) => {
+    if (!request.auth) {
+      throw new https.HttpsError("unauthenticated", "User must be signed in");
+    }
+
+    const key = request.data.key;
+
+    const command = new DeleteObjectCommand({
+      Bucket: r2Bucket.value(),
+      Key: key,
+    });
+
+    await s3Client.send(command);
+  }
+);
