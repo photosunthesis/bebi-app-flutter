@@ -1,6 +1,6 @@
 import 'package:bebi_app/constants/type_adapter_ids.dart';
+import 'package:bebi_app/data/hive_adapters/repeat_rule_adapter.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
-import 'package:bebi_app/data/models/hive_adapters/repeat_rule_adapter.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
 class CalendarEventAdapter extends TypeAdapter<CalendarEvent> {
