@@ -1,3 +1,4 @@
+import 'package:bebi_app/app/app_cubit.dart';
 import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/ui/features/cycles_setup/cycle_setup_cubit.dart';
@@ -36,10 +37,15 @@ class _CyclesSetupScreenState extends State<CyclesSetupScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<CycleSetupCubit, CycleSetupState>(
-      listener: (context, state) => switch (state) {
-        CycleSetupErrorState(:final error) => context.showSnackbar(error),
-        CycleSetupSuccessState() => context.pop(true),
-        _ => null,
+      listener: (context, state) {
+        if (state is CycleSetupErrorState) {
+          context.showSnackbar(state.error);
+        }
+
+        if (state is CycleSetupSuccessState) {
+          context.read<AppCubit>().loadUserProfiles();
+          context.pop(true);
+        }
       },
       builder: (context, state) => KeyboardDismissOnTap(
         dismissOnCapturedTaps: true,
