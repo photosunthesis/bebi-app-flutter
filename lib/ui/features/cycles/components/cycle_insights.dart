@@ -31,7 +31,7 @@ class CycleInsights extends StatelessWidget {
                 return Skeletonizer(
                   textBoneBorderRadius:
                       const TextBoneBorderRadius.fromHeightFactor(0.3),
-                  effect: SoldColorEffect(
+                  effect: SolidColorEffect(
                     color: context.colorScheme.secondary.withAlpha(40),
                   ),
                   enabled:

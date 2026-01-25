@@ -5,7 +5,7 @@ version: 0.5.2
 
 environment:
   sdk: ">=3.9.2 <4.0.0"
-  flutter: "^3.35.6"
+  flutter: "^3.38.4"
 
 dependencies:
   blurhash_ffi: ^1.2.7
@@ -30,21 +30,20 @@ dependencies:
   flutter_markdown_plus: ^1.0.3
   flutter_refresh_rate_control: ^0.0.4+1
   gal: ^2.3.2
-  get_it: ^8.2.0
-  go_router: ^16.1.0
+  get_it: ^9.2.0
+  go_router: ^17.0.1
   hive_ce_flutter: ^2.3.1
   http: ^1.5.0
   image: ^4.5.4
   image_picker: ^1.1.2
-  injectable: ^2.5.1
+  injectable: ^2.7.1+4
   intl: ^0.20.2
   material_symbols_icons: ^4.2815.1
   package_info_plus: ^9.0.0
   paged_vertical_calendar: ^1.1.10
   path_provider: ^2.1.5
   skeletonizer: ^2.1.0+1
-  super_editor: ^0.3.0-dev.29
-  super_editor_markdown: ^0.2.0
+  super_editor: ^0.3.0-dev.48
   table_calendar: ^3.2.0
   url_launcher: ^6.3.2
 
@@ -55,7 +54,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   icons_launcher: ^3.0.1
-  injectable_generator: ^2.8.1
+  injectable_generator: ^2.9.1
 
 flutter:
   uses-material-design: true
