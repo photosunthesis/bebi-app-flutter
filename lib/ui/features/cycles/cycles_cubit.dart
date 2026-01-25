@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bebi_app/data/models/async_value.dart';
 import 'package:bebi_app/data/models/cycle_day_insights.dart';
 import 'package:bebi_app/data/models/cycle_log.dart';
+import 'package:bebi_app/data/models/prediction_confidence.dart';
 import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:bebi_app/data/repositories/cycle_logs_repository.dart';
 import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
@@ -155,12 +156,14 @@ class CyclesCubit extends Cubit<CyclesState>
         useCache: useCache,
       );
 
-      final predictions = _cyclePredictionsService.predictUpcomingCycles(
+      final result = _cyclePredictionsService.predictUpcomingCycles(
         cycleLogs,
         state.focusedDate,
       );
 
-      return [...cycleLogs, ...predictions];
+      emit(state.copyWith(predictionConfidence: AsyncData(result.confidence)));
+
+      return [...cycleLogs, ...result.predictions];
     });
 
     emit(state.copyWith(cycleLogs: cycleLogs));
@@ -192,6 +195,7 @@ class CyclesCubit extends Cubit<CyclesState>
           insightsData,
           isCurrentUser: state.isViewingCurrentUser,
           locale: l10n.localeName,
+          confidence: state.predictionConfidence.asData(),
           useCache: useCache,
         ),
       );

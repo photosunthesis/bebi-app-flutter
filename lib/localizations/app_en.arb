@@ -168,8 +168,8 @@
   "welcomeToCycleTrackingMessage": "Start tracking your cycle by tapping the button below, or view your partner's data using the profile icons above.",
   "setupCycleTrackingButton": "Set up cycle tracking",
   "cycleTrackingDisclaimer": "This app provides helpful information to support your cycle tracking. For personalized guidance, we recommend consulting with a medical professional. The AI-generated insights and cycle predictions are designed to be informative and supportive, though they may not always be accurate for everyone's unique cycle.",
-  "fertileWindowDescription": "Your fertile window is predicted to begin on **{date}**.",
-  "@fertileWindowDescription": {
+  "fertileWindowDescriptionLow": "Your fertile window may begin around **{date}**.",
+  "@fertileWindowDescriptionLow": {
     "placeholders": {
       "date": {
         "type": "String",
@@ -177,8 +177,26 @@
       }
     }
   },
-  "partnerFertileWindowDescription": "Your partner's fertile window is predicted to begin on **{date}**.",
-  "@partnerFertileWindowDescription": {
+  "fertileWindowDescriptionMedium": "Your fertile window is estimated to begin on **{date}**.",
+  "@fertileWindowDescriptionMedium": {
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "description": "The formatted date when fertile window begins"
+      }
+    }
+  },
+  "fertileWindowDescriptionHigh": "Your fertile window is predicted to begin on **{date}**.",
+  "@fertileWindowDescriptionHigh": {
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "description": "The formatted date when fertile window begins"
+      }
+    }
+  },
+  "partnerFertileWindowDescriptionLow": "Your partner's fertile window may begin around **{date}**.",
+  "@partnerFertileWindowDescriptionLow": {
     "placeholders": {
       "date": {
         "type": "String",
@@ -186,8 +204,26 @@
       }
     }
   },
-  "nextPeriodDescription": "Your next period is predicted to begin on **{date}**.",
-  "@nextPeriodDescription": {
+  "partnerFertileWindowDescriptionMedium": "Your partner's fertile window is estimated to begin on **{date}**.",
+  "@partnerFertileWindowDescriptionMedium": {
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "description": "The formatted date when partner's fertile window begins"
+      }
+    }
+  },
+  "partnerFertileWindowDescriptionHigh": "Your partner's fertile window is predicted to begin on **{date}**.",
+  "@partnerFertileWindowDescriptionHigh": {
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "description": "The formatted date when partner's fertile window begins"
+      }
+    }
+  },
+  "nextPeriodDescriptionLow": "Your next period may begin around **{date}**.",
+  "@nextPeriodDescriptionLow": {
     "placeholders": {
       "date": {
         "type": "String",
@@ -195,8 +231,44 @@
       }
     }
   },
-  "partnerNextPeriodDescription": "Your partner's next period is predicted to begin on **{date}**.",
-  "@partnerNextPeriodDescription": {
+  "nextPeriodDescriptionMedium": "Your next period is estimated to begin on **{date}**.",
+  "@nextPeriodDescriptionMedium": {
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "description": "The formatted date when next period begins"
+      }
+    }
+  },
+  "nextPeriodDescriptionHigh": "Your next period is predicted to begin on **{date}**.",
+  "@nextPeriodDescriptionHigh": {
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "description": "The formatted date when next period begins"
+      }
+    }
+  },
+  "partnerNextPeriodDescriptionLow": "Your partner's next period may begin around **{date}**.",
+  "@partnerNextPeriodDescriptionLow": {
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "description": "The formatted date when partner's next period begins"
+      }
+    }
+  },
+  "partnerNextPeriodDescriptionMedium": "Your partner's next period is estimated to begin on **{date}**.",
+  "@partnerNextPeriodDescriptionMedium": {
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "description": "The formatted date when partner's next period begins"
+      }
+    }
+  },
+  "partnerNextPeriodDescriptionHigh": "Your partner's next period is predicted to begin on **{date}**.",
+  "@partnerNextPeriodDescriptionHigh": {
     "placeholders": {
       "date": {
         "type": "String",
@@ -402,5 +474,10 @@
   "storyDownloadedSnackbar": "Story downloaded to your gallery.",
   "cameraInitializationError": "Failed to initialize camera. Please ensure the app has permission to access the camera and try again.",
   "you": "You",
-  "user": "User"
+  "user": "User",
+  "predictionConfidenceTitle": "Prediction Confidence",
+  "confidenceLevelLow": "Low",
+  "confidenceLevelMedium": "Medium",
+  "confidenceLevelHigh": "High",
+  "confidenceDescription": "This score indicates how reliable the predictions are based on the amount of data available. More data leads to better predictions."
 }

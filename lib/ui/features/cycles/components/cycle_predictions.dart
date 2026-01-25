@@ -2,6 +2,7 @@ import 'package:bebi_app/app/app_cubit.dart';
 import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/app/theme/app_colors.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
+import 'package:bebi_app/data/models/prediction_confidence.dart';
 import 'package:bebi_app/data/models/user_profile_view.dart';
 import 'package:bebi_app/ui/features/cycles/cycles_cubit.dart';
 import 'package:bebi_app/ui/shared_widgets/specialized/angled_stripes_background.dart';
@@ -90,12 +91,27 @@ class _CyclePredictionsState extends State<CyclePredictions> {
       builder: (context, state) {
         final fertileDays = state.insights.asData()?.fertileDays ?? [];
 
+        final confidenceLevel =
+            state.predictionConfidence.asData()?.level ??
+            PredictionConfidenceLevel.high;
+
         late String description;
         if (state.isViewingCurrentUser) {
           if (fertileDays.isNotEmpty) {
-            description = context.l10n.fertileWindowDescription(
-              fertileDays.first.toEEEEMMMMd(),
-            );
+            description = switch (confidenceLevel) {
+              PredictionConfidenceLevel.low =>
+                context.l10n.fertileWindowDescriptionLow(
+                  fertileDays.first.toEEEEMMMMd(),
+                ),
+              PredictionConfidenceLevel.medium =>
+                context.l10n.fertileWindowDescriptionMedium(
+                  fertileDays.first.toEEEEMMMMd(),
+                ),
+              PredictionConfidenceLevel.high =>
+                context.l10n.fertileWindowDescriptionHigh(
+                  fertileDays.first.toEEEEMMMMd(),
+                ),
+            };
           } else {
             description = context.l10n.notEnoughDataFertileWindow;
           }
@@ -103,9 +119,14 @@ class _CyclePredictionsState extends State<CyclePredictions> {
           final dateString = fertileDays.isNotEmpty
               ? fertileDays.first.toEEEEMMMMd()
               : '';
-          description = context.l10n.partnerFertileWindowDescription(
-            dateString,
-          );
+          description = switch (confidenceLevel) {
+            PredictionConfidenceLevel.low =>
+              context.l10n.partnerFertileWindowDescriptionLow(dateString),
+            PredictionConfidenceLevel.medium =>
+              context.l10n.partnerFertileWindowDescriptionMedium(dateString),
+            PredictionConfidenceLevel.high =>
+              context.l10n.partnerFertileWindowDescriptionHigh(dateString),
+          };
         }
 
         return _buildCalendar(
@@ -129,12 +150,27 @@ class _CyclePredictionsState extends State<CyclePredictions> {
       builder: (context, state) {
         final nextPeriodDates = state.insights.asData()?.nextPeriodDates ?? [];
 
+        final confidenceLevel =
+            state.predictionConfidence.asData()?.level ??
+            PredictionConfidenceLevel.high;
+
         late String description;
         if (state.isViewingCurrentUser) {
           if (nextPeriodDates.isNotEmpty) {
-            description = context.l10n.nextPeriodDescription(
-              nextPeriodDates.first.toEEEEMMMMd(),
-            );
+            description = switch (confidenceLevel) {
+              PredictionConfidenceLevel.low =>
+                context.l10n.nextPeriodDescriptionLow(
+                  nextPeriodDates.first.toEEEEMMMMd(),
+                ),
+              PredictionConfidenceLevel.medium =>
+                context.l10n.nextPeriodDescriptionMedium(
+                  nextPeriodDates.first.toEEEEMMMMd(),
+                ),
+              PredictionConfidenceLevel.high =>
+                context.l10n.nextPeriodDescriptionHigh(
+                  nextPeriodDates.first.toEEEEMMMMd(),
+                ),
+            };
           } else {
             description = context.l10n.notEnoughDataNextPeriod;
           }
@@ -142,7 +178,14 @@ class _CyclePredictionsState extends State<CyclePredictions> {
           final dateString = nextPeriodDates.isNotEmpty
               ? nextPeriodDates.first.toEEEEMMMMd()
               : '';
-          description = context.l10n.partnerNextPeriodDescription(dateString);
+          description = switch (confidenceLevel) {
+            PredictionConfidenceLevel.low =>
+              context.l10n.partnerNextPeriodDescriptionLow(dateString),
+            PredictionConfidenceLevel.medium =>
+              context.l10n.partnerNextPeriodDescriptionMedium(dateString),
+            PredictionConfidenceLevel.high =>
+              context.l10n.partnerNextPeriodDescriptionHigh(dateString),
+          };
         }
 
         return _buildCalendar(

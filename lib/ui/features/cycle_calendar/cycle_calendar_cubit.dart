@@ -26,19 +26,19 @@ class CycleCalendarCubit extends Cubit<CycleCalendarState>
           userId,
         );
 
-        final predictions = _cyclePredictionsService.predictUpcomingCycles(
+        final result = _cyclePredictionsService.predictUpcomingCycles(
           cycleLogs,
           DateTime.now(),
         );
 
-        final sortedLogs = [...cycleLogs, ...predictions]
+        final sortedLogs = [...cycleLogs, ...result.predictions]
           ..sort((a, b) => b.date.compareTo(a.date));
 
         logDataLoaded(
           dataType: 'cycle_logs',
           parameters: {
             'log_count': cycleLogs.length,
-            'predicted_count': predictions.length,
+            'predicted_count': result.predictions.length,
           },
         );
 

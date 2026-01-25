@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:bebi_app/data/models/cycle_log.dart';
+import 'package:bebi_app/data/models/prediction_confidence.dart';
 import 'package:bebi_app/utils/extensions/int_extensions.dart';
 import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
 // ignore: depend_on_referenced_packages
@@ -12,59 +13,107 @@ class CyclePredictionsService with LocalizationsMixin {
   const CyclePredictionsService();
 
   static const _defaultCycleLength = 28;
-  static const _maxCycleLengthDeviation = 14.0;
   static const _minCycleGap = 15;
   static const _maxCycleGap = 45;
   static const _irregularityThreshold = 4.0;
-  static const _ovulationDayBeforePeriod = 14;
+  static const _defaultOvulationDayBeforePeriod = 14;
   static const _baseFertileWindowDays = 6;
   static const _defaultPeriodLength = 4;
   static const _minPeriodDays = 1;
   static const _maxPeriodDays = 10;
-  static const _consecutiveDayThreshold = 1;
+  static const _consecutiveDayThreshold = 14;
   static const _ovulationWindowExtensionDivisor = 2;
   static const _maxOvulationWindowExtension = 3;
   static const _periodExtensionDivisor = 4;
   static const _maxPeriodExtension = 2;
 
-  List<CycleLog> predictUpcomingCycles(List<CycleLog> logs, DateTime now) {
+  // Symptom-based prediction weights (days before period)
+  static const _symptomOffsets = {
+    'cramps': 2,
+    'breast_tenderness': 4, // 3-5 days
+    'mood_swings': 3, // 2-4 days
+    'bloating': 3, // 2-3 days
+    'headache': 2, // 1-3 days
+    'fatigue': 3, // 2-4 days
+    'acne': 3, // 2-4 days
+    'backache': 2, // 1-3 days
+  };
+
+  ({List<CycleLog> predictions, PredictionConfidence confidence})
+  predictUpcomingCycles(List<CycleLog> logs, DateTime now) {
+    if (logs.isEmpty) {
+      return (
+        predictions: <CycleLog>[],
+        confidence: const PredictionConfidence(
+          accuracy: 0,
+          cyclesAnalyzed: 0,
+          hasSymptomData: false,
+          trend: PredictionTrend.stable,
+        ),
+      );
+    }
+
     final periodLogs = _getSortedActualPeriodLogs(logs);
     if (periodLogs.isEmpty) throw ArgumentError(l10n.noPeriodDataError);
 
     final periodStartDates = _extractPeriodStartDates(periodLogs);
-    final avgCycleLength = _calculateAverageCycleLength(periodStartDates);
-    final stdDev = _calculateCycleStandardDeviation(periodStartDates);
+    final cycleLengths = _calculateCycleLengths(periodStartDates);
+    final weightedAvgCycleLength = _calculateWeightedCycleLength(cycleLengths);
+    final stdDev = _calculateStandardDeviationFromLengths(
+      cycleLengths,
+      weightedAvgCycleLength,
+    );
     final avgPeriodDays = _calculateAveragePeriodDaysFromDates(
       periodLogs,
       periodStartDates,
     );
+
     final isIrregular = stdDev > _irregularityThreshold;
     final lastPeriodDate = periodLogs.last.date;
     final baseNextPeriodStart = lastPeriodDate;
-    var nextPeriodStart = _adjustNextPeriodForSymptoms(
+
+    // Check symptoms for adjustment
+    final (adjustedDate, hasSymptomData) = _adjustNextPeriodForSymptoms(
       logs,
       baseNextPeriodStart,
       now,
     );
-    final random = isIrregular ? Random(now.millisecondsSinceEpoch) : null;
+
+    var nextPeriodStart = adjustedDate;
+
+    // Calculate confidence
+    final trend = _detectCycleTrend(cycleLengths);
+    final confidence = _calculateConfidence(
+      cycleLengths.length,
+      stdDev,
+      hasSymptomData,
+      trend,
+    );
 
     final predictions = <CycleLog>[];
 
+    // Calculate individual luteal phase
+    // We need historical ovulation data to calculate this accurately
+    // For now we will use a more sophisticated estimation based on cycle length if available
+    final lutealPhaseLength = _estimateLutealPhaseLength(
+      logs,
+      periodStartDates,
+    );
+
     final historicalOvulations = _generateHistoricalOvulationPredictions(
       periodLogs,
+      lutealPhaseLength,
     );
     predictions.addAll(historicalOvulations);
 
     for (var i = 0; i < 6; i++) {
       final cycleId = 'predicted_cycle_$i';
-      final cycleLength = _getPredictedCycleLength(
-        avgCycleLength,
-        stdDev,
-        isIrregular,
-        random,
-      );
 
-      nextPeriodStart = nextPeriodStart.add(cycleLength.days);
+      // Use weighted average without random variation for future predictions
+      // This is more reliable for user planning than random noise
+      final currentCycleLength = weightedAvgCycleLength.round();
+
+      nextPeriodStart = nextPeriodStart.add(currentCycleLength.days);
 
       predictions.addAll(
         _generatePredictedPeriodLogs(
@@ -73,12 +122,14 @@ class CyclePredictionsService with LocalizationsMixin {
           avgPeriodDays,
           isIrregular,
           stdDev,
+          logs, // Pass all logs to analyze flow patterns
         ),
       );
 
       predictions.addAll(
         _generatePredictedOvulationWindow(
           nextPeriodStart,
+          lutealPhaseLength,
           cycleId,
           isIrregular,
           stdDev,
@@ -86,16 +137,68 @@ class CyclePredictionsService with LocalizationsMixin {
       );
     }
 
-    return predictions;
+    return (predictions: predictions, confidence: confidence);
   }
 
-  double _calculateAverageCycleLength(List<DateTime> periodStartDates) {
-    if (periodStartDates.length < 2) {
-      return _defaultCycleLength.toDouble();
+  PredictionConfidence _calculateConfidence(
+    int cyclesAnalyzed,
+    double stdDev,
+    bool hasSymptomData,
+    PredictionTrend trend,
+  ) {
+    // Base accuracy starts low
+    var accuracy = 0.3;
+
+    // More cycles = better accuracy
+    if (cyclesAnalyzed >= 6) {
+      accuracy += 0.4;
+    } else if (cyclesAnalyzed >= 3) {
+      accuracy += 0.2;
     }
 
-    final gaps = <int>[];
+    // Regular cycles = better accuracy
+    if (stdDev < 2.0) {
+      accuracy += 0.2;
+    } else if (stdDev < 4.0) {
+      accuracy += 0.1;
+    }
 
+    // Symptom matches increase confidence for near-term prediction
+    if (hasSymptomData) {
+      accuracy += 0.1;
+    }
+
+    // Unstable trend reduces confidence slightly
+    if (trend != PredictionTrend.stable) {
+      accuracy -= 0.1;
+    }
+
+    return PredictionConfidence(
+      accuracy: accuracy.clamp(0.0, 1.0),
+      cyclesAnalyzed: cyclesAnalyzed,
+      hasSymptomData: hasSymptomData,
+      trend: trend,
+    );
+  }
+
+  PredictionTrend _detectCycleTrend(List<int> cycleLengths) {
+    if (cycleLengths.length < 3) return PredictionTrend.stable;
+
+    final half = cycleLengths.length ~/ 2;
+    final firstHalfAvg = cycleLengths.take(half).average;
+    final secondHalfAvg = cycleLengths.skip(half).average;
+
+    final diff = secondHalfAvg - firstHalfAvg;
+
+    if (diff > 2) return PredictionTrend.lengthening;
+    if (diff < -2) return PredictionTrend.shortening;
+    return PredictionTrend.stable;
+  }
+
+  List<int> _calculateCycleLengths(List<DateTime> periodStartDates) {
+    if (periodStartDates.length < 2) return [];
+
+    final gaps = <int>[];
     for (var i = 1; i < periodStartDates.length; i++) {
       final diff = periodStartDates[i]
           .difference(periodStartDates[i - 1])
@@ -104,32 +207,30 @@ class CyclePredictionsService with LocalizationsMixin {
         gaps.add(diff);
       }
     }
-
-    if (gaps.isEmpty) {
-      return _defaultCycleLength.toDouble();
-    }
-
-    return gaps.average;
+    return gaps;
   }
 
-  double _calculateCycleStandardDeviation(List<DateTime> periodStartDates) {
-    if (periodStartDates.length < 2) return 0.0;
+  double _calculateWeightedCycleLength(List<int> cycleLengths) {
+    if (cycleLengths.isEmpty) return _defaultCycleLength.toDouble();
+    if (cycleLengths.length == 1) return cycleLengths.first.toDouble();
 
-    final gaps = <int>[];
-    for (var i = 1; i < periodStartDates.length; i++) {
-      final diff = periodStartDates[i]
-          .difference(periodStartDates[i - 1])
-          .inDays;
+    var totalWeight = 0.0;
+    var weightedSum = 0.0;
 
-      if (diff >= _minCycleGap && diff <= _maxCycleGap) {
-        gaps.add(diff);
-      }
+    for (var i = 0; i < cycleLengths.length; i++) {
+      // Recent cycles have higher weight
+      // e.g. for 3 cycles: weights are 1, 2, 3
+      final weight = (i + 1).toDouble();
+      weightedSum += cycleLengths[i] * weight;
+      totalWeight += weight;
     }
 
+    return weightedSum / totalWeight;
+  }
+
+  double _calculateStandardDeviationFromLengths(List<int> gaps, double mean) {
     if (gaps.isEmpty || gaps.length < 2) return 0.0;
-
-    final avg = gaps.average;
-    return _calculateStandardDeviation(gaps, avg);
+    return _calculateStandardDeviation(gaps, mean);
   }
 
   int _calculateAveragePeriodDaysFromDates(
@@ -190,7 +291,7 @@ class CyclePredictionsService with LocalizationsMixin {
     return periodGroups.map((group) => group.first.date).toList();
   }
 
-  DateTime _adjustNextPeriodForSymptoms(
+  (DateTime, bool) _adjustNextPeriodForSymptoms(
     List<CycleLog> allLogs,
     DateTime lastPeriodDate,
     DateTime now,
@@ -199,67 +300,96 @@ class CyclePredictionsService with LocalizationsMixin {
       7.days,
     ); // look back 7 days for recent symptoms
 
-    final hasRecentCramps = allLogs.any(
-      (log) =>
-          log.date.isAfter(cutoffDate) &&
-          log.type == LogType.symptom &&
-          !log.isPrediction &&
-          log.symptoms?.contains('cramps') == true,
-    );
+    // Get recent symptoms excluding predictions
+    final recentSymptoms = allLogs
+        .where(
+          (log) =>
+              log.date.isAfter(cutoffDate) &&
+              log.type == LogType.symptom &&
+              !log.isPrediction &&
+              log.symptoms != null,
+        )
+        .expand((log) => log.symptoms!)
+        .toSet();
 
-    final adjustedDate = hasRecentCramps
-        ? lastPeriodDate.subtract(
-            1.days,
-          ) // adjust period start by 1 day if cramps detected
+    if (recentSymptoms.isEmpty) {
+      return (lastPeriodDate, false);
+    }
+
+    // Find the symptom that predicts the earliest period onset (largest offset)
+    var maxOffset = 0;
+    var hasPredictiveSymptoms = false;
+
+    for (final symptom in recentSymptoms) {
+      if (_symptomOffsets.containsKey(symptom)) {
+        final offset = _symptomOffsets[symptom]!;
+        if (offset > maxOffset) {
+          maxOffset = offset;
+          hasPredictiveSymptoms = true;
+        }
+      }
+    }
+
+    // Only adjust if we have strong signal
+    final adjustedDate = hasPredictiveSymptoms
+        ? lastPeriodDate.subtract(1.days) // conservative 1 day adjustment
         : lastPeriodDate;
 
     if (adjustedDate.isBefore(now.subtract(60.days))) {
       // prevent predictions more than 60 days in the past
-      throw ArgumentError(l10n.unableToDetermineCycleError);
+      return (lastPeriodDate, false);
     }
 
-    return adjustedDate;
+    return (adjustedDate, hasPredictiveSymptoms);
   }
 
-  int _getPredictedCycleLength(
-    double avgCycleLength,
-    double stdDev,
-    bool isIrregular,
-    Random? rand,
+  int _estimateLutealPhaseLength(
+    List<CycleLog> logs,
+    List<DateTime> periodStartDates,
   ) {
-    if (avgCycleLength < _minCycleGap || avgCycleLength > _maxCycleGap) {
-      throw ArgumentError(l10n.unableToDetermineCycleError);
+    // Try to calculate from historical data
+    final ovulationLogs = logs
+        .where((l) => l.type == LogType.ovulation && !l.isPrediction)
+        .toList();
+
+    if (ovulationLogs.isNotEmpty && periodStartDates.length >= 2) {
+      final lutealLengths = <int>[];
+
+      for (final ovulation in ovulationLogs) {
+        // Find the period that started immediately after this ovulation
+        final nextPeriod = periodStartDates
+            .where((p) => p.isAfter(ovulation.date))
+            .sortedBy((d) => d)
+            .firstOrNull;
+
+        if (nextPeriod != null) {
+          final length = nextPeriod.difference(ovulation.date).inDays;
+          if (length >= 10 && length <= 16) {
+            lutealLengths.add(length);
+          }
+        }
+      }
+
+      if (lutealLengths.isNotEmpty) {
+        return lutealLengths.average.round();
+      }
     }
 
-    if (!isIrregular) return avgCycleLength.round();
-
-    final deviation =
-        (rand!.nextDouble() * 2 - 1) * min(stdDev, _maxCycleLengthDeviation);
-    final predictedLength = (avgCycleLength + deviation).round();
-
-    if (predictedLength < _minCycleGap || predictedLength > _maxCycleGap) {
-      return avgCycleLength.round();
-    }
-
-    return predictedLength;
+    // Fallback: Estimate based on total cycle length if it's very short or long
+    // Standard text book is 14 days, but shorter cycles often have shorter luteal phases
+    return _defaultOvulationDayBeforePeriod;
   }
 
   List<CycleLog> _generatePredictedOvulationWindow(
     DateTime nextPeriodStart,
+    int lutealPhaseLength,
     String cycleId,
     bool isIrregular,
     double stdDev,
   ) {
-    final cycleLength = _getPredictedCycleLength(
-      _defaultCycleLength.toDouble(),
-      stdDev,
-      isIrregular,
-      isIrregular ? Random(nextPeriodStart.millisecondsSinceEpoch) : null,
-    );
-    final previousPeriodStart = nextPeriodStart.subtract(cycleLength.days);
-    final ovulationDate = previousPeriodStart.add(
-      _ovulationDayBeforePeriod.days,
-    );
+    // Calculate ovulation by subtracting luteal phase from next period start
+    // This assumes the luteal phase is relatively constant
+    final ovulationDate = nextPeriodStart.subtract(lutealPhaseLength.days);
 
     final windowExtension = isIrregular
         ? (stdDev / _ovulationWindowExtensionDivisor)
@@ -267,10 +397,7 @@ class CyclePredictionsService with LocalizationsMixin {
               .round()
         : 0;
 
-    final fertileStart = ovulationDate.subtract(
-      (5 + windowExtension)
-          .days, // fertile window starts 5 days before ovulation
-    );
+    final fertileStart = ovulationDate.subtract((5 + windowExtension).days);
 
     final windowDays = _baseFertileWindowDays + windowExtension;
 
@@ -293,6 +420,7 @@ class CyclePredictionsService with LocalizationsMixin {
     int avgPeriodDays,
     bool isIrregular,
     double stdDev,
+    List<CycleLog> allLogs,
   ) {
     if (avgPeriodDays <= 0) {
       throw ArgumentError(l10n.unableToDetermineCycleError);
@@ -308,14 +436,24 @@ class CyclePredictionsService with LocalizationsMixin {
       _maxPeriodDays,
     );
 
+    // Analyze flow pattern for better predictions
+    final flowPattern = _analyzeFlowPattern(allLogs, periodDays);
+
     return List.generate(periodDays, (i) {
       final date = start.add(i.days);
+
+      // Use historical pattern if available, otherwise default logic
+      FlowIntensity flow;
+      if (i < flowPattern.length) {
+        flow = flowPattern[i];
+      } else {
+        flow = i < 2 ? FlowIntensity.medium : FlowIntensity.light;
+      }
+
       return CycleLog.period(
         id: '${cycleId}_period_$i',
         date: date,
-        flow: i < 2
-            ? FlowIntensity.medium
-            : FlowIntensity.light, // first 2 days are heavier flow
+        flow: flow,
         createdBy: 'system',
         ownedBy: 'system',
         users: [],
@@ -324,8 +462,54 @@ class CyclePredictionsService with LocalizationsMixin {
     });
   }
 
+  List<FlowIntensity> _analyzeFlowPattern(
+    List<CycleLog> logs,
+    int predictedDays,
+  ) {
+    // Get recent complete periods
+    final periodGroups = _groupPeriodEventsByProximity(
+      logs.where((l) => l.type == LogType.period && !l.isPrediction).toList(),
+    );
+
+    if (periodGroups.isEmpty) return [];
+
+    // Take up to 3 most recent periods
+    final recentPeriods = periodGroups.reversed.take(3).toList();
+    final flowSums = List<int>.filled(10, 0); // Max 10 days
+    final flowCounts = List<int>.filled(10, 0);
+
+    for (final group in recentPeriods) {
+      final sortedGroup = group.sortedBy((l) => l.date);
+      for (var i = 0; i < sortedGroup.length; i++) {
+        if (i < 10 && sortedGroup[i].flow != null) {
+          flowSums[i] += sortedGroup[i].flow!.index;
+          flowCounts[i]++;
+        }
+      }
+    }
+
+    final pattern = <FlowIntensity>[];
+    for (var i = 0; i < predictedDays; i++) {
+      if (i < 10 && flowCounts[i] > 0) {
+        final avgFlowIndex = (flowSums[i] / flowCounts[i]).round();
+        pattern.add(
+          FlowIntensity.values[avgFlowIndex.clamp(
+            0,
+            FlowIntensity.values.length - 1,
+          )],
+        );
+      } else {
+        // Fallback
+        pattern.add(i < 2 ? FlowIntensity.medium : FlowIntensity.light);
+      }
+    }
+
+    return pattern;
+  }
+
   List<CycleLog> _generateHistoricalOvulationPredictions(
     List<CycleLog> periodLogs,
+    int lutealPhaseLength,
   ) {
     if (periodLogs.length < 2) return [];
 
@@ -344,9 +528,8 @@ class CyclePredictionsService with LocalizationsMixin {
       final cycleLength = nextPeriodStart.difference(currentPeriodStart).inDays;
 
       if (cycleLength >= _minCycleGap && cycleLength <= _maxCycleGap) {
-        final ovulationDate = nextPeriodStart.subtract(
-          _ovulationDayBeforePeriod.days,
-        );
+        // Calculate historical ovulation date by subtracting luteal phase from next period start
+        final ovulationDate = nextPeriodStart.subtract(lutealPhaseLength.days);
 
         if (ovulationDate.isBefore(nextPeriodStart)) {
           final fertileStart = ovulationDate.subtract(5.days);

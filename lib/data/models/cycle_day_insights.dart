@@ -1,3 +1,5 @@
+import 'package:bebi_app/data/models/prediction_confidence.dart';
+
 enum CyclePhase { period, follicular, ovulation, luteal }
 
 class CycleDayInsights {
@@ -9,6 +11,7 @@ class CycleDayInsights {
     required this.averagePeriodDurationInDays,
     required this.nextPeriodDates,
     required this.fertileDays,
+    this.confidence,
   });
 
   final DateTime date;
@@ -18,4 +21,5 @@ class CycleDayInsights {
   final int averagePeriodDurationInDays;
   final List<DateTime> nextPeriodDates;
   final List<DateTime> fertileDays;
+  final PredictionConfidence? confidence;
 }

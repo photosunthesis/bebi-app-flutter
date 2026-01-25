@@ -56,9 +56,10 @@ class CycleSetupCubit extends Cubit<CycleSetupState>
         );
 
         final cycleLogs = List.generate(periodDurationInDays, (index) {
+          final flow = index < 2 ? FlowIntensity.medium : FlowIntensity.light;
           return CycleLog.period(
             date: periodStartDate.add(index.days),
-            flow: FlowIntensity.light,
+            flow: flow,
             createdBy: _firebaseAuth.currentUser!.uid,
             ownedBy: _firebaseAuth.currentUser!.uid,
             users: shouldShareWithPartner
