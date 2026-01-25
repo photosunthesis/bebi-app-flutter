@@ -5,9 +5,7 @@ import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/ui/features/cycles/cycles_cubit.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:bebi_app/utils/extensions/color_extensions.dart';
-import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
 // ignore: depend_on_referenced_packages
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -46,12 +44,9 @@ class _CycleLogsState extends State<CycleLogs> {
   Widget _buildPeriodSection() {
     return BlocBuilder<CyclesCubit, CyclesState>(
       builder: (context, state) {
-        final periodLog = state.cycleLogs.maybeMap(
-          data: (data) => data.firstWhereOrNull(
-            (e) =>
-                e.type == LogType.period && e.date.isSameDay(state.focusedDate),
-          ),
-          orElse: () => null,
+        final periodLog = state.cycleLogs.asData()?.findByTypeAndDate(
+          LogType.period,
+          state.focusedDate,
         );
 
         return Column(
@@ -199,11 +194,9 @@ class _CycleLogsState extends State<CycleLogs> {
   }) {
     return BlocBuilder<CyclesCubit, CyclesState>(
       builder: (context, state) {
-        final log = state.cycleLogs.maybeMap(
-          data: (data) => data.firstWhereOrNull(
-            (e) => e.type == logType && e.date.isSameDay(state.focusedDate),
-          ),
-          orElse: () => null,
+        final log = state.cycleLogs.asData()?.findByTypeAndDate(
+          logType,
+          state.focusedDate,
         );
 
         return InkWell(

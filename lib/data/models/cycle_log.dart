@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'package:bebi_app/app/theme/app_colors.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+// ignore: depend_on_referenced_packages
+import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 
 class CycleLog extends Equatable {
@@ -244,4 +246,16 @@ enum IntimacyType {
   unprotected;
 
   String get label => name[0].toUpperCase() + name.substring(1);
+}
+
+extension CycleLogListExtension on List<CycleLog> {
+  CycleLog? findByTypeAndDate(LogType type, DateTime date) {
+    return firstWhereOrNull((l) => l.type == type && l.date.isSameDay(date));
+  }
+
+  Map<LogType, CycleLog?> findAllByDate(DateTime date) {
+    return {
+      for (final type in LogType.values) type: findByTypeAndDate(type, date),
+    };
+  }
 }

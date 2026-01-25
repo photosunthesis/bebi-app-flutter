@@ -56,17 +56,17 @@ class CyclePredictionsService with LocalizationsMixin {
     final periodLogs = _getSortedActualPeriodLogs(logs);
     if (periodLogs.isEmpty) throw ArgumentError(l10n.noPeriodDataError);
 
-    final periodStartDates = _extractPeriodStartDates(periodLogs);
+    final periodGroups = _groupPeriodEventsByProximity(periodLogs);
+    if (periodGroups.isEmpty) throw ArgumentError(l10n.noPeriodDataError);
+
+    final periodStartDates = _extractPeriodStartDates(periodGroups);
     final cycleLengths = _calculateCycleLengths(periodStartDates);
     final weightedAvgCycleLength = _calculateWeightedCycleLength(cycleLengths);
     final stdDev = _calculateStandardDeviationFromLengths(
       cycleLengths,
       weightedAvgCycleLength,
     );
-    final avgPeriodDays = _calculateAveragePeriodDaysFromDates(
-      periodLogs,
-      periodStartDates,
-    );
+    final avgPeriodDays = _calculateAveragePeriodDaysFromGroups(periodGroups);
 
     final isIrregular = stdDev > _irregularityThreshold;
     final lastPeriodDate = periodLogs.last.date;
@@ -101,7 +101,7 @@ class CyclePredictionsService with LocalizationsMixin {
     );
 
     final historicalOvulations = _generateHistoricalOvulationPredictions(
-      periodLogs,
+      periodGroups,
       lutealPhaseLength,
     );
     predictions.addAll(historicalOvulations);
@@ -233,13 +233,7 @@ class CyclePredictionsService with LocalizationsMixin {
     return _calculateStandardDeviation(gaps, mean);
   }
 
-  int _calculateAveragePeriodDaysFromDates(
-    List<CycleLog> periodLogs,
-    List<DateTime> periodStartDates,
-  ) {
-    if (periodStartDates.isEmpty) throw ArgumentError(l10n.noPeriodDataError);
-
-    final periodGroups = _groupPeriodEventsByProximity(periodLogs);
+  int _calculateAveragePeriodDaysFromGroups(List<List<CycleLog>> periodGroups) {
     if (periodGroups.isEmpty) throw ArgumentError(l10n.noPeriodDataError);
 
     final cyclePeriodDays = <int>[];
@@ -280,10 +274,7 @@ class CyclePredictionsService with LocalizationsMixin {
     return sqrt(variance);
   }
 
-  List<DateTime> _extractPeriodStartDates(List<CycleLog> periodLogs) {
-    if (periodLogs.isEmpty) throw ArgumentError(l10n.noPeriodDataError);
-
-    final periodGroups = _groupPeriodEventsByProximity(periodLogs);
+  List<DateTime> _extractPeriodStartDates(List<List<CycleLog>> periodGroups) {
     if (periodGroups.isEmpty) {
       throw ArgumentError(l10n.noPeriodDataError);
     }
@@ -508,12 +499,9 @@ class CyclePredictionsService with LocalizationsMixin {
   }
 
   List<CycleLog> _generateHistoricalOvulationPredictions(
-    List<CycleLog> periodLogs,
+    List<List<CycleLog>> periodGroups,
     int lutealPhaseLength,
   ) {
-    if (periodLogs.length < 2) return [];
-
-    final periodGroups = _groupPeriodEventsByProximity(periodLogs);
     if (periodGroups.length < 2) return [];
 
     final historicalOvulations = <CycleLog>[];

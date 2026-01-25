@@ -8,7 +8,6 @@ import 'package:bebi_app/utils/extensions/color_extensions.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
 import 'package:bebi_app/utils/extensions/int_extensions.dart';
 // ignore: depend_on_referenced_packages
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -103,24 +102,13 @@ class _CycleCalendarScreenState extends State<CycleCalendarScreen> {
                 },
                 onDayPressed: context.pop,
                 dayBuilder: (context, date) {
-                  final [
-                    periodLog,
-                    ovulationLog,
-                    symptomLog,
-                    intimacyLog,
-                  ] = LogType.values
-                      .map(
-                        (e) => cycleLogs.firstWhereOrNull(
-                          (l) => l.type == e && l.date.isSameDay(date),
-                        ),
-                      )
-                      .toList();
+                  final logs = cycleLogs.findAllByDate(date);
                   return _defaultDayBuilder(
                     date: date,
-                    periodLog: periodLog,
-                    ovulationLog: ovulationLog,
-                    symptomLog: symptomLog,
-                    intimacyLog: intimacyLog,
+                    periodLog: logs[LogType.period],
+                    ovulationLog: logs[LogType.ovulation],
+                    symptomLog: logs[LogType.symptom],
+                    intimacyLog: logs[LogType.intimacy],
                   );
                 },
               );

@@ -95,39 +95,14 @@ class _CyclePredictionsState extends State<CyclePredictions> {
             state.predictionConfidence.asData()?.level ??
             PredictionConfidenceLevel.high;
 
-        late String description;
-        if (state.isViewingCurrentUser) {
-          if (fertileDays.isNotEmpty) {
-            description = switch (confidenceLevel) {
-              PredictionConfidenceLevel.low =>
-                context.l10n.fertileWindowDescriptionLow(
-                  fertileDays.first.toEEEEMMMMd(),
-                ),
-              PredictionConfidenceLevel.medium =>
-                context.l10n.fertileWindowDescriptionMedium(
-                  fertileDays.first.toEEEEMMMMd(),
-                ),
-              PredictionConfidenceLevel.high =>
-                context.l10n.fertileWindowDescriptionHigh(
-                  fertileDays.first.toEEEEMMMMd(),
-                ),
-            };
-          } else {
-            description = context.l10n.notEnoughDataFertileWindow;
-          }
-        } else {
-          final dateString = fertileDays.isNotEmpty
+        final description = _getConfidenceDescription(
+          isCurrentUser: state.isViewingCurrentUser,
+          level: confidenceLevel,
+          dateString: fertileDays.isNotEmpty
               ? fertileDays.first.toEEEEMMMMd()
-              : '';
-          description = switch (confidenceLevel) {
-            PredictionConfidenceLevel.low =>
-              context.l10n.partnerFertileWindowDescriptionLow(dateString),
-            PredictionConfidenceLevel.medium =>
-              context.l10n.partnerFertileWindowDescriptionMedium(dateString),
-            PredictionConfidenceLevel.high =>
-              context.l10n.partnerFertileWindowDescriptionHigh(dateString),
-          };
-        }
+              : '',
+          isFertileWindow: true,
+        );
 
         return _buildCalendar(
           focusedDay: fertileDays.isNotEmpty
@@ -154,39 +129,14 @@ class _CyclePredictionsState extends State<CyclePredictions> {
             state.predictionConfidence.asData()?.level ??
             PredictionConfidenceLevel.high;
 
-        late String description;
-        if (state.isViewingCurrentUser) {
-          if (nextPeriodDates.isNotEmpty) {
-            description = switch (confidenceLevel) {
-              PredictionConfidenceLevel.low =>
-                context.l10n.nextPeriodDescriptionLow(
-                  nextPeriodDates.first.toEEEEMMMMd(),
-                ),
-              PredictionConfidenceLevel.medium =>
-                context.l10n.nextPeriodDescriptionMedium(
-                  nextPeriodDates.first.toEEEEMMMMd(),
-                ),
-              PredictionConfidenceLevel.high =>
-                context.l10n.nextPeriodDescriptionHigh(
-                  nextPeriodDates.first.toEEEEMMMMd(),
-                ),
-            };
-          } else {
-            description = context.l10n.notEnoughDataNextPeriod;
-          }
-        } else {
-          final dateString = nextPeriodDates.isNotEmpty
+        final description = _getConfidenceDescription(
+          isCurrentUser: state.isViewingCurrentUser,
+          level: confidenceLevel,
+          dateString: nextPeriodDates.isNotEmpty
               ? nextPeriodDates.first.toEEEEMMMMd()
-              : '';
-          description = switch (confidenceLevel) {
-            PredictionConfidenceLevel.low =>
-              context.l10n.partnerNextPeriodDescriptionLow(dateString),
-            PredictionConfidenceLevel.medium =>
-              context.l10n.partnerNextPeriodDescriptionMedium(dateString),
-            PredictionConfidenceLevel.high =>
-              context.l10n.partnerNextPeriodDescriptionHigh(dateString),
-          };
-        }
+              : '',
+          isFertileWindow: false,
+        );
 
         return _buildCalendar(
           focusedDay: nextPeriodDates.isNotEmpty
@@ -363,5 +313,50 @@ class _CyclePredictionsState extends State<CyclePredictions> {
         ),
       ),
     );
+  }
+
+  String _getConfidenceDescription({
+    required bool isCurrentUser,
+    required PredictionConfidenceLevel level,
+    required String dateString,
+    required bool isFertileWindow,
+  }) {
+    if (isCurrentUser) {
+      if (dateString.isNotEmpty) {
+        return switch (level) {
+          PredictionConfidenceLevel.low =>
+            isFertileWindow
+                ? context.l10n.fertileWindowDescriptionLow(dateString)
+                : context.l10n.nextPeriodDescriptionLow(dateString),
+          PredictionConfidenceLevel.medium =>
+            isFertileWindow
+                ? context.l10n.fertileWindowDescriptionMedium(dateString)
+                : context.l10n.nextPeriodDescriptionMedium(dateString),
+          PredictionConfidenceLevel.high =>
+            isFertileWindow
+                ? context.l10n.fertileWindowDescriptionHigh(dateString)
+                : context.l10n.nextPeriodDescriptionHigh(dateString),
+        };
+      } else {
+        return isFertileWindow
+            ? context.l10n.notEnoughDataFertileWindow
+            : context.l10n.notEnoughDataNextPeriod;
+      }
+    } else {
+      return switch (level) {
+        PredictionConfidenceLevel.low =>
+          isFertileWindow
+              ? context.l10n.partnerFertileWindowDescriptionLow(dateString)
+              : context.l10n.partnerNextPeriodDescriptionLow(dateString),
+        PredictionConfidenceLevel.medium =>
+          isFertileWindow
+              ? context.l10n.partnerFertileWindowDescriptionMedium(dateString)
+              : context.l10n.partnerNextPeriodDescriptionMedium(dateString),
+        PredictionConfidenceLevel.high =>
+          isFertileWindow
+              ? context.l10n.partnerFertileWindowDescriptionHigh(dateString)
+              : context.l10n.partnerNextPeriodDescriptionHigh(dateString),
+      };
+    }
   }
 }

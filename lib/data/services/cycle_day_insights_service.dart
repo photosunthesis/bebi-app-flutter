@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bebi_app/data/models/cycle_day_insights.dart';
 import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/data/models/prediction_confidence.dart';
+import 'package:bebi_app/data/services/cycle_insights_prompt.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
 import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
 // ignore: depend_on_referenced_packages
@@ -17,6 +18,8 @@ class CycleDayInsightsService with LocalizationsMixin {
     this._generativeModel,
     @Named('ai_insights_box') this._aiInsightsBox,
   );
+
+  static const _maxPeriodGapDays = 14;
 
   final GenerativeModel _generativeModel;
   final Box<String> _aiInsightsBox;
@@ -85,7 +88,8 @@ class CycleDayInsightsService with LocalizationsMixin {
       final currentGroup = periodGroups.lastOrNull;
       // 14 days is the max distance between two period events
       if (currentGroup == null ||
-          event.date.difference(currentGroup.last.date).inDays > 14) {
+          event.date.difference(currentGroup.last.date).inDays >
+              _maxPeriodGapDays) {
         periodGroups.add([event]);
       } else {
         currentGroup.add(event);
@@ -186,14 +190,6 @@ class CycleDayInsightsService with LocalizationsMixin {
       periodLogs.where((date) => date.isBefore(normalizedDate)),
       isLatest: true,
     );
-    final nextPeriodDate = _findClosestDate(
-      periodLogs.where((date) => date.isAfter(normalizedDate)),
-      isLatest: false,
-    );
-    final previousOvulationDate = _findClosestDate(
-      ovulationLogs.where((date) => date.isBefore(normalizedDate)),
-      isLatest: true,
-    );
 
     if (previousPeriodDate != null) {
       final ovulationAfterPreviousPeriod = _findClosestDate(
@@ -206,13 +202,6 @@ class CycleDayInsightsService with LocalizationsMixin {
           normalizedDate.isBefore(ovulationAfterPreviousPeriod)) {
         return CyclePhase.follicular;
       }
-    }
-
-    if (previousOvulationDate != null &&
-        nextPeriodDate != null &&
-        normalizedDate.isAfter(previousOvulationDate) &&
-        normalizedDate.isBefore(nextPeriodDate)) {
-      return CyclePhase.luteal;
     }
 
     return CyclePhase.luteal;
@@ -253,11 +242,11 @@ class CycleDayInsightsService with LocalizationsMixin {
       final cachedInsights = _aiInsightsBox.get(key);
       if (cachedInsights != null && useCache) return cachedInsights;
 
-      final prompt = _generateInsightsPrompt(
-        cycleDayInsights,
-        isCurrentUser,
-        locale,
-        confidence,
+      final prompt = CycleInsightsPrompt.generate(
+        insights: cycleDayInsights,
+        isCurrentUser: isCurrentUser,
+        locale: locale,
+        confidence: confidence,
       );
 
       final response = await _generativeModel.generateContent([
@@ -272,94 +261,5 @@ class CycleDayInsightsService with LocalizationsMixin {
     } catch (_) {
       throw ArgumentError(l10n.aiInsightsGenerationError);
     }
-  }
-
-  String _generateInsightsPrompt(
-    CycleDayInsights insights,
-    bool isCurrentUser,
-    String locale,
-    PredictionConfidence? confidence,
-  ) {
-    final pronouns = isCurrentUser
-        ? (subject: 'you', possessive: 'your', reflexive: 'yourself')
-        : (
-            subject: 'your partner',
-            possessive: "your partner's",
-            reflexive: 'your partner',
-          );
-
-    final accuracyPercent = ((confidence?.accuracy ?? 0) * 100).round();
-    final hasSymptoms = confidence?.hasSymptomData ?? false;
-
-    return '''
-You are a warm, knowledgeable cycle health companion in a couples app. Be like a trusted friend who happens to have medical expertise—direct, witty, and genuinely helpful. No clinical detachment, no awkward euphemisms.
-
----
-
-## CYCLE DATA
-
-| Field | Value |
-|-------|-------|
-| Date | ${insights.date.toEEEEMMMMdyyyy()} |
-| Day of Cycle | **${insights.dayOfCycle}** of ${insights.cycleLengthInDays} days |
-| Phase | **${insights.cyclePhase.name.toUpperCase()}** |
-| Avg Period Duration | ${insights.averagePeriodDurationInDays} days |
-| Next Period | ${insights.nextPeriodDates.isEmpty ? 'Not predicted' : insights.nextPeriodDates.map((e) => e.toEEEEMMMMdyyyy()).join(', ')} |
-| Fertile Window | ${insights.fertileDays.isEmpty ? 'Not predicted' : insights.fertileDays.map((e) => e.toEEEEMMMMdyyyy()).join(', ')} |
-
-## PREDICTION QUALITY
-
-- **Confidence**: ${confidence?.level.label ?? 'Unknown'} ($accuracyPercent% accuracy)
-- **Cycles Tracked**: ${confidence?.cyclesAnalyzed ?? 0}
-- **Trend**: ${confidence?.trend.name ?? 'Unknown'}
-- **Symptom Logging**: ${hasSymptoms ? 'Yes - use this for richer insights' : 'No - predictions are based on dates only'}
-
-Adjust your certainty accordingly:
-- Low confidence (<50%): "might", "could", "tracking more will help"
-- High confidence (>80%): More definitive, but never absolute
-- Changing trend: Acknowledge the shift naturally
-
----
-
-## WHO IS THIS FOR?
-
-Use these pronouns consistently:
-- Subject: "${pronouns.subject}"
-- Possessive: "${pronouns.possessive}"  
-- Reflexive: "${pronouns.reflexive}"
-
----
-
-## YOUR RESPONSE
-
-**Format** (exactly this structure):
-
-[One clear opening sentence about day ${insights.dayOfCycle} in the ${insights.cyclePhase.name} phase—what's happening in the body, no greeting]
-
-- [Insight 1: 25-35 words, actionable wellness tip for today]
-- [Insight 2: 25-35 words, body awareness or symptom expectation]
-- [Insight 3: 25-35 words, self-care or partner support when natural]
-
-**Voice**:
-- Calm, knowledgeable expertise—informative without being excited
-- Adult topics (sex, fertility, periods) with zero cringe
-- Straightforward and grounded, skip the hype
-- Inclusive of all relationships and orientations
-- Partner dynamics only when genuinely relevant to the phase
-
-**Phase vibes**:
-- Period: Comfort strategies, practical pain relief, energy management
-- Follicular: Gradual energy increase, good time for new activities
-- Ovulation: Peak fertility window, heightened physical changes, potential libido shift
-- Luteal: PMS awareness, cravings are normal, rest when needed
-
----
-
-## LANGUAGE
-
-Write in: **${locale.toUpperCase()}** with culturally appropriate references.
-
-Now generate insights for day ${insights.dayOfCycle} of the ${insights.cyclePhase.name} phase.
-''';
   }
 }

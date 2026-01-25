@@ -9,8 +9,6 @@ import 'package:bebi_app/utils/extensions/color_extensions.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
 import 'package:bebi_app/utils/extensions/int_extensions.dart';
 // ignore: depend_on_referenced_packages
-import 'package:collection/collection.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -31,11 +29,12 @@ class _CycleDatePickerState extends State<CycleDatePicker> {
 
   static const _initialIndex = 1000;
   static const _daysToShow = 7;
+  static const _debounceMilliseconds = 350;
 
   bool _isTransitioning = false;
   Timer? _debounceTimer;
   int? _pendingIndex;
-  final Duration _debounceDuration = 350.milliseconds;
+  final Duration _debounceDuration = _debounceMilliseconds.milliseconds;
 
   @override
   void initState() {
@@ -124,14 +123,11 @@ class _CycleDatePickerState extends State<CycleDatePicker> {
         orElse: () => <CycleLog>[],
       ),
       builder: (context, cycleLogs) {
-        final [periodLog, ovulationLog, symptomLog, intimacyLog] = LogType
-            .values
-            .map(
-              (e) => cycleLogs.firstWhereOrNull(
-                (l) => l.type == e && l.date.isSameDay(date),
-              ),
-            )
-            .toList();
+        final logs = cycleLogs.findAllByDate(date);
+        final periodLog = logs[LogType.period];
+        final ovulationLog = logs[LogType.ovulation];
+        final symptomLog = logs[LogType.symptom];
+        final intimacyLog = logs[LogType.intimacy];
 
         return InkWell(
           splashColor: Colors.transparent,
