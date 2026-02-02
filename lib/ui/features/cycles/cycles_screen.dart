@@ -7,13 +7,13 @@ import 'package:bebi_app/ui/features/cycles/components/cycle_insights.dart';
 import 'package:bebi_app/ui/features/cycles/components/cycle_logs.dart';
 import 'package:bebi_app/ui/features/cycles/components/cycle_predictions.dart';
 import 'package:bebi_app/ui/features/cycles/cycles_cubit.dart';
+import 'package:bebi_app/ui/shared_widgets/avatars/user_profile_avatar.dart';
 import 'package:bebi_app/ui/shared_widgets/layouts/main_app_bar.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
 import 'package:bebi_app/utils/extensions/int_extensions.dart';
 import 'package:bebi_app/utils/platform/platform_utils.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -219,24 +219,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
   }
 
   Widget _buildProfileAvatar(UserProfileView? profile, {Key? key}) {
-    return Container(
-      key: key,
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: context.colorScheme.outline,
-          width: UiConstants.borderWidth,
-        ),
-      ),
-      child: CircleAvatar(
-        backgroundColor: context.colorScheme.onTertiary,
-        backgroundImage: profile != null && profile.profilePictureUrl != null
-            ? CachedNetworkImageProvider(profile.profilePictureUrl!)
-            : null,
-      ),
-    );
+    return UserProfileAvatar(key: key, userProfile: profile, radius: 20);
   }
 
   Widget _buildDisclaimer() {

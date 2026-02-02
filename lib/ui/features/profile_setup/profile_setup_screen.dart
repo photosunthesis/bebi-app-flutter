@@ -5,6 +5,7 @@ import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/data/models/async_value.dart';
 import 'package:bebi_app/ui/features/profile_setup/profile_setup_cubit.dart';
+import 'package:bebi_app/ui/shared_widgets/avatars/user_profile_avatar.dart';
 import 'package:bebi_app/ui/shared_widgets/forms/app_text_form_field.dart';
 import 'package:bebi_app/ui/shared_widgets/layouts/main_app_bar.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
@@ -133,26 +134,12 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         children: [
           AnimatedSwitcher(
             duration: 300.milliseconds,
-            child: Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: context.colorScheme.outline,
-                  width: UiConstants.borderWidth,
-                ),
-              ),
-              child: CircleAvatar(
-                radius: 60,
-                backgroundColor: Colors.transparent,
-                backgroundImage: backgroundImage,
-                child: backgroundImage == null
-                    ? Icon(
-                        Symbols.face,
-                        size: 50,
-                        color: context.colorScheme.secondary.withAlpha(100),
-                      )
-                    : null,
-              ),
+            child: UserProfileAvatar(
+              radius: 60,
+              imageProvider: backgroundImage,
+              displayName: _displayNameController.text,
+              backgroundColor: Colors.transparent,
+              fontSize: 40,
             ),
           ),
           Positioned(

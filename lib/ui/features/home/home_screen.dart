@@ -5,11 +5,11 @@ import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/data/models/app_update_info.dart';
 import 'package:bebi_app/data/models/user_profile_view.dart';
 import 'package:bebi_app/ui/features/home/home_cubit.dart';
+import 'package:bebi_app/ui/shared_widgets/avatars/user_profile_avatar.dart';
 import 'package:bebi_app/ui/shared_widgets/modals/options_bottom_dialog.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:bebi_app/utils/extensions/string_extensions.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -123,22 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
       elevation: 0,
       offset: const Offset(0, 50),
       child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: context.colorScheme.outline,
-            width: UiConstants.borderWidth,
-          ),
-        ),
-        child: CircleAvatar(
-          backgroundColor: context.colorScheme.onTertiary,
-          backgroundImage:
-              userProfile != null && userProfile.profilePictureUrl != null
-              ? CachedNetworkImageProvider(userProfile.profilePictureUrl!)
-              : null,
-        ),
+        child: UserProfileAvatar(userProfile: userProfile, radius: 20),
       ),
       itemBuilder: (context) => [
         PopupMenuItem(
@@ -148,22 +133,9 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Row(
               children: [
                 Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: context.colorScheme.outline,
-                      width: UiConstants.borderWidth,
-                    ),
-                  ),
-                  child: CircleAvatar(
-                    backgroundColor: context.colorScheme.onTertiary,
-                    backgroundImage: userProfile?.profilePictureUrl != null
-                        ? CachedNetworkImageProvider(
-                            userProfile!.profilePictureUrl!,
-                          )
-                        : null,
+                  child: UserProfileAvatar(
+                    userProfile: userProfile,
+                    radius: 16,
                   ),
                 ),
                 const SizedBox(width: 12),
