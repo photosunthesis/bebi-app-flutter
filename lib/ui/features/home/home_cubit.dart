@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bebi_app/data/models/app_update_info.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/data/models/cycle_log.dart';
+import 'package:bebi_app/data/models/story.dart';
 import 'package:bebi_app/data/models/user_partnership.dart';
 import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
@@ -27,6 +28,7 @@ class HomeCubit extends Cubit<HomeState> with GuardMixin, AnalyticsMixin {
     this._cycleLogBox,
     this._userProfileBox,
     this._userPartnershipBox,
+    this._storyBox,
     @Named('ai_insights_box') this._aiSummaryAndInsightsBox,
     @Named('story_image_url_box') this._storyImageUrlBox,
     this._appUpdateService,
@@ -41,6 +43,7 @@ class HomeCubit extends Cubit<HomeState> with GuardMixin, AnalyticsMixin {
   final Box<CycleLog> _cycleLogBox;
   final Box<UserProfile> _userProfileBox;
   final Box<UserPartnership> _userPartnershipBox;
+  final Box<Story> _storyBox;
   final Box<String> _aiSummaryAndInsightsBox;
   final Box<String> _storyImageUrlBox;
   final AppUpdateService _appUpdateService;
@@ -117,6 +120,7 @@ class HomeCubit extends Cubit<HomeState> with GuardMixin, AnalyticsMixin {
         await _cycleLogBox.clear();
         await _userProfileBox.clear();
         await _userPartnershipBox.clear();
+        await _storyBox.clear();
         await _aiSummaryAndInsightsBox.clear();
         await _storyImageUrlBox.clear();
       },
