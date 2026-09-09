@@ -66,3 +66,4 @@ ios/build/**
 lib/localizations/*.dart
 
 sentry.properties
+.claude/*
