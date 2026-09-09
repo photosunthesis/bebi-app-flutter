@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:bebi_app/features/account/data/user_partnerships_repository.dart';
-import 'package:bebi_app/features/account/domain/user_partnership.dart';
+import 'package:bebi_app/features/account/domain/resolve_sharing_audience.dart';
+import 'package:bebi_app/features/account/domain/sharing_audience.dart';
 import 'package:bebi_app/features/calendar/data/calendar_events_repository.dart';
 import 'package:bebi_app/features/calendar/domain/calendar_event.dart';
 import 'package:bebi_app/features/calendar/domain/repeat_rule.dart';
@@ -21,7 +21,7 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
     with GuardMixin, AnalyticsMixin {
   CalendarEventFormCubit(
     this._calendarEventsRepository,
-    this._userPartnershipsRepository,
+    this._resolveSharingAudience,
     this._firebaseAuth,
   ) : super(
         CalendarEventFormState(
@@ -39,7 +39,7 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
   }
 
   final CalendarEventsRepository _calendarEventsRepository;
-  final UserPartnershipsRepository _userPartnershipsRepository;
+  final ResolveSharingAudience _resolveSharingAudience;
   final FirebaseAuth _firebaseAuth;
 
   void initialize(CalendarEvent? calendarEvent, DateTime? selectedDate) {
@@ -116,9 +116,7 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
 
         final isExistingEvent = state.originalEvent?.id.isNotEmpty ?? false;
         final isRecurringEvent = state.originalEvent?.isRecurring ?? false;
-        final partnership = await _userPartnershipsRepository.getByUserId(
-          state.currentUserId,
-        );
+        final audience = await _resolveSharingAudience.shared();
 
         if (isExistingEvent && isRecurringEvent && instanceDate != null) {
           assert(
@@ -129,10 +127,10 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
             baseEvent: state.originalEvent!,
             saveOption: saveOption!,
             instanceDate: instanceDate,
-            partnership: partnership!,
+            audience: audience,
           );
         } else {
-          await _handleRegularSave(partnership: partnership!);
+          await _handleRegularSave(audience: audience);
         }
 
         emit(state.copyWith(isLoading: false, saveSuccessful: true));
@@ -157,9 +155,7 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
     );
   }
 
-  Future<void> _handleRegularSave({
-    required UserPartnership partnership,
-  }) async {
+  Future<void> _handleRegularSave({required SharingAudience audience}) async {
     await _calendarEventsRepository.createOrUpdate(
       CalendarEvent(
         id: state.originalEvent?.id ?? '',
@@ -172,7 +168,7 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
         eventColor: state.eventColor,
         createdBy: state.originalEvent?.createdBy ?? state.currentUserId,
         updatedBy: state.currentUserId,
-        users: partnership.users,
+        users: audience.users,
         createdAt: state.originalEvent?.createdAt ?? DateTime.now(),
         updatedAt: DateTime.now(),
       ),
@@ -183,18 +179,18 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
     required CalendarEvent baseEvent,
     required SaveChangesDialogOptions saveOption,
     required DateTime instanceDate,
-    required UserPartnership partnership,
+    required SharingAudience audience,
   }) async {
     await switch (saveOption) {
       SaveChangesDialogOptions.onlyThisEvent => _handleSaveOnlyThisEvent(
         baseEvent: baseEvent,
         instanceDate: instanceDate,
-        partnership: partnership,
+        audience: audience,
       ),
       SaveChangesDialogOptions.allFutureEvents => _handleSaveAllFutureEvents(
         baseEvent: baseEvent,
         instanceDate: instanceDate,
-        partnership: partnership,
+        audience: audience,
       ),
       SaveChangesDialogOptions.cancel => null,
     };
@@ -203,7 +199,7 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
   Future<void> _handleSaveOnlyThisEvent({
     required CalendarEvent baseEvent,
     required DateTime instanceDate,
-    required UserPartnership partnership,
+    required SharingAudience audience,
   }) async {
     if (baseEvent.startDate.isSameDay(instanceDate)) {
       final nextOccurrenceDate = _getNextOccurrence(baseEvent);
@@ -245,7 +241,7 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
       eventColor: state.eventColor,
       createdBy: state.currentUserId,
       updatedBy: state.currentUserId,
-      users: partnership.users,
+      users: audience.users,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
@@ -256,7 +252,7 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
   Future<void> _handleSaveAllFutureEvents({
     required CalendarEvent baseEvent,
     required DateTime instanceDate,
-    required UserPartnership partnership,
+    required SharingAudience audience,
   }) async {
     if (!baseEvent.startDate.isSameDay(instanceDate)) {
       final updatedBaseEvent = baseEvent.copyWith(
@@ -278,7 +274,7 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
       eventColor: state.eventColor,
       createdBy: state.currentUserId,
       updatedBy: state.currentUserId,
-      users: partnership.users,
+      users: audience.users,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );

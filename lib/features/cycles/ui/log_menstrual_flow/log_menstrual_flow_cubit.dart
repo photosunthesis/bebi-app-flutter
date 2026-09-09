@@ -1,7 +1,6 @@
 import 'dart:async';
 
-import 'package:bebi_app/features/account/data/user_partnerships_repository.dart';
-import 'package:bebi_app/features/account/data/user_profile_repository.dart';
+import 'package:bebi_app/features/account/domain/resolve_sharing_audience.dart';
 import 'package:bebi_app/features/cycles/data/cycle_logs_repository.dart';
 import 'package:bebi_app/features/cycles/domain/cycle_log.dart';
 import 'package:bebi_app/utils/extensions/int_extensions.dart';
@@ -18,16 +17,14 @@ class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState>
     with GuardMixin, AnalyticsMixin {
   LogMenstrualFlowCubit(
     this._cycleLogsRepository,
-    this._userProfileRepository,
-    this._userPartnershipsRepository,
+    this._resolveSharingAudience,
     this._firebaseAuth,
   ) : super(const LogMenstrualFlowLoadedState()) {
     logScreenViewed(screenName: 'log_menstrual_flow_screen');
   }
 
   final CycleLogsRepository _cycleLogsRepository;
-  final UserProfileRepository _userProfileRepository;
-  final UserPartnershipsRepository _userPartnershipsRepository;
+  final ResolveSharingAudience _resolveSharingAudience;
   final FirebaseAuth _firebaseAuth;
 
   String? get _currentUserId => _firebaseAuth.currentUser?.uid;
@@ -43,29 +40,17 @@ class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState>
       () async {
         emit(const LogMenstrualFlowLoadingState());
 
-        final userProfile = await _userProfileRepository.getByUserId(
-          _currentUserId!,
+        final audience = await _resolveSharingAudience.forLog(
+          logForPartner: logForPartner,
         );
-
-        final partnership = await _userPartnershipsRepository.getByUserId(
-          _currentUserId!,
-        );
-
-        final partnerProfile = await _userProfileRepository.getByUserId(
-          partnership!.users.firstWhere((user) => user != _currentUserId!),
-        );
-
-        final users = logForPartner || userProfile!.isSharingCycleWithPartner
-            ? partnership.users
-            : [_currentUserId!];
 
         final cycleLog = CycleLog.period(
           id: cycleLogId ?? '',
           date: date,
           flow: flowIntensity,
           createdBy: _currentUserId!,
-          ownedBy: logForPartner ? partnerProfile!.userId : _currentUserId!,
-          users: users,
+          ownedBy: audience.ownedBy,
+          users: audience.users,
         );
 
         final previousLogs = await _cycleLogsRepository.getByUserIdAndDateRange(
@@ -94,7 +79,7 @@ class LogMenstrualFlowCubit extends Cubit<LogMenstrualFlowState>
             'flow_intensity': flowIntensity.name,
             'log_for_partner': logForPartner,
             'is_update': cycleLogId != null,
-            'is_sharing_with_partner': userProfile!.isSharingCycleWithPartner,
+            'is_sharing_with_partner': audience.isSharingCycleWithPartner,
             'auto_generated_days': previousLogs.isEmpty && cycleLogId == null
                 ? averagePeriodDurationInDays
                 : 1,

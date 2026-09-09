@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:bebi_app/features/account/data/user_partnerships_repository.dart';
 import 'package:bebi_app/features/account/data/user_profile_repository.dart';
+import 'package:bebi_app/features/account/domain/resolve_sharing_audience.dart';
 import 'package:bebi_app/features/cycles/data/cycle_logs_repository.dart';
 import 'package:bebi_app/features/cycles/domain/cycle_log.dart';
 import 'package:bebi_app/utils/extensions/int_extensions.dart';
@@ -19,7 +19,7 @@ class CycleSetupCubit extends Cubit<CycleSetupState>
   CycleSetupCubit(
     this._userProfileRepository,
     this._cycleLogsRepository,
-    this._userPartnershipsRepository,
+    this._resolveSharingAudience,
     this._firebaseAuth,
   ) : super(const CycleSetupInitialState()) {
     logScreenViewed(screenName: 'cycle_setup_screen');
@@ -27,7 +27,7 @@ class CycleSetupCubit extends Cubit<CycleSetupState>
 
   final UserProfileRepository _userProfileRepository;
   final CycleLogsRepository _cycleLogsRepository;
-  final UserPartnershipsRepository _userPartnershipsRepository;
+  final ResolveSharingAudience _resolveSharingAudience;
   final FirebaseAuth _firebaseAuth;
 
   Future<void> setUpCycleTracking({
@@ -43,8 +43,8 @@ class CycleSetupCubit extends Cubit<CycleSetupState>
           _firebaseAuth.currentUser!.uid,
         );
 
-        final partnership = await _userPartnershipsRepository.getByUserId(
-          _firebaseAuth.currentUser!.uid,
+        final audience = await _resolveSharingAudience.forSelf(
+          shareWithPartner: shouldShareWithPartner,
         );
 
         await _userProfileRepository.createOrUpdate(
@@ -61,10 +61,8 @@ class CycleSetupCubit extends Cubit<CycleSetupState>
             date: periodStartDate.add(index.days),
             flow: flow,
             createdBy: _firebaseAuth.currentUser!.uid,
-            ownedBy: _firebaseAuth.currentUser!.uid,
-            users: shouldShareWithPartner
-                ? partnership!.users
-                : [_firebaseAuth.currentUser!.uid],
+            ownedBy: audience.ownedBy,
+            users: audience.users,
           );
         });
 

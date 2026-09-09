@@ -1,7 +1,6 @@
 import 'dart:async';
 
-import 'package:bebi_app/features/account/data/user_partnerships_repository.dart';
-import 'package:bebi_app/features/account/data/user_profile_repository.dart';
+import 'package:bebi_app/features/account/domain/resolve_sharing_audience.dart';
 import 'package:bebi_app/features/cycles/data/cycle_logs_repository.dart';
 import 'package:bebi_app/features/cycles/domain/cycle_log.dart';
 import 'package:bebi_app/utils/mixins/analytics_mixin.dart';
@@ -18,16 +17,14 @@ class LogSymptomsCubit extends Cubit<LogSymptomsState>
     with GuardMixin, AnalyticsMixin, LocalizationsMixin {
   LogSymptomsCubit(
     this._cycleLogsRepository,
-    this._userProfileRepository,
-    this._userPartnershipsRepository,
+    this._resolveSharingAudience,
     this._firebaseAuth,
   ) : super(const LogSymptomsLoadedState()) {
     logScreenViewed(screenName: 'log_symptoms_screen');
   }
 
   final CycleLogsRepository _cycleLogsRepository;
-  final UserProfileRepository _userProfileRepository;
-  final UserPartnershipsRepository _userPartnershipsRepository;
+  final ResolveSharingAudience _resolveSharingAudience;
   final FirebaseAuth _firebaseAuth;
 
   String get _currentUserId => _firebaseAuth.currentUser!.uid;
@@ -46,21 +43,9 @@ class LogSymptomsCubit extends Cubit<LogSymptomsState>
           throw Exception(l10n.selectSymptomRequired);
         }
 
-        final userProfile = await _userProfileRepository.getByUserId(
-          _currentUserId,
+        final audience = await _resolveSharingAudience.forLog(
+          logForPartner: logForPartner,
         );
-
-        final partnership = await _userPartnershipsRepository.getByUserId(
-          _currentUserId,
-        );
-
-        final partnerProfile = await _userProfileRepository.getByUserId(
-          partnership!.users.firstWhere((user) => user != _currentUserId),
-        );
-
-        final users = logForPartner || userProfile!.isSharingCycleWithPartner
-            ? partnership.users
-            : [_currentUserId];
 
         if (symptoms.isEmpty) {
           await _cycleLogsRepository.deleteById(cycleLogId!);
@@ -71,8 +56,8 @@ class LogSymptomsCubit extends Cubit<LogSymptomsState>
               date: date,
               symptoms: symptoms,
               createdBy: _currentUserId,
-              ownedBy: logForPartner ? partnerProfile!.userId : _currentUserId,
-              users: users,
+              ownedBy: audience.ownedBy,
+              users: audience.users,
             ),
           );
         }
@@ -86,7 +71,7 @@ class LogSymptomsCubit extends Cubit<LogSymptomsState>
             'log_for_partner': logForPartner,
             'is_update': cycleLogId != null,
             'is_deletion': symptoms.isEmpty,
-            'is_sharing_with_partner': userProfile!.isSharingCycleWithPartner,
+            'is_sharing_with_partner': audience.isSharingCycleWithPartner,
           },
         );
       },

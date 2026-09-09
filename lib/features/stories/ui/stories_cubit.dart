@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:bebi_app/core/ui/async_value.dart';
-import 'package:bebi_app/features/account/data/user_partnerships_repository.dart';
-import 'package:bebi_app/features/account/domain/user_partnership.dart';
+import 'package:bebi_app/features/account/domain/resolve_sharing_audience.dart';
+import 'package:bebi_app/features/account/domain/sharing_audience.dart';
 import 'package:bebi_app/features/stories/data/stories_repository.dart';
 import 'package:bebi_app/features/stories/domain/story.dart';
 import 'package:bebi_app/utils/mixins/analytics_mixin.dart';
@@ -22,23 +22,21 @@ class StoriesCubit extends Cubit<StoriesState> with GuardMixin, AnalyticsMixin {
   StoriesCubit(
     this._firebaseAuth,
     this._storiesRepository,
-    this._userPartnershipsRepository,
+    this._resolveSharingAudience,
   ) : super(const StoriesState()) {
     logScreenViewed(screenName: 'stories_screen');
   }
 
   final FirebaseAuth _firebaseAuth;
   final StoriesRepository _storiesRepository;
-  final UserPartnershipsRepository _userPartnershipsRepository;
+  final ResolveSharingAudience _resolveSharingAudience;
 
-  UserPartnership? _partnership;
+  SharingAudience? _sharingAudience;
 
   Future<void> initialize({bool useCache = true}) async {
     emit(state.copyWith(stories: const AsyncLoading()));
 
-    _partnership ??= (await _userPartnershipsRepository.getByUserId(
-      _firebaseAuth.currentUser!.uid,
-    ))!;
+    _sharingAudience ??= await _resolveSharingAudience.shared();
 
     emit(
       state.copyWith(
@@ -85,7 +83,7 @@ class StoriesCubit extends Cubit<StoriesState> with GuardMixin, AnalyticsMixin {
           await _storiesRepository.createStory(
             createdBy: _firebaseAuth.currentUser!.uid,
             title: title,
-            users: _partnership!.users,
+            users: _sharingAudience!.users,
             imageFile: imageFile,
           );
 

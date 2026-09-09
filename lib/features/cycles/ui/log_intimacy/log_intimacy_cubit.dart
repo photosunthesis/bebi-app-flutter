@@ -1,7 +1,6 @@
 import 'dart:async';
 
-import 'package:bebi_app/features/account/data/user_partnerships_repository.dart';
-import 'package:bebi_app/features/account/data/user_profile_repository.dart';
+import 'package:bebi_app/features/account/domain/resolve_sharing_audience.dart';
 import 'package:bebi_app/features/cycles/data/cycle_logs_repository.dart';
 import 'package:bebi_app/features/cycles/domain/cycle_log.dart';
 import 'package:bebi_app/utils/mixins/analytics_mixin.dart';
@@ -17,16 +16,14 @@ class LogIntimacyCubit extends Cubit<LogIntimacyState>
     with GuardMixin, AnalyticsMixin {
   LogIntimacyCubit(
     this._cycleLogsRepository,
-    this._userProfileRepository,
-    this._userPartnershipsRepository,
+    this._resolveSharingAudience,
     this._firebaseAuth,
   ) : super(const LogIntimmacyLoadedState()) {
     logScreenViewed(screenName: 'log_intimacy_screen');
   }
 
   final CycleLogsRepository _cycleLogsRepository;
-  final UserProfileRepository _userProfileRepository;
-  final UserPartnershipsRepository _userPartnershipsRepository;
+  final ResolveSharingAudience _resolveSharingAudience;
   final FirebaseAuth _firebaseAuth;
 
   String get _currentUserId => _firebaseAuth.currentUser!.uid;
@@ -41,21 +38,9 @@ class LogIntimacyCubit extends Cubit<LogIntimacyState>
       () async {
         emit(const LogIntimacyLoadingState());
 
-        final userProfile = await _userProfileRepository.getByUserId(
-          _currentUserId,
+        final audience = await _resolveSharingAudience.forLog(
+          logForPartner: logForPartner,
         );
-
-        final partnership = await _userPartnershipsRepository.getByUserId(
-          _currentUserId,
-        );
-
-        final partnerProfile = await _userProfileRepository.getByUserId(
-          partnership!.users.firstWhere((user) => user != _currentUserId),
-        );
-
-        final users = logForPartner || userProfile!.isSharingCycleWithPartner
-            ? partnership.users
-            : [_currentUserId];
 
         await _cycleLogsRepository.createOrUpdate(
           CycleLog.intimacy(
@@ -63,8 +48,8 @@ class LogIntimacyCubit extends Cubit<LogIntimacyState>
             date: date,
             intimacyType: intimacyType,
             createdBy: _currentUserId,
-            ownedBy: logForPartner ? partnerProfile!.userId : _currentUserId,
-            users: users,
+            ownedBy: audience.ownedBy,
+            users: audience.users,
           ),
         );
 
@@ -76,7 +61,7 @@ class LogIntimacyCubit extends Cubit<LogIntimacyState>
             'intimacy_type': intimacyType.name,
             'log_for_partner': logForPartner,
             'is_update': cycleLogId != null,
-            'is_sharing_with_partner': userProfile!.isSharingCycleWithPartner,
+            'is_sharing_with_partner': audience.isSharingCycleWithPartner,
           },
         );
       },
