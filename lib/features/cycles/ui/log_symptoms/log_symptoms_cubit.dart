@@ -1,0 +1,101 @@
+import 'dart:async';
+
+import 'package:bebi_app/features/account/data/user_partnerships_repository.dart';
+import 'package:bebi_app/features/account/data/user_profile_repository.dart';
+import 'package:bebi_app/features/cycles/data/cycle_logs_repository.dart';
+import 'package:bebi_app/features/cycles/domain/cycle_log.dart';
+import 'package:bebi_app/utils/mixins/analytics_mixin.dart';
+import 'package:bebi_app/utils/mixins/guard_mixin.dart';
+import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
+
+part 'log_symptoms_state.dart';
+
+@injectable
+class LogSymptomsCubit extends Cubit<LogSymptomsState>
+    with GuardMixin, AnalyticsMixin, LocalizationsMixin {
+  LogSymptomsCubit(
+    this._cycleLogsRepository,
+    this._userProfileRepository,
+    this._userPartnershipsRepository,
+    this._firebaseAuth,
+  ) : super(const LogSymptomsLoadedState()) {
+    logScreenViewed(screenName: 'log_symptoms_screen');
+  }
+
+  final CycleLogsRepository _cycleLogsRepository;
+  final UserProfileRepository _userProfileRepository;
+  final UserPartnershipsRepository _userPartnershipsRepository;
+  final FirebaseAuth _firebaseAuth;
+
+  String get _currentUserId => _firebaseAuth.currentUser!.uid;
+
+  Future<void> logSymptoms({
+    String? cycleLogId,
+    required DateTime date,
+    required List<String> symptoms,
+    required bool logForPartner,
+  }) async {
+    await guard(
+      () async {
+        emit(const LogSymptomsLoadingState());
+
+        if (cycleLogId == null && symptoms.isEmpty) {
+          throw Exception(l10n.selectSymptomRequired);
+        }
+
+        final userProfile = await _userProfileRepository.getByUserId(
+          _currentUserId,
+        );
+
+        final partnership = await _userPartnershipsRepository.getByUserId(
+          _currentUserId,
+        );
+
+        final partnerProfile = await _userProfileRepository.getByUserId(
+          partnership!.users.firstWhere((user) => user != _currentUserId),
+        );
+
+        final users = logForPartner || userProfile!.isSharingCycleWithPartner
+            ? partnership.users
+            : [_currentUserId];
+
+        if (symptoms.isEmpty) {
+          await _cycleLogsRepository.deleteById(cycleLogId!);
+        } else {
+          await _cycleLogsRepository.createOrUpdate(
+            CycleLog.symptom(
+              id: cycleLogId ?? '',
+              date: date,
+              symptoms: symptoms,
+              createdBy: _currentUserId,
+              ownedBy: logForPartner ? partnerProfile!.userId : _currentUserId,
+              users: users,
+            ),
+          );
+        }
+
+        emit(const LogSymptomsSuccessState());
+
+        logUserAction(
+          action: symptoms.isEmpty ? 'symptoms_deleted' : 'symptoms_logged',
+          parameters: {
+            'symptoms_count': symptoms.length,
+            'log_for_partner': logForPartner,
+            'is_update': cycleLogId != null,
+            'is_deletion': symptoms.isEmpty,
+            'is_sharing_with_partner': userProfile!.isSharingCycleWithPartner,
+          },
+        );
+      },
+      onError: (error, _) {
+        emit(LogSymptomsErrorState(error.toString()));
+      },
+      onComplete: () {
+        emit(const LogSymptomsLoadedState());
+      },
+    );
+  }
+}

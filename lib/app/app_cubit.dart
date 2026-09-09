@@ -1,7 +1,7 @@
-import 'package:bebi_app/data/models/async_value.dart';
-import 'package:bebi_app/data/models/user_profile_view.dart';
-import 'package:bebi_app/data/repositories/user_partnerships_repository.dart';
-import 'package:bebi_app/data/repositories/user_profile_repository.dart';
+import 'package:bebi_app/core/ui/async_value.dart';
+import 'package:bebi_app/features/account/data/user_partnerships_repository.dart';
+import 'package:bebi_app/features/account/data/user_profile_repository.dart';
+import 'package:bebi_app/features/account/domain/user_profile_view.dart';
 import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

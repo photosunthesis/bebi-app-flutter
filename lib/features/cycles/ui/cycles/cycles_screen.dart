@@ -1,0 +1,331 @@
+import 'package:bebi_app/app/app_cubit.dart';
+import 'package:bebi_app/app/router/app_routes.dart';
+import 'package:bebi_app/constants/ui_constants.dart';
+import 'package:bebi_app/core/ui/default_snackbar.dart';
+import 'package:bebi_app/core/ui/main_app_bar.dart';
+import 'package:bebi_app/core/ui/user_profile_avatar.dart';
+import 'package:bebi_app/features/account/domain/user_profile_view.dart';
+import 'package:bebi_app/features/cycles/ui/cycles/components/cycle_date_picker.dart';
+import 'package:bebi_app/features/cycles/ui/cycles/components/cycle_insights.dart';
+import 'package:bebi_app/features/cycles/ui/cycles/components/cycle_logs.dart';
+import 'package:bebi_app/features/cycles/ui/cycles/components/cycle_predictions.dart';
+import 'package:bebi_app/features/cycles/ui/cycles/cycles_cubit.dart';
+import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
+import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
+import 'package:bebi_app/utils/extensions/int_extensions.dart';
+import 'package:bebi_app/utils/platform/platform_utils.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:material_symbols_icons/symbols.dart';
+import 'package:material_ui/material_ui.dart';
+
+class CyclesScreen extends StatefulWidget {
+  const CyclesScreen({super.key});
+
+  @override
+  State<CyclesScreen> createState() => _CyclesScreenState();
+}
+
+class _CyclesScreenState extends State<CyclesScreen> {
+  late final _cubit = context.read<CyclesCubit>();
+  late final _scrollController = ScrollController();
+  bool _isAnimating = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _cubit.initialize());
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<CyclesCubit, CyclesState>(
+      listener: (context, state) {
+        if (!_isAnimating) {
+          _isAnimating = true;
+          _scrollController
+              .animateTo(0, duration: 300.milliseconds, curve: Curves.ease)
+              .then((_) => _isAnimating = false);
+        }
+
+        if (state.errorMessage != null) {
+          context.showSnackbar(state.errorMessage!, duration: 6.seconds);
+        }
+      },
+      child: Scaffold(
+        appBar: _buildAppBar(),
+        body: Stack(
+          children: [
+            RefreshIndicator.adaptive(
+              onRefresh: () async => _cubit.initialize(useCache: false),
+              child: ListView(
+                controller: _scrollController,
+                children: [
+                  const SizedBox(height: 16),
+                  const CycleLogs(),
+                  const SizedBox(height: 32),
+                  const CycleInsights(),
+                  const SizedBox(height: 32),
+                  const CyclePredictions(),
+                  const SizedBox(height: 20),
+                  _buildDisclaimer(),
+                ],
+              ),
+            ),
+            _buildCyclesSetupPrompt(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  AppBar _buildAppBar() {
+    return MainAppBar.build(
+      context,
+      toolbarHeight: 138 + ((kIsPwa && kIsWebiOS) || kIsAndroid ? 10 : 0),
+      flexibleSpace: Column(
+        children: [
+          _buildHeader(),
+          const SizedBox(height: 14),
+          const CycleDatePicker(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return SafeArea(
+      minimum: EdgeInsets.only(
+        top: (kIsPwa && kIsWebiOS) || kIsAndroid ? 10 : 0,
+      ),
+      child: BlocSelector<CyclesCubit, CyclesState, DateTime>(
+        selector: (state) => state.focusedDate,
+        builder: (context, date) => Center(
+          child: Stack(
+            children: [
+              _buildDateControls(date),
+              Positioned.fill(
+                top: 34,
+                child: Icon(
+                  Symbols.keyboard_arrow_down,
+                  color: context.colorScheme.primary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDateControls(DateTime date) {
+    return SizedBox(
+      child: Stack(
+        children: [
+          _buildNavigationButtons(date),
+          Positioned.fill(
+            child: Center(
+              child: Text(
+                date.isToday ? 'Today, ${date.toMMMMd()}' : date.toEEEEMMMd(),
+                style: context.primaryTextTheme.headlineSmall,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavigationButtons(DateTime date) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: UiConstants.padding),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [_buildTodayButton(date), _buildAccountSwitcher()],
+      ),
+    );
+  }
+
+  Widget _buildTodayButton(DateTime date) {
+    return AnimatedSwitcher(
+      duration: 120.milliseconds,
+      child: date.isToday
+          ? const SizedBox(height: 30)
+          : SizedBox(
+              key: const Key('today_button'),
+              height: 30,
+              child: OutlinedButton(
+                onPressed: () => _cubit.setFocusedDate(DateTime.now()),
+                child: Text(context.l10n.todayButton.toUpperCase()),
+              ),
+            ),
+    );
+  }
+
+  Widget _buildAccountSwitcher() {
+    return BlocSelector<AppCubit, AppState, (UserProfileView, UserProfileView)>(
+      selector: (state) => (
+        state.userProfileAsync.asData()!,
+        state.partnerProfileAsync.asData()!,
+      ),
+      builder: (context, userProfiles) {
+        final (userProfile, partnerProfile) = userProfiles;
+
+        return BlocBuilder<CyclesCubit, CyclesState>(
+          buildWhen: (previous, current) =>
+              previous.isViewingCurrentUser != current.isViewingCurrentUser,
+          builder: (context, state) {
+            return InkWell(
+              onTap: _cubit.switchUserProfile,
+              borderRadius: BorderRadius.circular(60),
+              splashFactory: NoSplash.splashFactory,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: Stack(
+                  children: [
+                    Opacity(
+                      opacity: 0.4,
+                      child: Transform.translate(
+                        offset: const Offset(16, 0),
+                        child: _buildProfileAvatar(
+                          state.isViewingCurrentUser
+                              ? partnerProfile
+                              : userProfile,
+                        ),
+                      ),
+                    ),
+                    AnimatedSwitcher(
+                      duration: 120.milliseconds,
+                      child: _buildProfileAvatar(
+                        state.isViewingCurrentUser
+                            ? userProfile
+                            : partnerProfile,
+                        key: ValueKey(state.isViewingCurrentUser),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildProfileAvatar(UserProfileView? profile, {Key? key}) {
+    return UserProfileAvatar(key: key, userProfile: profile);
+  }
+
+  Widget _buildDisclaimer() {
+    return Padding(
+      padding: const EdgeInsets.all(UiConstants.padding),
+      child: Text(
+        context.l10n.cycleTrackingDisclaimer,
+        style: context.textTheme.bodySmall?.copyWith(
+          height: 1.4,
+          color: context.colorScheme.secondary,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCyclesSetupPrompt() {
+    return BlocSelector<AppCubit, AppState, (UserProfileView, UserProfileView)>(
+      selector: (state) => (
+        state.userProfileAsync.asData()!,
+        state.partnerProfileAsync.asData()!,
+      ),
+      builder: (context, userProfiles) {
+        final userProfile = userProfiles.$1;
+
+        return BlocSelector<CyclesCubit, CyclesState, bool>(
+          selector: (state) => switch (state) {
+            final s when s.cycleLogs.isLoading || s.insights.isLoading => true,
+            final s when !s.isViewingCurrentUser => true,
+            _ when userProfile.hasCycle => true,
+            _ => false,
+          },
+          builder: (context, hidePrompt) {
+            return AnimatedSwitcher(
+              duration: 120.milliseconds,
+              child: hidePrompt
+                  ? const SizedBox.shrink()
+                  : Container(
+                      key: const ValueKey('no_cycle_data'),
+                      color: context.colorScheme.surface.withAlpha(200),
+                      width: double.infinity,
+                      height: double.infinity,
+                      padding: const EdgeInsets.all(32),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          DecoratedBox(
+                            decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                  color: context.colorScheme.surface.withAlpha(
+                                    200,
+                                  ),
+                                  blurRadius: 12,
+                                  spreadRadius: 1,
+                                ),
+                              ],
+                            ),
+                            child: Text(
+                              context.l10n.welcomeToCycleTrackingTitle,
+                              style: context.primaryTextTheme.titleLarge,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          DecoratedBox(
+                            decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                  color: context.colorScheme.surface.withAlpha(
+                                    200,
+                                  ),
+                                  blurRadius: 12,
+                                  spreadRadius: 8,
+                                ),
+                              ],
+                            ),
+                            child: Text(
+                              context.l10n.welcomeToCycleTrackingMessage,
+                              style: context.textTheme.bodyMedium?.copyWith(
+                                height: 1.4,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 18),
+                          ElevatedButton(
+                            onPressed: () async {
+                              final shouldReinitialize = await context
+                                  .pushNamed(AppRoutes.cyclesSetup);
+                              if (shouldReinitialize == true) {
+                                await _cubit.initialize(useCache: false);
+                              }
+                            },
+                            child: Text(
+                              context.l10n.setupCycleTrackingButton
+                                  .toUpperCase(),
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+                        ],
+                      ),
+                    ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
