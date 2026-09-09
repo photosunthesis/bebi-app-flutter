@@ -1,3 +1,6 @@
+import 'package:bebi_app/app/router/app_routes.dart';
+import 'package:bebi_app/app/router/bottom_sheet_page.dart';
+import 'package:bebi_app/app/router/main_scaffold.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/ui/features/add_partner/add_partner_cubit.dart';
@@ -32,8 +35,6 @@ import 'package:bebi_app/ui/features/stories/stories_cubit.dart';
 import 'package:bebi_app/ui/features/stories/stories_screen.dart';
 import 'package:bebi_app/ui/features/update_password/update_password_cubit.dart';
 import 'package:bebi_app/ui/features/update_password/update_password_screen.dart';
-import 'package:bebi_app/ui/shared_widgets/layouts/main_scaffold.dart';
-import 'package:bebi_app/ui/shared_widgets/modals/bottom_sheet_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -41,10 +42,6 @@ import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:injectable/injectable.dart';
 import 'package:material_ui/material_ui.dart';
-
-export 'package:go_router/go_router.dart' show GoRouterHelper;
-
-part 'app_routes.dart';
 
 @module
 abstract class AppRouter {

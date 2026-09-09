@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:bebi_app/app/app_cubit.dart';
-import 'package:bebi_app/app/router/app_router.dart';
+import 'package:bebi_app/app/router/app_routes.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/data/models/async_value.dart';
 import 'package:bebi_app/ui/features/profile_setup/profile_setup_cubit.dart';
@@ -17,6 +17,7 @@ import 'package:bebi_app/utils/formatters/date_input_formatter.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_keyboard_visibility_temp_fork/flutter_keyboard_visibility_temp_fork.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:material_ui/material_ui.dart';

@@ -1,4 +1,4 @@
-import 'package:bebi_app/app/router/app_router.dart';
+import 'package:bebi_app/app/router/app_routes.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/data/models/repeat_rule.dart';
@@ -11,6 +11,7 @@ import 'package:bebi_app/utils/extensions/color_extensions.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:material_ui/material_ui.dart';
 
