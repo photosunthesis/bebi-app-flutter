@@ -5,8 +5,8 @@ import 'package:bebi_app/data/models/calendar_event.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:bebi_app/utils/extensions/color_extensions.dart';
 import 'package:bebi_app/utils/extensions/string_extensions.dart';
-import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:material_ui/material_ui.dart';
 
 abstract class CalendarEvents {
   static final _kaomoji = Kaomojis.getRandomFromHappySet();

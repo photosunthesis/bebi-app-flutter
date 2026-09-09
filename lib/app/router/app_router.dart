@@ -36,11 +36,11 @@ import 'package:bebi_app/ui/shared_widgets/layouts/main_scaffold.dart';
 import 'package:bebi_app/ui/shared_widgets/modals/bottom_sheet_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:injectable/injectable.dart';
+import 'package:material_ui/material_ui.dart';
 
 export 'package:go_router/go_router.dart' show GoRouterHelper;
 

@@ -2,8 +2,8 @@ import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:bebi_app/utils/extensions/state_extensions.dart';
 import 'package:bebi_app/utils/extensions/widgets_binding_extensions.dart';
-import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:super_editor/super_editor.dart';
 
 /// {@template markdown_toolbar}

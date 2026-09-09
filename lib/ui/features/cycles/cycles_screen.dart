@@ -14,9 +14,9 @@ import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
 import 'package:bebi_app/utils/extensions/int_extensions.dart';
 import 'package:bebi_app/utils/platform/platform_utils.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:material_ui/material_ui.dart';
 
 class CyclesScreen extends StatefulWidget {
   const CyclesScreen({super.key});
@@ -219,7 +219,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
   }
 
   Widget _buildProfileAvatar(UserProfileView? profile, {Key? key}) {
-    return UserProfileAvatar(key: key, userProfile: profile, radius: 20);
+    return UserProfileAvatar(key: key, userProfile: profile);
   }
 
   Widget _buildDisclaimer() {

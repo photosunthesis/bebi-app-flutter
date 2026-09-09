@@ -1,5 +1,5 @@
 import 'package:bebi_app/utils/extensions/widgets_binding_extensions.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 extension StateExtensions on State {
   /// Runs [stateChange] within setState() as early as possible.

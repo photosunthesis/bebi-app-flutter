@@ -7,11 +7,11 @@ import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:bebi_app/utils/extensions/color_extensions.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
 import 'package:bebi_app/utils/extensions/int_extensions.dart';
-// ignore: depend_on_referenced_packages
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
+// ignore: depend_on_referenced_packages
+import 'package:material_ui/material_ui.dart';
 import 'package:paged_vertical_calendar/paged_vertical_calendar.dart';
 
 class CycleCalendarScreen extends StatefulWidget {

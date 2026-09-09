@@ -6,9 +6,9 @@ import 'package:bebi_app/ui/features/calendar_event_form/components/calendar_eve
 import 'package:bebi_app/ui/shared_widgets/layouts/main_app_bar.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:material_ui/material_ui.dart';
 
 class CalendarEventFormScreen extends StatefulWidget {
   const CalendarEventFormScreen({

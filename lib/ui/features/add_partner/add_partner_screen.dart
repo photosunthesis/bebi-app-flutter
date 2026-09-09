@@ -9,10 +9,10 @@ import 'package:bebi_app/utils/extensions/int_extensions.dart';
 import 'package:bebi_app/utils/formatters/user_code_formatter.dart';
 import 'package:bebi_app/utils/mixins/analytics_mixin.dart';
 import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_keyboard_visibility_temp_fork/flutter_keyboard_visibility_temp_fork.dart';
+import 'package:material_ui/material_ui.dart';
 
 class AddPartnerScreen extends StatefulWidget {
   const AddPartnerScreen({super.key});

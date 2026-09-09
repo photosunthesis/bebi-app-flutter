@@ -6,7 +6,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 
-sealed class AsyncValue<T> with EquatableMixin {
+sealed class AsyncValue<T> with Equatable {
   const AsyncValue();
 
   R maybeMap<R>({

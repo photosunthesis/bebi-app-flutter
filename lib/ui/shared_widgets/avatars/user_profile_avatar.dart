@@ -2,8 +2,8 @@ import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/data/models/user_profile_view.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:material_ui/material_ui.dart';
 
 class UserProfileAvatar extends StatelessWidget {
   const UserProfileAvatar({

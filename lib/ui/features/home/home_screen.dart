@@ -10,9 +10,9 @@ import 'package:bebi_app/ui/shared_widgets/modals/options_bottom_dialog.dart';
 import 'package:bebi_app/ui/shared_widgets/snackbars/default_snackbar.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:bebi_app/utils/extensions/string_extensions.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -122,9 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       elevation: 0,
       offset: const Offset(0, 50),
-      child: Container(
-        child: UserProfileAvatar(userProfile: userProfile, radius: 20),
-      ),
+      child: UserProfileAvatar(userProfile: userProfile),
       itemBuilder: (context) => [
         PopupMenuItem(
           value: 'profile',
@@ -132,12 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.only(bottom: 8),
             child: Row(
               children: [
-                Container(
-                  child: UserProfileAvatar(
-                    userProfile: userProfile,
-                    radius: 16,
-                  ),
-                ),
+                UserProfileAvatar(userProfile: userProfile, radius: 16),
                 const SizedBox(width: 12),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

@@ -5,10 +5,10 @@ import 'package:bebi_app/data/models/cycle_log.dart';
 import 'package:bebi_app/ui/features/cycles/cycles_cubit.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:bebi_app/utils/extensions/color_extensions.dart';
-// ignore: depend_on_referenced_packages
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_symbols_icons/symbols.dart';
+// ignore: depend_on_referenced_packages
+import 'package:material_ui/material_ui.dart';
 
 class CycleLogs extends StatefulWidget {
   const CycleLogs({super.key});
