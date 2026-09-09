@@ -49,6 +49,22 @@ root/
   └── utils/                      # extensions, formatters, mixins
 ```
 
+## Working on this with Claude Code
+
+This project runs on Flutter 3.47.2 / Dart 3.13.2, which is newer than most AI models' training data — so they tend to suggest widgets and APIs that have since been deprecated or removed. The [`dart-sdk-skills`](https://github.com/RandalSchwartz/dart-sdk-skills) plugin fixes that by giving Claude Code a version-by-version reference for both SDKs.
+
+Install it once, from inside Claude Code:
+
+```
+/plugin marketplace add RandalSchwartz/dart-sdk-skills
+/plugin install dart-sdk-skills@dart-sdk-skills
+```
+
+That adds two skills, which load on their own whenever they're relevant:
+
+- **`dart-sdk-changelog`** — Dart language features and core APIs, minimum SDK lookups, experimental flags, macros and augmentations
+- **`flutter-sdk-changelog`** — widget deprecations and their replacements (`WillPopScope` → `PopScope`, `withOpacity` → `withValues`, `MaterialState` → `WidgetState`), Material 3 migration, Flutter-to-Dart version matrix
+
 ## License
 
 Feel free to explore this project for inspiration and learning! It's licensed under MIT with a Commons Clause, which means you can use, modify, and study the code freely — just not for commercial purposes. See [LICENSE](LICENSE) for details.

@@ -3,7 +3,8 @@ name: Flutter Prepare
 inputs:
   flutter_version:
     description: Flutter version
-    required: true
+    required: false
+    default: "3.47.2"
   firebase_project:
     description: Firebase project id
     required: true
@@ -23,12 +24,12 @@ runs:
   steps:
     - uses: subosito/flutter-action@v2
       with:
-        channel: master
+        channel: stable
         flutter-version: ${{ inputs.flutter_version }}
         cache: true
 
     - name: Cache Flutter dependencies
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: |
           ~/.pub-cache
@@ -38,7 +39,7 @@ runs:
           flutter-deps-${{ runner.os }}-
 
     - name: Cache Firebase CLI and global packages
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: |
           ~/.pub-cache/bin

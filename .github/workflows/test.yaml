@@ -15,17 +15,16 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Prepare Flutter project
         uses: ./.github/actions/flutter-prepare
         with:
-          flutter_version: 3.38.9
           firebase_project: bebi-app
           firebase_platforms: none
 
       - name: Cache Flutter dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.pub-cache

@@ -32,3 +32,14 @@ linter:
     use_super_parameters: true
     avoid_unnecessary_containers: true
     avoid_redundant_argument_values: true
+
+plugins:
+  import_lint: ^2.0.0
+
+import_lint:
+  severity: "error"
+  rules:
+    no_material_anywhere:
+      target: "package:bebi_app/**/*.dart"
+      from: "package:flutter/material.dart"
+      except: []

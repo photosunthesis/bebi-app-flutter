@@ -65,12 +65,12 @@ jobs:
       packages: write
       actions: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Download all workflow run artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         continue-on-error: true
 
       - name: Read latest version from CHANGELOG
@@ -114,7 +114,7 @@ jobs:
           echo "artifacts=$ARTIFACTS" >> $GITHUB_OUTPUT
 
       - name: Create Release
-        uses: ncipollo/release-action@v1.14.0
+        uses: ncipollo/release-action@v1.21.0
         with:
           prerelease: false
           tag: ${{ github.ref_name }}
