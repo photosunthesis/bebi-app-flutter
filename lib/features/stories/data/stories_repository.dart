@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:bebi_app/core/data/image_storage_service.dart';
+import 'package:bebi_app/features/stories/data/story_dto.dart';
 import 'package:bebi_app/features/stories/domain/story.dart';
 import 'package:blurhash_ffi/blurhash.dart';
 import 'package:camera/camera.dart';
@@ -43,7 +44,7 @@ class StoriesRepository {
         .orderBy('created_at', descending: true)
         .get();
 
-    final stories = querySnapshot.docs.map(Story.fromFirestore).toList();
+    final stories = querySnapshot.docs.map(StoryDto.fromFirestore).toList();
 
     unawaited(
       _storiesBox.putAll({for (final story in stories) story.id: story}),

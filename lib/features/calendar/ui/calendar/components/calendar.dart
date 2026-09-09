@@ -1,6 +1,7 @@
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/features/calendar/domain/calendar_event.dart';
 import 'package:bebi_app/features/calendar/ui/calendar/calendar_cubit.dart';
+import 'package:bebi_app/features/calendar/ui/event_color_extension.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
 import 'package:bebi_app/utils/extensions/int_extensions.dart';

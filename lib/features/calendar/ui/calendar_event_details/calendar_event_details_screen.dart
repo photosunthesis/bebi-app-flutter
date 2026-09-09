@@ -5,6 +5,8 @@ import 'package:bebi_app/features/calendar/domain/calendar_event.dart';
 import 'package:bebi_app/features/calendar/domain/repeat_rule.dart';
 import 'package:bebi_app/features/calendar/ui/calendar_event_details/calendar_event_details_cubit.dart';
 import 'package:bebi_app/features/calendar/ui/calendar_event_details/components/delete_event_bottom_dialog.dart';
+import 'package:bebi_app/features/calendar/ui/event_color_extension.dart';
+import 'package:bebi_app/features/calendar/ui/repeat_frequency_extension.dart';
 import 'package:bebi_app/features/calendar/ui/save_changes_dialog_options.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:bebi_app/utils/extensions/color_extensions.dart';
@@ -104,7 +106,7 @@ class _CalendarEventDetailsScreenState
     final dateTimeText =
         _event.repeatRule.frequency == RepeatFrequency.doNotRepeat
         ? date
-        : '$date - ${context.l10n.repeats} ${_event.repeatRule.frequency.label.toLowerCase()}';
+        : '$date - ${context.l10n.repeats} ${_event.repeatRule.frequency.label(context).toLowerCase()}';
 
     return SliverPadding(
       padding: const EdgeInsets.fromLTRB(24, 10, 24, 0),

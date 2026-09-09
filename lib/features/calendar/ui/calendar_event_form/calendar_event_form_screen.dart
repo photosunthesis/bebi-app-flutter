@@ -5,6 +5,7 @@ import 'package:bebi_app/core/ui/main_app_bar.dart';
 import 'package:bebi_app/features/calendar/domain/calendar_event.dart';
 import 'package:bebi_app/features/calendar/ui/calendar_event_form/calendar_event_form_cubit.dart';
 import 'package:bebi_app/features/calendar/ui/calendar_event_form/components/calendar_event_form.dart';
+import 'package:bebi_app/features/calendar/ui/event_color_extension.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -141,7 +142,7 @@ class _CalendarEventFormScreenState extends State<CalendarEventFormScreen> {
                         ),
                         const SizedBox(width: 12),
                         Text(
-                          e.label,
+                          e.label(context),
                           style: context.textTheme.bodyMedium!.copyWith(
                             fontWeight: FontWeight.w500,
                           ),

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bebi_app/features/cycles/data/cycle_log_dto.dart';
 import 'package:bebi_app/features/cycles/domain/cycle_log.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
@@ -21,7 +22,7 @@ class CycleLogsRepository {
     final docSnapshot = await _firestore.collection(_collection).doc(id).get();
 
     if (docSnapshot.exists) {
-      final cycleLog = CycleLog.fromFirestore(docSnapshot);
+      final cycleLog = CycleLogDto.fromFirestore(docSnapshot);
       unawaited(_cycleLogBox.put(cycleLog.id, cycleLog));
       return cycleLog;
     }
@@ -42,7 +43,7 @@ class CycleLogsRepository {
         .get();
 
     final firestoreLogs = querySnapshot.docs
-        .map(CycleLog.fromFirestore)
+        .map(CycleLogDto.fromFirestore)
         .toList();
 
     return firestoreLogs;
@@ -102,7 +103,7 @@ class CycleLogsRepository {
         .get();
 
     final firestoreLogs = querySnapshot.docs
-        .map(CycleLog.fromFirestore)
+        .map(CycleLogDto.fromFirestore)
         .toList();
 
     if (firestoreLogs.isNotEmpty) {

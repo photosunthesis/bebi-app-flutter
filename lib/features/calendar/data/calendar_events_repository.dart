@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bebi_app/features/calendar/data/calendar_event_dto.dart';
 import 'package:bebi_app/features/calendar/domain/calendar_event.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -47,7 +48,7 @@ class CalendarEventsRepository {
     }
 
     final userEvents = await userEventsQuery.get();
-    final events = userEvents.docs.map(CalendarEvent.fromFirestore).toList();
+    final events = userEvents.docs.map(CalendarEventDto.fromFirestore).toList();
 
     unawaited(_cacheEvents(events));
 
@@ -66,7 +67,7 @@ class CalendarEventsRepository {
     final docRef = _firestore.collection(_collection).doc(id);
     final docSnapshot = await docRef.get();
     final event = docSnapshot.exists
-        ? CalendarEvent.fromFirestore(docSnapshot)
+        ? CalendarEventDto.fromFirestore(docSnapshot)
         : null;
 
     if (event != null) unawaited(_cacheEvents(<CalendarEvent>[event]));

@@ -1,9 +1,4 @@
-import 'dart:ui';
-
-import 'package:bebi_app/app/theme/app_colors.dart';
 import 'package:bebi_app/features/calendar/domain/repeat_rule.dart';
-import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
 class CalendarEvent extends Equatable {
@@ -27,31 +22,6 @@ class CalendarEvent extends Equatable {
        _createdAt = (createdAt ?? DateTime.now()).toUtc(),
        _updatedAt = (updatedAt ?? DateTime.now()).toUtc();
 
-  factory CalendarEvent.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    return CalendarEvent(
-      id: doc.id,
-      title: data['title'] as String,
-      notes: data['notes'] as String?,
-      startDate: (data['start_date'] as Timestamp).toDate(),
-      endDate: data['end_date'] != null
-          ? (data['end_date'] as Timestamp).toDate()
-          : null,
-      allDay: data['all_day'] as bool? ?? false,
-      repeatRule: RepeatRule.fromMap(
-        data['repeat_rule'] as Map<String, dynamic>,
-      ),
-      eventColor: EventColor.values.firstWhere(
-        (e) => e.name == data['event_color'],
-      ),
-      createdBy: data['created_by'] as String,
-      updatedBy: data['updated_by'] as String,
-      users: List<String>.from(data['users'] as List<dynamic>),
-      createdAt: (data['created_at'] as Timestamp).toDate(),
-      updatedAt: (data['updated_at'] as Timestamp).toDate(),
-    );
-  }
-
   final String id;
   final String? recurringEventId; // Used in UI only, not stored in Firestore
   final String title;
@@ -71,7 +41,6 @@ class CalendarEvent extends Equatable {
   DateTime? get endDate => _endDate?.toLocal();
   DateTime get createdAt => _createdAt.toLocal();
   DateTime get updatedAt => _updatedAt.toLocal();
-  Color get color => eventColor.color;
   bool get isRecurring => repeatRule.frequency != RepeatFrequency.doNotRepeat;
   bool get isLastRecurringEvent =>
       isRecurring &&
@@ -115,23 +84,6 @@ class CalendarEvent extends Equatable {
     );
   }
 
-  Map<String, dynamic> toFirestore() {
-    return {
-      'title': title,
-      'notes': notes,
-      'start_date': Timestamp.fromDate(startDate),
-      'end_date': endDate != null ? Timestamp.fromDate(endDate!) : null,
-      'all_day': allDay,
-      'repeat_rule': repeatRule.toMap(),
-      'event_color': eventColor.name,
-      'created_by': createdBy,
-      'updated_by': updatedBy,
-      'users': users,
-      'created_at': Timestamp.fromDate(createdAt),
-      'updated_at': Timestamp.fromDate(updatedAt),
-    };
-  }
-
   @override
   List<Object?> get props => [
     id,
@@ -151,32 +103,4 @@ class CalendarEvent extends Equatable {
   ];
 }
 
-enum EventColor with LocalizationsMixin {
-  black,
-  green,
-  blue,
-  yellow,
-  pink,
-  orange,
-  red;
-
-  Color get color => switch (this) {
-    EventColor.black => AppColors.stone600,
-    EventColor.green => AppColors.green,
-    EventColor.blue => AppColors.blue,
-    EventColor.yellow => AppColors.yellow,
-    EventColor.pink => AppColors.pink,
-    EventColor.orange => AppColors.orange,
-    EventColor.red => AppColors.red,
-  };
-
-  String get label => switch (this) {
-    EventColor.black => l10n.eventColorBlack,
-    EventColor.green => l10n.eventColorGreen,
-    EventColor.blue => l10n.eventColorBlue,
-    EventColor.yellow => l10n.eventColorYellow,
-    EventColor.pink => l10n.eventColorPink,
-    EventColor.orange => l10n.eventColorOrange,
-    EventColor.red => l10n.eventColorRed,
-  };
-}
+enum EventColor { black, green, blue, yellow, pink, orange, red }

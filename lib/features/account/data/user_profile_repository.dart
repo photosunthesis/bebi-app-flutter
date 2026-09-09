@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bebi_app/core/data/image_storage_service.dart';
+import 'package:bebi_app/features/account/data/user_profile_dto.dart';
 import 'package:bebi_app/features/account/domain/user_profile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 // ignore: depend_on_referenced_packages
@@ -34,7 +35,7 @@ class UserProfileRepository {
     final doc = await _firestore.collection(_collection).doc(userId).get();
     if (!doc.exists) return null;
 
-    final userProfile = UserProfile.fromFirestore(doc);
+    final userProfile = UserProfileDto.fromFirestore(doc);
 
     await _cacheUserProfile(userProfile);
 
@@ -47,7 +48,7 @@ class UserProfileRepository {
         .where(FieldPath.documentId, whereIn: userIds)
         .get();
 
-    return querySnapshot.docs.map(UserProfile.fromFirestore).toList();
+    return querySnapshot.docs.map(UserProfileDto.fromFirestore).toList();
   }
 
   Future<UserProfile?> getByUserCode(
@@ -67,7 +68,7 @@ class UserProfileRepository {
 
     if (querySnapshot.docs.isEmpty) return null;
 
-    final userProfile = UserProfile.fromFirestore(querySnapshot.docs.first);
+    final userProfile = UserProfileDto.fromFirestore(querySnapshot.docs.first);
 
     unawaited(_cacheUserProfile(userProfile));
 

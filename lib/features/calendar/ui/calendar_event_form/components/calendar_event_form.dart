@@ -4,6 +4,8 @@ import 'package:bebi_app/features/calendar/domain/repeat_rule.dart';
 import 'package:bebi_app/features/calendar/ui/calendar_event_form/calendar_event_form_cubit.dart';
 import 'package:bebi_app/features/calendar/ui/calendar_event_form/components/date_fields_bottom_dialog.dart';
 import 'package:bebi_app/features/calendar/ui/calendar_event_form/components/sticky_markdown_toolbar.dart';
+import 'package:bebi_app/features/calendar/ui/event_color_extension.dart';
+import 'package:bebi_app/features/calendar/ui/repeat_frequency_extension.dart';
 import 'package:bebi_app/features/calendar/ui/save_changes_dialog_options.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:bebi_app/utils/extensions/color_extensions.dart';
@@ -209,7 +211,7 @@ class _CalendarEventFormState extends State<CalendarEventForm> {
       return date;
     }
 
-    return '$date - ${context.l10n.repeats} ${state.repeatRule.frequency.label.toLowerCase()}';
+    return '$date - ${context.l10n.repeats} ${state.repeatRule.frequency.label(context).toLowerCase()}';
   }
 
   Widget _buildNotesSection() {

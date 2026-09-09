@@ -3,6 +3,7 @@ import 'package:bebi_app/core/ui/main_app_bar.dart';
 import 'package:bebi_app/features/cycles/domain/cycle_log.dart';
 import 'package:bebi_app/features/cycles/ui/angled_stripes_background.dart';
 import 'package:bebi_app/features/cycles/ui/cycle_calendar/cycle_calendar_cubit.dart';
+import 'package:bebi_app/features/cycles/ui/cycle_log_color_extension.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:bebi_app/utils/extensions/color_extensions.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';

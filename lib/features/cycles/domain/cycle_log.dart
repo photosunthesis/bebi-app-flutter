@@ -1,8 +1,4 @@
-import 'dart:ui';
-
-import 'package:bebi_app/app/theme/app_colors.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 // ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
@@ -24,28 +20,6 @@ class CycleLog extends Equatable {
   }) : _date = date.noTime(),
        _createdAt = createdAt.toUtc(),
        _updatedAt = updatedAt.toUtc();
-
-  factory CycleLog.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    return CycleLog(
-      id: doc.id,
-      date: data['date'].toDate(),
-      type: LogType.values[data['type']],
-      flow: data['flow'] != null ? FlowIntensity.values[data['flow']] : null,
-      symptoms: data['symptoms'] != null
-          ? List<String>.from(data['symptoms'] as List<dynamic>)
-          : null,
-      intimacyType: data['intimacy_type'] != null
-          ? IntimacyType.values[data['intimacy_type']]
-          : null,
-      createdBy: data['created_by'],
-      ownedBy: data['owned_by'],
-      createdAt: data['created_at'].toDate(),
-      updatedAt: data['updated_at'].toDate(),
-      users: List<String>.from(data['users'] as List<dynamic>),
-      isPrediction: data['is_prediction'],
-    );
-  }
 
   factory CycleLog.period({
     String id = '',
@@ -154,13 +128,6 @@ class CycleLog extends Equatable {
   DateTime get createdAt => _createdAt.toLocal();
   DateTime get updatedAt => _updatedAt.toLocal();
 
-  Color get color => switch (type) {
-    LogType.period => AppColors.red,
-    LogType.ovulation => AppColors.blue,
-    LogType.symptom => AppColors.purple,
-    LogType.intimacy => AppColors.purple,
-  };
-
   CycleLog copyWith({
     String? id,
     DateTime? date,
@@ -189,22 +156,6 @@ class CycleLog extends Equatable {
       users: users ?? this.users,
       isPrediction: isPrediction ?? this.isPrediction,
     );
-  }
-
-  Map<String, dynamic> toFirestore() {
-    return {
-      'date': date,
-      'type': type.index,
-      'flow': flow?.index,
-      'symptoms': symptoms,
-      'intimacy_type': intimacyType?.index,
-      'owned_by': ownedBy,
-      'created_by': createdBy,
-      'created_at': Timestamp.fromDate(createdAt),
-      'updated_at': Timestamp.fromDate(updatedAt),
-      'users': users,
-      'is_prediction': isPrediction,
-    };
   }
 
   @override

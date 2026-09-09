@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bebi_app/features/account/data/user_partnership_dto.dart';
 import 'package:bebi_app/features/account/domain/user_partnership.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 // ignore: depend_on_referenced_packages
@@ -32,7 +33,9 @@ class UserPartnershipsRepository {
         .get();
 
     if (querySnapshot.docs.isEmpty) return null;
-    final partnership = UserPartnership.fromFirestore(querySnapshot.docs.first);
+    final partnership = UserPartnershipDto.fromFirestore(
+      querySnapshot.docs.first,
+    );
     unawaited(_cachePartnership(partnership));
     return partnership;
   }

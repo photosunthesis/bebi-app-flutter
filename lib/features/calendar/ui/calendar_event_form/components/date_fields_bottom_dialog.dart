@@ -2,6 +2,7 @@ import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/core/ui/app_switch.dart';
 import 'package:bebi_app/features/calendar/domain/repeat_rule.dart';
 import 'package:bebi_app/features/calendar/ui/calendar_event_form/components/app_date_time_picker.dart';
+import 'package:bebi_app/features/calendar/ui/repeat_frequency_extension.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:bebi_app/utils/extensions/int_extensions.dart';
 import 'package:go_router/go_router.dart';
@@ -226,7 +227,7 @@ class _DateFieldsBottomDialogState<T> extends State<DateFieldsBottomDialog<T>> {
                       height: 36,
                       padding: const EdgeInsets.only(left: 12, right: 8),
                       child: Text(
-                        e.label,
+                        e.label(context),
                         style: context.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
                         ),
@@ -235,7 +236,7 @@ class _DateFieldsBottomDialogState<T> extends State<DateFieldsBottomDialog<T>> {
                   )
                   .toList(),
               child: Text(
-                _repeatFrequency.label,
+                _repeatFrequency.label(context),
                 style: context.textTheme.bodyMedium!.copyWith(
                   fontWeight: FontWeight.w500,
                 ),
