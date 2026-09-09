@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:bebi_app/utils/platform/platform_utils_io.dart';
+import 'package:bebi_app/utils/platform/platform_utils.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';

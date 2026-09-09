@@ -1,7 +1,6 @@
 import 'package:bebi_app/constants/type_adapter_ids.dart';
+import 'package:bebi_app/data/models/user_profile.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
-
-import '../models/user_profile.dart';
 
 class UserProfileAdapter extends TypeAdapter<UserProfile> {
   @override
