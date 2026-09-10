@@ -4,10 +4,11 @@ import 'package:bebi_app/core/ui/async_value.dart';
 import 'package:bebi_app/features/account/data/user_profile_repository.dart';
 import 'package:bebi_app/features/account/domain/couple_context.dart';
 import 'package:bebi_app/features/account/domain/resolve_couple_context.dart';
-import 'package:bebi_app/features/cycles/data/cycle_day_insights_service.dart';
+import 'package:bebi_app/features/cycles/data/ai_insights_repository.dart';
 import 'package:bebi_app/features/cycles/data/cycle_logs_repository.dart';
 import 'package:bebi_app/features/cycles/domain/cycle_day_insights.dart';
 import 'package:bebi_app/features/cycles/domain/cycle_log.dart';
+import 'package:bebi_app/features/cycles/domain/derive_cycle_day_insights.dart';
 import 'package:bebi_app/features/cycles/domain/no_period_data_exception.dart';
 import 'package:bebi_app/features/cycles/domain/predict_upcoming_cycles.dart';
 import 'package:bebi_app/features/cycles/domain/prediction_confidence.dart';
@@ -28,7 +29,8 @@ class CyclesCubit extends Cubit<CyclesState>
   CyclesCubit(
     this._cycleLogsRepository,
     this._predictUpcomingCycles,
-    this._cycleDayInsightsService,
+    this._deriveCycleDayInsights,
+    this._aiInsightsRepository,
     this._resolveCoupleContext,
     this._userProfileRepository,
     this._firebaseAuth,
@@ -38,7 +40,8 @@ class CyclesCubit extends Cubit<CyclesState>
 
   final CycleLogsRepository _cycleLogsRepository;
   final PredictUpcomingCycles _predictUpcomingCycles;
-  final CycleDayInsightsService _cycleDayInsightsService;
+  final DeriveCycleDayInsights _deriveCycleDayInsights;
+  final AiInsightsRepository _aiInsightsRepository;
   final ResolveCoupleContext _resolveCoupleContext;
   final UserProfileRepository _userProfileRepository;
   final FirebaseAuth _firebaseAuth;
@@ -170,12 +173,13 @@ class CyclesCubit extends Cubit<CyclesState>
 
     emit(state.copyWith(insights: const AsyncLoading()));
 
-    final insights = await AsyncValue.guard(
-      () => _cycleDayInsightsService.getInsightsFromDateAndEvents(
-        state.focusedDate,
-        cycleLogs,
-      ),
-    );
+    final insights = await AsyncValue.guard(() {
+      try {
+        return _deriveCycleDayInsights(state.focusedDate, cycleLogs);
+      } on NoPeriodDataException {
+        throw ArgumentError(l10n.noPeriodDataError);
+      }
+    });
 
     emit(state.copyWith(insights: insights));
 
@@ -184,7 +188,7 @@ class CyclesCubit extends Cubit<CyclesState>
       emit(state.copyWith(aiSummary: const AsyncLoading()));
 
       final aiSummary = await AsyncValue.guard(
-        () => _cycleDayInsightsService.generateAiInsights(
+        () => _aiInsightsRepository.generate(
           insightsData,
           isCurrentUser: state.isViewingCurrentUser,
           locale: l10n.localeName,

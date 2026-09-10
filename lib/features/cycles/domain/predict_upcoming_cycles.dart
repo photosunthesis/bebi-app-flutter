@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:bebi_app/features/cycles/domain/cycle_log.dart';
+import 'package:bebi_app/features/cycles/domain/group_period_events_by_proximity.dart';
 import 'package:bebi_app/features/cycles/domain/no_period_data_exception.dart';
 import 'package:bebi_app/features/cycles/domain/prediction_confidence.dart';
 import 'package:bebi_app/utils/extensions/int_extensions.dart';
@@ -21,7 +22,6 @@ class PredictUpcomingCycles {
   static const _defaultPeriodLength = 4;
   static const _minPeriodDays = 1;
   static const _maxPeriodDays = 10;
-  static const _consecutiveDayThreshold = 14;
   static const _ovulationWindowExtensionDivisor = 2;
   static const _maxOvulationWindowExtension = 3;
   static const _periodExtensionDivisor = 4;
@@ -58,7 +58,7 @@ class PredictUpcomingCycles {
     final periodLogs = _getSortedActualPeriodLogs(logs);
     if (periodLogs.isEmpty) throw NoPeriodDataException();
 
-    final periodGroups = _groupPeriodEventsByProximity(periodLogs);
+    final periodGroups = groupPeriodEventsByProximity(periodLogs);
     final periodStartDates = _extractPeriodStartDates(periodGroups);
     final cycleLengths = _calculateCycleLengths(periodStartDates);
     final weightedAvgCycleLength = _calculateWeightedCycleLength(cycleLengths);
@@ -245,28 +245,6 @@ class PredictUpcomingCycles {
     return cyclePeriodDays.average.round();
   }
 
-  List<List<CycleLog>> _groupPeriodEventsByProximity(List<CycleLog> events) {
-    if (events.isEmpty) return [];
-
-    final sortedEvents = events.toList()
-      ..sort((a, b) => a.date.compareTo(b.date));
-
-    final groups = <List<CycleLog>>[];
-
-    for (final event in sortedEvents) {
-      final group = groups.lastOrNull;
-      if (group == null ||
-          event.date.difference(group.last.date).inDays >
-              _consecutiveDayThreshold) {
-        groups.add([event]);
-      } else {
-        group.add(event);
-      }
-    }
-
-    return groups;
-  }
-
   double _calculateStandardDeviation(List<int> gaps, double mean) {
     final variance = gaps.map((g) => pow(g - mean, 2)).sum / (gaps.length - 1);
     return sqrt(variance);
@@ -448,7 +426,7 @@ class PredictUpcomingCycles {
     int predictedDays,
   ) {
     // Get recent complete periods
-    final periodGroups = _groupPeriodEventsByProximity(
+    final periodGroups = groupPeriodEventsByProximity(
       logs.where((l) => l.type == LogType.period && !l.isPrediction).toList(),
     );
 

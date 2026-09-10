@@ -1,48 +1,26 @@
-import 'dart:async';
-
-import 'package:bebi_app/features/cycles/data/cycle_insights_prompt.dart';
 import 'package:bebi_app/features/cycles/domain/cycle_day_insights.dart';
 import 'package:bebi_app/features/cycles/domain/cycle_log.dart';
-import 'package:bebi_app/features/cycles/domain/prediction_confidence.dart';
+import 'package:bebi_app/features/cycles/domain/group_period_events_by_proximity.dart';
+import 'package:bebi_app/features/cycles/domain/no_period_data_exception.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
-import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
 // ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
-import 'package:firebase_ai/firebase_ai.dart';
-import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:injectable/injectable.dart';
 
 @injectable
-class CycleDayInsightsService with LocalizationsMixin {
-  const CycleDayInsightsService(
-    this._generativeModel,
-    @Named('ai_insights_box') this._aiInsightsBox,
-  );
+class DeriveCycleDayInsights {
+  const DeriveCycleDayInsights();
 
-  static const _maxPeriodGapDays = 14;
-
-  final GenerativeModel _generativeModel;
-  final Box<String> _aiInsightsBox;
-
-  CycleDayInsights getInsightsFromDateAndEvents(
-    DateTime date,
-    List<CycleLog> events,
-  ) {
+  CycleDayInsights call(DateTime date, List<CycleLog> events) {
     final sortedEvents = events.sortedBy((e) => e.date);
     final periodEvents = sortedEvents.where((e) => e.type == LogType.period);
     final ovulationEvents = sortedEvents.where(
       (e) => e.type == LogType.ovulation,
     );
 
-    if (periodEvents.isEmpty) {
-      throw ArgumentError(l10n.noPeriodDataError);
-    }
+    if (periodEvents.isEmpty) throw NoPeriodDataException();
 
-    final periodGroups = _groupPeriodEventsByProximity(periodEvents.toList());
-
-    if (periodGroups.isEmpty) {
-      throw ArgumentError(l10n.unableToDetermineCycleError);
-    }
+    final periodGroups = groupPeriodEventsByProximity(periodEvents.toList());
 
     final currentPeriodGroup = _findCurrentPeriodGroup(date, periodGroups);
     final cycleStart = currentPeriodGroup.first.date;
@@ -79,24 +57,6 @@ class CycleDayInsightsService with LocalizationsMixin {
       nextPeriodDates: nextPeriodGroup.map((log) => log.date).toList(),
       fertileDays: currentFertileWindow,
     );
-  }
-
-  List<List<CycleLog>> _groupPeriodEventsByProximity(List<CycleLog> events) {
-    final periodGroups = <List<CycleLog>>[];
-
-    for (final event in events) {
-      final currentGroup = periodGroups.lastOrNull;
-      // 14 days is the max distance between two period events
-      if (currentGroup == null ||
-          event.date.difference(currentGroup.last.date).inDays >
-              _maxPeriodGapDays) {
-        periodGroups.add([event]);
-      } else {
-        currentGroup.add(event);
-      }
-    }
-
-    return periodGroups;
   }
 
   List<CycleLog> _findCurrentPeriodGroup(
@@ -221,45 +181,7 @@ class CycleDayInsightsService with LocalizationsMixin {
   }
 
   int _calculateAveragePeriodDays(List<List<CycleLog>> periodGroups) {
-    if (periodGroups.isEmpty) {
-      throw ArgumentError(l10n.noPeriodDataForCycleError);
-    }
-
     final periodLengths = periodGroups.map((group) => group.length).toList();
     return periodLengths.average.round();
-  }
-
-  Future<String> generateAiInsights(
-    CycleDayInsights cycleDayInsights, {
-    required bool isCurrentUser,
-    required String locale,
-    PredictionConfidence? confidence,
-    bool useCache = true,
-  }) async {
-    try {
-      final date = cycleDayInsights.date.toIso8601String().substring(0, 10);
-      final key = '${date}_${isCurrentUser ? 'self' : 'partner'}';
-      final cachedInsights = _aiInsightsBox.get(key);
-      if (cachedInsights != null && useCache) return cachedInsights;
-
-      final prompt = CycleInsightsPrompt.generate(
-        insights: cycleDayInsights,
-        isCurrentUser: isCurrentUser,
-        locale: locale,
-        confidence: confidence,
-      );
-
-      final response = await _generativeModel.generateContent([
-        Content.text(prompt),
-      ]);
-
-      if (response.text == null) throw ArgumentError();
-
-      unawaited(_aiInsightsBox.put(key, response.text!));
-
-      return response.text!;
-    } catch (_) {
-      throw ArgumentError(l10n.aiInsightsGenerationError);
-    }
   }
 }
