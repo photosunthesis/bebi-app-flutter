@@ -2,7 +2,7 @@ import 'package:bebi_app/app/app_cubit.dart';
 import 'package:bebi_app/app/router/app_routes.dart';
 import 'package:bebi_app/app/theme/app_colors.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
-import 'package:bebi_app/features/account/domain/user_profile_view.dart';
+import 'package:bebi_app/features/account/domain/couple_context.dart';
 import 'package:bebi_app/features/cycles/domain/prediction_confidence.dart';
 import 'package:bebi_app/features/cycles/ui/angled_stripes_background.dart';
 import 'package:bebi_app/features/cycles/ui/cycles/cycles_cubit.dart';
@@ -51,17 +51,13 @@ class _CyclePredictionsState extends State<CyclePredictions> {
   }
 
   Widget _buildViewAllButton() {
-    return BlocSelector<AppCubit, AppState, (UserProfileView, UserProfileView)>(
-      selector: (state) => (
-        state.userProfileAsync.asData()!,
-        state.partnerProfileAsync.asData()!,
-      ),
-      builder: (context, userProfiles) {
-        final (userProfile, partnerProfile) = userProfiles;
+    return BlocSelector<AppCubit, AppState, CoupleContext>(
+      selector: (state) => state.coupleContextAsync.asData()!,
+      builder: (context, coupleContext) {
         return BlocSelector<CyclesCubit, CyclesState, String?>(
           selector: (state) => state.isViewingCurrentUser
-              ? userProfile.userId
-              : partnerProfile.userId,
+              ? coupleContext.me.userId
+              : coupleContext.partner?.userId,
           builder: (context, userId) {
             return OutlinedButton(
               onPressed: () async {

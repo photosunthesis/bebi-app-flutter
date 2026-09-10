@@ -53,7 +53,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
           data: (shouldRedirect) {
             if (shouldRedirect == true) {
               context.goNamed(AppRoutes.home);
-              context.read<AppCubit>().loadUserProfiles();
+              context.read<AppCubit>().loadCoupleContext();
             }
           },
           error: (error, stack) {

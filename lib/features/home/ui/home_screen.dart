@@ -5,7 +5,7 @@ import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/core/ui/default_snackbar.dart';
 import 'package:bebi_app/core/ui/options_bottom_dialog.dart';
 import 'package:bebi_app/core/ui/user_profile_avatar.dart';
-import 'package:bebi_app/features/account/domain/user_profile_view.dart';
+import 'package:bebi_app/features/account/domain/couple_context.dart';
 import 'package:bebi_app/features/home/domain/app_update_info.dart';
 import 'package:bebi_app/features/home/ui/home_cubit.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
@@ -32,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _cubit.initialize();
-      context.read<AppCubit>().loadUserProfiles();
+      context.read<AppCubit>().loadCoupleContext();
     });
   }
 
@@ -76,10 +76,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildHeader() {
     final now = DateTime.now();
-    return BlocSelector<AppCubit, AppState, UserProfileView?>(
-      selector: (state) => state.userProfileAsync.maybeMap(
+    return BlocSelector<AppCubit, AppState, CoupleMember?>(
+      selector: (state) => state.coupleContextAsync.maybeMap(
         orElse: () => null,
-        data: (data) => data,
+        data: (data) => data?.me,
       ),
       builder: (context, userProfile) {
         return Padding(
@@ -110,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildAccountMenu(UserProfileView? userProfile) {
+  Widget _buildAccountMenu(CoupleMember? userProfile) {
     return PopupMenuButton(
       splashRadius: 0,
       color: context.colorScheme.surface,
@@ -123,7 +123,10 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       elevation: 0,
       offset: const Offset(0, 50),
-      child: UserProfileAvatar(userProfile: userProfile),
+      child: UserProfileAvatar(
+        imageUrl: userProfile?.profilePictureUrl,
+        displayName: userProfile?.displayName,
+      ),
       itemBuilder: (context) => [
         PopupMenuItem(
           value: 'profile',
@@ -131,7 +134,11 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.only(bottom: 8),
             child: Row(
               children: [
-                UserProfileAvatar(userProfile: userProfile, radius: 16),
+                UserProfileAvatar(
+                  imageUrl: userProfile?.profilePictureUrl,
+                  displayName: userProfile?.displayName,
+                  radius: 16,
+                ),
                 const SizedBox(width: 12),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

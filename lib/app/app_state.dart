@@ -5,23 +5,19 @@ part of 'app_cubit.dart';
 /// Stuff here is accessible from anywhere in the app. Add global stuff as needed.
 class AppState {
   const AppState({
-    this.userProfileAsync = const AsyncData(null),
-    this.partnerProfileAsync = const AsyncData(null),
+    this.coupleContextAsync = const AsyncData(null),
     this.userIsSignedIn = false,
   });
 
-  final AsyncValue<UserProfileView?> userProfileAsync;
-  final AsyncValue<UserProfileView?> partnerProfileAsync;
+  final AsyncValue<CoupleContext?> coupleContextAsync;
   final bool userIsSignedIn;
 
   AppState copyWith({
-    AsyncValue<UserProfileView?>? userProfileAsync,
-    AsyncValue<UserProfileView?>? partnerProfileAsync,
+    AsyncValue<CoupleContext?>? coupleContextAsync,
     bool? userIsSignedIn,
   }) {
     return AppState(
-      userProfileAsync: userProfileAsync ?? this.userProfileAsync,
-      partnerProfileAsync: partnerProfileAsync ?? this.partnerProfileAsync,
+      coupleContextAsync: coupleContextAsync ?? this.coupleContextAsync,
       userIsSignedIn: userIsSignedIn ?? this.userIsSignedIn,
     );
   }

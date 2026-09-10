@@ -4,7 +4,7 @@ import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/core/ui/default_snackbar.dart';
 import 'package:bebi_app/core/ui/main_app_bar.dart';
 import 'package:bebi_app/core/ui/user_profile_avatar.dart';
-import 'package:bebi_app/features/account/domain/user_profile_view.dart';
+import 'package:bebi_app/features/account/domain/couple_context.dart';
 import 'package:bebi_app/features/cycles/ui/cycles/components/cycle_date_picker.dart';
 import 'package:bebi_app/features/cycles/ui/cycles/components/cycle_insights.dart';
 import 'package:bebi_app/features/cycles/ui/cycles/components/cycle_logs.dart';
@@ -169,14 +169,9 @@ class _CyclesScreenState extends State<CyclesScreen> {
   }
 
   Widget _buildAccountSwitcher() {
-    return BlocSelector<AppCubit, AppState, (UserProfileView, UserProfileView)>(
-      selector: (state) => (
-        state.userProfileAsync.asData()!,
-        state.partnerProfileAsync.asData()!,
-      ),
-      builder: (context, userProfiles) {
-        final (userProfile, partnerProfile) = userProfiles;
-
+    return BlocSelector<AppCubit, AppState, CoupleContext>(
+      selector: (state) => state.coupleContextAsync.asData()!,
+      builder: (context, coupleContext) {
         return BlocBuilder<CyclesCubit, CyclesState>(
           buildWhen: (previous, current) =>
               previous.isViewingCurrentUser != current.isViewingCurrentUser,
@@ -195,8 +190,8 @@ class _CyclesScreenState extends State<CyclesScreen> {
                         offset: const Offset(16, 0),
                         child: _buildProfileAvatar(
                           state.isViewingCurrentUser
-                              ? partnerProfile
-                              : userProfile,
+                              ? coupleContext.partner
+                              : coupleContext.me,
                         ),
                       ),
                     ),
@@ -204,8 +199,8 @@ class _CyclesScreenState extends State<CyclesScreen> {
                       duration: 120.milliseconds,
                       child: _buildProfileAvatar(
                         state.isViewingCurrentUser
-                            ? userProfile
-                            : partnerProfile,
+                            ? coupleContext.me
+                            : coupleContext.partner,
                         key: ValueKey(state.isViewingCurrentUser),
                       ),
                     ),
@@ -219,8 +214,12 @@ class _CyclesScreenState extends State<CyclesScreen> {
     );
   }
 
-  Widget _buildProfileAvatar(UserProfileView? profile, {Key? key}) {
-    return UserProfileAvatar(key: key, userProfile: profile);
+  Widget _buildProfileAvatar(CoupleMember? member, {Key? key}) {
+    return UserProfileAvatar(
+      key: key,
+      imageUrl: member?.profilePictureUrl,
+      displayName: member?.displayName,
+    );
   }
 
   Widget _buildDisclaimer() {
@@ -237,19 +236,14 @@ class _CyclesScreenState extends State<CyclesScreen> {
   }
 
   Widget _buildCyclesSetupPrompt() {
-    return BlocSelector<AppCubit, AppState, (UserProfileView, UserProfileView)>(
-      selector: (state) => (
-        state.userProfileAsync.asData()!,
-        state.partnerProfileAsync.asData()!,
-      ),
-      builder: (context, userProfiles) {
-        final userProfile = userProfiles.$1;
-
+    return BlocSelector<AppCubit, AppState, CoupleContext>(
+      selector: (state) => state.coupleContextAsync.asData()!,
+      builder: (context, coupleContext) {
         return BlocSelector<CyclesCubit, CyclesState, bool>(
           selector: (state) => switch (state) {
             final s when s.cycleLogs.isLoading || s.insights.isLoading => true,
             final s when !s.isViewingCurrentUser => true,
-            _ when userProfile.hasCycle => true,
+            _ when coupleContext.me.hasCycle => true,
             _ => false,
           },
           builder: (context, hidePrompt) {

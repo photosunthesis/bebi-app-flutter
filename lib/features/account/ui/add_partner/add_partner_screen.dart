@@ -60,7 +60,7 @@ class _AddPartnerScreenState extends State<AddPartnerScreen>
           }
 
           if (state is AddPartnerSuccessState) {
-            context.read<AppCubit>().loadUserProfiles();
+            context.read<AppCubit>().loadCoupleContext();
             context.goNamed(AppRoutes.home);
           }
         },

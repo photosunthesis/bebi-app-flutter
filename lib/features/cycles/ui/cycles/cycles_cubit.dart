@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:bebi_app/core/ui/async_value.dart';
-import 'package:bebi_app/features/account/data/user_partnerships_repository.dart';
 import 'package:bebi_app/features/account/data/user_profile_repository.dart';
-import 'package:bebi_app/features/account/domain/user_profile.dart';
+import 'package:bebi_app/features/account/domain/couple_context.dart';
+import 'package:bebi_app/features/account/domain/resolve_couple_context.dart';
 import 'package:bebi_app/features/cycles/data/cycle_day_insights_service.dart';
 import 'package:bebi_app/features/cycles/data/cycle_logs_repository.dart';
 import 'package:bebi_app/features/cycles/domain/cycle_day_insights.dart';
@@ -28,8 +28,8 @@ class CyclesCubit extends Cubit<CyclesState>
     this._cycleLogsRepository,
     this._cyclePredictionsService,
     this._cycleDayInsightsService,
+    this._resolveCoupleContext,
     this._userProfileRepository,
-    this._userPartnershipsRepository,
     this._firebaseAuth,
   ) : super(CyclesState(focusedDate: DateTime.now())) {
     logScreenViewed(screenName: 'cycles_screen');
@@ -38,12 +38,11 @@ class CyclesCubit extends Cubit<CyclesState>
   final CycleLogsRepository _cycleLogsRepository;
   final CyclePredictionsService _cyclePredictionsService;
   final CycleDayInsightsService _cycleDayInsightsService;
+  final ResolveCoupleContext _resolveCoupleContext;
   final UserProfileRepository _userProfileRepository;
-  final UserPartnershipsRepository _userPartnershipsRepository;
   final FirebaseAuth _firebaseAuth;
 
-  UserProfile? _userProfile;
-  UserProfile? _partnerProfile;
+  CoupleContext? _coupleContext;
 
   Future<void> initialize({bool useCache = true}) async {
     await _loadProfiles(useCache);
@@ -52,48 +51,38 @@ class CyclesCubit extends Cubit<CyclesState>
 
   Future<void> _loadProfiles(bool useCache) async {
     await guard(() async {
-      final currentUser = _firebaseAuth.currentUser!;
-
-      _userProfile = await _userProfileRepository.getByUserId(
-        currentUser.uid,
-        useCache: useCache,
-      );
-
-      if (!_userProfile!.didSetUpCycles) {
-        _userProfile = _userProfile!.copyWith(
-          hasCycle: false,
-          didSetUpCycles: true,
-        );
-
-        await _userProfileRepository.createOrUpdate(_userProfile!);
-
-        logUserAction(
-          action: 'skipped_cycle_setup',
-          parameters: {'user_has_cycle': _userProfile!.hasCycle},
-        );
-      }
-
-      final partnership = await _userPartnershipsRepository.getByUserId(
-        currentUser.uid,
-        useCache: useCache,
-      );
-
-      final partnerId = partnership!.users.firstWhere(
-        (userId) => userId != currentUser.uid,
-        orElse: () => throw Exception(l10n.userProfileNotFoundError),
-      );
-
-      _partnerProfile = await _userProfileRepository.getByUserId(
-        partnerId,
-        useCache: useCache,
-      );
+      await _markCycleSetupSkipped(useCache);
+      _coupleContext = await _resolveCoupleContext(useCache: useCache);
     });
+  }
+
+  /// Opening cycles without ever running setup counts as declining it, and that
+  /// decision lives on the account profile.
+  Future<void> _markCycleSetupSkipped(bool useCache) async {
+    final userProfile = await _userProfileRepository.getByUserId(
+      _firebaseAuth.currentUser!.uid,
+      useCache: useCache,
+    );
+
+    if (userProfile!.didSetUpCycles) return;
+
+    final updatedProfile = userProfile.copyWith(
+      hasCycle: false,
+      didSetUpCycles: true,
+    );
+
+    await _userProfileRepository.createOrUpdate(updatedProfile);
+
+    logUserAction(
+      action: 'skipped_cycle_setup',
+      parameters: {'user_has_cycle': updatedProfile.hasCycle},
+    );
   }
 
   Future<void> setFocusedDate(DateTime date) async {
     if (state.focusedDate.isSameDay(date)) return;
 
-    if (state.isViewingCurrentUser && _userProfile?.hasCycle != true) {
+    if (state.isViewingCurrentUser && _coupleContext?.me.hasCycle != true) {
       return;
     }
 
@@ -102,7 +91,7 @@ class CyclesCubit extends Cubit<CyclesState>
   }
 
   Future<void> switchUserProfile() async {
-    if (_partnerProfile?.isSharingCycleWithPartner != true) {
+    if (_coupleContext?.partner?.isSharingCycleWithPartner != true) {
       emit(
         state.copyWith(
           cycleLogs: AsyncError(
@@ -144,15 +133,15 @@ class CyclesCubit extends Cubit<CyclesState>
     emit(state.copyWith(cycleLogs: const AsyncLoading()));
 
     final cycleLogs = await AsyncValue.guard(() async {
-      final activeProfile = _getActiveProfile();
+      final activeMember = _getActiveMember();
 
-      if (activeProfile == null ||
-          (state.isViewingCurrentUser && activeProfile.hasCycle != true)) {
+      if (activeMember == null ||
+          (state.isViewingCurrentUser && activeMember.hasCycle != true)) {
         return <CycleLog>[];
       }
 
       final cycleLogs = await _cycleLogsRepository.getCycleLogsByUserId(
-        activeProfile.userId,
+        activeMember.userId,
         useCache: useCache,
       );
 
@@ -204,7 +193,9 @@ class CyclesCubit extends Cubit<CyclesState>
     }
   }
 
-  UserProfile? _getActiveProfile() {
-    return state.isViewingCurrentUser ? _userProfile : _partnerProfile;
+  CoupleMember? _getActiveMember() {
+    return state.isViewingCurrentUser
+        ? _coupleContext?.me
+        : _coupleContext?.partner;
   }
 }

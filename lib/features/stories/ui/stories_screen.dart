@@ -3,7 +3,7 @@ import 'package:bebi_app/constants/kaomojis.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/core/ui/default_snackbar.dart';
 import 'package:bebi_app/core/ui/options_bottom_dialog.dart';
-import 'package:bebi_app/features/account/domain/user_profile_view.dart';
+import 'package:bebi_app/features/account/domain/couple_context.dart';
 import 'package:bebi_app/features/stories/domain/story.dart';
 import 'package:bebi_app/features/stories/ui/components/stories_camera.dart';
 import 'package:bebi_app/features/stories/ui/stories_cubit.dart';
@@ -346,17 +346,13 @@ class _StoriesScreenState extends State<StoriesScreen> with GuardMixin {
   }
 
   Widget _buildStoryDetails(Story story) {
-    return BlocSelector<AppCubit, AppState, (UserProfileView, UserProfileView)>(
-      selector: (state) => (
-        state.userProfileAsync.asData()!,
-        state.partnerProfileAsync.asData()!,
-      ),
-      builder: (context, userProfiles) {
-        final (userProfile, partnerProfile) = userProfiles;
-        final isCurrentUserStory = story.createdBy == userProfile.userId;
+    return BlocSelector<AppCubit, AppState, CoupleContext>(
+      selector: (state) => state.coupleContextAsync.asData()!,
+      builder: (context, coupleContext) {
+        final isCurrentUserStory = story.createdBy == coupleContext.me.userId;
         final displayName = isCurrentUserStory
             ? context.l10n.you
-            : partnerProfile.displayName;
+            : coupleContext.partner!.displayName;
 
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

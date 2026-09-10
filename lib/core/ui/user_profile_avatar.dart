@@ -1,5 +1,4 @@
 import 'package:bebi_app/constants/ui_constants.dart';
-import 'package:bebi_app/features/account/domain/user_profile_view.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -8,7 +7,7 @@ import 'package:material_ui/material_ui.dart';
 class UserProfileAvatar extends StatelessWidget {
   const UserProfileAvatar({
     super.key,
-    this.userProfile,
+    this.imageUrl,
     this.imageProvider,
     this.displayName,
     this.radius = 20,
@@ -16,7 +15,7 @@ class UserProfileAvatar extends StatelessWidget {
     this.fontSize,
   });
 
-  final UserProfileView? userProfile;
+  final String? imageUrl;
   final ImageProvider? imageProvider;
   final String? displayName;
   final double radius;
@@ -27,9 +26,8 @@ class UserProfileAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final image =
         imageProvider ??
-        (userProfile?.profilePictureUrl != null &&
-                userProfile!.profilePictureUrl!.parseUrl() != null
-            ? CachedNetworkImageProvider(userProfile!.profilePictureUrl!)
+        (imageUrl != null && imageUrl!.parseUrl() != null
+            ? CachedNetworkImageProvider(imageUrl!)
             : null);
 
     final bgColor = backgroundColor ?? context.colorScheme.onSurface;
@@ -54,7 +52,7 @@ class UserProfileAvatar extends StatelessWidget {
   }
 
   Widget _buildFallbackContent(BuildContext context, Color bgColor) {
-    final name = displayName ?? userProfile?.displayName;
+    final name = displayName;
 
     if (name == null || name.isEmpty) {
       return Icon(

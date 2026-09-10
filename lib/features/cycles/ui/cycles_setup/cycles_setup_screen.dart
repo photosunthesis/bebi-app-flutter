@@ -43,7 +43,7 @@ class _CyclesSetupScreenState extends State<CyclesSetupScreen> {
         }
 
         if (state is CycleSetupSuccessState) {
-          context.read<AppCubit>().loadUserProfiles();
+          context.read<AppCubit>().loadCoupleContext();
           context.pop(true);
         }
       },
