@@ -21,6 +21,7 @@ All notable changes to this project will be documented in this file.
 
 - Stories from a previous account no longer show up after signing out and into another one 🐛
 - Profiles now refresh right after setting up cycle tracking 🩹
+- The cycles and stories screens no longer crash while your profile info is still loading 🐛
 
 ## [0.5.2] - 2025-10-20
 
