@@ -1,25 +1,19 @@
 PODS:
-  - blurhash_ffi (0.0.1):
-    - Flutter
   - Flutter (1.0.0)
   - super_keyboard (0.0.1):
     - Flutter
 
 DEPENDENCIES:
-  - blurhash_ffi (from `.symlinks/plugins/blurhash_ffi/ios`)
   - Flutter (from `Flutter`)
   - super_keyboard (from `.symlinks/plugins/super_keyboard/ios`)
 
 EXTERNAL SOURCES:
-  blurhash_ffi:
-    :path: ".symlinks/plugins/blurhash_ffi/ios"
   Flutter:
     :path: Flutter
   super_keyboard:
     :path: ".symlinks/plugins/super_keyboard/ios"
 
 SPEC CHECKSUMS:
-  blurhash_ffi: 87aab623d744d4d6cd6057d285bd2258df904786
   Flutter: 71a624a5bc0c04062bf19101d501e466baf2fb47
   super_keyboard: 016de6ce9ab826f9a0b185608209d6a3b556d577
 

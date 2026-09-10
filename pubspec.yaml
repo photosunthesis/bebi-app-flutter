@@ -8,7 +8,7 @@ environment:
   flutter: ">=3.47.2"
 
 dependencies:
-  blurhash_ffi: ^1.2.7
+  blurhash_dart: ^1.2.1
   cached_network_image: ^4.0.0
   camera: ^0.12.1
   cloud_firestore: ^6.0.0
@@ -23,6 +23,7 @@ dependencies:
   firebase_crashlytics: ^5.0.1
   flutter:
     sdk: flutter
+  flutter_blurhash: ^0.9.1
   flutter_bloc: ^9.1.1
   flutter_keyboard_visibility_temp_fork: ^0.1.5
   flutter_localizations:

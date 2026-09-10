@@ -1,16 +1,17 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:bebi_app/core/data/image_storage_repository.dart';
 import 'package:bebi_app/features/stories/data/story_dto.dart';
 import 'package:bebi_app/features/stories/domain/story.dart';
-import 'package:blurhash_ffi/blurhash.dart';
+import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:camera/camera.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cross_file_image/cross_file_image.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:image/image.dart' as img;
 import 'package:injectable/injectable.dart';
 
 @injectable
@@ -59,11 +60,7 @@ class StoriesRepository {
     required List<String> users,
     required XFile imageFile,
   }) async {
-    final blurHash = await BlurhashFFI.encode(
-      XFileImage(imageFile),
-      componentX: 3,
-      componentY: 2,
-    );
+    final blurHash = await _encodeBlurHash(imageFile);
 
     final objectName = await _imageStorageRepository.uploadStoryImageFile(
       imageFile,
@@ -122,6 +119,34 @@ class StoriesRepository {
     );
 
     return storyImageUrl;
+  }
+
+  // The hash only holds a few components, so a 64px decode is plenty and keeps
+  // the pure Dart encode off the UI thread's critical path.
+  Future<String> _encodeBlurHash(XFile imageFile) async {
+    final bytes = await imageFile.readAsBytes();
+    final codec = await ui.instantiateImageCodec(bytes, targetWidth: 64);
+
+    try {
+      final frame = await codec.getNextFrame();
+
+      try {
+        final rgba = await frame.image.toByteData();
+
+        final image = img.Image.fromBytes(
+          width: frame.image.width,
+          height: frame.image.height,
+          bytes: rgba!.buffer,
+          numChannels: 4,
+        );
+
+        return BlurHash.encode(image, numCompX: 3, numCompY: 2).hash;
+      } finally {
+        frame.image.dispose();
+      }
+    } finally {
+      codec.dispose();
+    }
   }
 
   Future<Uint8List> getStoryImageBytes(Story story) async {
