@@ -1,4 +1,4 @@
-import 'package:bebi_app/features/cycles/domain/prediction_confidence.dart';
+import 'package:bebi_app/features/cycles/domain/entities/prediction_confidence.dart';
 
 enum CyclePhase { period, follicular, ovulation, luteal }
 

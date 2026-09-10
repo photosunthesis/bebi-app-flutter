@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:bebi_app/features/home/domain/app_update_info.dart';
-import 'package:bebi_app/features/home/domain/compare_app_versions_usecase.dart';
+import 'package:bebi_app/features/home/domain/entities/app_update_info.dart';
+import 'package:bebi_app/features/home/domain/usecases/compare_app_versions_usecase.dart';
 import 'package:bebi_app/utils/platform/platform_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;

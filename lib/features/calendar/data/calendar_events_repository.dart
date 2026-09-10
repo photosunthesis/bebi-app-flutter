@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:bebi_app/features/calendar/data/calendar_event_dto.dart';
-import 'package:bebi_app/features/calendar/domain/calendar_event.dart';
+import 'package:bebi_app/features/calendar/domain/entities/calendar_event.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 // ignore: depend_on_referenced_packages

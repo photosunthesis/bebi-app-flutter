@@ -1,7 +1,7 @@
 import 'package:bebi_app/features/account/data/user_partnerships_repository.dart';
 import 'package:bebi_app/features/account/data/user_profile_repository.dart';
-import 'package:bebi_app/features/account/domain/couple_context.dart';
-import 'package:bebi_app/features/account/domain/user_profile.dart';
+import 'package:bebi_app/features/account/domain/entities/couple_context.dart';
+import 'package:bebi_app/features/account/domain/entities/user_profile.dart';
 // ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
 import 'package:firebase_auth/firebase_auth.dart';

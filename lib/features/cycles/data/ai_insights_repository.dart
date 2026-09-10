@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:bebi_app/features/cycles/data/cycle_insights_prompt.dart';
-import 'package:bebi_app/features/cycles/domain/cycle_day_insights.dart';
-import 'package:bebi_app/features/cycles/domain/prediction_confidence.dart';
+import 'package:bebi_app/features/cycles/domain/entities/cycle_day_insights.dart';
+import 'package:bebi_app/features/cycles/domain/entities/prediction_confidence.dart';
 import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';

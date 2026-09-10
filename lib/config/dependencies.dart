@@ -1,9 +1,9 @@
 import 'package:bebi_app/app/router/app_routes.dart';
-import 'package:bebi_app/features/account/domain/user_partnership.dart';
-import 'package:bebi_app/features/account/domain/user_profile.dart';
-import 'package:bebi_app/features/calendar/domain/calendar_event.dart';
-import 'package:bebi_app/features/cycles/domain/cycle_log.dart';
-import 'package:bebi_app/features/stories/domain/story.dart';
+import 'package:bebi_app/features/account/domain/entities/user_partnership.dart';
+import 'package:bebi_app/features/account/domain/entities/user_profile.dart';
+import 'package:bebi_app/features/calendar/domain/entities/calendar_event.dart';
+import 'package:bebi_app/features/cycles/domain/entities/cycle_log.dart';
+import 'package:bebi_app/features/stories/domain/entities/story.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_ai/firebase_ai.dart';

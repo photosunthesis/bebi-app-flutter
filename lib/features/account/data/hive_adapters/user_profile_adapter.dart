@@ -1,5 +1,5 @@
 import 'package:bebi_app/constants/type_adapter_ids.dart';
-import 'package:bebi_app/features/account/domain/user_profile.dart';
+import 'package:bebi_app/features/account/domain/entities/user_profile.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
 class UserProfileAdapter extends TypeAdapter<UserProfile> {

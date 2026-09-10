@@ -1,5 +1,5 @@
 import 'package:bebi_app/constants/type_adapter_ids.dart';
-import 'package:bebi_app/features/stories/domain/story.dart';
+import 'package:bebi_app/features/stories/domain/entities/story.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
 class StoryAdapter extends TypeAdapter<Story> {

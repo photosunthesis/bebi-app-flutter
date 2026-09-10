@@ -1,7 +1,7 @@
 import 'package:bebi_app/app/theme/app_colors.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/core/ui/default_snackbar.dart';
-import 'package:bebi_app/features/cycles/domain/symptoms.dart';
+import 'package:bebi_app/features/cycles/domain/entities/symptoms.dart';
 import 'package:bebi_app/features/cycles/ui/log_symptoms/log_symptoms_cubit.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:bebi_app/utils/extensions/color_extensions.dart';

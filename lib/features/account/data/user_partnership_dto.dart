@@ -1,4 +1,4 @@
-import 'package:bebi_app/features/account/domain/user_partnership.dart';
+import 'package:bebi_app/features/account/domain/entities/user_partnership.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 extension UserPartnershipDto on UserPartnership {

@@ -1,7 +1,7 @@
-import 'package:bebi_app/features/cycles/domain/cycle_day_insights.dart';
-import 'package:bebi_app/features/cycles/domain/cycle_log.dart';
-import 'package:bebi_app/features/cycles/domain/group_period_events_by_proximity.dart';
+import 'package:bebi_app/features/cycles/domain/entities/cycle_day_insights.dart';
+import 'package:bebi_app/features/cycles/domain/entities/cycle_log.dart';
 import 'package:bebi_app/features/cycles/domain/no_period_data_exception.dart';
+import 'package:bebi_app/features/cycles/domain/usecases/group_period_events_by_proximity.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
 // ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';

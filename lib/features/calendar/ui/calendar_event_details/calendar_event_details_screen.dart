@@ -1,8 +1,8 @@
 import 'package:bebi_app/app/router/app_routes.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/core/ui/main_app_bar.dart';
-import 'package:bebi_app/features/calendar/domain/calendar_event.dart';
-import 'package:bebi_app/features/calendar/domain/repeat_rule.dart';
+import 'package:bebi_app/features/calendar/domain/entities/calendar_event.dart';
+import 'package:bebi_app/features/calendar/domain/entities/repeat_rule.dart';
 import 'package:bebi_app/features/calendar/ui/calendar_event_details/calendar_event_details_cubit.dart';
 import 'package:bebi_app/features/calendar/ui/calendar_event_details/components/delete_event_bottom_dialog.dart';
 import 'package:bebi_app/features/calendar/ui/event_color_extension.dart';

@@ -1,4 +1,4 @@
-import 'package:bebi_app/features/calendar/domain/repeat_rule.dart';
+import 'package:bebi_app/features/calendar/domain/entities/repeat_rule.dart';
 import 'package:bebi_app/utils/extensions/build_context_extensions.dart';
 import 'package:material_ui/material_ui.dart';
 

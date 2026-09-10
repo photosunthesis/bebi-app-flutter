@@ -1,5 +1,5 @@
-import 'package:bebi_app/features/calendar/domain/calendar_event.dart';
-import 'package:bebi_app/features/calendar/domain/repeat_rule.dart';
+import 'package:bebi_app/features/calendar/domain/entities/calendar_event.dart';
+import 'package:bebi_app/features/calendar/domain/entities/repeat_rule.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
 import 'package:bebi_app/utils/extensions/int_extensions.dart';
 import 'package:injectable/injectable.dart';

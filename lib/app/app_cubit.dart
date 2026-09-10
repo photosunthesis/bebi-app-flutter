@@ -1,6 +1,6 @@
 import 'package:bebi_app/core/ui/async_value.dart';
-import 'package:bebi_app/features/account/domain/couple_context.dart';
-import 'package:bebi_app/features/account/domain/resolve_couple_context_usecase.dart';
+import 'package:bebi_app/features/account/domain/entities/couple_context.dart';
+import 'package:bebi_app/features/account/domain/usecases/resolve_couple_context_usecase.dart';
 import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';

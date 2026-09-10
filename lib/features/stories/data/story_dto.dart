@@ -1,4 +1,4 @@
-import 'package:bebi_app/features/stories/domain/story.dart';
+import 'package:bebi_app/features/stories/domain/entities/story.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 extension StoryDto on Story {

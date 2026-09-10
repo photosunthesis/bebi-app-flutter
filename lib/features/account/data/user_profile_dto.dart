@@ -1,4 +1,4 @@
-import 'package:bebi_app/features/account/domain/user_profile.dart';
+import 'package:bebi_app/features/account/domain/entities/user_profile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 extension UserProfileDto on UserProfile {

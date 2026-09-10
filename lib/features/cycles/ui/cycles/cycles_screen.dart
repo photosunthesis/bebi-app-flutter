@@ -4,7 +4,7 @@ import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/core/ui/default_snackbar.dart';
 import 'package:bebi_app/core/ui/main_app_bar.dart';
 import 'package:bebi_app/core/ui/user_profile_avatar.dart';
-import 'package:bebi_app/features/account/domain/couple_context.dart';
+import 'package:bebi_app/features/account/domain/entities/couple_context.dart';
 import 'package:bebi_app/features/cycles/ui/cycles/components/cycle_date_picker.dart';
 import 'package:bebi_app/features/cycles/ui/cycles/components/cycle_insights.dart';
 import 'package:bebi_app/features/cycles/ui/cycles/components/cycle_logs.dart';

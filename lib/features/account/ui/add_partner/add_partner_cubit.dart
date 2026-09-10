@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:bebi_app/features/account/data/user_partnerships_repository.dart';
 import 'package:bebi_app/features/account/data/user_profile_repository.dart';
-import 'package:bebi_app/features/account/domain/user_partnership.dart';
+import 'package:bebi_app/features/account/domain/entities/user_partnership.dart';
 import 'package:bebi_app/utils/mixins/analytics_mixin.dart';
 import 'package:bebi_app/utils/mixins/guard_mixin.dart';
 import 'package:bebi_app/utils/mixins/localizations_mixin.dart';

@@ -1,5 +1,5 @@
-import 'package:bebi_app/features/cycles/domain/cycle_day_insights.dart';
-import 'package:bebi_app/features/cycles/domain/prediction_confidence.dart';
+import 'package:bebi_app/features/cycles/domain/entities/cycle_day_insights.dart';
+import 'package:bebi_app/features/cycles/domain/entities/prediction_confidence.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
 
 abstract class CycleInsightsPrompt {

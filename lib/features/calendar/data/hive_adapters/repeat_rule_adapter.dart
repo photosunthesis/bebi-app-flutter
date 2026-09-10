@@ -1,5 +1,5 @@
 import 'package:bebi_app/constants/type_adapter_ids.dart';
-import 'package:bebi_app/features/calendar/domain/repeat_rule.dart';
+import 'package:bebi_app/features/calendar/domain/entities/repeat_rule.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
 class RepeatRuleAdapter extends TypeAdapter<RepeatRule> {

@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:bebi_app/features/cycles/data/cycle_log_dto.dart';
-import 'package:bebi_app/features/cycles/domain/cycle_log.dart';
+import 'package:bebi_app/features/cycles/domain/entities/cycle_log.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:injectable/injectable.dart';

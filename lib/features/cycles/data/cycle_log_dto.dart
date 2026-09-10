@@ -1,4 +1,4 @@
-import 'package:bebi_app/features/cycles/domain/cycle_log.dart';
+import 'package:bebi_app/features/cycles/domain/entities/cycle_log.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 extension CycleLogDto on CycleLog {

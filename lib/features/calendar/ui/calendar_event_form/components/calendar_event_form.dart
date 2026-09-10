@@ -1,6 +1,6 @@
 import 'package:bebi_app/core/ui/app_text_form_field.dart';
 import 'package:bebi_app/core/ui/options_bottom_dialog.dart';
-import 'package:bebi_app/features/calendar/domain/repeat_rule.dart';
+import 'package:bebi_app/features/calendar/domain/entities/repeat_rule.dart';
 import 'package:bebi_app/features/calendar/ui/calendar_event_form/calendar_event_form_cubit.dart';
 import 'package:bebi_app/features/calendar/ui/calendar_event_form/components/date_fields_bottom_dialog.dart';
 import 'package:bebi_app/features/calendar/ui/calendar_event_form/components/sticky_markdown_toolbar.dart';

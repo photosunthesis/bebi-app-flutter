@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:bebi_app/features/account/domain/resolve_sharing_audience_usecase.dart';
-import 'package:bebi_app/features/account/domain/sharing_audience.dart';
+import 'package:bebi_app/features/account/domain/entities/sharing_audience.dart';
+import 'package:bebi_app/features/account/domain/usecases/resolve_sharing_audience_usecase.dart';
 import 'package:bebi_app/features/calendar/data/calendar_events_repository.dart';
-import 'package:bebi_app/features/calendar/domain/calendar_event.dart';
-import 'package:bebi_app/features/calendar/domain/repeat_rule.dart';
+import 'package:bebi_app/features/calendar/domain/entities/calendar_event.dart';
+import 'package:bebi_app/features/calendar/domain/entities/repeat_rule.dart';
 import 'package:bebi_app/features/calendar/ui/save_changes_dialog_options.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
 import 'package:bebi_app/utils/extensions/int_extensions.dart';

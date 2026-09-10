@@ -1,6 +1,6 @@
 import 'package:bebi_app/features/account/data/user_partnerships_repository.dart';
 import 'package:bebi_app/features/account/data/user_profile_repository.dart';
-import 'package:bebi_app/features/account/domain/sharing_audience.dart';
+import 'package:bebi_app/features/account/domain/entities/sharing_audience.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:injectable/injectable.dart';
 

@@ -2,7 +2,7 @@ import 'package:bebi_app/app/router/app_routes.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/core/ui/default_snackbar.dart';
 import 'package:bebi_app/core/ui/main_app_bar.dart';
-import 'package:bebi_app/features/calendar/domain/calendar_event.dart';
+import 'package:bebi_app/features/calendar/domain/entities/calendar_event.dart';
 import 'package:bebi_app/features/calendar/ui/calendar_event_form/calendar_event_form_cubit.dart';
 import 'package:bebi_app/features/calendar/ui/calendar_event_form/components/calendar_event_form.dart';
 import 'package:bebi_app/features/calendar/ui/event_color_extension.dart';

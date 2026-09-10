@@ -1,5 +1,5 @@
 import 'package:bebi_app/features/calendar/data/repeat_rule_dto.dart';
-import 'package:bebi_app/features/calendar/domain/calendar_event.dart';
+import 'package:bebi_app/features/calendar/domain/entities/calendar_event.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 extension CalendarEventDto on CalendarEvent {

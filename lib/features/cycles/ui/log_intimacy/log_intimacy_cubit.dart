@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:bebi_app/features/account/domain/resolve_sharing_audience_usecase.dart';
+import 'package:bebi_app/features/account/domain/usecases/resolve_sharing_audience_usecase.dart';
 import 'package:bebi_app/features/cycles/data/cycle_logs_repository.dart';
-import 'package:bebi_app/features/cycles/domain/cycle_log.dart';
+import 'package:bebi_app/features/cycles/domain/entities/cycle_log.dart';
 import 'package:bebi_app/utils/mixins/analytics_mixin.dart';
 import 'package:bebi_app/utils/mixins/guard_mixin.dart';
 import 'package:firebase_auth/firebase_auth.dart';

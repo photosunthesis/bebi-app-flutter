@@ -1,6 +1,6 @@
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/core/ui/main_app_bar.dart';
-import 'package:bebi_app/features/cycles/domain/cycle_log.dart';
+import 'package:bebi_app/features/cycles/domain/entities/cycle_log.dart';
 import 'package:bebi_app/features/cycles/ui/angled_stripes_background.dart';
 import 'package:bebi_app/features/cycles/ui/cycle_calendar/cycle_calendar_cubit.dart';
 import 'package:bebi_app/features/cycles/ui/cycle_log_color_extension.dart';

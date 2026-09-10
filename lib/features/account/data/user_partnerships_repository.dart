@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:bebi_app/features/account/data/user_partnership_dto.dart';
-import 'package:bebi_app/features/account/domain/user_partnership.dart';
+import 'package:bebi_app/features/account/domain/entities/user_partnership.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 // ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';

@@ -1,6 +1,6 @@
 import 'package:bebi_app/features/cycles/data/cycle_logs_repository.dart';
-import 'package:bebi_app/features/cycles/domain/cycle_log.dart';
-import 'package:bebi_app/features/cycles/domain/predict_upcoming_cycles_usecase.dart';
+import 'package:bebi_app/features/cycles/domain/entities/cycle_log.dart';
+import 'package:bebi_app/features/cycles/domain/usecases/predict_upcoming_cycles_usecase.dart';
 import 'package:bebi_app/utils/mixins/analytics_mixin.dart';
 import 'package:bebi_app/utils/mixins/guard_mixin.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

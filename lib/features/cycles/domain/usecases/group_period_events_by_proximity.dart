@@ -1,4 +1,4 @@
-import 'package:bebi_app/features/cycles/domain/cycle_log.dart';
+import 'package:bebi_app/features/cycles/domain/entities/cycle_log.dart';
 // ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
 

@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:bebi_app/core/ui/async_value.dart';
-import 'package:bebi_app/features/account/domain/resolve_sharing_audience_usecase.dart';
-import 'package:bebi_app/features/account/domain/sharing_audience.dart';
+import 'package:bebi_app/features/account/domain/entities/sharing_audience.dart';
+import 'package:bebi_app/features/account/domain/usecases/resolve_sharing_audience_usecase.dart';
 import 'package:bebi_app/features/stories/data/stories_repository.dart';
-import 'package:bebi_app/features/stories/domain/story.dart';
+import 'package:bebi_app/features/stories/domain/entities/story.dart';
 import 'package:bebi_app/utils/mixins/analytics_mixin.dart';
 import 'package:bebi_app/utils/mixins/guard_mixin.dart';
 import 'package:camera/camera.dart';

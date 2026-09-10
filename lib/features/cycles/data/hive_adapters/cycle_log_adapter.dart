@@ -1,5 +1,5 @@
 import 'package:bebi_app/constants/type_adapter_ids.dart';
-import 'package:bebi_app/features/cycles/domain/cycle_log.dart';
+import 'package:bebi_app/features/cycles/domain/entities/cycle_log.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
 class CycleLogAdapter extends TypeAdapter<CycleLog> {

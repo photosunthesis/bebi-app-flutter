@@ -3,7 +3,7 @@ import 'dart:math';
 
 import 'package:bebi_app/core/ui/async_value.dart';
 import 'package:bebi_app/features/account/data/user_profile_repository.dart';
-import 'package:bebi_app/features/account/domain/user_profile.dart';
+import 'package:bebi_app/features/account/domain/entities/user_profile.dart';
 import 'package:bebi_app/utils/mixins/analytics_mixin.dart';
 import 'package:bebi_app/utils/mixins/guard_mixin.dart';
 import 'package:bebi_app/utils/mixins/localizations_mixin.dart';

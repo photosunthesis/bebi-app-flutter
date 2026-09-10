@@ -1,5 +1,5 @@
 import 'package:bebi_app/app/theme/app_colors.dart';
-import 'package:bebi_app/features/cycles/domain/cycle_log.dart';
+import 'package:bebi_app/features/cycles/domain/entities/cycle_log.dart';
 import 'package:material_ui/material_ui.dart';
 
 extension CycleLogColorExtension on CycleLog {

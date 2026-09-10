@@ -1,4 +1,4 @@
-import 'package:bebi_app/features/calendar/domain/repeat_rule.dart';
+import 'package:bebi_app/features/calendar/domain/entities/repeat_rule.dart';
 import 'package:equatable/equatable.dart';
 
 class CalendarEvent extends Equatable {

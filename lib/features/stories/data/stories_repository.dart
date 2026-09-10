@@ -5,7 +5,7 @@ import 'dart:ui' as ui;
 
 import 'package:bebi_app/core/data/image_storage_repository.dart';
 import 'package:bebi_app/features/stories/data/story_dto.dart';
-import 'package:bebi_app/features/stories/domain/story.dart';
+import 'package:bebi_app/features/stories/domain/entities/story.dart';
 import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:camera/camera.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
