@@ -117,6 +117,7 @@ jobs:
         uses: ncipollo/release-action@v1.21.0
         with:
           prerelease: false
+          allowUpdates: true
           tag: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
           token: ${{ secrets.GITHUB_TOKEN }}
