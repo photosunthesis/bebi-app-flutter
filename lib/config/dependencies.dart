@@ -1,4 +1,4 @@
-import 'package:bebi_app/app/router/app_routes.dart';
+import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/features/account/domain/entities/user_partnership.dart';
 import 'package:bebi_app/features/account/domain/entities/user_profile.dart';
 import 'package:bebi_app/features/calendar/domain/entities/calendar_event.dart';

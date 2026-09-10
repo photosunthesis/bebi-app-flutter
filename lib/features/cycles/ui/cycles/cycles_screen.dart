@@ -1,5 +1,5 @@
 import 'package:bebi_app/app/app_cubit.dart';
-import 'package:bebi_app/app/router/app_routes.dart';
+import 'package:bebi_app/app/router/app_router.dart';
 import 'package:bebi_app/constants/ui_constants.dart';
 import 'package:bebi_app/core/ui/default_snackbar.dart';
 import 'package:bebi_app/core/ui/main_app_bar.dart';
