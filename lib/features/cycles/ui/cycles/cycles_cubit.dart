@@ -8,7 +8,8 @@ import 'package:bebi_app/features/cycles/data/cycle_day_insights_service.dart';
 import 'package:bebi_app/features/cycles/data/cycle_logs_repository.dart';
 import 'package:bebi_app/features/cycles/domain/cycle_day_insights.dart';
 import 'package:bebi_app/features/cycles/domain/cycle_log.dart';
-import 'package:bebi_app/features/cycles/domain/cycle_predictions_service.dart';
+import 'package:bebi_app/features/cycles/domain/no_period_data_exception.dart';
+import 'package:bebi_app/features/cycles/domain/predict_upcoming_cycles.dart';
 import 'package:bebi_app/features/cycles/domain/prediction_confidence.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
 import 'package:bebi_app/utils/mixins/analytics_mixin.dart';
@@ -26,7 +27,7 @@ class CyclesCubit extends Cubit<CyclesState>
     with AnalyticsMixin, LocalizationsMixin, GuardMixin {
   CyclesCubit(
     this._cycleLogsRepository,
-    this._cyclePredictionsService,
+    this._predictUpcomingCycles,
     this._cycleDayInsightsService,
     this._resolveCoupleContext,
     this._userProfileRepository,
@@ -36,7 +37,7 @@ class CyclesCubit extends Cubit<CyclesState>
   }
 
   final CycleLogsRepository _cycleLogsRepository;
-  final CyclePredictionsService _cyclePredictionsService;
+  final PredictUpcomingCycles _predictUpcomingCycles;
   final CycleDayInsightsService _cycleDayInsightsService;
   final ResolveCoupleContext _resolveCoupleContext;
   final UserProfileRepository _userProfileRepository;
@@ -145,14 +146,17 @@ class CyclesCubit extends Cubit<CyclesState>
         useCache: useCache,
       );
 
-      final result = _cyclePredictionsService.predictUpcomingCycles(
-        cycleLogs,
-        state.focusedDate,
-      );
+      try {
+        final result = _predictUpcomingCycles(cycleLogs, state.focusedDate);
 
-      emit(state.copyWith(predictionConfidence: AsyncData(result.confidence)));
+        emit(
+          state.copyWith(predictionConfidence: AsyncData(result.confidence)),
+        );
 
-      return [...cycleLogs, ...result.predictions];
+        return [...cycleLogs, ...result.predictions];
+      } on NoPeriodDataException {
+        throw ArgumentError(l10n.noPeriodDataError);
+      }
     });
 
     emit(state.copyWith(cycleLogs: cycleLogs));

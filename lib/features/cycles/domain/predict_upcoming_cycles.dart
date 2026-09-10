@@ -1,16 +1,16 @@
 import 'dart:math';
 
 import 'package:bebi_app/features/cycles/domain/cycle_log.dart';
+import 'package:bebi_app/features/cycles/domain/no_period_data_exception.dart';
 import 'package:bebi_app/features/cycles/domain/prediction_confidence.dart';
 import 'package:bebi_app/utils/extensions/int_extensions.dart';
-import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
 // ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
 import 'package:injectable/injectable.dart';
 
 @injectable
-class CyclePredictionsService with LocalizationsMixin {
-  const CyclePredictionsService();
+class PredictUpcomingCycles {
+  const PredictUpcomingCycles();
 
   static const _defaultCycleLength = 28;
   static const _minCycleGap = 15;
@@ -39,8 +39,10 @@ class CyclePredictionsService with LocalizationsMixin {
     'backache': 2, // 1-3 days
   };
 
-  ({List<CycleLog> predictions, PredictionConfidence confidence})
-  predictUpcomingCycles(List<CycleLog> logs, DateTime now) {
+  ({List<CycleLog> predictions, PredictionConfidence confidence}) call(
+    List<CycleLog> logs,
+    DateTime now,
+  ) {
     if (logs.isEmpty) {
       return (
         predictions: <CycleLog>[],
@@ -54,11 +56,9 @@ class CyclePredictionsService with LocalizationsMixin {
     }
 
     final periodLogs = _getSortedActualPeriodLogs(logs);
-    if (periodLogs.isEmpty) throw ArgumentError(l10n.noPeriodDataError);
+    if (periodLogs.isEmpty) throw NoPeriodDataException();
 
     final periodGroups = _groupPeriodEventsByProximity(periodLogs);
-    if (periodGroups.isEmpty) throw ArgumentError(l10n.noPeriodDataError);
-
     final periodStartDates = _extractPeriodStartDates(periodGroups);
     final cycleLengths = _calculateCycleLengths(periodStartDates);
     final weightedAvgCycleLength = _calculateWeightedCycleLength(cycleLengths);
@@ -234,8 +234,6 @@ class CyclePredictionsService with LocalizationsMixin {
   }
 
   int _calculateAveragePeriodDaysFromGroups(List<List<CycleLog>> periodGroups) {
-    if (periodGroups.isEmpty) throw ArgumentError(l10n.noPeriodDataError);
-
     final cyclePeriodDays = <int>[];
 
     for (final group in periodGroups) {
@@ -275,10 +273,6 @@ class CyclePredictionsService with LocalizationsMixin {
   }
 
   List<DateTime> _extractPeriodStartDates(List<List<CycleLog>> periodGroups) {
-    if (periodGroups.isEmpty) {
-      throw ArgumentError(l10n.noPeriodDataError);
-    }
-
     return periodGroups.map((group) => group.first.date).toList();
   }
 
@@ -413,10 +407,6 @@ class CyclePredictionsService with LocalizationsMixin {
     double stdDev,
     List<CycleLog> allLogs,
   ) {
-    if (avgPeriodDays <= 0) {
-      throw ArgumentError(l10n.unableToDetermineCycleError);
-    }
-
     final periodExtension = isIrregular
         ? (stdDev / _periodExtensionDivisor)
               .clamp(0, _maxPeriodExtension)

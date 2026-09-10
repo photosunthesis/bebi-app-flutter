@@ -1,6 +1,6 @@
 import 'package:bebi_app/features/cycles/data/cycle_logs_repository.dart';
 import 'package:bebi_app/features/cycles/domain/cycle_log.dart';
-import 'package:bebi_app/features/cycles/domain/cycle_predictions_service.dart';
+import 'package:bebi_app/features/cycles/domain/predict_upcoming_cycles.dart';
 import 'package:bebi_app/utils/mixins/analytics_mixin.dart';
 import 'package:bebi_app/utils/mixins/guard_mixin.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,13 +11,13 @@ part 'cycle_calendar_state.dart';
 @injectable
 class CycleCalendarCubit extends Cubit<CycleCalendarState>
     with GuardMixin, AnalyticsMixin {
-  CycleCalendarCubit(this._cycleLogsRepository, this._cyclePredictionsService)
+  CycleCalendarCubit(this._cycleLogsRepository, this._predictUpcomingCycles)
     : super(const CycleCalendarLoadedState([])) {
     logScreenViewed(screenName: 'cycle_calendar_screen');
   }
 
   final CycleLogsRepository _cycleLogsRepository;
-  final CyclePredictionsService _cyclePredictionsService;
+  final PredictUpcomingCycles _predictUpcomingCycles;
 
   Future<void> initialize(String userId) async {
     await guard(
@@ -26,10 +26,7 @@ class CycleCalendarCubit extends Cubit<CycleCalendarState>
           userId,
         );
 
-        final result = _cyclePredictionsService.predictUpcomingCycles(
-          cycleLogs,
-          DateTime.now(),
-        );
+        final result = _predictUpcomingCycles(cycleLogs, DateTime.now());
 
         final sortedLogs = [...cycleLogs, ...result.predictions]
           ..sort((a, b) => b.date.compareTo(a.date));
