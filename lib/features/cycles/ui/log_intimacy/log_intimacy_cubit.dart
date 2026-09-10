@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:bebi_app/features/account/domain/resolve_sharing_audience.dart';
+import 'package:bebi_app/features/account/domain/resolve_sharing_audience_usecase.dart';
 import 'package:bebi_app/features/cycles/data/cycle_logs_repository.dart';
 import 'package:bebi_app/features/cycles/domain/cycle_log.dart';
 import 'package:bebi_app/utils/mixins/analytics_mixin.dart';
@@ -23,7 +23,7 @@ class LogIntimacyCubit extends Cubit<LogIntimacyState>
   }
 
   final CycleLogsRepository _cycleLogsRepository;
-  final ResolveSharingAudience _resolveSharingAudience;
+  final ResolveSharingAudienceUsecase _resolveSharingAudience;
   final FirebaseAuth _firebaseAuth;
 
   String get _currentUserId => _firebaseAuth.currentUser!.uid;

@@ -3,14 +3,14 @@ import 'dart:async';
 import 'package:bebi_app/core/ui/async_value.dart';
 import 'package:bebi_app/features/account/data/user_profile_repository.dart';
 import 'package:bebi_app/features/account/domain/couple_context.dart';
-import 'package:bebi_app/features/account/domain/resolve_couple_context.dart';
+import 'package:bebi_app/features/account/domain/resolve_couple_context_usecase.dart';
 import 'package:bebi_app/features/cycles/data/ai_insights_repository.dart';
 import 'package:bebi_app/features/cycles/data/cycle_logs_repository.dart';
 import 'package:bebi_app/features/cycles/domain/cycle_day_insights.dart';
 import 'package:bebi_app/features/cycles/domain/cycle_log.dart';
-import 'package:bebi_app/features/cycles/domain/derive_cycle_day_insights.dart';
+import 'package:bebi_app/features/cycles/domain/derive_cycle_day_insights_usecase.dart';
 import 'package:bebi_app/features/cycles/domain/no_period_data_exception.dart';
-import 'package:bebi_app/features/cycles/domain/predict_upcoming_cycles.dart';
+import 'package:bebi_app/features/cycles/domain/predict_upcoming_cycles_usecase.dart';
 import 'package:bebi_app/features/cycles/domain/prediction_confidence.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
 import 'package:bebi_app/utils/mixins/analytics_mixin.dart';
@@ -39,10 +39,10 @@ class CyclesCubit extends Cubit<CyclesState>
   }
 
   final CycleLogsRepository _cycleLogsRepository;
-  final PredictUpcomingCycles _predictUpcomingCycles;
-  final DeriveCycleDayInsights _deriveCycleDayInsights;
+  final PredictUpcomingCyclesUsecase _predictUpcomingCycles;
+  final DeriveCycleDayInsightsUsecase _deriveCycleDayInsights;
   final AiInsightsRepository _aiInsightsRepository;
-  final ResolveCoupleContext _resolveCoupleContext;
+  final ResolveCoupleContextUsecase _resolveCoupleContext;
   final UserProfileRepository _userProfileRepository;
   final FirebaseAuth _firebaseAuth;
 

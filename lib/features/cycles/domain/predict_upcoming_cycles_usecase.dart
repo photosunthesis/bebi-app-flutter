@@ -10,8 +10,8 @@ import 'package:collection/collection.dart';
 import 'package:injectable/injectable.dart';
 
 @injectable
-class PredictUpcomingCycles {
-  const PredictUpcomingCycles();
+class PredictUpcomingCyclesUsecase {
+  const PredictUpcomingCyclesUsecase();
 
   static const _defaultCycleLength = 28;
   static const _minCycleGap = 15;

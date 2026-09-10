@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:bebi_app/core/ui/async_value.dart';
-import 'package:bebi_app/features/account/domain/resolve_sharing_audience.dart';
+import 'package:bebi_app/features/account/domain/resolve_sharing_audience_usecase.dart';
 import 'package:bebi_app/features/account/domain/sharing_audience.dart';
 import 'package:bebi_app/features/stories/data/stories_repository.dart';
 import 'package:bebi_app/features/stories/domain/story.dart';
@@ -29,7 +29,7 @@ class StoriesCubit extends Cubit<StoriesState> with GuardMixin, AnalyticsMixin {
 
   final FirebaseAuth _firebaseAuth;
   final StoriesRepository _storiesRepository;
-  final ResolveSharingAudience _resolveSharingAudience;
+  final ResolveSharingAudienceUsecase _resolveSharingAudience;
 
   SharingAudience? _sharingAudience;
 

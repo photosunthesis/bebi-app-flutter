@@ -5,8 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:injectable/injectable.dart';
 
 @injectable
-class ResolveSharingAudience {
-  const ResolveSharingAudience(
+class ResolveSharingAudienceUsecase {
+  const ResolveSharingAudienceUsecase(
     this._userProfileRepository,
     this._userPartnershipsRepository,
     this._firebaseAuth,

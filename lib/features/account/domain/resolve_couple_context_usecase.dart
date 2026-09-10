@@ -8,8 +8,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:injectable/injectable.dart';
 
 @injectable
-class ResolveCoupleContext {
-  const ResolveCoupleContext(
+class ResolveCoupleContextUsecase {
+  const ResolveCoupleContextUsecase(
     this._userProfileRepository,
     this._userPartnershipsRepository,
     this._firebaseAuth,

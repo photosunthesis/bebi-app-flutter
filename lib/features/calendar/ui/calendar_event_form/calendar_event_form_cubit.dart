@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:bebi_app/features/account/domain/resolve_sharing_audience.dart';
+import 'package:bebi_app/features/account/domain/resolve_sharing_audience_usecase.dart';
 import 'package:bebi_app/features/account/domain/sharing_audience.dart';
 import 'package:bebi_app/features/calendar/data/calendar_events_repository.dart';
 import 'package:bebi_app/features/calendar/domain/calendar_event.dart';
@@ -39,7 +39,7 @@ class CalendarEventFormCubit extends Cubit<CalendarEventFormState>
   }
 
   final CalendarEventsRepository _calendarEventsRepository;
-  final ResolveSharingAudience _resolveSharingAudience;
+  final ResolveSharingAudienceUsecase _resolveSharingAudience;
   final FirebaseAuth _firebaseAuth;
 
   void initialize(CalendarEvent? calendarEvent, DateTime? selectedDate) {

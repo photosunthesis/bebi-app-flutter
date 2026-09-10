@@ -1,6 +1,6 @@
 import 'package:bebi_app/features/cycles/data/cycle_logs_repository.dart';
 import 'package:bebi_app/features/cycles/domain/cycle_log.dart';
-import 'package:bebi_app/features/cycles/domain/predict_upcoming_cycles.dart';
+import 'package:bebi_app/features/cycles/domain/predict_upcoming_cycles_usecase.dart';
 import 'package:bebi_app/utils/mixins/analytics_mixin.dart';
 import 'package:bebi_app/utils/mixins/guard_mixin.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,7 +17,7 @@ class CycleCalendarCubit extends Cubit<CycleCalendarState>
   }
 
   final CycleLogsRepository _cycleLogsRepository;
-  final PredictUpcomingCycles _predictUpcomingCycles;
+  final PredictUpcomingCyclesUsecase _predictUpcomingCycles;
 
   Future<void> initialize(String userId) async {
     await guard(

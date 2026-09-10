@@ -8,8 +8,8 @@ import 'package:collection/collection.dart';
 import 'package:injectable/injectable.dart';
 
 @injectable
-class DeriveCycleDayInsights {
-  const DeriveCycleDayInsights();
+class DeriveCycleDayInsightsUsecase {
+  const DeriveCycleDayInsightsUsecase();
 
   CycleDayInsights call(DateTime date, List<CycleLog> events) {
     final sortedEvents = events.sortedBy((e) => e.date);
