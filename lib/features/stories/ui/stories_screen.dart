@@ -346,13 +346,13 @@ class _StoriesScreenState extends State<StoriesScreen> with GuardMixin {
   }
 
   Widget _buildStoryDetails(Story story) {
-    return BlocSelector<AppCubit, AppState, CoupleContext>(
-      selector: (state) => state.coupleContextAsync.asData()!,
+    return BlocSelector<AppCubit, AppState, CoupleContext?>(
+      selector: (state) => state.coupleContextAsync.asData(),
       builder: (context, coupleContext) {
-        final isCurrentUserStory = story.createdBy == coupleContext.me.userId;
+        final isCurrentUserStory = story.createdBy == coupleContext?.me.userId;
         final displayName = isCurrentUserStory
             ? context.l10n.you
-            : coupleContext.partner!.displayName;
+            : coupleContext?.partner?.displayName ?? context.l10n.yourPartner;
 
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

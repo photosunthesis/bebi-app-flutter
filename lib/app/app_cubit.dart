@@ -23,8 +23,6 @@ class AppCubit extends Cubit<AppState> with LocalizationsMixin {
   final ResolveCoupleContextUsecase _resolveCoupleContext;
 
   Future<void> loadCoupleContext({bool useCache = true}) async {
-    emit(state.copyWith(coupleContextAsync: const AsyncLoading()));
-
     emit(
       state.copyWith(
         coupleContextAsync: await AsyncValue.guard(

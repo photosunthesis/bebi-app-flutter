@@ -51,13 +51,13 @@ class _CyclePredictionsState extends State<CyclePredictions> {
   }
 
   Widget _buildViewAllButton() {
-    return BlocSelector<AppCubit, AppState, CoupleContext>(
-      selector: (state) => state.coupleContextAsync.asData()!,
+    return BlocSelector<AppCubit, AppState, CoupleContext?>(
+      selector: (state) => state.coupleContextAsync.asData(),
       builder: (context, coupleContext) {
         return BlocSelector<CyclesCubit, CyclesState, String?>(
           selector: (state) => state.isViewingCurrentUser
-              ? coupleContext.me.userId
-              : coupleContext.partner?.userId,
+              ? coupleContext?.me.userId
+              : coupleContext?.partner?.userId,
           builder: (context, userId) {
             return OutlinedButton(
               onPressed: () async {

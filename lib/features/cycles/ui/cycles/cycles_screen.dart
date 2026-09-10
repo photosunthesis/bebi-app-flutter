@@ -169,8 +169,8 @@ class _CyclesScreenState extends State<CyclesScreen> {
   }
 
   Widget _buildAccountSwitcher() {
-    return BlocSelector<AppCubit, AppState, CoupleContext>(
-      selector: (state) => state.coupleContextAsync.asData()!,
+    return BlocSelector<AppCubit, AppState, CoupleContext?>(
+      selector: (state) => state.coupleContextAsync.asData(),
       builder: (context, coupleContext) {
         return BlocBuilder<CyclesCubit, CyclesState>(
           buildWhen: (previous, current) =>
@@ -190,8 +190,8 @@ class _CyclesScreenState extends State<CyclesScreen> {
                         offset: const Offset(16, 0),
                         child: _buildProfileAvatar(
                           state.isViewingCurrentUser
-                              ? coupleContext.partner
-                              : coupleContext.me,
+                              ? coupleContext?.partner
+                              : coupleContext?.me,
                         ),
                       ),
                     ),
@@ -199,8 +199,8 @@ class _CyclesScreenState extends State<CyclesScreen> {
                       duration: 120.milliseconds,
                       child: _buildProfileAvatar(
                         state.isViewingCurrentUser
-                            ? coupleContext.me
-                            : coupleContext.partner,
+                            ? coupleContext?.me
+                            : coupleContext?.partner,
                         key: ValueKey(state.isViewingCurrentUser),
                       ),
                     ),
@@ -236,15 +236,15 @@ class _CyclesScreenState extends State<CyclesScreen> {
   }
 
   Widget _buildCyclesSetupPrompt() {
-    return BlocSelector<AppCubit, AppState, CoupleContext>(
-      selector: (state) => state.coupleContextAsync.asData()!,
+    return BlocSelector<AppCubit, AppState, CoupleContext?>(
+      selector: (state) => state.coupleContextAsync.asData(),
       builder: (context, coupleContext) {
         return BlocSelector<CyclesCubit, CyclesState, bool>(
           selector: (state) => switch (state) {
             final s when s.cycleLogs.isLoading || s.insights.isLoading => true,
             final s when !s.isViewingCurrentUser => true,
-            _ when coupleContext.me.hasCycle => true,
-            _ => false,
+            // Without a profile we can't tell if setup is needed, so stay hidden.
+            _ => coupleContext?.me.hasCycle ?? true,
           },
           builder: (context, hidePrompt) {
             return AnimatedSwitcher(
