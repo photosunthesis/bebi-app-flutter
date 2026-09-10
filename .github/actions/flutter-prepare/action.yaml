@@ -5,15 +5,22 @@ inputs:
     description: Flutter version
     required: false
     default: "3.47.2"
-  firebase_project:
-    description: Firebase project id
-    required: true
-  firebase_token:
-    description: Firebase CI token
+  firebase_options:
+    description: Contents of lib/config/firebase_options.dart
     required: false
-  firebase_platforms:
-    description: Platforms to configure for flutterfire (android,ios,web)
-    required: true
+  google_services_json:
+    description: Contents of android/app/google-services.json
+    required: false
+  google_service_info_plist:
+    description: Contents of ios/Runner/GoogleService-Info.plist
+    required: false
+  firebase_json:
+    description: Contents of firebase.json
+    required: false
+  install_flutterfire:
+    description: Install the FlutterFire CLI, which the iOS Crashlytics build phase needs on PATH
+    required: false
+    default: "false"
   generate_l10n:
     description: Whether to run flutter gen-l10n
     required: false
@@ -38,32 +45,32 @@ runs:
         restore-keys: |
           flutter-deps-${{ runner.os }}-
 
-    - name: Cache Firebase CLI and global packages
-      uses: actions/cache@v6
-      with:
-        path: |
-          ~/.pub-cache/bin
-          ~/.pub-cache/global_packages
-        key: firebase-cli-${{ runner.os }}-v1
-        restore-keys: |
-          firebase-cli-${{ runner.os }}-
-
-    - name: Configure firebase
-      if: ${{ inputs.firebase_token != '' && inputs.firebase_token != null }}
+    - name: Write Firebase config files
       shell: bash
+      env:
+        FIREBASE_OPTIONS: ${{ inputs.firebase_options }}
+        GOOGLE_SERVICES_JSON: ${{ inputs.google_services_json }}
+        GOOGLE_SERVICE_INFO_PLIST: ${{ inputs.google_service_info_plist }}
+        FIREBASE_JSON: ${{ inputs.firebase_json }}
       run: |
-        if ! command -v firebase &> /dev/null; then
-          curl -sL https://firebase.tools | bash
+        if [ -n "$FIREBASE_OPTIONS" ]; then
+          mkdir -p lib/config
+          printf '%s\n' "$FIREBASE_OPTIONS" > lib/config/firebase_options.dart
         fi
-        if ! dart pub global list | grep -q flutterfire_cli; then
-          dart pub global activate flutterfire_cli
+        if [ -n "$GOOGLE_SERVICES_JSON" ]; then
+          printf '%s\n' "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
         fi
-        flutterfire configure \
-          --project=${{ inputs.firebase_project }} \
-          --platforms=${{ inputs.firebase_platforms }} \
-          --token=${{ inputs.firebase_token }} \
-          --out=lib/config/firebase_options.dart \
-          --yes
+        if [ -n "$GOOGLE_SERVICE_INFO_PLIST" ]; then
+          printf '%s\n' "$GOOGLE_SERVICE_INFO_PLIST" > ios/Runner/GoogleService-Info.plist
+        fi
+        if [ -n "$FIREBASE_JSON" ]; then
+          printf '%s\n' "$FIREBASE_JSON" > firebase.json
+        fi
+
+    - name: Install FlutterFire CLI
+      if: ${{ inputs.install_flutterfire == 'true' }}
+      shell: bash
+      run: dart pub global activate flutterfire_cli
 
     - name: Download dependencies
       shell: bash

@@ -19,9 +19,6 @@ jobs:
 
       - name: Prepare Flutter project
         uses: ./.github/actions/flutter-prepare
-        with:
-          firebase_project: bebi-app
-          firebase_platforms: none
 
       - name: Cache Flutter dependencies
         uses: actions/cache@v6

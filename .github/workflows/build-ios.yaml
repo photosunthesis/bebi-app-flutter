@@ -28,9 +28,10 @@ jobs:
       - name: Prepare Flutter project
         uses: ./.github/actions/flutter-prepare
         with:
-          firebase_project: bebi-app
-          firebase_token: ${{ secrets.FIREBASE_CI_TOKEN }}
-          firebase_platforms: ios
+          firebase_options: ${{ secrets.FIREBASE_OPTIONS_DART }}
+          google_service_info_plist: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}
+          firebase_json: ${{ secrets.FIREBASE_JSON }}
+          install_flutterfire: "true"
 
       - name: Cache iOS build cache
         uses: actions/cache@v6

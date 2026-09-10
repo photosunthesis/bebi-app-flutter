@@ -30,18 +30,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Create firebase.json
-        run: echo '${{ secrets.FIREBASE_JSON }}' > firebase.json
-
       - name: Prepare Flutter project
         uses: ./.github/actions/flutter-prepare
         with:
-          firebase_project: bebi-app
-          firebase_token: ${{ secrets.FIREBASE_CI_TOKEN }}
-          firebase_platforms: web
-
-      - name: Configure firebase.json
-        run: echo '${{ secrets.FIREBASE_JSON }}' > firebase.json
+          firebase_options: ${{ secrets.FIREBASE_OPTIONS_DART }}
+          firebase_json: ${{ secrets.FIREBASE_JSON }}
 
       - name: Build Web
         run: flutter build web --release --wasm --source-maps --build-number=${{ inputs.build_number || github.run_number }}
