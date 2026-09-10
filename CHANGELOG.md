@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.0] - 2026-09-10
+
+### Added
+
+- Profile pictures: Upload one during profile setup and see it on the home and cycles screens 🖼️
+- Prediction confidence: Cycle predictions and AI insights now say how sure they are 🔮
+
+### Changed
+
+- Cycle insights now run on a newer AI model (Gemini 3.5 Flash-Lite) 🤖
+- Reworked how the app is put together under the hood, nothing should look or behave differently 🧱
+- Refined the AI insights tone, including a note on intimacy around ovulation 🌸
+- Polished the download and delete buttons on stories 💄
+- Updated Flutter to 3.47.2 🚀
+
+### Fixed
+
+- Stories from a previous account no longer show up after signing out and into another one 🐛
+- Profiles now refresh right after setting up cycle tracking 🩹
+
 ## [0.5.2] - 2025-10-20
 
 ### Added
