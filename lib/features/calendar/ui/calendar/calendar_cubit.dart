@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:bebi_app/core/ui/async_value.dart';
 import 'package:bebi_app/features/calendar/data/calendar_events_repository.dart';
 import 'package:bebi_app/features/calendar/domain/calendar_event.dart';
-import 'package:bebi_app/features/calendar/domain/recurring_calendar_events_service.dart';
+import 'package:bebi_app/features/calendar/domain/expand_recurring_events_usecase.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
 import 'package:bebi_app/utils/extensions/int_extensions.dart';
 import 'package:bebi_app/utils/mixins/analytics_mixin.dart';
@@ -17,14 +17,14 @@ part 'calendar_state.dart';
 class CalendarCubit extends Cubit<CalendarState> with AnalyticsMixin {
   CalendarCubit(
     this._calendarEventsRepository,
-    this._recurringCalendarEventsService,
+    this._expandRecurringEvents,
     this._firebaseAuth,
   ) : super(CalendarState(focusedDay: DateTime.now())) {
     logScreenViewed(screenName: 'calendar_screen');
   }
 
   final CalendarEventsRepository _calendarEventsRepository;
-  final RecurringCalendarEventsService _recurringCalendarEventsService;
+  final ExpandRecurringEventsUsecase _expandRecurringEvents;
   final FirebaseAuth _firebaseAuth;
 
   DateTime? _windowStart;
@@ -44,7 +44,7 @@ class CalendarCubit extends Cubit<CalendarState> with AnalyticsMixin {
     _windowEnd = state.focusedDay.add(_defaultTimeWindow);
 
     // Clear the recurring events cache to ensure fresh generation
-    _recurringCalendarEventsService.clearCache();
+    _expandRecurringEvents.clearCache();
 
     final result = await AsyncValue.guard(() async {
       final baseEvents = await _calendarEventsRepository.getByUserId(
@@ -52,7 +52,7 @@ class CalendarCubit extends Cubit<CalendarState> with AnalyticsMixin {
         useCache: useCache,
       );
 
-      final recurringEvents = _recurringCalendarEventsService
+      final recurringEvents = _expandRecurringEvents
           .generateRecurringEventsInWindow(
             baseEvents,
             _windowStart!,
@@ -140,7 +140,7 @@ class CalendarCubit extends Cubit<CalendarState> with AnalyticsMixin {
     emit(state.copyWith(events: const AsyncLoading()));
 
     final result = await AsyncValue.guard(() async {
-      final recurringEvents = _recurringCalendarEventsService
+      final recurringEvents = _expandRecurringEvents
           .generateRecurringEventsInWindow(baseEvents, rangeStart, rangeEnd);
 
       _windowStart = _windowStart?.earlierDate(rangeStart) ?? rangeStart;

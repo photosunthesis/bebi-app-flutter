@@ -5,8 +5,8 @@ import 'package:bebi_app/utils/extensions/int_extensions.dart';
 import 'package:injectable/injectable.dart';
 
 @injectable
-class RecurringCalendarEventsService {
-  RecurringCalendarEventsService();
+class ExpandRecurringEventsUsecase {
+  ExpandRecurringEventsUsecase();
 
   /// When true, an instance that occurs exactly at [endDate] is allowed
   /// (endDate is inclusive). When false, occurrences on or after [endDate]

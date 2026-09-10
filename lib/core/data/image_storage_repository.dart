@@ -4,8 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:injectable/injectable.dart';
 
 @injectable
-class ImageStorageService {
-  const ImageStorageService(this._functions);
+class ImageStorageRepository {
+  const ImageStorageRepository(this._functions);
 
   final FirebaseFunctions _functions;
 

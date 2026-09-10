@@ -6,7 +6,7 @@ import 'package:bebi_app/features/account/domain/user_partnership.dart';
 import 'package:bebi_app/features/account/domain/user_profile.dart';
 import 'package:bebi_app/features/calendar/domain/calendar_event.dart';
 import 'package:bebi_app/features/cycles/domain/cycle_log.dart';
-import 'package:bebi_app/features/home/data/app_update_service.dart';
+import 'package:bebi_app/features/home/data/app_releases_repository.dart';
 import 'package:bebi_app/features/home/domain/app_update_info.dart';
 import 'package:bebi_app/features/stories/domain/story.dart';
 import 'package:bebi_app/utils/mixins/analytics_mixin.dart';
@@ -31,7 +31,7 @@ class HomeCubit extends Cubit<HomeState> with GuardMixin, AnalyticsMixin {
     this._storyBox,
     @Named('ai_insights_box') this._aiSummaryAndInsightsBox,
     @Named('story_image_url_box') this._storyImageUrlBox,
-    this._appUpdateService,
+    this._appReleasesRepository,
   ) : super(const HomeLoadingState()) {
     logScreenViewed(screenName: 'home_screen');
   }
@@ -46,7 +46,7 @@ class HomeCubit extends Cubit<HomeState> with GuardMixin, AnalyticsMixin {
   final Box<Story> _storyBox;
   final Box<String> _aiSummaryAndInsightsBox;
   final Box<String> _storyImageUrlBox;
-  final AppUpdateService _appUpdateService;
+  final AppReleasesRepository _appReleasesRepository;
 
   Future<void> initialize() async {
     await guard(
@@ -79,7 +79,7 @@ class HomeCubit extends Cubit<HomeState> with GuardMixin, AnalyticsMixin {
           return;
         }
 
-        final updateInfo = await _appUpdateService.checkForUpdate();
+        final updateInfo = await _appReleasesRepository.checkForUpdate();
 
         if (updateInfo?.hasUpdate == true) {
           emit(HomeShouldUpdateAppState(updateInfo!));

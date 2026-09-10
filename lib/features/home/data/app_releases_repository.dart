@@ -1,8 +1,7 @@
 import 'dart:convert';
-import 'dart:math' as math;
 
 import 'package:bebi_app/features/home/domain/app_update_info.dart';
-import 'package:bebi_app/utils/mixins/localizations_mixin.dart';
+import 'package:bebi_app/features/home/domain/compare_app_versions_usecase.dart';
 import 'package:bebi_app/utils/platform/platform_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -10,10 +9,11 @@ import 'package:injectable/injectable.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 @injectable
-class AppUpdateService with LocalizationsMixin {
-  const AppUpdateService(this._packageInfo);
+class AppReleasesRepository {
+  const AppReleasesRepository(this._packageInfo, this._compareAppVersions);
 
   final PackageInfo _packageInfo;
+  final CompareAppVersionsUsecase _compareAppVersions;
 
   static const _owner = 'photosunthesis';
   static const _repo = 'bebi-app-flutter';
@@ -27,7 +27,7 @@ class AppUpdateService with LocalizationsMixin {
         Uri.parse('$_baseUrl/repos/$_owner/$_repo/releases/latest'),
       );
 
-      if (response.statusCode != 200) throw Exception(l10n.checkUpdateError);
+      if (response.statusCode != 200) return null;
 
       final releaseJson = jsonDecode(response.body) as Map<String, dynamic>;
       return _parseReleaseData(releaseJson);
@@ -53,7 +53,7 @@ class AppUpdateService with LocalizationsMixin {
               )['browser_download_url']
               as String;
     final publishedAt = DateTime.parse(releaseData['published_at']);
-    final hasUpdate = _isVersionNewer(latestVersion, _packageInfo.version);
+    final hasUpdate = _compareAppVersions(latestVersion, _packageInfo.version);
 
     return AppUpdateInfo(
       oldVersion: _packageInfo.version,
@@ -63,33 +63,5 @@ class AppUpdateService with LocalizationsMixin {
       downloadUrl: downloadUrl,
       publishedAt: publishedAt,
     );
-  }
-
-  bool _isVersionNewer(String remoteVersion, String currentVersion) {
-    try {
-      final remoteParts = _parseVersionParts(remoteVersion);
-      final currentParts = _parseVersionParts(currentVersion);
-
-      final maxLength = math.max(remoteParts.length, currentParts.length);
-
-      for (var i = 0; i < maxLength; i++) {
-        final remote = i < remoteParts.length ? remoteParts[i] : 0;
-        final current = i < currentParts.length ? currentParts[i] : 0;
-
-        if (remote > current) return true;
-        if (remote < current) return false;
-      }
-
-      return false;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  List<int> _parseVersionParts(String version) {
-    return version.split('.').map((part) {
-      final cleanPart = part.split('+')[0].split('-')[0];
-      return int.tryParse(cleanPart) ?? 0;
-    }).toList();
   }
 }

@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:bebi_app/core/data/image_storage_service.dart';
+import 'package:bebi_app/core/data/image_storage_repository.dart';
 import 'package:bebi_app/features/account/data/user_profile_dto.dart';
 import 'package:bebi_app/features/account/domain/user_profile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -14,12 +14,12 @@ import 'package:injectable/injectable.dart';
 class UserProfileRepository {
   const UserProfileRepository(
     this._firestore,
-    this._imageStorageService,
+    this._imageStorageRepository,
     this._userProfileBox,
   );
 
   final FirebaseFirestore _firestore;
-  final ImageStorageService _imageStorageService;
+  final ImageStorageRepository _imageStorageRepository;
   final Box<UserProfile> _userProfileBox;
 
   static const _collection = 'user_profiles';
@@ -103,7 +103,7 @@ class UserProfileRepository {
     String userId,
     XFile imageFile,
   ) async {
-    final profilePictureObjectName = await _imageStorageService
+    final profilePictureObjectName = await _imageStorageRepository
         .uploadProfilePictureFile(imageFile);
 
     return profilePictureObjectName;
@@ -124,7 +124,7 @@ class UserProfileRepository {
       return null;
     }
 
-    final imageUrl = await _imageStorageService.getImageUrlByObjectName(
+    final imageUrl = await _imageStorageRepository.getImageUrlByObjectName(
       userProfile.profilePictureStorageName!,
     );
 
@@ -136,7 +136,7 @@ class UserProfileRepository {
       return;
     }
 
-    await _imageStorageService.deleteImageByObjectName(
+    await _imageStorageRepository.deleteImageByObjectName(
       userProfile.profilePictureStorageName!,
     );
   }

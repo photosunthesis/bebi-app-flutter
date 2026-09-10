@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:bebi_app/core/data/image_storage_service.dart';
+import 'package:bebi_app/core/data/image_storage_repository.dart';
 import 'package:bebi_app/features/stories/data/story_dto.dart';
 import 'package:bebi_app/features/stories/domain/story.dart';
 import 'package:blurhash_ffi/blurhash.dart';
@@ -17,13 +17,13 @@ import 'package:injectable/injectable.dart';
 class StoriesRepository {
   StoriesRepository(
     this._firestore,
-    this._imageStorageService,
+    this._imageStorageRepository,
     this._storiesBox,
     @Named('story_image_url_box') this._storyImageUrlBox,
   );
 
   final FirebaseFirestore _firestore;
-  final ImageStorageService _imageStorageService;
+  final ImageStorageRepository _imageStorageRepository;
   final Box<Story> _storiesBox;
   final Box<String> _storyImageUrlBox;
 
@@ -65,7 +65,7 @@ class StoriesRepository {
       componentY: 2,
     );
 
-    final objectName = await _imageStorageService.uploadStoryImageFile(
+    final objectName = await _imageStorageRepository.uploadStoryImageFile(
       imageFile,
     );
 
@@ -89,7 +89,9 @@ class StoriesRepository {
   }
 
   Future<void> deleteStory(Story story) async {
-    await _imageStorageService.deleteImageByObjectName(story.storageObjectName);
+    await _imageStorageRepository.deleteImageByObjectName(
+      story.storageObjectName,
+    );
     await _firestore.collection(_collection).doc(story.id).delete();
     await _storiesBox.delete(story.id);
   }
@@ -105,7 +107,7 @@ class StoriesRepository {
       if (age.inDays < 6) return cached['imageUrl'] as String;
     }
 
-    final storyImageUrl = await _imageStorageService.getImageUrlByObjectName(
+    final storyImageUrl = await _imageStorageRepository.getImageUrlByObjectName(
       story.storageObjectName,
     );
 

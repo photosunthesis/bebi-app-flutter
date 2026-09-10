@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:bebi_app/features/calendar/data/calendar_events_repository.dart';
 import 'package:bebi_app/features/calendar/domain/calendar_event.dart';
-import 'package:bebi_app/features/calendar/domain/recurring_calendar_events_service.dart';
+import 'package:bebi_app/features/calendar/domain/expand_recurring_events_usecase.dart';
 import 'package:bebi_app/features/calendar/domain/repeat_rule.dart';
 import 'package:bebi_app/utils/extensions/datetime_extensions.dart';
 import 'package:bebi_app/utils/extensions/int_extensions.dart';
@@ -18,13 +18,13 @@ class CalendarEventDetailsCubit extends Cubit<CalendarEventDetailsState>
     with GuardMixin, AnalyticsMixin {
   CalendarEventDetailsCubit(
     this._calendarEventsRepository,
-    this._recurringCalendarEventsService,
+    this._expandRecurringEvents,
   ) : super(const CalendarEventDetailsLoadedState()) {
     logScreenViewed(screenName: 'calendar_event_details_screen');
   }
 
   final CalendarEventsRepository _calendarEventsRepository;
-  final RecurringCalendarEventsService _recurringCalendarEventsService;
+  final ExpandRecurringEventsUsecase _expandRecurringEvents;
 
   Future<void> deleteCalendarEvent(
     String calendarEventId, {
@@ -64,17 +64,14 @@ class CalendarEventDetailsCubit extends Cubit<CalendarEventDetailsState>
   ) async {
     if (baseEvent.startDate.isSameDay(instanceDate)) {
       await _calendarEventsRepository.deleteById(baseEvent.id);
-      _recurringCalendarEventsService.removeEventFromCache(
-        baseEvent.id,
-        instanceDate,
-      );
+      _expandRecurringEvents.removeEventFromCache(baseEvent.id, instanceDate);
     } else {
       final updatedBaseEvent = baseEvent.copyWith(
         endDate: instanceDate.subtract(1.days),
       );
 
       await _calendarEventsRepository.createOrUpdate(updatedBaseEvent);
-      _recurringCalendarEventsService.updateEventInCache(updatedBaseEvent);
+      _expandRecurringEvents.updateEventInCache(updatedBaseEvent);
     }
   }
 
@@ -84,10 +81,7 @@ class CalendarEventDetailsCubit extends Cubit<CalendarEventDetailsState>
   ) async {
     if (baseEvent.repeatRule.frequency == RepeatFrequency.doNotRepeat) {
       await _calendarEventsRepository.deleteById(baseEvent.id);
-      _recurringCalendarEventsService.removeEventFromCache(
-        baseEvent.id,
-        instanceDate,
-      );
+      _expandRecurringEvents.removeEventFromCache(baseEvent.id, instanceDate);
       return;
     }
 
@@ -97,11 +91,11 @@ class CalendarEventDetailsCubit extends Cubit<CalendarEventDetailsState>
       await _excludeInstanceDate(baseEvent, instanceDate);
     }
 
-    _recurringCalendarEventsService.updateEventInCache(baseEvent);
+    _expandRecurringEvents.updateEventInCache(baseEvent);
   }
 
   Future<void> _updateToNextOccurrence(CalendarEvent baseEvent) async {
-    final nextOccurrence = _recurringCalendarEventsService.getNextOccurrence(
+    final nextOccurrence = _expandRecurringEvents.getNextOccurrence(
       baseEvent.startDate,
       baseEvent.repeatRule,
     );
