@@ -20,44 +20,47 @@ Built with Flutter and Firebase, using BLoC for state management and dependency 
 The code is organized feature-first, then layered inside each feature. The layering comes mostly from the [Flutter app architecture guide](https://docs.flutter.dev/app-architecture/guide), tweaked to how I think Flutter apps should be built after making a few of them. Every feature owns its own `ui/`, `domain/` and `data/` folders instead of the whole app sharing one big `ui/` and one big `data/`, and I've found that a lot easier to manage, maintain and work with.
 
 ```
-                              features/<feature>/
-       one of these per feature: account, calendar, cycles, home, stories
-┌──────────────────────────────────────────────────────────────────────────────┐
-│ ui/                                                                          │
-│                                                                              │
-│    ┌───────────────┐ user action ┌───────────────┐                           │
-│    │    Screen     │ ──────────▶ │     Cubit     │                           │
-│    │               │ ◀────────── │    + State    │                           │
-│    └───────────────┘  new state  └───────┬───────┘                           │
-│                                          ▲                                   │
-│                                          ├─── domain logic ───┐              │
-│                         plain read/write │                    │              │
-├──────────────────────────────────────────┼────────────────────┼──────────────┤
-│ domain/                                  │                    │              │
-│                                          │                    │              │
-│    ┌───────────────┐                     │            ┌───────────────┐      │
-│    │   Entities    │                     │     ┌─────▶│   Use case    │      │
-│    │  plain Dart   │                     │     │      │               │      │
-│    └───────────────┘                     │     │      └───────┬───────┘      │
-│                                          │     │              ▲              │
-├──────────────────────────────────────────┼─────┼──────────────┼──────────────┤
-│ data/                                    │     │              │              │
-│                                          │     ▼              ▼              │
-│    ┌───────────────┐             ┌───────────────┐    ┌───────────────┐      │
-│    │      DTO      │ ◀─────────▶ │ Repository A  │    │ Repository B  │      │
-│    │ Hive adapter  │             │               │    │               │      │
-│    └───────────────┘             └───────┬───────┘    └───────┬───────┘      │
-│                                          ▲                    ▲              │
-│                                          │                    │              │
-└──────────────────────────────────────────┼────────────────────┼──────────────┘
-                                           │                    │           
-                                           ▼                    ▼           
-┌──────────────────────────────────────────────────────────────────────────────┐
-│ data sources                                                                 │
-│                                                                              │
-│     Firestore · Hive · Cloud Functions · Cloudflare R2 · Gemini · GitHub     │
-│                                                                              │
-└──────────────────────────────────────────────────────────────────────────────┘
+                                  features/<feature>/
+                     arrows point from the caller to what it calls
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│ ui/                                                                                 │
+│                                                                                     │
+│    ┌───────────────┐ user action ┌───────────────┐                                  │
+│    │    Screen     │ ──────────▶ │     Cubit     │ ────────────────────┐            │
+│    │    widgets    │ ◀────────── │    + State    │                     │            │
+│    └───────────────┘  new state  └───────┬───────┘                     │            │
+│                                          │                             │            │
+│                   plain reads and writes │                entities in, │            │
+│                                          │                a result out │            │
+├──────────────────────────────────────────┼─────────────────────────────┼────────────┤
+│ domain/                                  │                             │            │
+│                                          │                             ▼            │
+│    ┌───────────────┐                     │                     ┌───────────────┐    │
+│    │   Entities    │                     │                     │   Use case    │    │
+│    │  plain Dart   │                     │                     │  heavy logic  │    │
+│    └───────────────┘                     │                     └───────┬───────┘    │
+│                                          │  ┌──────────────────────────┤            │
+│                                          │  │       sometimes it calls │            │
+│                                          │  │ repositories, SDKs, APIs │            │
+├──────────────────────────────────────────┼──┼──────────────────────────┼────────────┤
+│ data/                                    │  │                          │            │
+│                                          ▼  ▼                          ▼            │
+│    ┌───────────────┐             ┌───────────────┐             ┌───────────────┐    │
+│    │ DTO / adapter │ ◀────────── │  Repository   │             │  Repository   │    │
+│    │ maps entities │             │ owns a source │             │ owns a source │    │
+│    └───────────────┘             └───────┬───────┘             └───────┬───────┘    │
+│                                          │                             │            │
+│                                          │                             │            │
+│                                          │                             │            │
+└──────────────────────────────────────────┼─────────────────────────────┼────────────┘
+                                           │                             │
+                                           ▼                             ▼
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│ data sources                                                                        │
+│                                                                                     │
+│        Firestore · Hive · Cloud Functions · Cloudflare R2 · Gemini · GitHub         │
+│                                                                                     │
+└─────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 Inside a feature, the screen sends user actions to its cubit, the cubit emits new state back, and the cubit reaches down for data. Plain reads and writes go straight to a repository. A use case only exists when there's real logic to hold, either merging repositories (working out who the couple is, who a write is shared with) or domain math that doesn't belong in a cubit (expanding repeating events, cycle predictions and insights, comparing versions), so there are six of them in the whole app, not one per screen. Entities are the plain Dart objects every layer passes around, and the DTO and Hive adapter in `data/` are what map them to Firestore and to the local cache.
